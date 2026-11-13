@@ -1,11 +1,10 @@
 import "server-only";
 import { and, eq, gte, isNull, sql } from "drizzle-orm";
-import { QUOTA_METRICS, type QuotaMetric } from "@/config/plans";
 import { db, type DbOrTx } from "@/db";
 import { bidCredits, bids } from "@/db/schema";
-import { consumeQuota, getUsage, refundQuota } from "@/lib/billing/quota";
-import { getOrgEntitlements } from "@/lib/billing/subscription";
+import { entitlementsFor, getSubscription } from "@/lib/billing/subscription";
 import { NotFoundError } from "@/lib/errors";
+import { allowanceWindow, carriedOver, monthLabel, windowAt, type AllowanceSubscription, type AllowanceWindow } from "./allowance";
 
 /**
  * Plan gating for the bid desk — the ONLY file that knows how plans, quotas and one-off
@@ -19,9 +18,16 @@ import { NotFoundError } from "@/lib/errors";
  * ONE free cited bid check per workspace, ever. A Bid Pass (`bid_credits`) buys one full
  * bid on any plan.
  *
- * Metering: when the metric is registered in QUOTA_METRICS the foundation's atomic
- * `consumeQuota` is the counter (so rollover etc. live in the quota layer). Until then —
- * and whenever a plan is simulated locally — usage is counted from the bids themselves.
+ * Metering: usage is counted from the bids themselves — each bid is stamped with the start
+ * of the allowance window it was taken from (`allowance_period_start`) — under a
+ * per-workspace lock. The foundation's quota counters are not used: they reset on the 1st
+ * of the calendar month, and the product rules below do not.
+ *
+ * Allowance windows (./allowance.ts): monthly windows that renew on the BILLING date, not
+ * on the 1st. Full bids left over from the window just before carry into the current one
+ * (at most one plan limit's worth), are used first and lapse when it ends. A trial
+ * includes TRIAL_FULL_BIDS full bids in total. Cited checks follow the same windows and
+ * do not carry over.
  *
  * Local development: BIDS_SIMULATE_PLAN=free|radar_pro|bid_desk|bid_desk_plus pretends the
  * workspace is on that plan. Ignored on a Vercel production deployment.
@@ -36,6 +42,12 @@ const FULL_BID_METRIC = "bids.monthly";
 const CHECK_METRIC = "briefs.monthly";
 const DRAFTING_FEATURE = "bids.drafting";
 
+/** Full bids included in the 14-day trial, in total (not per month; nothing carries out of it). */
+export const TRIAL_FULL_BIDS = 1;
+/** How many windows back the carry-over is traced. One is what matters; a few more make it exact. */
+const ROLLOVER_LOOKBACK_WINDOWS = 12;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 type PlanAccess = {
   planName: string;
   /** Null = unlimited. */
@@ -43,9 +55,15 @@ type PlanAccess = {
   checksPerMonth: number | null;
   drafting: boolean;
   simulated: boolean;
+  /** The subscription the windows are anchored on; null when there is none (or a plan is simulated). */
+  subscription: AllowanceSubscription;
+  /** True during the trial: the allowance is TRIAL_FULL_BIDS for the whole trial. */
+  trial: boolean;
+  /** Paid since (the end of the trial, or when the subscription began): windows before it carry nothing over. */
+  paidSince: Date | null;
 };
 
-const SIMULATED_PLANS: Record<string, Omit<PlanAccess, "simulated">> = {
+const SIMULATED_PLANS: Record<string, Pick<PlanAccess, "planName" | "fullBidsPerMonth" | "checksPerMonth" | "drafting">> = {
   free: { planName: "Free", fullBidsPerMonth: 0, checksPerMonth: 0, drafting: false },
   radar_pro: { planName: "Radar Pro", fullBidsPerMonth: 0, checksPerMonth: 1, drafting: false },
   bid_desk: { planName: "Bid Desk", fullBidsPerMonth: 3, checksPerMonth: 0, drafting: true },
@@ -56,7 +74,7 @@ function simulatedPlan(): PlanAccess | null {
   if (process.env.VERCEL_ENV === "production") return null;
   const key = process.env.BIDS_SIMULATE_PLAN?.trim().toLowerCase();
   const plan = key ? SIMULATED_PLANS[key] : undefined;
-  return plan ? { ...plan, simulated: true } : null;
+  return plan ? { ...plan, simulated: true, subscription: null, trial: false, paidSince: null } : null;
 }
 
 function numericLimit(value: unknown): number | null | undefined {
@@ -67,38 +85,73 @@ function numericLimit(value: unknown): number | null | undefined {
 async function planAccess(organizationId: string, executor: DbOrTx = db): Promise<PlanAccess> {
   const simulated = simulatedPlan();
   if (simulated) return simulated;
-  const entitlements = await getOrgEntitlements(organizationId, executor);
+  const subscription = await getSubscription(organizationId, executor);
+  const entitlements = entitlementsFor(subscription);
   const limits = entitlements.limits as unknown as Record<string, unknown>;
   const features = entitlements.features as unknown as Record<string, unknown>;
   const fullBids = numericLimit(limits[FULL_BID_METRIC]);
   const checks = numericLimit(limits[CHECK_METRIC]);
+  const drafting = features[DRAFTING_FEATURE] === true;
+  // The windows follow the subscription only while it is the one being honoured.
+  const honoured = subscription && entitlements.isPaid ? subscription : null;
+  const trial = honoured?.status === "trialing";
+  const planLimit = fullBids === undefined ? 0 : fullBids;
   return {
     planName: entitlements.plan.name,
-    fullBidsPerMonth: fullBids === undefined ? 0 : fullBids,
+    fullBidsPerMonth: trial && drafting ? Math.min(TRIAL_FULL_BIDS, planLimit ?? TRIAL_FULL_BIDS) : planLimit,
     checksPerMonth: checks === undefined ? 0 : checks,
-    drafting: features[DRAFTING_FEATURE] === true,
+    drafting,
     simulated: false,
+    subscription: honoured ? { billingInterval: honoured.billingInterval, currentPeriodStart: honoured.currentPeriodStart, currentPeriodEnd: honoured.currentPeriodEnd } : null,
+    trial,
+    paidSince: honoured ? (honoured.trialEnd ?? honoured.createdAt) : null,
   };
 }
 
-function monthStart(now: Date = new Date()): Date {
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-}
+type WindowUsage = {
+  window: AllowanceWindow;
+  /** Taken from the plan in this window. */
+  used: number;
+  /** Full bids carried in from the window before (0 for checks, trials and unlimited plans). */
+  carried: number;
+  /** The window they were carried from, for the label. */
+  carriedFrom: AllowanceWindow | null;
+};
 
-/** True when the foundation meters this key itself (registered in QUOTA_METRICS). */
-function foundationMeters(metric: string, plan: PlanAccess): metric is QuotaMetric {
-  return !plan.simulated && Object.prototype.hasOwnProperty.call(QUOTA_METRICS, metric);
-}
-
-async function usedThisMonth(organizationId: string, source: "plan_bid" | "plan_brief", plan: PlanAccess, executor: DbOrTx = db): Promise<number> {
-  const metric = source === "plan_bid" ? FULL_BID_METRIC : CHECK_METRIC;
-  if (foundationMeters(metric, plan)) return getUsage(organizationId, metric);
-  const [row] = await executor
-    .select({ count: sql<number>`count(*)::int` })
+/**
+ * What the plan allowance looks like right now: the current window, what was taken in it
+ * and, for full bids, what was carried in. Counted from the bids' window stamps.
+ */
+async function windowUsage(organizationId: string, source: "plan_bid" | "plan_brief", plan: PlanAccess, executor: DbOrTx = db, now: Date = new Date()): Promise<WindowUsage> {
+  const window = allowanceWindow(plan.subscription, now);
+  const limit = plan.fullBidsPerMonth;
+  // Carry-over needs a paid subscription that was already running in the window before.
+  const rolls = source === "plan_bid" && !plan.trial && plan.paidSince !== null && limit !== null && limit > 0;
+  const earlier: AllowanceWindow[] = [];
+  if (rolls) {
+    for (let back = 1; back <= ROLLOVER_LOOKBACK_WINDOWS; back += 1) {
+      const candidate = windowAt(plan.subscription, now, -back);
+      // A day of slack: the subscription row and its first period are stamped by different events.
+      if (candidate.start.getTime() < plan.paidSince!.getTime() - DAY_MS) break;
+      earlier.unshift(candidate);
+    }
+  }
+  const from = earlier[0]?.start ?? window.start;
+  const stamps = await executor
+    .select({ stamp: bids.allowancePeriodStart })
     .from(bids)
-    .where(and(eq(bids.organizationId, organizationId), eq(bids.accessSource, source), gte(bids.allowancePeriodStart, monthStart())));
-  return row?.count ?? 0;
+    .where(and(eq(bids.organizationId, organizationId), eq(bids.accessSource, source), gte(bids.allowancePeriodStart, from)));
+  const countIn = (range: AllowanceWindow) => stamps.filter((row) => row.stamp !== null && row.stamp >= range.start && row.stamp < range.end).length;
+  return {
+    window,
+    used: countIn(window),
+    carried: rolls ? carriedOver(limit!, earlier.map(countIn)) : 0,
+    carriedFrom: earlier.at(-1) ?? null,
+  };
 }
+
+/** Room left in the window: the plan's own allowance plus what was carried in. */
+const roomIn = (limit: number | null, usage: WindowUsage): number | null => (limit === null ? null : Math.max(0, limit + usage.carried - usage.used));
 
 async function unusedCredits(organizationId: string, kind: "bid_pass" | "free_brief", executor: DbOrTx = db): Promise<number> {
   const [row] = await executor
@@ -120,16 +173,28 @@ async function ensureFreeCheck(organizationId: string, executor: DbOrTx = db): P
   await executor.insert(bidCredits).values({ organizationId, kind: "free_brief", source: "signup" }).onConflictDoNothing();
 }
 
-const remainingOf = (limit: number | null, used: number): number | null => (limit === null ? null : Math.max(0, limit - used));
-const hasRoom = (limit: number | null, used: number): boolean => limit === null || used < limit;
+const hasRoom = (limit: number | null, usage: WindowUsage): boolean => limit === null || usage.used < limit + usage.carried;
 
 export type BidAccessSummary = {
   planName: string;
   simulated: boolean;
   /** Plan includes drafting, evaluation and answer export. */
   drafting: boolean;
-  fullBids: { limit: number | null; used: number; remaining: number | null };
-  checks: { limit: number | null; used: number; remaining: number | null };
+  fullBids: {
+    /** The plan's allowance per window (TRIAL_FULL_BIDS during a trial). Null = unlimited. */
+    limit: number | null;
+    /** Taken in the current window. */
+    used: number;
+    /** Left in the current window, carried-over bids included. Null = unlimited. */
+    remaining: number | null;
+    /** Carried-over bids that are still unused: they are used first and lapse at `useBy`. */
+    rolledOver: { count: number; fromLabel: string; useBy: Date } | null;
+    /** When the current window ends and the allowance renews. */
+    renewsAt: Date;
+    /** True during the trial: `limit` is for the whole trial. */
+    trial: boolean;
+  };
+  checks: { limit: number | null; used: number; remaining: number | null; renewsAt: Date };
   /** Unused Bid Passes. */
   bidPasses: number;
   freeCheckAvailable: boolean;
@@ -139,14 +204,14 @@ export type BidAccessSummary = {
 
 function pickAllowance(input: {
   plan: PlanAccess;
-  fullUsed: number;
-  checksUsed: number;
+  full: WindowUsage;
+  checks: WindowUsage;
   freeCheck: boolean;
   bidPasses: number;
 }): BidAccessSummary["next"] {
   const { plan } = input;
-  if (plan.drafting && hasRoom(plan.fullBidsPerMonth, input.fullUsed)) return { source: "plan_bid", level: "full" };
-  if (hasRoom(plan.checksPerMonth, input.checksUsed)) return { source: "plan_brief", level: "brief" };
+  if (plan.drafting && hasRoom(plan.fullBidsPerMonth, input.full)) return { source: "plan_bid", level: "full" };
+  if (hasRoom(plan.checksPerMonth, input.checks)) return { source: "plan_brief", level: "brief" };
   // A check first, the pass only when it is the last thing left: nobody should spend a
   // Bid Pass to find out they are not eligible.
   if (input.freeCheck) return { source: "free_brief", level: "brief" };
@@ -158,28 +223,37 @@ function pickAllowance(input: {
 export async function getBidAccess(organizationId: string): Promise<BidAccessSummary> {
   await ensureFreeCheck(organizationId);
   const plan = await planAccess(organizationId);
-  const [fullUsed, checksUsed, bidPasses, freeChecks] = await Promise.all([
-    usedThisMonth(organizationId, "plan_bid", plan),
-    usedThisMonth(organizationId, "plan_brief", plan),
+  const [full, checks, bidPasses, freeChecks] = await Promise.all([
+    windowUsage(organizationId, "plan_bid", plan),
+    windowUsage(organizationId, "plan_brief", plan),
     unusedCredits(organizationId, "bid_pass"),
     unusedCredits(organizationId, "free_brief"),
   ]);
+  // Carried-over bids are used first, so what is left of them is the carry minus what was taken.
+  const carriedLeft = Math.max(0, full.carried - full.used);
   return {
     planName: plan.planName,
     simulated: plan.simulated,
     drafting: plan.drafting,
-    fullBids: { limit: plan.fullBidsPerMonth, used: fullUsed, remaining: remainingOf(plan.fullBidsPerMonth, fullUsed) },
-    checks: { limit: plan.checksPerMonth, used: checksUsed, remaining: remainingOf(plan.checksPerMonth, checksUsed) },
+    fullBids: {
+      limit: plan.fullBidsPerMonth,
+      used: full.used,
+      remaining: roomIn(plan.fullBidsPerMonth, full),
+      rolledOver: carriedLeft > 0 && full.carriedFrom ? { count: carriedLeft, fromLabel: monthLabel(full.carriedFrom.start), useBy: full.window.end } : null,
+      renewsAt: full.window.end,
+      trial: plan.trial,
+    },
+    checks: { limit: plan.checksPerMonth, used: checks.used, remaining: roomIn(plan.checksPerMonth, checks), renewsAt: checks.window.end },
     bidPasses,
     freeCheckAvailable: freeChecks > 0,
-    next: pickAllowance({ plan, fullUsed, checksUsed, freeCheck: freeChecks > 0, bidPasses }),
+    next: pickAllowance({ plan, full, checks, freeCheck: freeChecks > 0, bidPasses }),
   };
 }
 
 /** Single seam for "may this workspace start (or unlock) a full bid now?". */
 export async function canStartFullBid(organizationId: string): Promise<boolean> {
   const plan = await planAccess(organizationId);
-  if (plan.drafting && hasRoom(plan.fullBidsPerMonth, await usedThisMonth(organizationId, "plan_bid", plan))) return true;
+  if (plan.drafting && hasRoom(plan.fullBidsPerMonth, await windowUsage(organizationId, "plan_bid", plan))) return true;
   return (await unusedCredits(organizationId, "bid_pass")) > 0;
 }
 
@@ -200,12 +274,11 @@ async function consumeCredit(organizationId: string, kind: "bid_pass" | "free_br
   return rows.length > 0;
 }
 
-async function consumeMonthly(organizationId: string, source: "plan_bid" | "plan_brief", plan: PlanAccess, tx: DbOrTx): Promise<boolean> {
-  const metric = source === "plan_bid" ? FULL_BID_METRIC : CHECK_METRIC;
+/** The window to stamp on the bid when the plan still has room, or null. The caller holds the workspace's allowance lock. */
+async function planWindowWithRoom(organizationId: string, source: "plan_bid" | "plan_brief", plan: PlanAccess, tx: DbOrTx): Promise<AllowanceWindow | null> {
   const limit = source === "plan_bid" ? plan.fullBidsPerMonth : plan.checksPerMonth;
-  if (foundationMeters(metric, plan)) return (await consumeQuota(organizationId, metric)).ok;
-  // Counted from the bids themselves; the caller holds the workspace's allowance lock.
-  return hasRoom(limit, await usedThisMonth(organizationId, source, plan, tx));
+  const usage = await windowUsage(organizationId, source, plan, tx);
+  return hasRoom(limit, usage) ? usage.window : null;
 }
 
 export type ReserveResult = { ok: true; level: AccessLevel; source: AllowanceSource } | { ok: false; reason: "none_left" };
@@ -228,30 +301,23 @@ async function reserve(organizationId: string, bidId: string, want: "any" | "ful
     }
 
     const plan = await planAccess(organizationId, tx);
-    const stamp = async (source: AllowanceSource, level: AccessLevel): Promise<ReserveResult> => {
+    // The stamp is the start of the window the allowance came from: it is what the counts are made of.
+    const stamp = async (source: AllowanceSource, level: AccessLevel, window: AllowanceWindow = allowanceWindow(plan.subscription, new Date())): Promise<ReserveResult> => {
       await tx
         .update(bids)
-        .set({ accessLevel: level, accessSource: source, allowancePeriodStart: monthStart(), updatedAt: new Date() })
+        .set({ accessLevel: level, accessSource: source, allowancePeriodStart: window.start, updatedAt: new Date() })
         .where(and(eq(bids.id, bidId), eq(bids.organizationId, organizationId)));
       return { ok: true, level, source };
     };
 
-    if (plan.drafting && (await consumeMonthly(organizationId, "plan_bid", plan, tx))) {
-      try {
-        return await stamp("plan_bid", "full");
-      } catch (error) {
-        if (foundationMeters(FULL_BID_METRIC, plan)) await refundQuota(organizationId, FULL_BID_METRIC).catch(() => undefined);
-        throw error;
-      }
+    if (plan.drafting) {
+      const window = await planWindowWithRoom(organizationId, "plan_bid", plan, tx);
+      if (window) return stamp("plan_bid", "full", window);
     }
     if (want === "any") {
-      if ((plan.checksPerMonth === null || plan.checksPerMonth > 0) && (await consumeMonthly(organizationId, "plan_brief", plan, tx))) {
-        try {
-          return await stamp("plan_brief", "brief");
-        } catch (error) {
-          if (foundationMeters(CHECK_METRIC, plan)) await refundQuota(organizationId, CHECK_METRIC).catch(() => undefined);
-          throw error;
-        }
+      if (plan.checksPerMonth === null || plan.checksPerMonth > 0) {
+        const window = await planWindowWithRoom(organizationId, "plan_brief", plan, tx);
+        if (window) return stamp("plan_brief", "brief", window);
       }
       if (await consumeCredit(organizationId, "free_brief", bidId, tx)) return stamp("free_brief", "brief");
     }
@@ -295,6 +361,8 @@ export async function getBidCapabilities(organizationId: string, bid: { accessLe
  * Grants a Bid Pass (called by billing when a one-off purchase completes, or by an admin).
  * `externalRef` makes the grant idempotent: the same reference never grants twice.
  * Returns true when a new credit was created.
+ *
+ * A purchased pass does not expire while the account exists: billing passes no `expiresAt`.
  */
 export async function grantBidPass(organizationId: string, options: { source: string; externalRef?: string | null; expiresAt?: Date | null }, executor: DbOrTx = db): Promise<boolean> {
   const rows = await executor
@@ -303,4 +371,21 @@ export async function grantBidPass(organizationId: string, options: { source: st
     .onConflictDoNothing()
     .returning({ id: bidCredits.id });
   return rows.length > 0;
+}
+
+/**
+ * Takes back an unused Bid Pass after a refund (called by the billing webhook with the
+ * reference the pass was granted under). A pass that already paid for a bid stays with
+ * that bid. The row is kept, marked as lapsed, so a replay of the purchase event cannot
+ * grant the pass again; calling this twice is harmless.
+ */
+export async function revokeBidPass(organizationId: string, externalRef: string, executor: DbOrTx = db): Promise<"revoked" | "already_used" | "not_found"> {
+  const rows = await executor.execute<{ consumed_at: Date | null }>(sql`
+    update bid_credits
+    set expires_at = case when consumed_at is null then least(coalesce(expires_at, now()), now()) else expires_at end
+    where organization_id = ${organizationId} and kind = 'bid_pass' and external_ref = ${externalRef}
+    returning consumed_at
+  `);
+  if (rows.length === 0) return "not_found";
+  return rows[0]!.consumed_at === null ? "revoked" : "already_used";
 }
