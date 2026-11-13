@@ -161,7 +161,9 @@ const SMALL_NUMBER_WORDS: Record<string, string> = { one: "1", two: "2", three: 
 /** The figures a requirement states, so "two references in three years" equals "2 references in 3 years". */
 function magnitudeSet(text: string): string {
   const figures = new Set(thresholdMagnitudes(text));
-  for (const word of normaliseText(text).split(/[^a-z]+/)) {
+  // "any one claim", "each and every one", "one of the following" are not quantities.
+  const words = normaliseText(text).replace(/\b(any|each|every)\s+one\b|\bone\s+(claim|occurrence|event|incident|of)\b/g, " ");
+  for (const word of words.split(/[^a-z]+/)) {
     const mapped = SMALL_NUMBER_WORDS[word];
     if (mapped) figures.add(mapped);
   }

@@ -126,12 +126,21 @@ export async function createBidWithFiles(scope: Scope, files: Array<{ name: stri
 }
 
 /** Runs queued jobs until the bid leaves `processing` (retries are released from their backoff). */
-export async function runPipeline(scope: Scope, bidId: string, rounds = 12): Promise<bidsApi.BidRow> {
+export async function runPipeline(scope: Scope, bidId: string, timeoutMs = 20_000): Promise<bidsApi.BidRow> {
+  const deadline = Date.now() + timeoutMs;
   let bid = await bidsApi.getBid(scope, bidId);
-  for (let round = 0; round < rounds && bid.status === "processing"; round += 1) {
+  while (bid.status === "processing" && Date.now() < deadline) {
     await db.update(jobs).set({ runAfter: new Date(Date.now() - 1000) }).where(eq(jobs.status, "pending"));
-    await runWorker({ maxJobs: 20, timeBudgetMs: 60_000 });
+    const summary = await runWorker({ maxJobs: 20, timeBudgetMs: 60_000 });
+    // Nothing to claim: another worker (a watchdog kick) holds the job. Give it a moment.
+    if (summary.claimed === 0) await new Promise((resolve) => setTimeout(resolve, 50));
     bid = await bidsApi.getBid(scope, bidId);
+  }
+  // Let a concurrent worker finish recording its job before the next test resets the database.
+  for (let i = 0; i < 100; i += 1) {
+    const [running] = await db.select({ count: sql<number>`count(*)::int` }).from(jobs).where(eq(jobs.status, "running"));
+    if ((running?.count ?? 0) === 0) break;
+    await new Promise((resolve) => setTimeout(resolve, 20));
   }
   return bid;
 }

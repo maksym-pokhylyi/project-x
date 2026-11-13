@@ -78,6 +78,9 @@ describe("sameRequirement", () => {
     expect(same("Bidders must hold public liability insurance of at least £5 million", "Public liability insurance — minimum £5,000,000", "£5m", "£5,000,000")).toBe(true);
     expect(same("Provide two references from the last three years", "Bidders must provide 2 references within the last 3 years")).toBe(true);
     expect(same("Hold a valid CHAS accreditation", "CHAS accreditation must be held by the bidder")).toBe(true);
+    // "any one claim" is not a quantity (this split one requirement in two on a test pack).
+    expect(same("Public liability insurance of at least £5,000,000", "Hold public liability insurance (minimum £5m any one claim)", "£5,000,000", "£5m")).toBe(true);
+    expect(same("Provide one reference", "Provide two references")).toBe(false);
   });
 
   it("never merges different insurances, even from one sentence with one figure", () => {

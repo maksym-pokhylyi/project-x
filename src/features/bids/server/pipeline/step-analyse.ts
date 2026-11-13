@@ -403,7 +403,7 @@ export type { DocumentClass };
 
 const CLASS_PATTERNS: Array<[DocumentClass, RegExp]> = [
   ["clarifications", /clarif|q\s?(&|and)\s?a\b|questions?[\s_-]*(and|&)[\s_-]*answers?|quer(y|ies)|faqs?\b|addend|amendment|responses?[\s_-]*to[\s_-]*(questions|queries)/i],
-  ["questionnaire", /questionnaire|\bddq\b|\bpsq\b|\bsq\b|\bpqq\b|due[\s_-]*dilig|selection[\s_-]*(stage|criteria)|conditions[\s_-]*of[\s_-]*participation|health[\s_-]*(and|&)?[\s_-]*safety/i],
+  ["questionnaire", /questionnaire|\bddq\b|\bpsq\b|\bsq\b|\bpqq\b|due[\s_-]*dil+ig|selection[\s_-]*(stage|criteria)|conditions[\s_-]*of[\s_-]*participation|health[\s_-]*(and|&)?[\s_-]*safety/i],
   ["response_template", /response|template|submission|method[\s_-]*statement|methodology|quality|form[\s_-]*of[\s_-]*tender|tender[\s_-]*form|proposal[\s_-]*form|award[\s_-]*questions/i],
   ["pricing", /pric(e|ing)|commercial|schedule[\s_-]*of[\s_-]*rates|cost[\s_-]*(model|schedule)|fees?\b/i],
 ];

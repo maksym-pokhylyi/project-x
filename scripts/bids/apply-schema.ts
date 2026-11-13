@@ -11,7 +11,6 @@
  *   pnpm tsx scripts/bids/apply-schema.ts            # create if missing (DATABASE_URL)
  *   pnpm tsx scripts/bids/apply-schema.ts --reset    # drop + recreate (local only)
  */
-import { generateDrizzleJson, generateMigration } from "drizzle-kit/api";
 import postgres from "postgres";
 import * as appSchema from "../../src/db/schema/app";
 import * as authSchema from "../../src/db/schema/auth";
@@ -20,9 +19,16 @@ import * as bidsSchema from "../../src/db/schema/bids";
 export const BIDS_TABLES = ["bid_credits", "company_facts", "library_docs", "bid_questions", "bid_requirements", "bid_files", "bids"] as const;
 
 export async function bidsSchemaStatements(): Promise<string[]> {
-  const foundation = generateDrizzleJson({ ...authSchema, ...appSchema });
-  const withBids = generateDrizzleJson({ ...authSchema, ...appSchema, ...bidsSchema }, foundation.id);
-  return generateMigration(foundation, withBids);
+  // Loaded on demand and cleaned up after: drizzle-kit/api adds enumerable properties to
+  // Array.prototype (`random`), which makes pdf.js refuse to load in the same process.
+  const { generateDrizzleJson, generateMigration } = await import("drizzle-kit/api");
+  try {
+    const foundation = generateDrizzleJson({ ...authSchema, ...appSchema });
+    const withBids = generateDrizzleJson({ ...authSchema, ...appSchema, ...bidsSchema }, foundation.id);
+    return await generateMigration(foundation, withBids);
+  } finally {
+    for (const key in []) delete (Array.prototype as unknown as Record<string, unknown>)[key];
+  }
 }
 
 /** Creates the tables when `bids` does not exist yet. Returns true when it created them. */
