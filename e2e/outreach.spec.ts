@@ -98,10 +98,13 @@ test("the founder signs in and finds Outreach, Suppressions and Ingestion in the
 
   const nav = admin.getByRole("navigation", { name: "Admin" });
   for (const name of ["Outreach", "Suppressions", "Ingestion"]) await expect(nav.getByRole("link", { name, exact: true })).toBeVisible();
-  // The overview carries the outreach summary and the two figures that wait for the bid desk.
+  // The overview carries the founder's sixteen numbers, the outreach summary among them.
   await expect(admin.getByTestId("admin-stat")).toHaveCount(16);
   await expect(admin.locator('[data-kpi="outreach"]')).toContainText("0 sent");
-  await expect(admin.locator('[data-kpi="suppressions"]')).toContainText("Do-not-contact list");
+  await expect(admin.locator('[data-kpi="bid-pass"]')).toContainText("0 in 7 days · 0 in 30 days");
+  const list = admin.locator('[data-kpi="suppressions"]');
+  await expect(list).toContainText("Do-not-contact list");
+  await expect(list.getByRole("link", { name: "Open the list" })).toHaveAttribute("href", "/admin/suppressions");
 
   await nav.getByRole("link", { name: "Ingestion", exact: true }).click();
   await expect(admin.getByRole("heading", { level: 1, name: "Data ingestion" })).toBeVisible();
@@ -368,6 +371,65 @@ test("the form without a link answers every address in the same way", async ({ b
   await expect(admin.getByTestId("suppression-row")).toContainText("Opt-out form");
   await admin.goto(campaignUrl);
   await expect(admin.locator('[data-testid="prospect-row"][data-status="opted_out"]')).toHaveCount(2);
+});
+
+test("corrections: a wrong sent date is cleared, and an entry leaves the list only when typed out", async () => {
+  // 1. Castle was marked by mistake: tick the row, open the correction, clear its date.
+  await admin.goto(campaignUrl);
+  const castle = admin.getByTestId("prospect-row").filter({ hasText: "Castle Gardens LLP" });
+  await expect(castle).toHaveAttribute("data-status", "sent");
+  const tick = castle.getByTestId("prospect-tick");
+  const tickIt = () =>
+    expect(async () => {
+      if ((await tick.getAttribute("aria-checked")) !== "true") await tick.click();
+      await expect(tick).toHaveAttribute("aria-checked", "true", { timeout: 1_000 });
+    }).toPass();
+  await tickIt();
+  const correction = admin.locator("details", { hasText: "Marked the wrong rows, or the wrong day?" });
+  await expect(admin.getByTestId("clear-sent")).toBeHidden();
+  await correction.locator("summary").click();
+  await admin.getByTestId("clear-sent").click();
+  await expect(admin.getByTestId("flash-notice")).toContainText("Sent date cleared for 1 company. The correction is in the audit trail.");
+  await expect(castle).toHaveAttribute("data-status", "exported");
+  await expect(admin.getByTestId("funnel-sent")).toContainText("2");
+  // The tick went with the action (the form is reset once it has run): nothing stays
+  // selected for the next action by accident.
+  await expect(tick).toHaveAttribute("aria-checked", "false");
+  // …and it is marked again, this time by its tick.
+  await tickIt();
+  await admin.getByTestId("mark-selected").click();
+  await expect(admin.getByTestId("flash-notice")).toContainText("1 company marked as sent.");
+  await expect(castle).toHaveAttribute("data-status", "sent");
+  await expect(admin.getByTestId("funnel-sent")).toContainText("3");
+
+  // 2. An address added to the list by mistake: one click does not remove it.
+  await admin.goto("/admin/suppressions");
+  const before = await admin.getByTestId("suppression-counts").innerText();
+  await admin.getByLabel("Address or domain").fill("mistake@wrong-entry.example");
+  await admin.getByTestId("add-suppression-button").click();
+  await expect(admin.getByTestId("flash-notice")).toContainText("Added to the list.");
+  const entry = admin.getByTestId("suppression-row").filter({ hasText: "mistake@wrong-entry.example" });
+  await expect(entry.getByTestId("remove-suppression-form")).toBeHidden();
+  await entry.locator("summary").click();
+  await entry.getByLabel("Type the address to confirm").fill("mistake@wrong-entry");
+  await entry.getByRole("button", { name: "Remove from the list" }).click();
+  await expect(admin.getByTestId("flash-error")).toContainText("Type the address or domain exactly as shown to remove it.");
+  await expect(entry).toHaveCount(1);
+  await entry.locator("summary").click();
+  await entry.getByLabel("Type the address to confirm").fill("mistake@wrong-entry.example");
+  await entry.getByRole("button", { name: "Remove from the list" }).click();
+  await expect(admin.getByTestId("flash-notice")).toContainText("Entry removed. The removal is in the audit trail.");
+  await expect(entry).toHaveCount(0);
+  expect(await admin.getByTestId("suppression-counts").innerText()).toBe(before);
+  // The people who opted out are still on it.
+  await expect(admin.getByTestId("suppression-row").filter({ hasText: "tenders@acmegrounds.example" })).toHaveCount(1);
+
+  await admin.goto("/admin/outreach");
+  const trail = admin.getByTestId("audit-trail");
+  for (const action of ["campaign.sent_cleared", "suppression.added", "suppression.removed"]) {
+    await expect(trail.locator(`[data-testid="audit-row"][data-action="${action}"]`).first()).toBeVisible();
+  }
+  expect(await trail.innerText()).not.toMatch(/@/);
 });
 
 test("the app sent no e-mail to anyone on the list", async () => {
