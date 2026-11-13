@@ -1,0 +1,1337 @@
+[
+  {
+    "event_id": "evt_01zzfixturetrial0001000000",
+    "event_type": "subscription.trialing",
+    "occurred_at": "2026-11-13T15:10:20.540368Z",
+    "data": {
+      "id": "sub_01zzfixturetrial0001000000",
+      "status": "trialing",
+      "customer_id": "ctm_01zzfixturetrial0001000000",
+      "address_id": "add_01zzfixturetrial0001000000",
+      "business_id": null,
+      "currency_code": "GBP",
+      "created_at": "2026-11-13T15:10:20.417Z",
+      "updated_at": "2026-11-13T15:10:20.417Z",
+      "started_at": "2026-11-13T15:10:20.413Z",
+      "first_billed_at": null,
+      "next_billed_at": "2026-11-27T15:10:20.413Z",
+      "paused_at": null,
+      "canceled_at": null,
+      "discount": null,
+      "collection_mode": "manual",
+      "billing_details": {
+        "payment_terms": {
+          "interval": "week",
+          "frequency": 2
+        },
+        "enable_checkout": false,
+        "purchase_order_number": "ZZ-VERIFY",
+        "additional_information": "ZZ API verification (automated, safe to ignore)"
+      },
+      "current_billing_period": {
+        "ends_at": "2026-11-27T15:10:20.413Z",
+        "starts_at": "2026-11-13T15:10:20.413Z"
+      },
+      "billing_cycle": {
+        "interval": "month",
+        "frequency": 1
+      },
+      "scheduled_change": null,
+      "items": [
+        {
+          "price": {
+            "id": "pri_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "type": "standard",
+            "status": "active",
+            "quantity": {
+              "maximum": 1,
+              "minimum": 1
+            },
+            "tax_mode": "location",
+            "created_at": "2026-11-13T15:08:58.269Z",
+            "product_id": "pro_01zzfixturetrial0001000000",
+            "unit_price": {
+              "amount": "14900",
+              "currency_code": "GBP"
+            },
+            "updated_at": "2026-11-13T15:10:12.274861Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "import_meta": null,
+            "trial_period": {
+              "interval": "day",
+              "frequency": 14,
+              "requires_payment_method": true
+            },
+            "billing_cycle": {
+              "interval": "month",
+              "frequency": 1
+            },
+            "unit_price_overrides": []
+          },
+          "status": "trialing",
+          "product": {
+            "id": "pro_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore)",
+            "type": "standard",
+            "status": "active",
+            "image_url": null,
+            "created_at": "2026-11-13T15:08:57.956Z",
+            "updated_at": "2026-11-13T15:10:11.633Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 run 20261113150852",
+            "tax_category": "standard"
+          },
+          "quantity": 1,
+          "recurring": true,
+          "created_at": "2026-11-13T15:10:20.417Z",
+          "updated_at": "2026-11-13T15:10:20.417Z",
+          "trial_dates": {
+            "ends_at": "2026-11-27T15:10:20.413Z",
+            "starts_at": "2026-11-13T15:10:20.413Z"
+          },
+          "next_billed_at": "2026-11-27T15:10:20.413Z",
+          "previously_billed_at": null
+        }
+      ],
+      "custom_data": {
+        "run": "20261113151006",
+        "purpose": "zz_api_verification"
+      },
+      "consent_requirements": [],
+      "import_meta": null
+    }
+  },
+  {
+    "event_id": "evt_01zzfixturetrial0002000000",
+    "event_type": "transaction.updated",
+    "occurred_at": "2026-11-13T15:10:20.817129Z",
+    "data": {
+      "id": "txn_01zzfixturetrial0001000000",
+      "status": "paid",
+      "customer_id": "ctm_01zzfixturetrial0001000000",
+      "address_id": "add_01zzfixturetrial0001000000",
+      "business_id": null,
+      "custom_data": {
+        "run": "20261113151006",
+        "purpose": "zz_api_verification"
+      },
+      "currency_code": "GBP",
+      "origin": "api",
+      "subscription_id": "sub_01zzfixturetrial0001000000",
+      "invoice_id": null,
+      "invoice_number": null,
+      "collection_mode": "manual",
+      "discount_id": null,
+      "billing_details": {
+        "payment_terms": {
+          "interval": "day",
+          "frequency": 14
+        },
+        "enable_checkout": false,
+        "purchase_order_number": "ZZ-VERIFY",
+        "additional_information": "ZZ API verification (automated, safe to ignore)"
+      },
+      "billing_period": {
+        "ends_at": "2026-11-27T15:10:20.413Z",
+        "starts_at": "2026-11-13T15:10:20.413Z"
+      },
+      "items": [
+        {
+          "price": {
+            "id": "pri_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "type": "standard",
+            "status": "active",
+            "quantity": {
+              "maximum": 1,
+              "minimum": 1
+            },
+            "tax_mode": "location",
+            "created_at": "2026-11-13T15:08:58.269Z",
+            "product_id": "pro_01zzfixturetrial0001000000",
+            "unit_price": {
+              "amount": "14900",
+              "currency_code": "GBP"
+            },
+            "updated_at": "2026-11-13T15:10:12.274861Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "trial_period": {
+              "interval": "day",
+              "frequency": 14,
+              "requires_payment_method": true
+            },
+            "billing_cycle": {
+              "interval": "month",
+              "frequency": 1
+            },
+            "unit_price_overrides": []
+          },
+          "quantity": 1,
+          "proration": null
+        }
+      ],
+      "details": {
+        "totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "credit": "0",
+          "balance": "0",
+          "discount": "0",
+          "earnings": "0",
+          "subtotal": "0",
+          "grand_total": "0",
+          "currency_code": "GBP",
+          "grand_total_tax": "0",
+          "credit_to_balance": "0"
+        },
+        "line_items": [
+          {
+            "id": "txnitm_01zzfixturetrial0001000000",
+            "totals": {
+              "tax": "0",
+              "total": "0",
+              "discount": "0",
+              "subtotal": "0"
+            },
+            "product": {
+              "id": "pro_01zzfixturetrial0001000000",
+              "name": "ZZ API verification (automated, safe to ignore)",
+              "type": "standard",
+              "status": "active",
+              "image_url": null,
+              "created_at": "2026-11-13T15:08:57.956Z",
+              "updated_at": "2026-11-13T15:10:11.633Z",
+              "custom_data": {
+                "run": "20261113150852",
+                "purpose": "zz_api_verification"
+              },
+              "description": "ZZ API verification (automated, safe to ignore) \u2014 run 20261113150852",
+              "tax_category": "standard"
+            },
+            "price_id": "pri_01zzfixturetrial0001000000",
+            "quantity": 1,
+            "tax_rate": "0.2",
+            "unit_totals": {
+              "tax": "0",
+              "total": "0",
+              "discount": "0",
+              "subtotal": "0"
+            }
+          }
+        ],
+        "payout_totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "credit": "0",
+          "balance": "0",
+          "discount": "0",
+          "earnings": "0",
+          "fee_rate": "0",
+          "subtotal": "0",
+          "grand_total": "0",
+          "currency_code": "USD",
+          "exchange_rate": "1.2972603",
+          "grand_total_tax": "0",
+          "credit_to_balance": "0"
+        },
+        "tax_rates_used": [
+          {
+            "totals": {
+              "tax": "0",
+              "total": "0",
+              "discount": "0",
+              "subtotal": "0"
+            },
+            "tax_rate": "0.2"
+          }
+        ],
+        "adjusted_totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "earnings": "0",
+          "subtotal": "0",
+          "grand_total": "0",
+          "retained_fee": "0",
+          "currency_code": "GBP",
+          "grand_total_tax": "0"
+        },
+        "adjusted_payout_totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "earnings": "0",
+          "subtotal": "0",
+          "retained_fee": "0",
+          "currency_code": "USD",
+          "exchange_rate": "1.2972603",
+          "chargeback_fee": {
+            "amount": "0",
+            "original": null
+          }
+        }
+      },
+      "payments": [],
+      "checkout": {
+        "url": null
+      },
+      "created_at": "2026-11-13T15:10:20.174968Z",
+      "updated_at": "2026-11-13T15:10:20.809758718Z",
+      "billed_at": "2026-11-13T15:10:20.139284Z",
+      "revised_at": null,
+      "receipt_data": null
+    }
+  },
+  {
+    "event_id": "evt_01zzfixturetrial0003000000",
+    "event_type": "transaction.updated",
+    "occurred_at": "2026-11-13T15:10:22.455300Z",
+    "data": {
+      "id": "txn_01zzfixturetrial0001000000",
+      "status": "completed",
+      "customer_id": "ctm_01zzfixturetrial0001000000",
+      "address_id": "add_01zzfixturetrial0001000000",
+      "business_id": null,
+      "custom_data": {
+        "run": "20261113151006",
+        "purpose": "zz_api_verification"
+      },
+      "currency_code": "GBP",
+      "origin": "api",
+      "subscription_id": "sub_01zzfixturetrial0001000000",
+      "invoice_id": "inv_01zzfixturetrial0001000000",
+      "invoice_number": "000000-10002",
+      "collection_mode": "manual",
+      "discount_id": null,
+      "billing_details": {
+        "payment_terms": {
+          "interval": "day",
+          "frequency": 14
+        },
+        "enable_checkout": false,
+        "purchase_order_number": "ZZ-VERIFY",
+        "additional_information": "ZZ API verification (automated, safe to ignore)"
+      },
+      "billing_period": {
+        "ends_at": "2026-11-27T15:10:20.413Z",
+        "starts_at": "2026-11-13T15:10:20.413Z"
+      },
+      "items": [
+        {
+          "price": {
+            "id": "pri_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "type": "standard",
+            "status": "active",
+            "quantity": {
+              "maximum": 1,
+              "minimum": 1
+            },
+            "tax_mode": "location",
+            "created_at": "2026-11-13T15:08:58.269Z",
+            "product_id": "pro_01zzfixturetrial0001000000",
+            "unit_price": {
+              "amount": "14900",
+              "currency_code": "GBP"
+            },
+            "updated_at": "2026-11-13T15:10:12.274861Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "trial_period": {
+              "interval": "day",
+              "frequency": 14,
+              "requires_payment_method": true
+            },
+            "billing_cycle": {
+              "interval": "month",
+              "frequency": 1
+            },
+            "unit_price_overrides": []
+          },
+          "quantity": 1,
+          "proration": null
+        }
+      ],
+      "details": {
+        "totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "credit": "0",
+          "balance": "0",
+          "discount": "0",
+          "earnings": "0",
+          "subtotal": "0",
+          "grand_total": "0",
+          "currency_code": "GBP",
+          "grand_total_tax": "0",
+          "credit_to_balance": "0"
+        },
+        "line_items": [
+          {
+            "id": "txnitm_01zzfixturetrial0001000000",
+            "totals": {
+              "tax": "0",
+              "total": "0",
+              "discount": "0",
+              "subtotal": "0"
+            },
+            "product": {
+              "id": "pro_01zzfixturetrial0001000000",
+              "name": "ZZ API verification (automated, safe to ignore)",
+              "type": "standard",
+              "status": "active",
+              "image_url": null,
+              "created_at": "2026-11-13T15:08:57.956Z",
+              "updated_at": "2026-11-13T15:10:11.633Z",
+              "custom_data": {
+                "run": "20261113150852",
+                "purpose": "zz_api_verification"
+              },
+              "description": "ZZ API verification (automated, safe to ignore) \u2014 run 20261113150852",
+              "tax_category": "standard"
+            },
+            "price_id": "pri_01zzfixturetrial0001000000",
+            "quantity": 1,
+            "tax_rate": "0.2",
+            "unit_totals": {
+              "tax": "0",
+              "total": "0",
+              "discount": "0",
+              "subtotal": "0"
+            }
+          }
+        ],
+        "payout_totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "credit": "0",
+          "balance": "0",
+          "discount": "0",
+          "earnings": "0",
+          "fee_rate": "0",
+          "subtotal": "0",
+          "grand_total": "0",
+          "currency_code": "USD",
+          "exchange_rate": "1.2972603",
+          "grand_total_tax": "0",
+          "credit_to_balance": "0"
+        },
+        "tax_rates_used": [
+          {
+            "totals": {
+              "tax": "0",
+              "total": "0",
+              "discount": "0",
+              "subtotal": "0"
+            },
+            "tax_rate": "0.2"
+          }
+        ],
+        "adjusted_totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "earnings": "0",
+          "subtotal": "0",
+          "grand_total": "0",
+          "retained_fee": "0",
+          "currency_code": "GBP",
+          "grand_total_tax": "0"
+        },
+        "adjusted_payout_totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "earnings": "0",
+          "subtotal": "0",
+          "retained_fee": "0",
+          "currency_code": "USD",
+          "exchange_rate": "1.2972603",
+          "chargeback_fee": {
+            "amount": "0",
+            "original": null
+          }
+        }
+      },
+      "payments": [],
+      "checkout": {
+        "url": null
+      },
+      "created_at": "2026-11-13T15:10:20.174968Z",
+      "updated_at": "2026-11-13T15:10:22.45157808Z",
+      "billed_at": "2026-11-13T15:10:20.139284Z",
+      "revised_at": null,
+      "receipt_data": null
+    }
+  },
+  {
+    "event_id": "evt_01zzfixturetrial0004000000",
+    "event_type": "transaction.completed",
+    "occurred_at": "2026-11-13T15:10:22.456830Z",
+    "data": {
+      "id": "txn_01zzfixturetrial0001000000",
+      "status": "completed",
+      "customer_id": "ctm_01zzfixturetrial0001000000",
+      "address_id": "add_01zzfixturetrial0001000000",
+      "business_id": null,
+      "custom_data": {
+        "run": "20261113151006",
+        "purpose": "zz_api_verification"
+      },
+      "currency_code": "GBP",
+      "origin": "api",
+      "subscription_id": "sub_01zzfixturetrial0001000000",
+      "invoice_id": "inv_01zzfixturetrial0001000000",
+      "invoice_number": "000000-10002",
+      "collection_mode": "manual",
+      "discount_id": null,
+      "billing_details": {
+        "payment_terms": {
+          "interval": "day",
+          "frequency": 14
+        },
+        "enable_checkout": false,
+        "purchase_order_number": "ZZ-VERIFY",
+        "additional_information": "ZZ API verification (automated, safe to ignore)"
+      },
+      "billing_period": {
+        "ends_at": "2026-11-27T15:10:20.413Z",
+        "starts_at": "2026-11-13T15:10:20.413Z"
+      },
+      "items": [
+        {
+          "price": {
+            "id": "pri_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "type": "standard",
+            "status": "active",
+            "quantity": {
+              "maximum": 1,
+              "minimum": 1
+            },
+            "tax_mode": "location",
+            "created_at": "2026-11-13T15:08:58.269Z",
+            "product_id": "pro_01zzfixturetrial0001000000",
+            "unit_price": {
+              "amount": "14900",
+              "currency_code": "GBP"
+            },
+            "updated_at": "2026-11-13T15:10:12.274861Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "trial_period": {
+              "interval": "day",
+              "frequency": 14,
+              "requires_payment_method": true
+            },
+            "billing_cycle": {
+              "interval": "month",
+              "frequency": 1
+            },
+            "unit_price_overrides": []
+          },
+          "quantity": 1,
+          "proration": null
+        }
+      ],
+      "details": {
+        "totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "credit": "0",
+          "balance": "0",
+          "discount": "0",
+          "earnings": "0",
+          "subtotal": "0",
+          "grand_total": "0",
+          "currency_code": "GBP",
+          "grand_total_tax": "0",
+          "credit_to_balance": "0"
+        },
+        "line_items": [
+          {
+            "id": "txnitm_01zzfixturetrial0001000000",
+            "totals": {
+              "tax": "0",
+              "total": "0",
+              "discount": "0",
+              "subtotal": "0"
+            },
+            "product": {
+              "id": "pro_01zzfixturetrial0001000000",
+              "name": "ZZ API verification (automated, safe to ignore)",
+              "type": "standard",
+              "status": "active",
+              "image_url": null,
+              "created_at": "2026-11-13T15:08:57.956Z",
+              "updated_at": "2026-11-13T15:10:11.633Z",
+              "custom_data": {
+                "run": "20261113150852",
+                "purpose": "zz_api_verification"
+              },
+              "description": "ZZ API verification (automated, safe to ignore) \u2014 run 20261113150852",
+              "tax_category": "standard"
+            },
+            "price_id": "pri_01zzfixturetrial0001000000",
+            "quantity": 1,
+            "tax_rate": "0.2",
+            "unit_totals": {
+              "tax": "0",
+              "total": "0",
+              "discount": "0",
+              "subtotal": "0"
+            }
+          }
+        ],
+        "payout_totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "credit": "0",
+          "balance": "0",
+          "discount": "0",
+          "earnings": "0",
+          "fee_rate": "0",
+          "subtotal": "0",
+          "grand_total": "0",
+          "currency_code": "USD",
+          "exchange_rate": "1.2972603",
+          "grand_total_tax": "0",
+          "credit_to_balance": "0"
+        },
+        "tax_rates_used": [
+          {
+            "totals": {
+              "tax": "0",
+              "total": "0",
+              "discount": "0",
+              "subtotal": "0"
+            },
+            "tax_rate": "0.2"
+          }
+        ],
+        "adjusted_totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "earnings": "0",
+          "subtotal": "0",
+          "grand_total": "0",
+          "retained_fee": "0",
+          "currency_code": "GBP",
+          "grand_total_tax": "0"
+        },
+        "adjusted_payout_totals": {
+          "fee": "0",
+          "tax": "0",
+          "total": "0",
+          "earnings": "0",
+          "subtotal": "0",
+          "retained_fee": "0",
+          "currency_code": "USD",
+          "exchange_rate": "1.2972603",
+          "chargeback_fee": {
+            "amount": "0",
+            "original": null
+          }
+        }
+      },
+      "payments": [],
+      "checkout": {
+        "url": null
+      },
+      "created_at": "2026-11-13T15:10:20.174968Z",
+      "updated_at": "2026-11-13T15:10:22.45157808Z",
+      "billed_at": "2026-11-13T15:10:20.139284Z",
+      "revised_at": null,
+      "receipt_data": null
+    }
+  },
+  {
+    "event_id": "evt_01zzfixturetrial0005000000",
+    "event_type": "subscription.updated",
+    "occurred_at": "2026-11-13T15:10:23.023854Z",
+    "data": {
+      "id": "sub_01zzfixturetrial0001000000",
+      "status": "trialing",
+      "customer_id": "ctm_01zzfixturetrial0001000000",
+      "address_id": "add_01zzfixturetrial0001000000",
+      "business_id": null,
+      "currency_code": "GBP",
+      "created_at": "2026-11-13T15:10:20.417Z",
+      "updated_at": "2026-11-13T15:10:22.925Z",
+      "started_at": "2026-11-13T15:10:20.413Z",
+      "first_billed_at": null,
+      "next_billed_at": null,
+      "paused_at": null,
+      "canceled_at": null,
+      "discount": null,
+      "collection_mode": "manual",
+      "billing_details": {
+        "payment_terms": {
+          "interval": "week",
+          "frequency": 2
+        },
+        "enable_checkout": false,
+        "purchase_order_number": "ZZ-VERIFY",
+        "additional_information": "ZZ API verification (automated, safe to ignore)"
+      },
+      "current_billing_period": {
+        "ends_at": "2026-11-27T15:10:20.413Z",
+        "starts_at": "2026-11-13T15:10:20.413Z"
+      },
+      "billing_cycle": {
+        "interval": "month",
+        "frequency": 1
+      },
+      "scheduled_change": {
+        "items": null,
+        "action": "cancel",
+        "resume_at": null,
+        "effective_at": "2026-11-27T15:10:20.413Z"
+      },
+      "items": [
+        {
+          "price": {
+            "id": "pri_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "type": "standard",
+            "status": "active",
+            "quantity": {
+              "maximum": 1,
+              "minimum": 1
+            },
+            "tax_mode": "location",
+            "created_at": "2026-11-13T15:08:58.269Z",
+            "product_id": "pro_01zzfixturetrial0001000000",
+            "unit_price": {
+              "amount": "14900",
+              "currency_code": "GBP"
+            },
+            "updated_at": "2026-11-13T15:10:12.274861Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "import_meta": null,
+            "trial_period": {
+              "interval": "day",
+              "frequency": 14,
+              "requires_payment_method": true
+            },
+            "billing_cycle": {
+              "interval": "month",
+              "frequency": 1
+            },
+            "unit_price_overrides": []
+          },
+          "status": "trialing",
+          "product": {
+            "id": "pro_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore)",
+            "type": "standard",
+            "status": "active",
+            "image_url": null,
+            "created_at": "2026-11-13T15:08:57.956Z",
+            "updated_at": "2026-11-13T15:10:11.633Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 run 20261113150852",
+            "tax_category": "standard"
+          },
+          "quantity": 1,
+          "recurring": true,
+          "created_at": "2026-11-13T15:10:20.417Z",
+          "updated_at": "2026-11-13T15:10:20.417Z",
+          "trial_dates": {
+            "ends_at": "2026-11-27T15:10:20.413Z",
+            "starts_at": "2026-11-13T15:10:20.413Z"
+          },
+          "next_billed_at": null,
+          "previously_billed_at": null
+        }
+      ],
+      "custom_data": {
+        "run": "20261113151006",
+        "purpose": "zz_api_verification"
+      },
+      "consent_requirements": [],
+      "import_meta": null
+    }
+  },
+  {
+    "event_id": "evt_01zzfixturetrial0006000000",
+    "event_type": "subscription.updated",
+    "occurred_at": "2026-11-13T15:10:23.459750Z",
+    "data": {
+      "id": "sub_01zzfixturetrial0001000000",
+      "status": "trialing",
+      "customer_id": "ctm_01zzfixturetrial0001000000",
+      "address_id": "add_01zzfixturetrial0001000000",
+      "business_id": null,
+      "currency_code": "GBP",
+      "created_at": "2026-11-13T15:10:20.417Z",
+      "updated_at": "2026-11-13T15:10:23.358Z",
+      "started_at": "2026-11-13T15:10:20.413Z",
+      "first_billed_at": null,
+      "next_billed_at": "2026-11-27T15:10:20.413Z",
+      "paused_at": null,
+      "canceled_at": null,
+      "discount": null,
+      "collection_mode": "manual",
+      "billing_details": {
+        "payment_terms": {
+          "interval": "week",
+          "frequency": 2
+        },
+        "enable_checkout": false,
+        "purchase_order_number": "ZZ-VERIFY",
+        "additional_information": "ZZ API verification (automated, safe to ignore)"
+      },
+      "current_billing_period": {
+        "ends_at": "2026-11-27T15:10:20.413Z",
+        "starts_at": "2026-11-13T15:10:20.413Z"
+      },
+      "billing_cycle": {
+        "interval": "month",
+        "frequency": 1
+      },
+      "scheduled_change": null,
+      "items": [
+        {
+          "price": {
+            "id": "pri_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "type": "standard",
+            "status": "active",
+            "quantity": {
+              "maximum": 1,
+              "minimum": 1
+            },
+            "tax_mode": "location",
+            "created_at": "2026-11-13T15:08:58.269Z",
+            "product_id": "pro_01zzfixturetrial0001000000",
+            "unit_price": {
+              "amount": "14900",
+              "currency_code": "GBP"
+            },
+            "updated_at": "2026-11-13T15:10:12.274861Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "import_meta": null,
+            "trial_period": {
+              "interval": "day",
+              "frequency": 14,
+              "requires_payment_method": true
+            },
+            "billing_cycle": {
+              "interval": "month",
+              "frequency": 1
+            },
+            "unit_price_overrides": []
+          },
+          "status": "trialing",
+          "product": {
+            "id": "pro_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore)",
+            "type": "standard",
+            "status": "active",
+            "image_url": null,
+            "created_at": "2026-11-13T15:08:57.956Z",
+            "updated_at": "2026-11-13T15:10:11.633Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 run 20261113150852",
+            "tax_category": "standard"
+          },
+          "quantity": 1,
+          "recurring": true,
+          "created_at": "2026-11-13T15:10:20.417Z",
+          "updated_at": "2026-11-13T15:10:20.417Z",
+          "trial_dates": {
+            "ends_at": "2026-11-27T15:10:20.413Z",
+            "starts_at": "2026-11-13T15:10:20.413Z"
+          },
+          "next_billed_at": "2026-11-27T15:10:20.413Z",
+          "previously_billed_at": null
+        }
+      ],
+      "custom_data": {
+        "run": "20261113151006",
+        "purpose": "zz_api_verification"
+      },
+      "consent_requirements": [],
+      "import_meta": null
+    }
+  },
+  {
+    "event_id": "evt_01zzfixturetrial0007000000",
+    "event_type": "subscription.updated",
+    "occurred_at": "2026-11-13T15:10:23.850746Z",
+    "data": {
+      "id": "sub_01zzfixturetrial0001000000",
+      "status": "trialing",
+      "customer_id": "ctm_01zzfixturetrial0001000000",
+      "address_id": "add_01zzfixturetrial0001000000",
+      "business_id": null,
+      "currency_code": "GBP",
+      "created_at": "2026-11-13T15:10:20.417Z",
+      "updated_at": "2026-11-13T15:10:23.754Z",
+      "started_at": "2026-11-13T15:10:20.413Z",
+      "first_billed_at": null,
+      "next_billed_at": null,
+      "paused_at": null,
+      "canceled_at": null,
+      "discount": null,
+      "collection_mode": "manual",
+      "billing_details": {
+        "payment_terms": {
+          "interval": "week",
+          "frequency": 2
+        },
+        "enable_checkout": false,
+        "purchase_order_number": "ZZ-VERIFY",
+        "additional_information": "ZZ API verification (automated, safe to ignore)"
+      },
+      "current_billing_period": {
+        "ends_at": "2026-11-27T15:10:20.413Z",
+        "starts_at": "2026-11-13T15:10:20.413Z"
+      },
+      "billing_cycle": {
+        "interval": "month",
+        "frequency": 1
+      },
+      "scheduled_change": {
+        "items": null,
+        "action": "pause",
+        "resume_at": null,
+        "effective_at": "2026-11-27T15:10:20.413Z"
+      },
+      "items": [
+        {
+          "price": {
+            "id": "pri_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "type": "standard",
+            "status": "active",
+            "quantity": {
+              "maximum": 1,
+              "minimum": 1
+            },
+            "tax_mode": "location",
+            "created_at": "2026-11-13T15:08:58.269Z",
+            "product_id": "pro_01zzfixturetrial0001000000",
+            "unit_price": {
+              "amount": "14900",
+              "currency_code": "GBP"
+            },
+            "updated_at": "2026-11-13T15:10:12.274861Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "import_meta": null,
+            "trial_period": {
+              "interval": "day",
+              "frequency": 14,
+              "requires_payment_method": true
+            },
+            "billing_cycle": {
+              "interval": "month",
+              "frequency": 1
+            },
+            "unit_price_overrides": []
+          },
+          "status": "trialing",
+          "product": {
+            "id": "pro_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore)",
+            "type": "standard",
+            "status": "active",
+            "image_url": null,
+            "created_at": "2026-11-13T15:08:57.956Z",
+            "updated_at": "2026-11-13T15:10:11.633Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 run 20261113150852",
+            "tax_category": "standard"
+          },
+          "quantity": 1,
+          "recurring": true,
+          "created_at": "2026-11-13T15:10:20.417Z",
+          "updated_at": "2026-11-13T15:10:20.417Z",
+          "trial_dates": {
+            "ends_at": "2026-11-27T15:10:20.413Z",
+            "starts_at": "2026-11-13T15:10:20.413Z"
+          },
+          "next_billed_at": null,
+          "previously_billed_at": null
+        }
+      ],
+      "custom_data": {
+        "run": "20261113151006",
+        "purpose": "zz_api_verification"
+      },
+      "consent_requirements": [],
+      "import_meta": null
+    }
+  },
+  {
+    "event_id": "evt_01zzfixturetrial0008000000",
+    "event_type": "subscription.updated",
+    "occurred_at": "2026-11-13T15:10:24.257756Z",
+    "data": {
+      "id": "sub_01zzfixturetrial0001000000",
+      "status": "trialing",
+      "customer_id": "ctm_01zzfixturetrial0001000000",
+      "address_id": "add_01zzfixturetrial0001000000",
+      "business_id": null,
+      "currency_code": "GBP",
+      "created_at": "2026-11-13T15:10:20.417Z",
+      "updated_at": "2026-11-13T15:10:24.163Z",
+      "started_at": "2026-11-13T15:10:20.413Z",
+      "first_billed_at": null,
+      "next_billed_at": "2026-11-27T15:10:20.413Z",
+      "paused_at": null,
+      "canceled_at": null,
+      "discount": null,
+      "collection_mode": "manual",
+      "billing_details": {
+        "payment_terms": {
+          "interval": "week",
+          "frequency": 2
+        },
+        "enable_checkout": false,
+        "purchase_order_number": "ZZ-VERIFY",
+        "additional_information": "ZZ API verification (automated, safe to ignore)"
+      },
+      "current_billing_period": {
+        "ends_at": "2026-11-27T15:10:20.413Z",
+        "starts_at": "2026-11-13T15:10:20.413Z"
+      },
+      "billing_cycle": {
+        "interval": "month",
+        "frequency": 1
+      },
+      "scheduled_change": null,
+      "items": [
+        {
+          "price": {
+            "id": "pri_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "type": "standard",
+            "status": "active",
+            "quantity": {
+              "maximum": 1,
+              "minimum": 1
+            },
+            "tax_mode": "location",
+            "created_at": "2026-11-13T15:08:58.269Z",
+            "product_id": "pro_01zzfixturetrial0001000000",
+            "unit_price": {
+              "amount": "14900",
+              "currency_code": "GBP"
+            },
+            "updated_at": "2026-11-13T15:10:12.274861Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "import_meta": null,
+            "trial_period": {
+              "interval": "day",
+              "frequency": 14,
+              "requires_payment_method": true
+            },
+            "billing_cycle": {
+              "interval": "month",
+              "frequency": 1
+            },
+            "unit_price_overrides": []
+          },
+          "status": "trialing",
+          "product": {
+            "id": "pro_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore)",
+            "type": "standard",
+            "status": "active",
+            "image_url": null,
+            "created_at": "2026-11-13T15:08:57.956Z",
+            "updated_at": "2026-11-13T15:10:11.633Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 run 20261113150852",
+            "tax_category": "standard"
+          },
+          "quantity": 1,
+          "recurring": true,
+          "created_at": "2026-11-13T15:10:20.417Z",
+          "updated_at": "2026-11-13T15:10:20.417Z",
+          "trial_dates": {
+            "ends_at": "2026-11-27T15:10:20.413Z",
+            "starts_at": "2026-11-13T15:10:20.413Z"
+          },
+          "next_billed_at": "2026-11-27T15:10:20.413Z",
+          "previously_billed_at": null
+        }
+      ],
+      "custom_data": {
+        "run": "20261113151006",
+        "purpose": "zz_api_verification"
+      },
+      "consent_requirements": [],
+      "import_meta": null
+    }
+  },
+  {
+    "event_id": "evt_01zzfixturetrial0009000000",
+    "event_type": "subscription.canceled",
+    "occurred_at": "2026-11-13T15:10:28.675031Z",
+    "data": {
+      "id": "sub_01zzfixturetrial0001000000",
+      "status": "canceled",
+      "customer_id": "ctm_01zzfixturetrial0001000000",
+      "address_id": "add_01zzfixturetrial0001000000",
+      "business_id": null,
+      "currency_code": "GBP",
+      "created_at": "2026-11-13T15:10:20.417Z",
+      "updated_at": "2026-11-13T15:10:28.589Z",
+      "started_at": "2026-11-13T15:10:20.413Z",
+      "first_billed_at": null,
+      "next_billed_at": null,
+      "paused_at": null,
+      "canceled_at": "2026-11-13T15:10:28.586Z",
+      "discount": null,
+      "collection_mode": "manual",
+      "billing_details": {
+        "payment_terms": {
+          "interval": "week",
+          "frequency": 2
+        },
+        "enable_checkout": false,
+        "purchase_order_number": "ZZ-VERIFY",
+        "additional_information": "ZZ API verification (automated, safe to ignore)"
+      },
+      "current_billing_period": null,
+      "billing_cycle": {
+        "interval": "month",
+        "frequency": 1
+      },
+      "scheduled_change": null,
+      "items": [
+        {
+          "price": {
+            "id": "pri_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "type": "standard",
+            "status": "active",
+            "quantity": {
+              "maximum": 1,
+              "minimum": 1
+            },
+            "tax_mode": "location",
+            "created_at": "2026-11-13T15:08:58.269Z",
+            "product_id": "pro_01zzfixturetrial0001000000",
+            "unit_price": {
+              "amount": "14900",
+              "currency_code": "GBP"
+            },
+            "updated_at": "2026-11-13T15:10:12.274861Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "import_meta": null,
+            "trial_period": {
+              "interval": "day",
+              "frequency": 14,
+              "requires_payment_method": true
+            },
+            "billing_cycle": {
+              "interval": "month",
+              "frequency": 1
+            },
+            "unit_price_overrides": []
+          },
+          "status": "trialing",
+          "product": {
+            "id": "pro_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore)",
+            "type": "standard",
+            "status": "active",
+            "image_url": null,
+            "created_at": "2026-11-13T15:08:57.956Z",
+            "updated_at": "2026-11-13T15:10:11.633Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 run 20261113150852",
+            "tax_category": "standard"
+          },
+          "quantity": 1,
+          "recurring": true,
+          "created_at": "2026-11-13T15:10:20.417Z",
+          "updated_at": "2026-11-13T15:10:20.417Z",
+          "trial_dates": {
+            "ends_at": "2026-11-27T15:10:20.413Z",
+            "starts_at": "2026-11-13T15:10:20.413Z"
+          },
+          "next_billed_at": null,
+          "previously_billed_at": null
+        }
+      ],
+      "custom_data": {
+        "run": "20261113151006",
+        "purpose": "zz_api_verification"
+      },
+      "consent_requirements": [],
+      "import_meta": null
+    }
+  },
+  {
+    "event_id": "evt_01zzfixturetrial0010000000",
+    "event_type": "subscription.updated",
+    "occurred_at": "2026-11-13T15:10:28.675031Z",
+    "data": {
+      "id": "sub_01zzfixturetrial0001000000",
+      "status": "canceled",
+      "customer_id": "ctm_01zzfixturetrial0001000000",
+      "address_id": "add_01zzfixturetrial0001000000",
+      "business_id": null,
+      "currency_code": "GBP",
+      "created_at": "2026-11-13T15:10:20.417Z",
+      "updated_at": "2026-11-13T15:10:28.589Z",
+      "started_at": "2026-11-13T15:10:20.413Z",
+      "first_billed_at": null,
+      "next_billed_at": null,
+      "paused_at": null,
+      "canceled_at": "2026-11-13T15:10:28.586Z",
+      "discount": null,
+      "collection_mode": "manual",
+      "billing_details": {
+        "payment_terms": {
+          "interval": "week",
+          "frequency": 2
+        },
+        "enable_checkout": false,
+        "purchase_order_number": "ZZ-VERIFY",
+        "additional_information": "ZZ API verification (automated, safe to ignore)"
+      },
+      "current_billing_period": null,
+      "billing_cycle": {
+        "interval": "month",
+        "frequency": 1
+      },
+      "scheduled_change": null,
+      "items": [
+        {
+          "price": {
+            "id": "pri_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "type": "standard",
+            "status": "active",
+            "quantity": {
+              "maximum": 1,
+              "minimum": 1
+            },
+            "tax_mode": "location",
+            "created_at": "2026-11-13T15:08:58.269Z",
+            "product_id": "pro_01zzfixturetrial0001000000",
+            "unit_price": {
+              "amount": "14900",
+              "currency_code": "GBP"
+            },
+            "updated_at": "2026-11-13T15:10:12.274861Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 monthly with trial",
+            "import_meta": null,
+            "trial_period": {
+              "interval": "day",
+              "frequency": 14,
+              "requires_payment_method": true
+            },
+            "billing_cycle": {
+              "interval": "month",
+              "frequency": 1
+            },
+            "unit_price_overrides": []
+          },
+          "status": "trialing",
+          "product": {
+            "id": "pro_01zzfixturetrial0001000000",
+            "name": "ZZ API verification (automated, safe to ignore)",
+            "type": "standard",
+            "status": "active",
+            "image_url": null,
+            "created_at": "2026-11-13T15:08:57.956Z",
+            "updated_at": "2026-11-13T15:10:11.633Z",
+            "custom_data": {
+              "run": "20261113150852",
+              "purpose": "zz_api_verification"
+            },
+            "description": "ZZ API verification (automated, safe to ignore) \u2014 run 20261113150852",
+            "tax_category": "standard"
+          },
+          "quantity": 1,
+          "recurring": true,
+          "created_at": "2026-11-13T15:10:20.417Z",
+          "updated_at": "2026-11-13T15:10:20.417Z",
+          "trial_dates": {
+            "ends_at": "2026-11-27T15:10:20.413Z",
+            "starts_at": "2026-11-13T15:10:20.413Z"
+          },
+          "next_billed_at": null,
+          "previously_billed_at": null
+        }
+      ],
+      "custom_data": {
+        "run": "20261113151006",
+        "purpose": "zz_api_verification"
+      },
+      "consent_requirements": [],
+      "import_meta": null
+    }
+  }
+]
