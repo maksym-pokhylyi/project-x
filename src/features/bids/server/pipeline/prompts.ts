@@ -79,7 +79,9 @@ Rules
 3. What NOT to list (it buries the real hurdles — a 60-line matrix stops being read):
    - company-detail fields of forms (name, address, registration and VAT numbers, contact details);
    - what the winning contractor must deliver or do AFTER award: deliverables, milestones, meetings, reports, programme dates, payment arrangements, confidentiality, ownership of outputs. Those are the job, not a hurdle to bidding. (Exception: list it if the pack makes accepting or evidencing it a condition of the tender.)
-   - descriptions of the scope, and the written questions themselves (those are extracted separately);
+   - descriptions of the scope, the written questions themselves and the evaluation criteria (those are extracted separately);
+   - the deadline, the clarification deadline and the submission address as such (they are key facts): list only a stated consequence, e.g. "late tenders will be rejected";
+   - instructions for filling in a pricing form;
    - the same requirement twice: if it is stated in several places, list it once and cite the clearest statement.
 4. "kind": use "pass_fail" ONLY where the pack says pass/fail, excluded, rejected, disqualified, non-compliant or "will not be considered"; "minimum_score_threshold" for score hurdles; "mandatory_unscored" where it says must/shall/required without stating the consequence; otherwise "desirable" or "information_only".
 5. "threshold": the level or number exactly as stated (e.g. "£5,000,000", "2 references within the last 3 years", "turnover at least 2x contract value"), else null. Never state a level the pack does not state.

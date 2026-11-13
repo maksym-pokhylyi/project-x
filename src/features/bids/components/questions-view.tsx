@@ -3,7 +3,7 @@
 import { ArrowRight, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { Fragment, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,8 @@ export type QuestionItem = {
   maxEvaluated: string | null;
   provenance: Provenance | null;
   source: string;
+  /** scored_weighted | scored_unweighted | pass_fail | information_only | unclear */
+  scored: string;
 };
 
 /** Status stepper: Not started → Draft → Reviewed → Final. */
@@ -77,6 +79,11 @@ export function QuestionsView({
   const started = questions.filter((question) => question.status !== "not_started").length;
   const final = questions.filter((question) => question.status === "final").length;
   const totalWeight = questions.reduce((sum, question) => sum + (question.weighting ?? 0), 0);
+  // Written, scored answers first; forms and declarations after them, under their own heading.
+  const isForm = (question: QuestionItem) => question.scored === "information_only" || question.scored === "pass_fail";
+  const answerable = questions.filter((question) => !isForm(question));
+  const forms = questions.filter(isForm);
+  const ordered = [...answerable, ...forms];
 
   return (
     <div className="space-y-4" data-testid="questions-view">
@@ -122,11 +129,20 @@ export function QuestionsView({
         </div>
       ) : (
         <ul className="space-y-2.5">
-          {questions.map((question) => {
+          {ordered.map((question, position) => {
             const { limit, fromPages } = effectiveWordLimit(question);
             const limitState = wordLimitState(question.wordCount, limit);
             return (
-              <li key={question.id} data-testid="question-card" data-status={question.status} className="rounded-lg border bg-card p-4">
+              <Fragment key={question.id}>
+                {position === answerable.length && forms.length > 0 ? (
+                  <li className="pt-4" data-testid="forms-heading">
+                    <h3 className="text-sm font-semibold">
+                      Forms, declarations and information to give <span className="font-normal text-muted-foreground tabular-nums">{forms.length}</span>
+                    </h3>
+                    <p className="text-xs text-muted-foreground">Not scored written answers: confirmations, declarations and details the pack asks you to supply. Listed so nothing is missed.</p>
+                  </li>
+                ) : null}
+              <li data-testid="question-card" data-status={question.status} data-scored={question.scored} className="rounded-lg border bg-card p-4">
                 <div className="flex gap-3">
                   <span className="mt-0.5 w-12 shrink-0 font-mono text-xs break-words text-muted-foreground">{question.ref || "—"}</span>
                   <div className="min-w-0 flex-1 space-y-2">
@@ -207,6 +223,7 @@ export function QuestionsView({
                   </div>
                 </div>
               </li>
+              </Fragment>
             );
           })}
         </ul>

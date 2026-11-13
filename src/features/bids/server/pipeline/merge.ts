@@ -69,10 +69,15 @@ const STOP_WORDS = new Set(
 
 /** Reduces plurals and common endings so "audits"/"audit" and "certificates"/"certificate" match. */
 function stem(word: string): string {
-  if (word.length > 4 && word.endsWith("ies")) return `${word.slice(0, -3)}y`;
-  if (word.length > 4 && word.endsWith("es") && !word.endsWith("ses")) return word.slice(0, -1);
-  if (word.length > 3 && word.endsWith("s") && !word.endsWith("ss")) return word.slice(0, -1);
-  return word;
+  let out = word;
+  if (out.length > 4 && out.endsWith("ies")) out = `${out.slice(0, -3)}y`;
+  else if (out.length > 4 && out.endsWith("es") && !out.endsWith("ses")) out = out.slice(0, -1);
+  else if (out.length > 3 && out.endsWith("s") && !out.endsWith("ss")) out = out.slice(0, -1);
+  // "raised"/"raise", "submitted"/"submit", "providing"/"provide": compare on a crude stem.
+  if (out.length > 5 && out.endsWith("ing")) out = out.slice(0, -3);
+  else if (out.length > 4 && out.endsWith("ed")) out = out.slice(0, -2);
+  if (out.length > 4 && out.endsWith("e")) out = out.slice(0, -1);
+  return out.replace(/(.)\1$/, "$1");
 }
 
 function wordSet(text: string): Set<string> {
@@ -196,9 +201,12 @@ export function sameQuestion(a: Pick<DraftQuestion, "id" | "title" | "text" | "q
   const idB = normaliseId(b.id);
   if (idA && idA === idB && titleSimilarity >= 0.2) return true;
   // "3.3" and "H&S_3.3": one reference inside the other, and the wording overlaps.
-  const nested = idA.length >= 2 && idB.length >= 2 && idA !== idB && (idA.endsWith(idB) || idB.endsWith(idA)) && /\d/.test(idA) && /\d/.test(idB);
+  const nested = idA !== idB && /\d/.test(idA) && /\d/.test(idB) && (/[^\d]\d+$/.test(idA) || /[^\d]\d+$/.test(idB)) && (idA.endsWith(idB) || idB.endsWith(idA));
   if (nested && textContainment(`${a.title} ${a.text ?? ""}`, `${b.title} ${b.text ?? ""}`) >= 0.6) return true;
   if (textSimilarity(a.title, b.title) >= 0.8 && a.title.trim().length > 8) return true;
+  // One title wholly inside the other ("Risk Assessments and Method Statements" and
+  // "Health & Safety Q4 — Risk Assessments and Method Statements").
+  if (wordSet(a.title).size >= 3 && wordSet(b.title).size >= 3 && textContainment(a.title, b.title) >= 0.99) return true;
   if (titleSimilarity >= 0.75) return true;
   const quoteA = tightText(a.quote ?? "");
   return quoteA.length >= 24 && quoteA === tightText(b.quote ?? "");

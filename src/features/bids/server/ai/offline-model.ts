@@ -27,7 +27,10 @@ function promptText(options: unknown): string {
 function packUnits(text: string): Unit[] {
   const units: Unit[] = [];
   const pattern = /<<<FILE: (.+?) \| LOC: (.+?)>>>\n([\s\S]*?)(?=\n\n<<<FILE: |\n\n=== END OF TENDER PACK ===)/g;
-  for (const match of text.matchAll(pattern)) units.push({ file: match[1]!, loc: match[2]!, text: match[3]! });
+  for (const match of text.matchAll(pattern)) {
+    if (match[1] === "<file name>") continue; // the marker format described in the instructions, not a unit
+    units.push({ file: match[1]!, loc: match[2]!, text: match[3]! });
+  }
   return units;
 }
 

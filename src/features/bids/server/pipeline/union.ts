@@ -18,6 +18,34 @@ import type { QuestionDraft, RequirementDraft } from "./transform";
 
 export type PassId = "primary" | "second" | "document" | "recheck";
 
+/** What kind of document a per-document pass read. */
+export type DocumentClass = "clarifications" | "questionnaire" | "response_template" | "pricing";
+
+const QUESTION_LIKE = /^(briefly\s+)?(please\s+)?(describe|explain|outline|set out|detail how|tell us|state how|identify any|list any)\b/i;
+const QUALIFICATION_CATEGORIES = ["insurance", "financial", "accreditation", "experience"];
+
+/**
+ * Keeps the compliance matrix a list of hurdles. On a real council pack the readings
+ * returned 98 "requirements", half of them questions restated as requirements, pricing
+ * form instructions and evaluation criteria — a list nobody reads. Dropped here, in code:
+ *  - questions to answer ("Describe how you will…"): they belong on the Questions tab;
+ *  - "desirable" / "for information" items, unless they are about what the bidder holds
+ *    (insurance, finance, accreditations, experience);
+ *  - everything a response template or pricing form "requires" (those are forms to fill).
+ * Pass/fail items are never dropped by these rules.
+ */
+export function keepRequirement(draft: Pick<RequirementDraft, "text" | "kind" | "category" | "isPassFail">, context: { pass: PassId; documentClass?: DocumentClass | null }): boolean {
+  if (draft.isPassFail) return true;
+  if (QUESTION_LIKE.test(draft.text.trim())) return false;
+  const soft = draft.kind === "desirable" || draft.kind === "information";
+  if (soft && !QUALIFICATION_CATEGORIES.includes(draft.category)) return false;
+  if (context.pass === "document") {
+    if (context.documentClass === "response_template" || context.documentClass === "pricing") return false;
+    if (soft) return false;
+  }
+  return true;
+}
+
 export type ExistingRequirement = {
   id: string;
   text: string;

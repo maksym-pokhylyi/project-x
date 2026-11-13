@@ -1,6 +1,6 @@
 "use client";
 
-import { Banknote, BadgeCheck, BriefcaseBusiness, FileText, ListChecks, Pencil, Plus, Scale, ShieldCheck, Trash2, type LucideIcon } from "lucide-react";
+import { Banknote, BadgeCheck, BriefcaseBusiness, FileText, ListChecks, Pencil, Plus, Scale, Send, ShieldCheck, Trash2, Wrench, type LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { NativeSelect } from "@/components/forms/native-select";
@@ -57,6 +57,8 @@ const CATEGORY_ICONS: Record<RequirementCategory, LucideIcon> = {
   experience: BriefcaseBusiness,
   policy: FileText,
   legal: Scale,
+  technical: Wrench,
+  submission: Send,
   other: ListChecks,
 };
 

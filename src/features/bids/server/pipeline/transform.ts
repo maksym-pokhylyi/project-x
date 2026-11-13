@@ -24,10 +24,10 @@ const CATEGORY_MAP: Record<RawRequirement["category"], RequirementCategory> = {
   experience_references: "experience",
   staff_qualifications: "experience",
   mandatory_policy: "policy",
-  site_visit: "other",
+  site_visit: "submission",
   legal_declaration: "legal",
-  technical_mandatory: "other",
-  submission_formality: "other",
+  technical_mandatory: "technical",
+  submission_formality: "submission",
   other: "other",
 };
 

@@ -390,7 +390,7 @@ export function BriefView(props: BriefViewProps) {
           <SectionHeading title="What was read" />
           <p className="mt-1 max-w-[68ch] text-sm text-muted-foreground">
             This is a first-pass check, not a substitute for reading the tender. {packStats.files} file{packStats.files === 1 ? "" : "s"}, {packStats.pages} pages and sections
-            {packStats.durationSeconds ? `, read in ${Math.round(packStats.durationSeconds / 6) / 10} minutes` : ""}.{" "}
+            {packStats.durationSeconds ? `, read in ${packStats.durationSeconds < 90 ? `${packStats.durationSeconds} seconds` : `${Math.round(packStats.durationSeconds / 6) / 10} minutes`}` : ""}.{" "}
             {packStats.citations.total > 0 ? (
               <>
                 <span className="font-medium text-foreground">
@@ -434,7 +434,7 @@ export function BriefView(props: BriefViewProps) {
                           {file.note ? <p className="mt-0.5 pl-5 text-xs text-warning">{file.note}</p> : null}
                         </td>
                         <td className="px-3 py-2 align-top whitespace-nowrap">
-                          {file.status === "read" ? `${file.pages} page${file.pages === 1 ? "" : "s"}/sections` : <span className="font-medium text-destructive">{file.status}</span>}
+                          {file.status === "read" ? `${file.pages} ${file.pages === 1 ? "page or section" : "pages and sections"}` : <span className="font-medium text-destructive">{file.status}</span>}
                         </td>
                         <td className={cn("px-3 py-2 text-right align-top tabular-nums", file.items === 0 && file.status === "read" ? "text-warning" : "")}>
                           {file.items === 0 && file.status === "read" ? "0 — read it yourself" : file.items}

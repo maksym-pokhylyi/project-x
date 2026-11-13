@@ -27,7 +27,7 @@ import {
 } from "./schema";
 import { PermanentPipelineError, type BidRow } from "./state";
 import { compareKeyDates, parseUkLocal, toBrief, toFact, toKeyDate, toQuestion, toRequirement } from "./transform";
-import { mergeQuestionPass, mergeRequirementPass, reconcileFact, type PassId } from "./union";
+import { keepRequirement, mergeQuestionPass, mergeRequirementPass, reconcileFact, type DocumentClass, type PassId } from "./union";
 
 export type LoadedPack = { pack: BuiltPack; index: PackIndex };
 
@@ -150,8 +150,13 @@ async function lockBid(tx: Tx, bidId: string): Promise<void> {
 }
 
 /** Unions the requirements found by one pass into the bid (see union.ts). Returns rows added. */
-export async function persistRequirements(bid: BidRow, index: PackIndex, raws: RawRequirement[], pass: PassId): Promise<number> {
-  const drafts = raws.filter((raw) => raw.requirement.trim()).map((raw) => toRequirement(index, raw));
+export async function persistRequirements(bid: BidRow, index: PackIndex, raws: RawRequirement[], pass: PassId, documentClass: DocumentClass | null = null): Promise<number> {
+  const drafts = raws
+    .filter((raw) => raw.requirement.trim())
+    .map((raw) => toRequirement(index, raw))
+    .filter((draft) => keepRequirement(draft, { pass, documentClass }));
+
+
   if (drafts.length === 0) return 0;
   return db.transaction(async (tx) => {
     await lockBid(tx, bid.id);
@@ -394,12 +399,12 @@ export async function runQuestions(bid: BidRow, loaded: LoadedPack, attempt: num
 
 // --- Per-document passes ------------------------------------------------------------------
 
-export type DocumentClass = "clarifications" | "questionnaire" | "response_template" | "pricing";
+export type { DocumentClass };
 
 const CLASS_PATTERNS: Array<[DocumentClass, RegExp]> = [
   ["clarifications", /clarif|q\s?(&|and)\s?a\b|questions?[\s_-]*(and|&)[\s_-]*answers?|quer(y|ies)|faqs?\b|addend|amendment|responses?[\s_-]*to[\s_-]*(questions|queries)/i],
   ["questionnaire", /questionnaire|\bddq\b|\bpsq\b|\bsq\b|\bpqq\b|due[\s_-]*dilig|selection[\s_-]*(stage|criteria)|conditions[\s_-]*of[\s_-]*participation|health[\s_-]*(and|&)?[\s_-]*safety/i],
-  ["response_template", /response|template|submission|method[\s_-]*statement|methodology|quality|form[\s_-]*of[\s_-]*tender|tender[\s_-]*form|proposal[\s_-]*form|award[\s_-]*questions|evaluation/i],
+  ["response_template", /response|template|submission|method[\s_-]*statement|methodology|quality|form[\s_-]*of[\s_-]*tender|tender[\s_-]*form|proposal[\s_-]*form|award[\s_-]*questions/i],
   ["pricing", /pric(e|ing)|commercial|schedule[\s_-]*of[\s_-]*rates|cost[\s_-]*(model|schedule)|fees?\b/i],
 ];
 
@@ -436,7 +441,8 @@ export async function runDocuments(bid: BidRow, loaded: LoadedPack, attempt: num
       const text = file.units.map((unit) => unit.text).join("\n");
       return { file, text, tokens: estimateTokens(text), kind: classifyDocument(file.name, text) };
     })
-    .filter((entry): entry is typeof entry & { kind: DocumentClass } => entry.kind !== null && entry.tokens >= 60 && entry.tokens <= MAX_DOCUMENT_TOKENS)
+    // Pricing forms hold rows to fill in, not requirements or questions: no reading of their own.
+    .filter((entry): entry is typeof entry & { kind: DocumentClass } => entry.kind !== null && entry.kind !== "pricing" && entry.tokens >= 60 && entry.tokens <= MAX_DOCUMENT_TOKENS)
     .sort((a, b) => DOCUMENT_ORDER.indexOf(a.kind) - DOCUMENT_ORDER.indexOf(b.kind))
     .slice(0, MAX_DOCUMENT_PASSES);
   if (candidates.length === 0) return { model: "", usage: ZERO_USAGE, passes: [], failedPasses: [] };
@@ -463,7 +469,7 @@ export async function runDocuments(bid: BidRow, loaded: LoadedPack, attempt: num
         });
       }),
     onDone: async (result) => {
-      await persistRequirements(bid, loaded.index, result.value.requirements, "document");
+      await persistRequirements(bid, loaded.index, result.value.requirements, "document", kind);
       await persistQuestions(bid, loaded.index, result.value.questions, "document");
     },
   }));

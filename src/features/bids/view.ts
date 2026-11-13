@@ -52,6 +52,7 @@ export function toQuestionItem(row: QuestionRow): QuestionItem {
     maxEvaluated: row.evaluation?.maxScore ?? null,
     provenance: row.provenance,
     source: row.source,
+    scored: row.source === "user" ? "unclear" : row.scored,
   };
 }
 

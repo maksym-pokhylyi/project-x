@@ -182,7 +182,8 @@ export type BidVerdict = {
 export const COMPANY_STATUSES = ["met", "gap", "unknown", "verify"] as const;
 export type CompanyStatus = (typeof COMPANY_STATUSES)[number];
 
-export const REQUIREMENT_CATEGORIES = ["insurance", "financial", "accreditation", "experience", "policy", "legal", "other"] as const;
+/** The spec's seven categories, plus two that keep the matrix readable: what the solution must do, and rules for submitting. */
+export const REQUIREMENT_CATEGORIES = ["insurance", "financial", "accreditation", "experience", "policy", "legal", "technical", "submission", "other"] as const;
 export type RequirementCategory = (typeof REQUIREMENT_CATEGORIES)[number];
 
 export const REQUIREMENT_CATEGORY_LABELS: Record<RequirementCategory, string> = {
@@ -192,6 +193,8 @@ export const REQUIREMENT_CATEGORY_LABELS: Record<RequirementCategory, string> = 
   experience: "Experience and references",
   policy: "Policies",
   legal: "Legal and declarations",
+  technical: "Mandatory technical requirements",
+  submission: "Submission rules",
   other: "Other requirements",
 };
 
