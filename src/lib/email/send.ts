@@ -32,7 +32,7 @@ export async function sendEmail(to: string, template: EmailTemplate): Promise<st
   if (features.mailDelivery === "none") {
     const [row] = await db
       .insert(emailOutbox)
-      .values({ toEmail: recipient, subject: rendered.subject, template: template.name, html: null, text: null, status: "failed", error: "no e-mail provider configured" })
+      .values({ toEmail: recipient, subject: rendered.subject, template: template.name, html: null, text: null, status: "failed", error: "no email provider configured" })
       .returning({ id: emailOutbox.id });
     log.error("[email] NOT delivered: RESEND_API_KEY / EMAIL_FROM are not configured", { template: template.name });
     return row!.id;

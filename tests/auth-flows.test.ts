@@ -46,13 +46,13 @@ describe("authentication flows (dev outbox mode)", () => {
     actAs(null);
   });
 
-  it("runs with verification required and e-mails captured in the outbox", () => {
+  it("runs with verification required and emails captured in the outbox", () => {
     expect(features.emailConfigured).toBe(false);
     expect(features.devTools).toBe(true);
     expect(features.requireEmailVerification).toBe(true);
   });
 
-  it("sign-up requires e-mail verification; the outbox link verifies and signs in", async () => {
+  it("sign-up requires email verification; the outbox link verifies and signs in", async () => {
     const signUp = await auth.api.signUpEmail({
       body: { email: "new@example.com", name: "New User", password: PASSWORD, callbackURL: "/app" },
       returnHeaders: true,
@@ -69,7 +69,7 @@ describe("authentication flows (dev outbox mode)", () => {
     expect((await signIn("new@example.com")).status).toBe(403);
     expect(await db.select().from(emailOutbox).where(eq(emailOutbox.toEmail, "new@example.com"))).toHaveLength(2);
     expect(email?.status).toBe("outbox");
-    expect(email?.subject).toContain("Verify your e-mail");
+    expect(email?.subject).toContain("Verify your email");
     const link = firstLink(email!.text, "/api/auth/verify-email");
     expect(link.startsWith("http://localhost:3000/api/auth/verify-email?token=")).toBe(true);
 
@@ -86,7 +86,7 @@ describe("authentication flows (dev outbox mode)", () => {
     expect(names).toEqual(expect.arrayContaining(["user.signed_up", "user.email_verified", "user.signed_in", "workspace.created"]));
   });
 
-  it("does not reveal whether an e-mail is already registered at sign-up", async () => {
+  it("does not reveal whether an email is already registered at sign-up", async () => {
     await createTestUser({ email: "taken@example.com" });
     const usersBefore = (await db.select().from(users)).length;
     const response = (await auth.api.signUpEmail({
@@ -149,7 +149,7 @@ describe("workspaces and invitations", () => {
   const subscribe = (planKey: "starter" | "pro" | "business") =>
     db.insert(subscriptions).values({ organizationId: owner.organizationId, status: "active", planKey, paddleSubscriptionId: `sub_${planKey}` });
 
-  it("invitation by e-mail: invitee signs up, accepts and lands in the workspace", async () => {
+  it("invitation by email: invitee signs up, accepts and lands in the workspace", async () => {
     await subscribe("starter"); // Radar Pro: 2 seats
     const invited = await inviteMemberAction({ email: "Invitee@Example.com", role: "member" });
     expect(invited.ok).toBe(true);

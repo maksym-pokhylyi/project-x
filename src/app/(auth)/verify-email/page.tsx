@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { features } from "@/env";
 import { safeRedirect } from "@/lib/redirects";
 
-export const metadata: Metadata = { title: "Verify your e-mail", robots: { index: false } };
+export const metadata: Metadata = { title: "Verify your email", robots: { index: false } };
 
 export default async function VerifyEmailPage({
   searchParams,
@@ -23,8 +23,8 @@ export default async function VerifyEmailPage({
       title="Check your inbox"
       description={
         <>
-          {params.resent ? "Your e-mail address is not verified yet. " : ""}We sent a verification link to{" "}
-          <strong className="font-semibold text-ink">{email || "your e-mail address"}</strong>. Open it to activate your account.
+          {params.resent ? "Your email address is not verified yet. " : ""}We sent a verification link to{" "}
+          <strong className="font-semibold text-ink">{email || "your email address"}</strong>. Open it to activate your account.
         </>
       }
       footer={
@@ -37,7 +37,7 @@ export default async function VerifyEmailPage({
             <AlertTitle>Development mode</AlertTitle>
             <AlertDescription>
               <p>
-                E-mail delivery is not configured (no <code>RESEND_API_KEY</code>). Open the <Link href="/dev/outbox">dev outbox</Link> to read the message.
+                Email delivery is not configured (no <code>RESEND_API_KEY</code>). Open the <Link href="/dev/outbox">dev outbox</Link> to read the message.
               </p>
             </AlertDescription>
           </Alert>

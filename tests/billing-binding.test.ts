@@ -324,14 +324,14 @@ describe("Manage billing: portal sessions (F-06)", () => {
     await deliver(paddleEvent("subscription.created", { organizationId: ORG }));
   });
 
-  it("opens the customer portal for the bound customer when its e-mail is the caller's own verified address", async () => {
+  it("opens the customer portal for the bound customer when its email is the caller's own verified address", async () => {
     const { client, calls } = fakePaddle({ customerEmail: "Owner@Supplier.example" });
     const links = await createBillingLinks(ORG, { email: OWNER_EMAIL, emailVerified: true }, client);
     expect(links).toEqual({ portalUrl: "https://portal.paddle.example/overview", updatePaymentMethodUrl: "https://portal.paddle.example/update", cancelUrl: "https://portal.paddle.example/cancel" });
     expect(calls.portal).toEqual([{ customerId: CUSTOMER, subscriptionIds: [SUB] }]);
   });
 
-  it("never opens a portal session for a customer whose e-mail is not the caller's (someone else's Paddle customer)", async () => {
+  it("never opens a portal session for a customer whose email is not the caller's (someone else's Paddle customer)", async () => {
     // The checkout was opened with customer.email = billing@victim.example and Paddle reused the victim's customer.
     const { client, calls } = fakePaddle({ customerEmail: "billing@victim.example" });
     const links = await createBillingLinks(ORG, { email: OWNER_EMAIL, emailVerified: true }, client);
@@ -340,7 +340,7 @@ describe("Manage billing: portal sessions (F-06)", () => {
     expect(links).toEqual({ portalUrl: null, updatePaymentMethodUrl: "https://paddle.example/sub/update", cancelUrl: "https://paddle.example/sub/cancel" });
   });
 
-  it("requires the caller's e-mail to be verified", async () => {
+  it("requires the caller's email to be verified", async () => {
     const { client, calls } = fakePaddle({ customerEmail: OWNER_EMAIL });
     expect((await createBillingLinks(ORG, { email: OWNER_EMAIL, emailVerified: false }, client)).portalUrl).toBeNull();
     expect((await createBillingLinks(ORG, undefined, client)).portalUrl).toBeNull();

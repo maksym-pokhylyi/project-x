@@ -33,7 +33,7 @@ export function SignInForm({ redirectTo, googleEnabled }: { redirectTo: string; 
         router.push(`/verify-email?email=${encodeURIComponent(parsed.data.email)}&redirect=${encodeURIComponent(redirectTo)}&resent=1`);
         return;
       }
-      setFormError(error.status === 401 ? "Wrong e-mail or password." : (error.message ?? "Could not sign in. Please try again."));
+      setFormError(error.status === 401 ? "Wrong email or password." : (error.message ?? "Could not sign in. Please try again."));
       return;
     }
     router.push(redirectTo);
@@ -50,7 +50,7 @@ export function SignInForm({ redirectTo, googleEnabled }: { redirectTo: string; 
       ) : null}
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         <FormError message={formError} />
-        <FormField label="E-mail" name="email" type="email" autoComplete="email" required error={errors.email?.[0]} />
+        <FormField label="Email" name="email" type="email" autoComplete="email" required error={errors.email?.[0]} />
         <FormField
           label="Password"
           name="password"

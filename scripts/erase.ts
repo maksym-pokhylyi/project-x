@@ -19,7 +19,7 @@ async function main() {
   const [kind, target, ...flags] = process.argv.slice(2);
   const confirmed = flags.includes("--yes");
   if ((kind !== "account" && kind !== "workspace") || !target) {
-    throw new Error("Usage: pnpm erase account <user id | e-mail> [--yes]  |  pnpm erase workspace <organization id> [--yes]");
+    throw new Error("Usage: pnpm erase account <user id | email> [--yes]  |  pnpm erase workspace <organization id> [--yes]");
   }
 
   const { eq, or } = await import("drizzle-orm");
@@ -44,7 +44,7 @@ async function main() {
       .select({ id: users.id, email: users.email })
       .from(users)
       .where(or(eq(users.id, target), eq(users.email, target.toLowerCase())));
-    if (!user) throw new Error(`No account with id or e-mail ${target}`);
+    if (!user) throw new Error(`No account with id or email ${target}`);
     const plan = await planAccountDeletion(user.id);
     console.log(`Account ${user.email} (${user.id})`);
     console.log("  workspaces deleted with it:", plan.deleteWorkspaces.map((workspace) => workspace.name).join(", ") || "none");

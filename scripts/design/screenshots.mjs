@@ -96,7 +96,7 @@ const problems = [];
 async function signIn(context, who) {
   const page = await context.newPage();
   await page.goto(`${BASE_URL}/sign-in`);
-  await page.getByLabel("E-mail").fill(who === "member" ? "teammate@example.com" : DEMO.email);
+  await page.getByLabel("Email").fill(who === "member" ? "teammate@example.com" : DEMO.email);
   await page.getByLabel("Password").fill(DEMO.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.waitForURL(/\/app/);

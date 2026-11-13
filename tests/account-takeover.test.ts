@@ -52,7 +52,7 @@ async function verificationLinks(to: string): Promise<string[]> {
     .orderBy(asc(emailOutbox.createdAt));
   return rows.map((row) => {
     const link = (row.text?.match(/https?:\/\/[^\s<>"')]+/g) ?? []).find((candidate) => candidate.includes("/api/auth/verify-email"));
-    if (!link) throw new Error("verification e-mail without a link");
+    if (!link) throw new Error("verification email without a link");
     return link;
   });
 }
@@ -112,7 +112,7 @@ describe("F-01 pre-registration account takeover", () => {
       expect(await signInStatus(VICTIM, NEW_PASSWORD)).toBe(200);
     });
 
-    it("the victim who only clicks the unsolicited verification e-mail does not activate the attacker's password", async () => {
+    it("the victim who only clicks the unsolicited verification email does not activate the attacker's password", async () => {
       await signUp(VICTIM, ATTACKER_PASSWORD);
       const [link] = await verificationLinks(VICTIM);
 

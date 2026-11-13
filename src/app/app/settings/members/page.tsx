@@ -43,7 +43,7 @@ export default async function MembersPage() {
       <Card>
         <CardHeader>
           <CardTitle>Invite a teammate</CardTitle>
-          <CardDescription>They will receive an e-mail with a link to join this workspace.</CardDescription>
+          <CardDescription>They will receive an email with a link to join this workspace.</CardDescription>
         </CardHeader>
         <CardContent>
           <InviteForm seatsAvailable={seatsAvailable} canInvite={canManage} />

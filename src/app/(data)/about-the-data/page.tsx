@@ -62,7 +62,7 @@ export default async function AboutTheDataPage({ searchParams }: { searchParams:
           gives one, contract titles, values, dates, categories and the buyer. Figures are as published by each buyer; we do not verify them.
         </p>
         <p>
-          We do <strong>not</strong> show contact names, e-mail addresses or telephone numbers, even where a notice includes them. We do not publish pages for
+          We do <strong>not</strong> show contact names, email addresses or telephone numbers, even where a notice includes them. We do not publish pages for
           sole traders or for suppliers we cannot identify as a registered organisation.
         </p>
         <p>

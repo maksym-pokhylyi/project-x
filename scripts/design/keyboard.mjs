@@ -45,7 +45,7 @@ const focused = (page) =>
 async function signIn(context) {
   const page = await context.newPage();
   await page.goto(`${BASE_URL}/sign-in`);
-  await page.getByLabel("E-mail").fill(DEMO.email);
+  await page.getByLabel("Email").fill(DEMO.email);
   await page.getByLabel("Password").fill(DEMO.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.waitForURL(/\/app/);

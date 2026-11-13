@@ -22,7 +22,7 @@ export function Invitation({ inviterName, organizationName, role, url }: Invitat
       <Text style={emailStyles.muted}>
         If the button does not work, copy this link into your browser: {url}
         <br />
-        This invitation expires in 7 days. If you were not expecting it, you can ignore this e-mail.
+        This invitation expires in 7 days. If you were not expecting it, you can ignore this email.
       </Text>
     </EmailLayout>
   );

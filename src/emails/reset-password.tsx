@@ -19,7 +19,7 @@ export function ResetPassword({ name, url }: ResetPasswordProps) {
       <Text style={emailStyles.muted}>
         If the button does not work, copy this link into your browser: {url}
         <br />
-        If you did not request this, you can ignore this e-mail — your password stays unchanged.
+        If you did not request this, you can ignore this email — your password stays unchanged.
       </Text>
     </EmailLayout>
   );

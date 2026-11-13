@@ -5,7 +5,7 @@ import { ConfirmEmailForm } from "@/components/auth/confirm-email-form";
 import { Button } from "@/components/ui/button";
 import { safeRedirect } from "@/lib/redirects";
 
-export const metadata: Metadata = { title: "Confirm your e-mail", robots: { index: false }, referrer: "no-referrer" };
+export const metadata: Metadata = { title: "Confirm your email", robots: { index: false }, referrer: "no-referrer" };
 
 /**
  * Landing page for a verification link opened in a browser that did not create the
@@ -29,7 +29,7 @@ export default async function ConfirmEmailPage({ searchParams }: { searchParams:
 
   return (
     <AuthCard
-      title="Confirm your e-mail"
+      title="Confirm your email"
       description="Choose the password for your account to finish. For your security it replaces any password set earlier, and other devices are signed out."
       footer={
         <Link className="underline-offset-4 hover:underline" href="/sign-in">

@@ -77,14 +77,14 @@ async function followOutboxLink(page: Page, to: string, template: string) {
 
 async function fillSignUp(page: Page, user: { name: string; email: string; password: string }) {
   await page.getByLabel("Name").fill(user.name);
-  await page.getByLabel("Work e-mail").fill(user.email);
+  await page.getByLabel("Work email").fill(user.email);
   await page.getByLabel("Password").fill(user.password);
   await page.getByRole("button", { name: "Create account" }).click();
 }
 
 async function signIn(page: Page, user: { email: string; password: string }) {
   await page.goto("/sign-in");
-  await page.getByLabel("E-mail").fill(user.email);
+  await page.getByLabel("Email").fill(user.email);
   await page.getByLabel("Password").fill(user.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 }
@@ -150,7 +150,7 @@ test("dynamic pages get a per-request nonce policy, hydrate under it, and do not
   expect(scripts.every(Boolean)).toBe(true);
   // …the page is interactive (client-side validation runs)…
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.getByText("Enter a valid e-mail address.")).toBeVisible();
+  await expect(page.getByText("Enter a valid email address.")).toBeVisible();
   expect(cspViolations).toEqual([]);
 
   // …and markup injected into the page cannot execute.
@@ -210,14 +210,14 @@ test("signed-out visitors are redirected to sign-in from /app and /admin", async
   await expect(page).toHaveURL(/\/sign-in/);
 });
 
-test("sign up, verify e-mail through the dev outbox, land in an auto-created workspace", async () => {
+test("sign up, verify email through the dev outbox, land in an auto-created workspace", async () => {
   const page = ownerPage;
   await page.goto("/sign-up");
 
   // Client-side validation
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.getByText("Enter your name.")).toBeVisible();
-  await expect(page.getByText("Enter a valid e-mail address.")).toBeVisible();
+  await expect(page.getByText("Enter a valid email address.")).toBeVisible();
 
   await fillSignUp(page, owner);
   await expect(page).toHaveURL(/\/verify-email/);
@@ -285,17 +285,17 @@ test("the Free plan has a single seat; Radar Pro has two", async () => {
   await expect(page.getByTestId("seat-usage")).toContainText("1 of 2 seats in use on the Radar Pro plan");
 });
 
-test("invite a member by e-mail", async () => {
+test("invite a member by email", async () => {
   const page = ownerPage;
   await page.goto("/app/settings/members");
   await expect(page.getByTestId("seat-usage")).toContainText("1 of 2 seats in use");
   await expect(page.getByTestId("member-row")).toHaveCount(1);
 
-  await page.getByLabel("E-mail address").fill("not-an-email");
+  await page.getByLabel("Email address").fill("not-an-email");
   await page.getByRole("button", { name: "Send invitation" }).click();
-  await expect(page.getByText("Enter a valid e-mail address.")).toBeVisible();
+  await expect(page.getByText("Enter a valid email address.")).toBeVisible();
 
-  await page.getByLabel("E-mail address").fill(invitee.email);
+  await page.getByLabel("Email address").fill(invitee.email);
   await page.getByRole("button", { name: "Send invitation" }).click();
   await expect(page.getByText(`Invitation sent to ${invitee.email}.`)).toBeVisible();
   await expect(page.getByTestId("invitations-list")).toContainText(invitee.email);
@@ -313,7 +313,7 @@ test("the invitee accepts from a second browser via the outbox link", async () =
 
   await page.getByRole("link", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/sign-up\?/);
-  await expect(page.getByLabel("Work e-mail")).toHaveValue(invitee.email);
+  await expect(page.getByLabel("Work email")).toHaveValue(invitee.email);
   await fillSignUp(page, invitee);
   await expect(page).toHaveURL(/\/verify-email/);
 
@@ -395,10 +395,10 @@ test("sign out and back in: workspace, members and settings persisted", async ()
   await page.goto("/app");
   await expect(page).toHaveURL(/\/sign-in\?redirect=%2Fapp$/);
 
-  await page.getByLabel("E-mail").fill(owner.email);
+  await page.getByLabel("Email").fill(owner.email);
   await page.getByLabel("Password").fill("wrong-password");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.getByText("Wrong e-mail or password.")).toBeVisible();
+  await expect(page.getByText("Wrong email or password.")).toBeVisible();
 
   await page.getByLabel("Password").fill(owner.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
@@ -424,7 +424,7 @@ test("password reset through the outbox link", async ({ browser }) => {
   const context = await newContext(browser);
   const page = await context.newPage();
   await page.goto("/forgot-password");
-  await page.getByLabel("E-mail").fill(invitee.email);
+  await page.getByLabel("Email").fill(invitee.email);
   await page.getByRole("button", { name: "Send reset link" }).click();
   await expect(page.getByText("we have sent a link to reset the password")).toBeVisible();
 
@@ -440,7 +440,7 @@ test("password reset through the outbox link", async ({ browser }) => {
   await expect(memberPage).toHaveURL(/\/sign-in/);
 
   await signIn(page, { email: invitee.email, password: invitee.password });
-  await expect(page.getByText("Wrong e-mail or password.")).toBeVisible();
+  await expect(page.getByText("Wrong email or password.")).toBeVisible();
   await signIn(page, { email: invitee.email, password: newPassword });
   await expect(page).toHaveURL(/\/app$/);
   await context.close();
@@ -481,22 +481,22 @@ test("a verification link opened in another browser asks for a password instead 
   const page = await victimContext.newPage();
   await followOutboxLink(page, victim.email, "verify-email");
   await expect(page).toHaveURL(/\/verify-email\/confirm\?token=/);
-  await expect(page.getByRole("heading", { name: "Confirm your e-mail" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Confirm your email" })).toBeVisible();
   // Nothing has been activated yet: the attacker's password does not get them in.
   await signIn(attacker, { email: victim.email, password: "attacker-knows-this-1" });
   await expect(attacker).toHaveURL(/\/verify-email/);
 
   await page.getByLabel("Password").fill("short");
-  await page.getByRole("button", { name: "Confirm e-mail and set password" }).click();
+  await page.getByRole("button", { name: "Confirm email and set password" }).click();
   await expect(page.getByText("Use at least 8 characters.")).toBeVisible();
   await page.getByLabel("Password").fill("chosen-by-the-owner-2");
-  await page.getByRole("button", { name: "Confirm e-mail and set password" }).click();
+  await page.getByRole("button", { name: "Confirm email and set password" }).click();
   await expect(page).toHaveURL(/\/app$/);
   await expect(page.getByRole("heading", { level: 1, name: "Welcome, Vera" })).toBeVisible();
 
   // The password chosen before the mailbox was proven is dead.
   await signIn(attacker, { email: victim.email, password: "attacker-knows-this-1" });
-  await expect(attacker.getByText("Wrong e-mail or password.")).toBeVisible();
+  await expect(attacker.getByText("Wrong email or password.")).toBeVisible();
   await attackerContext.close();
   await victimContext.close();
 });
@@ -546,7 +546,7 @@ test("owner can export the workspace, delete it, and delete the account", async 
   await page.goto("/app");
   await expect(page).toHaveURL(/\/sign-in/);
   await signIn(page, user);
-  await expect(page.getByText("Wrong e-mail or password.")).toBeVisible();
+  await expect(page.getByText("Wrong email or password.")).toBeVisible();
   await context.close();
 });
 

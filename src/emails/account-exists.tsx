@@ -17,7 +17,7 @@ export function AccountExists({ signInUrl, resetUrl }: AccountExistsProps) {
     <EmailLayout preview={`Someone tried to create a ${site.name} account with this address.`}>
       <Heading style={emailStyles.heading}>You already have an account</Heading>
       <Text style={emailStyles.paragraph}>
-        Someone just tried to create a {site.name} account with this e-mail address, but one already exists. Nothing
+        Someone just tried to create a {site.name} account with this email address, but one already exists. Nothing
         was changed.
       </Text>
       <Text style={emailStyles.paragraph}>If that was you, sign in instead — or reset your password if you have forgotten it.</Text>
@@ -27,7 +27,7 @@ export function AccountExists({ signInUrl, resetUrl }: AccountExistsProps) {
       <Text style={emailStyles.muted}>
         Forgot your password? {resetUrl}
         <br />
-        If this was not you, you can ignore this e-mail: your account is unaffected.
+        If this was not you, you can ignore this email: your account is unaffected.
       </Text>
     </EmailLayout>
   );

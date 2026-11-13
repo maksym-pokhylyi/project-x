@@ -60,7 +60,7 @@ export function SignUpForm({
         <FormError message={formError} />
         <FormField label="Name" name="name" autoComplete="name" required error={errors.name?.[0]} />
         <FormField
-          label="Work e-mail"
+          label="Work email"
           name="email"
           type="email"
           autoComplete="email"

@@ -35,7 +35,7 @@ export function ConfirmEmailForm({ token, redirectTo }: { token: string; redirec
       setFormError(result.error.message);
       return;
     }
-    toast.success(result.data.signedIn ? "E-mail confirmed. Welcome!" : "E-mail confirmed. Sign in with your new password.");
+    toast.success(result.data.signedIn ? "Email confirmed. Welcome!" : "Email confirmed. Sign in with your new password.");
     router.push(result.data.redirectTo);
     router.refresh();
   }
@@ -53,7 +53,7 @@ export function ConfirmEmailForm({ token, redirectTo }: { token: string; redirec
         error={errors.password?.[0]}
       />
       <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Confirming…" : "Confirm e-mail and set password"}
+        {pending ? "Confirming…" : "Confirm email and set password"}
       </Button>
     </form>
   );

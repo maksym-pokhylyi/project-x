@@ -127,8 +127,8 @@ test("supplier page states: one award, no matches right now, about-the-data requ
   await expect(form.getByLabel("Page address")).toHaveValue(/\/suppliers\/harbour-catering-ltd-07777777$/);
   // Errors are shown as text next to the fields.
   await form.getByRole("button", { name: "Send request" }).click();
-  await expect(form.getByText("Enter a valid e-mail address.")).toBeVisible();
-  await form.getByLabel("Your e-mail address").fill(`director-${run}@harbourcatering.example`);
+  await expect(form.getByText("Enter a valid email address.")).toBeVisible();
+  await form.getByLabel("Your email address").fill(`director-${run}@harbourcatering.example`);
   await form.getByLabel("What should change?").fill("The contract value shown for our Bristol contract is wrong.");
   await form.getByRole("button", { name: "Send request" }).click();
   await expect(page.getByTestId("data-request-sent")).toContainText("we have your request");
@@ -220,7 +220,7 @@ test("claim → sign up → verify → confirm → radar shows the supplier's ma
   // Signed out: the claim continues after sign-up.
   await expect(page).toHaveURL(/\/sign-up\?redirect=%2Fclaim%2Facme-grounds-ltd-01111111$/);
   await page.getByLabel("Name").fill(user.name);
-  await page.getByLabel("Work e-mail").fill(user.email);
+  await page.getByLabel("Work email").fill(user.email);
   await page.getByLabel("Password").fill(user.password);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/verify-email/);
@@ -316,7 +316,7 @@ test("a workspace with no company sees the onboarding choices and can set up a r
   const other = { name: "Nora New", email: `nora-${run}@e2e.test`, password: "nora-password-123" };
   await page.goto("/sign-up");
   await page.getByLabel("Name").fill(other.name);
-  await page.getByLabel("Work e-mail").fill(other.email);
+  await page.getByLabel("Work email").fill(other.email);
   await page.getByLabel("Password").fill(other.password);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/verify-email/);

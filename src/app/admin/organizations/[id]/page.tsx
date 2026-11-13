@@ -61,7 +61,7 @@ export default async function AdminOrganizationPage({ params }: { params: Promis
                 <dd className="break-all">{subscription.paddleSubscriptionId ?? "—"}</dd>
                 <dt className="text-muted-foreground">Paddle customer</dt>
                 <dd className="break-all">{subscription.paddleCustomerId ?? "—"}</dd>
-                <dt className="text-muted-foreground">Billing e-mail</dt>
+                <dt className="text-muted-foreground">Billing email</dt>
                 <dd className="break-all">{subscription.customerEmail ?? "—"}</dd>
                 <dt className="text-muted-foreground">Last event</dt>
                 <dd>{subscription.lastEventAt?.toISOString() ?? "—"}</dd>

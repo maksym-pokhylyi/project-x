@@ -120,7 +120,7 @@ describe("session-derived context", () => {
     expect(ctx.role).toBe("owner");
   });
 
-  it("does not grant founder admin without ADMIN_EMAILS + verified e-mail", async () => {
+  it("does not grant founder admin without ADMIN_EMAILS + verified email", async () => {
     actAs(ownerA);
     await expect(requireAdmin()).rejects.toBeInstanceOf(ForbiddenError);
     const founder = await createTestUser({ email: "founder@example.com" });

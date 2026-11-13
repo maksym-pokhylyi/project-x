@@ -62,9 +62,9 @@ async function memberCount(organizationId: string): Promise<number> {
 announceConfigWarnings();
 
 const SIGN_UP_DISABLED_MESSAGE =
-  "Sign-up is not available right now: this site cannot send the e-mail needed to confirm your address. Please try again later or contact support.";
+  "Sign-up is not available right now: this site cannot send the email needed to confirm your address. Please try again later or contact support.";
 const EMAIL_UNAVAILABLE_MESSAGE =
-  "This site cannot send e-mail right now, so this action is unavailable. Please try again later or contact support.";
+  "This site cannot send email right now, so this action is unavailable. Please try again later or contact support.";
 
 /**
  * 400 with a stable code. The same rules as the app's own forms, enforced HERE so that
@@ -207,7 +207,7 @@ export const auth = betterAuth({
       if (!request) {
         throw new APIError("FORBIDDEN", {
           code: "EMAIL_CONFIRMATION_REQUIRED",
-          message: "Open the verification link in a browser to confirm this e-mail address.",
+          message: "Open the verification link in a browser to confirm this email address.",
         });
       }
       const requestUrl = new URL(request.url);
@@ -373,7 +373,7 @@ export const auth = betterAuth({
           if (features.mailDelivery === "none") throw emailUnavailable("EMAIL_DELIVERY_UNAVAILABLE", EMAIL_UNAVAILABLE_MESSAGE);
           if (!INVITABLE_ROLES.has(invitation.role)) throw invalid("Invite people as member or admin.");
           const email = emailSchema.safeParse(invitation.email);
-          if (!email.success) throw invalid("Enter a valid e-mail address.");
+          if (!email.success) throw invalid("Enter a valid email address.");
           const allowed = await rateLimit(`invite:${org.id}`, INVITATIONS_PER_WORKSPACE);
           if (!allowed.ok) {
             throw new APIError("TOO_MANY_REQUESTS", {

@@ -33,7 +33,7 @@ export function DataRequestForm({ defaultPage, supportEmail }: { defaultPage: st
           <option value="other">Something else</option>
         </NativeSelect>
       </div>
-      <FormField label="Your e-mail address" name="email" type="email" autoComplete="email" required error={fieldErrors.email?.[0]} hint="Only used to reply to this request." />
+      <FormField label="Your email address" name="email" type="email" autoComplete="email" required error={fieldErrors.email?.[0]} hint="Only used to reply to this request." />
       <FormField label="Company or organisation" name="organisationName" autoComplete="organization" error={fieldErrors.organisationName?.[0]} />
       <FormField label="Page address" name="pageUrl" defaultValue={defaultPage} hint="The page the request is about, if any." error={fieldErrors.pageUrl?.[0]} />
       <div className="space-y-1.5">

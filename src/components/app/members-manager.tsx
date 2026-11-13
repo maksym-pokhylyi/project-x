@@ -60,7 +60,7 @@ export function InviteForm({ seatsAvailable, canInvite }: { seatsAvailable: bool
       <FormError message={formError} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
         <div className="flex-1">
-          <FormField label="E-mail address" name="email" type="email" placeholder="colleague@company.com" required error={errors.email?.[0]} />
+          <FormField label="Email address" name="email" type="email" placeholder="colleague@company.com" required error={errors.email?.[0]} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="invite-role">Role</Label>

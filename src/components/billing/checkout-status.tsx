@@ -58,7 +58,7 @@ export function CheckoutStatus({ planNames }: { planNames: Record<string, string
       <div className="flex flex-col items-center gap-3 text-center" role="status">
         <CheckCircle2 aria-hidden className="size-10 text-brand" />
         <h2 className="type-section text-ink">You are on the {planKey ? (planNames[planKey] ?? planKey) : "new"} plan</h2>
-        <p className="max-w-sm text-sm text-ink-2">Your workspace has been upgraded. Paddle is sending your receipt by e-mail.</p>
+        <p className="max-w-sm text-sm text-ink-2">Your workspace has been upgraded. Paddle is sending your receipt by email.</p>
         <Button asChild>
           <Link href="/app">Continue</Link>
         </Button>

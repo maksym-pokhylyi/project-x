@@ -72,7 +72,7 @@ describe("organisation names and identifiers", () => {
   });
 });
 
-describe("contact e-mail classification", () => {
+describe("contact email classification", () => {
   it("separates role mailboxes, named people and free-mail", () => {
     const kind = (email: string) => classifyEmail(email)?.kind;
     for (const generic of ["info@acme.co.uk", "Tenders@Acme.co.uk", "sales.uk@acme.com", "bidteam@acme.com", "business.development@acme.com", "tenders2@acme.com", "ukbids@acme.com"]) {

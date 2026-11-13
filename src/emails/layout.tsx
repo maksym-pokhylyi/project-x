@@ -16,7 +16,7 @@ export function EmailLayout({ preview, children }: { preview: string; children: 
           <Text style={{ fontSize: 12, color: "#78716c", margin: 0, lineHeight: "18px" }}>
             {site.name} · {site.domain}
             <br />
-            Questions? Reply to this e-mail or write to {site.supportEmail}.
+            Questions? Reply to this email or write to {site.supportEmail}.
           </Text>
         </Container>
       </Body>

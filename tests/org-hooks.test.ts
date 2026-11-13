@@ -94,7 +94,7 @@ describe("raw Better Auth endpoints obey the app's rules (F-13)", () => {
   });
 
   describe("user names", () => {
-    it("a phishing text cannot become a user name through sign-up or update-user, so it never reaches an invitation e-mail", async () => {
+    it("a phishing text cannot become a user name through sign-up or update-user, so it never reaches an invitation email", async () => {
       expect(await raw(null, "/sign-up/email", { email: "new@example.com", password: "a-good-password-1", name: PHISHING })).toMatchObject({ status: 400, code: "VALIDATION" });
       expect(await raw(null, "/sign-up/email", { email: "new@example.com", password: "a-good-password-1", name: "Jo", image: "https://evil.example/a.png" })).toMatchObject({ status: 400, code: "VALIDATION" });
       expect(await db.select().from(users)).toHaveLength(1);

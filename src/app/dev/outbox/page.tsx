@@ -29,10 +29,10 @@ export default async function DevOutboxPage({ searchParams }: { searchParams: Pr
     <main id="main" className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-2xl font-semibold tracking-tight">Dev outbox</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        The 50 most recent e-mails stored locally because e-mail delivery is not configured. Newest first.
+        The 50 most recent emails stored locally because email delivery is not configured. Newest first.
       </p>
       {rows.length === 0 ? (
-        <p className="mt-8 rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">No e-mails yet.</p>
+        <p className="mt-8 rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">No emails yet.</p>
       ) : (
         <ul className="mt-6 space-y-4">
           {rows.map((row) => (

@@ -25,7 +25,7 @@ import { resetDatabase } from "./helpers/db";
 
 const template = { name: "reset-password", props: { name: "Ada", url: "https://bidfolio.co.uk/reset-password?token=abc" } } as const;
 
-describe("e-mail delivery through Resend (mocked)", () => {
+describe("email delivery through Resend (mocked)", () => {
   beforeEach(async () => {
     await resetDatabase();
     sendMock.mockReset();
@@ -36,7 +36,7 @@ describe("e-mail delivery through Resend (mocked)", () => {
     expect(features.requireEmailVerification).toBe(true);
   });
 
-  it("queues the e-mail with a job, sends it once and clears the stored body", async () => {
+  it("queues the email with a job, sends it once and clears the stored body", async () => {
     sendMock.mockResolvedValue({ data: { id: "resend_123" }, error: null });
     const outboxId = await sendEmail("Ada@Example.com", template);
 

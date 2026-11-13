@@ -132,7 +132,7 @@ export const OUTREACH_REASON_LABELS: Record<OutreachReason, string> = {
   non_uk_supplier: "Supplier address is outside the UK",
   supplier_removed: "Supplier asked to be removed",
   supplier_merged: "Record merged into another supplier",
-  invalid_email: "Address is not a valid e-mail address",
+  invalid_email: "Address is not a valid email address",
   freemail_domain: "Consumer webmail or ISP address",
   named_address_past_one_month: "Named address held for more than one month without contact",
   suppressed: "Address is suppressed",
