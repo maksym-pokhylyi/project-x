@@ -24,13 +24,17 @@ export type BillingInterval = (typeof BILLING_INTERVALS)[number];
  * `period: "month"` resets at the start of each UTC calendar month;
  * `period: "lifetime"` never resets.
  */
-export const QUOTA_METRICS = {
+export type QuotaMetricConfig = { label: string; description: string; period: "month" | "lifetime" };
+
+const defineQuotaMetrics = <T extends Record<string, QuotaMetricConfig>>(metrics: T): { [K in keyof T]: QuotaMetricConfig } => metrics;
+
+export const QUOTA_METRICS = defineQuotaMetrics({
   units: {
     label: "Units",
     description: "Placeholder metric. Rename to whatever your product meters (documents, reports, API calls…).",
     period: "month",
   },
-} as const satisfies Record<string, { label: string; description: string; period: "month" | "lifetime" }>;
+});
 
 export type QuotaMetric = keyof typeof QUOTA_METRICS;
 export const QUOTA_METRIC_KEYS = Object.keys(QUOTA_METRICS) as QuotaMetric[];

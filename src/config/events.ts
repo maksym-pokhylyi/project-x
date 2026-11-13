@@ -20,7 +20,7 @@ export type EventMap = {
   "member.invitation_accepted": { role: string };
   "member.invitation_canceled": Record<string, never>;
   "member.removed": Record<string, never>;
-  "member.role_changed": { from: string; to: string };
+  "member.role_changed": { to: string };
 
   // Billing
   "billing.checkout_started": { plan: string; interval: string };
