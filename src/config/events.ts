@@ -49,6 +49,9 @@ export type EventMap = {
   radar_viewed: { tab: string; source: "supplier" | "manual" | "none" };
   tender_saved: { ocid: string };
   tender_dismissed: { ocid: string };
+
+  // Outreach (SPEC §7). Never an e-mail address: `campaign` is the id of the list, null for the form without a link.
+  optout: { via: "link" | "form"; campaign: string | null };
 };
 
 export type EventName = keyof EventMap;

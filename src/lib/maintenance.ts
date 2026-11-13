@@ -51,7 +51,10 @@ export type MaintenanceSummary = Record<
   | "aiUsage"
   | "auditLog"
   | "checkoutNonces"
-  | "aiReservationsSettled",
+  | "aiReservationsSettled"
+  | "outreachProspectsErased"
+  | "outreachAudit"
+  | "outreachContactsStamped",
   number
 >;
 
@@ -105,7 +108,14 @@ export async function runMaintenance(batching: Batching = {}): Promise<Maintenan
     batching,
   );
 
+  // Outreach: prospect addresses are erased (the rows stay for the counts), the audit trail is
+  // trimmed and new contact rows are stamped from the suppression list. Imported lazily so the
+  // job registry does not pull the outreach module into every bundle.
+  const { runOutreachRetention } = await import("@/features/outreach/server/retention");
+  const outreach = await runOutreachRetention();
+
   return {
+    ...outreach,
     rateLimits,
     jobsSucceeded,
     jobsFailed,
