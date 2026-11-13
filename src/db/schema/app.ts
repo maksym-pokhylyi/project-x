@@ -368,6 +368,8 @@ export const emailOutbox = pgTable(
     /** Rendered bodies. Cleared after a successful provider send (they contain one-time links). */
     html: text("html"),
     text: text("text"),
+    /** Extra message headers (e.g. List-Unsubscribe), passed to the provider as they are. Cleared with the bodies. */
+    headers: jsonb("headers").$type<Record<string, string>>(),
     /** outbox | queued | sent | failed */
     status: text("status").notNull(),
     providerMessageId: text("provider_message_id"),

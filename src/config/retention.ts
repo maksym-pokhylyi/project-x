@@ -54,6 +54,11 @@ export const RETENTION_DAYS = {
    * as long as the workspace exists and go with it.
    */
   purchasePayload: 90,
+  /**
+   * Scheduled e-mails: who was sent which kind, when, and which items it listed
+   * (notification_log). 13 months covers an annual renewal reminder and year-over-year counts.
+   */
+  notificationLog: 395,
 } as const;
 
 export type RetentionKey = keyof typeof RETENTION_DAYS;

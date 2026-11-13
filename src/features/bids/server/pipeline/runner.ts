@@ -6,6 +6,8 @@ import { bidFiles, bidQuestions, bidRequirements, bids, users } from "@/db/schem
 import { appUrl } from "@/env";
 import { PIPELINE_STEPS, STEP_STAGE, VERDICT_LABELS, type Citation, type PackStats, type PipelineStep, type ProcessingState } from "@/features/bids/types";
 import { coverageSummary, isScoredQuestion } from "@/features/bids/view";
+import { unsubscribeLinks } from "@/features/notifications/links";
+import { wantsNotification } from "@/features/notifications/prefs";
 import { AiBudgetExceededError } from "@/lib/ai";
 import { track } from "@/lib/analytics";
 import { sendEmail } from "@/lib/email/send";
@@ -220,7 +222,8 @@ async function finalise(bid: BidRow): Promise<void> {
   if (bid.createdBy) {
     try {
       const [creator] = await db.select({ email: users.email, name: users.name }).from(users).where(eq(users.id, bid.createdBy));
-      if (creator) {
+      // Settings → Notifications → "Product emails" (and "unsubscribe from all") apply to this e-mail.
+      if (creator && (await wantsNotification(bid.createdBy, bid.organizationId, "product"))) {
         const daysLeft = fresh.submissionDeadline ? Math.ceil((fresh.submissionDeadline.getTime() - Date.now()) / 86_400_000) : null;
         const deadline = fresh.submissionDeadline
           ? `Closes ${new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(fresh.submissionDeadline)}` +
@@ -248,7 +251,7 @@ async function finalise(bid: BidRow): Promise<void> {
             coverage: coverageSummary(files, packStats).headline || null,
             url: `${appUrl}/app/bids/${bid.id}`,
           },
-        });
+        }, { headers: unsubscribeLinks({ userId: bid.createdBy, organizationId: bid.organizationId, kind: "product", email: creator.email }).headers });
       }
     } catch (error) {
       // The check is ready either way; a failed notification must not undo that.

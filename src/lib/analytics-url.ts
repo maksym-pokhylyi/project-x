@@ -9,8 +9,8 @@
  * Pure and dependency-free: used by the browser instrumentation and unit-tested.
  */
 
-/** Routes whose query string and fragment are never recorded. */
-const AUTH_ROUTE = /^\/(sign-in|sign-up|verify-email|forgot-password|reset-password|accept-invitation|api\/auth|dev)(\/|$)/;
+/** Routes whose query string and fragment are never recorded. (`/unsubscribe?t=…` carries a signed unsubscribe token.) */
+const AUTH_ROUTE = /^\/(sign-in|sign-up|verify-email|forgot-password|reset-password|accept-invitation|unsubscribe|api\/auth|dev)(\/|$)/;
 /** Path segments that are themselves a capability. */
 const OPAQUE_SEGMENTS: Array<[RegExp, string]> = [
   [/^\/accept-invitation\/[^/]+/, "/accept-invitation/[id]"],
@@ -18,6 +18,12 @@ const OPAQUE_SEGMENTS: Array<[RegExp, string]> = [
 ];
 /** Parameters removed wherever they appear. */
 const SENSITIVE_PARAMS = /^(token|key|code|state|sig|signature|expires|password|email|invitation(_?id)?)$/i;
+/**
+ * `/tenders/<id>?d=<notification id>` marks the scheduled e-mail a tender was opened from.
+ * The server counts it once (src/features/notifications/clicks.ts); a page view must not
+ * carry it, or a browser could be tied to the person the e-mail was sent to.
+ */
+const EMAIL_MARK = { route: /^\/tenders\//, param: "d" };
 
 export function sanitizeAnalyticsPath(pathname: string): string {
   for (const [pattern, replacement] of OPAQUE_SEGMENTS) {
@@ -46,6 +52,7 @@ export function sanitizeAnalyticsUrl(input: string): string {
     for (const name of [...url.searchParams.keys()]) {
       if (SENSITIVE_PARAMS.test(name)) url.searchParams.delete(name);
     }
+    if (EMAIL_MARK.route.test(url.pathname)) url.searchParams.delete(EMAIL_MARK.param);
   }
   url.pathname = sanitizeAnalyticsPath(url.pathname);
   return absolute ? url.toString() : `${url.pathname}${url.search}${url.hash}`;

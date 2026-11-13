@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 export function SettingsNav({ className }: { className?: string }) {
   const tabs = [
     { href: "/app/settings/profile", label: "Profile" },
+    { href: "/app/settings/notifications", label: "Notifications" },
     { href: "/app/settings/workspace", label: "Workspace" },
     { href: "/app/settings/members", label: "Members" },
     { href: "/app/usage", label: "Usage" },

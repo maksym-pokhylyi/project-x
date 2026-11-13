@@ -12,6 +12,7 @@ import { buildPackIndex } from "@/features/bids/server/pipeline/quote-verify";
 import { persistRequirements } from "@/features/bids/server/pipeline/step-analyse";
 import { runCompanyCheck } from "@/features/bids/server/pipeline/step-company";
 import { getBidStatus, reviveStalledBid } from "@/features/bids/server/status";
+import { updateNotificationPrefs } from "@/features/notifications/prefs";
 import type { CompanyFacts } from "@/features/bids/types";
 import { runWorker } from "@/lib/jobs/worker";
 import { createTestUser, type TestUser } from "../helpers/auth";
@@ -236,11 +237,21 @@ describe("pack pipeline", () => {
     const mail = await db.select().from(emailOutbox).where(eq(emailOutbox.template, "brief-ready"));
     expect(mail).toHaveLength(1);
     expect(mail[0]).toMatchObject({ toEmail: user.email, subject: "Your bid check is ready: Grounds Maintenance 2027-2030" });
+    // A "product" e-mail: mail clients get the one-click unsubscribe headers (src/features/notifications).
+    expect(mail[0]!.headers).toMatchObject({ "List-Unsubscribe": expect.stringContaining("/api/notifications/unsubscribe?t="), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" });
 
     // The status the UI polls says the same thing.
     const status = await getBidStatus(scope, bid);
     expect(status).toMatchObject({ status: "ready", progress: 100, failure: null, counts: { files: 2, filesRead: 2, requirements: 5, passFail: 3, questions: 3 } });
     expect(status.stages.map((stage) => stage.status)).toEqual(["done", "done", "done", "done"]);
+  });
+
+  it("the ready e-mail is not sent to someone who switched product e-mails off", async () => {
+    mock = installMockModel((call) => script(call));
+    await updateNotificationPrefs(user.id, user.organizationId, { productEmails: false });
+    const bid = await runPipeline(scope, await startBid());
+    expect(bid.status).toBe("ready");
+    expect(await db.select().from(emailOutbox).where(eq(emailOutbox.template, "brief-ready"))).toEqual([]);
   });
 
   it("without confirmed company facts: no company model call, nothing asserted, a cautious verdict", async () => {

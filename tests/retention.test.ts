@@ -44,6 +44,7 @@ describe("data retention (F-14)", () => {
       checkoutNonces: 90,
       bidWorkFiles: 14,
       purchasePayload: 90,
+      notificationLog: 395,
     });
   });
 
