@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/app/page-header";
 import { WorkspaceForm } from "@/components/app/workspace-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PLANS } from "@/config/plans";
 import { listAuditLog } from "@/server/audit";
 import { requireOrgForPage } from "@/server/session";
 import { hasRole } from "@/server/workspaces";
@@ -37,7 +38,7 @@ export default async function WorkspaceSettingsPage() {
           <CardContent>
             {!auditEnabled ? (
               <p className="text-sm text-ink-2">
-                The audit log is part of the Pro plan and above.{" "}
+                The activity log is part of the {PLANS.pro.name} plan and above.{" "}
                 {ctx.role === "owner" ? (
                   <Link href="/app/settings/billing" className="link font-medium">
                     Upgrade

@@ -154,7 +154,6 @@ export const PLANS: Record<PlanKey, Plan> = {
       "10 full bids a month; unused bids roll over one month",
       "Separate client workspaces",
       "10 seats",
-      "Priority support",
     ],
   },
 };

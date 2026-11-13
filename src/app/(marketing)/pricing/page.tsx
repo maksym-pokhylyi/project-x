@@ -88,7 +88,7 @@ export default function PricingPage() {
           <h1 id="pricing-title" className="type-h1 mt-3 text-ink">
             Pricing
           </h1>
-          <p className="type-lead mx-auto mt-4 max-w-xl">
+          <p className="type-lead mx-auto mt-4 max-w-xl text-balance">
             Start free. Pay monthly if you bid most months, or by the bid if you bid a few times a year. Every price is on this page: there is no demo call.
           </p>
         </header>

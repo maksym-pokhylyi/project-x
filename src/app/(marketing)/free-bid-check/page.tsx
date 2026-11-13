@@ -52,12 +52,13 @@ const contents = [
     title: "Red flags",
     body: "Terms that deserve a second look before you commit: TUPE, liquidated damages, a short mobilisation.",
   },
-  {
-    icon: CircleHelp,
-    title: "What we could not find",
-    body: "Anything expected but missing, and any quote we could not match to the source text, is listed so you can check it yourself.",
-  },
 ];
+
+/** Set apart from the list above: it is the part that makes the rest trustworthy. */
+const notFound = {
+  title: "And what we could not find",
+  body: "Anything a pack of this kind normally contains but this one does not, and any quote we could not match to the source text, is listed separately and marked “Verify in documents”, so that you know exactly what to check yourself.",
+};
 
 const steps = [
   { time: "1 minute", title: "Create a free account", body: "Name, work email and a password. No card." },
@@ -156,6 +157,13 @@ export default function FreeBidCheckPage() {
             </li>
           ))}
         </ul>
+        <div role="note" className="mt-8 grid grid-cols-[1.5rem_1fr] gap-x-3 rounded-card border border-line bg-surface p-5">
+          <CircleHelp aria-hidden className="mt-0.5 size-5 text-accent-ink" />
+          <div>
+            <h3 className="font-sans text-base leading-6 font-semibold text-ink">{notFound.title}</h3>
+            <p className="mt-1 max-w-reading text-base text-ink-2">{notFound.body}</p>
+          </div>
+        </div>
         <div className="mt-12 grid gap-4 md:grid-cols-2">
           <KeyDatesCard />
           <QuestionsCard />
