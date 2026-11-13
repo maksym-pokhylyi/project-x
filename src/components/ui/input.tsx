@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
  * 16 px text on phones (prevents iOS zoom), 14 px from md.
  */
 export const controlClasses =
-  "w-full min-w-0 rounded-control border border-line-control bg-surface px-3 text-base text-ink transition-[border-color,background-color] duration-150 ease-out placeholder:text-ink-3 hover:border-ink-3 focus-visible:border-focus disabled:cursor-not-allowed disabled:border-line-strong disabled:bg-surface-sunken disabled:text-ink-2 aria-invalid:border-danger aria-invalid:hover:border-danger read-only:bg-surface-sunken md:text-sm"
+  "w-full min-w-0 rounded-control border border-line-control bg-surface px-3 text-base text-ink transition-[border-color,background-color] duration-150 ease-out placeholder:text-ink-3 hover:border-ink-3 focus-visible:border-focus disabled:cursor-not-allowed disabled:border-line-strong disabled:bg-surface-sunken disabled:text-ink-2 aria-invalid:border-danger aria-invalid:hover:border-danger [&[readonly]]:bg-surface-sunken md:text-sm"
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (

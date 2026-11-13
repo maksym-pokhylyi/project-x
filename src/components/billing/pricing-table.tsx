@@ -4,7 +4,8 @@ import { Check } from "lucide-react";
 import { useId, useState, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ANNUAL_FREE_MONTHS, planDisplay } from "@/config/plan-display";
-import { PLANS, PLAN_KEYS, type BillingInterval, type Plan, type PlanKey } from "@/config/plans";
+import { radioGroupKeyDown } from "@/components/ui/radio-keys";
+import { BILLING_INTERVALS, PLANS, PLAN_KEYS, type BillingInterval, type Plan, type PlanKey } from "@/config/plans";
 import { cn } from "@/lib/utils";
 
 /**
@@ -43,8 +44,11 @@ export function PricingTable({
                 type="button"
                 role="radio"
                 aria-checked={checked}
+                data-value={value}
                 data-testid={`interval-${value}`}
+                tabIndex={checked ? 0 : -1}
                 onClick={() => setInterval(value)}
+                onKeyDown={(event) => radioGroupKeyDown(event, BILLING_INTERVALS, interval, setInterval)}
                 className={cn(
                   "inline-flex h-10 items-center gap-2 rounded-control px-4 font-medium transition-colors duration-150",
                   checked ? "bg-surface text-ink shadow-raised" : "text-ink-2 hover:text-ink",
@@ -80,7 +84,7 @@ export function PricingTable({
                 </h3>
                 {isCurrent ? <Badge variant="secondary">Current plan</Badge> : display.recommended ? <Badge variant="brand">Recommended</Badge> : null}
               </div>
-              <p className="mt-1 text-sm text-ink-2 lg:min-h-15">{display.summary}</p>
+              <p className={cn("mt-1 text-sm text-ink-2", layout === "wide" && "lg:min-h-15")}>{display.summary}</p>
 
               <p className="mt-5 flex items-baseline gap-1.5">
                 <span className="font-display text-3xl leading-10 font-semibold text-ink tabular-nums" data-testid={`price-${key}`}>
@@ -88,10 +92,10 @@ export function PricingTable({
                 </span>
                 {price.period ? <span className="text-sm text-ink-2">{price.period}</span> : null}
               </p>
-              <p className="mt-1 text-13 text-ink-2 lg:min-h-9">{price.note}</p>
+              <p className={cn("mt-1 text-13 text-ink-2", layout === "wide" && "lg:min-h-9")}>{price.note}</p>
 
               <div className="mt-5">{renderAction(PLANS[key], interval)}</div>
-              {display.footnote ? <p className="mt-2 text-xs text-ink-2 lg:min-h-8">{display.footnote}</p> : null}
+              {display.footnote ? <p className={cn("mt-2 text-xs text-ink-2", layout === "wide" && "lg:min-h-8")}>{display.footnote}</p> : null}
 
               <ul className="mt-5 flex-1 space-y-2.5 border-t border-line pt-5 text-sm text-ink">
                 {display.bullets.map((bullet) => (

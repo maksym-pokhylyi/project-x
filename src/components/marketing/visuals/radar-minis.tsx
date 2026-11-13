@@ -91,7 +91,7 @@ export function DirectAwardsMini({ className }: { className?: string }) {
       className={className}
       label="Buyers that awarded cleaning contracts without a tender in the last 12 months: Calderbrook Borough Council 7 direct awards, Marlow Heath Academy Trust 4, Wexcombe District Council 3."
     >
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
         <SampleNotice kind="Direct award" />
         <span className="text-xs text-ink-2">Cleaning services · last 12 months</span>
       </div>

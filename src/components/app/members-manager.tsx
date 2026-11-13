@@ -147,7 +147,7 @@ export function MembersList({
                       <option value="admin">Admin</option>
                       {currentRole === "owner" ? <option value="owner">Owner</option> : null}
                     </NativeSelect>
-                    <Button variant="outline" size="sm" disabled={busyId === member.id} onClick={() => setToRemove(member)}>
+                    <Button variant="outline" disabled={busyId === member.id} onClick={() => setToRemove(member)}>
                       Remove
                     </Button>
                   </>
@@ -223,10 +223,10 @@ export function InvitationsList({ invitations }: { invitations: InvitationItem[]
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => void copyLink(invitation)}>
+            <Button variant="outline" onClick={() => void copyLink(invitation)}>
               Copy link
             </Button>
-            <Button variant="outline" size="sm" disabled={busyId === invitation.id} onClick={() => void cancel(invitation)}>
+            <Button variant="outline" disabled={busyId === invitation.id} onClick={() => void cancel(invitation)}>
               Cancel
             </Button>
           </div>

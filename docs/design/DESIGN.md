@@ -190,7 +190,7 @@ Shape and depth: `rounded-control` (4 px), `rounded-card` (8 px), `rounded-modal
 three steps (`sm`/`md` 4, `lg`/`xl` 8, `2xl`+ 12); `shadow-raised`, `shadow-overlay` (Tailwind's `shadow-sm…md` map to raised,
 `shadow-lg…2xl` to overlay).
 
-Layout and helpers: `container-content` (1120 px column with gutters), `max-w-content`, `max-w-reading` (68ch), `hit-40` (40 px hit
+Layout and helpers: `container-content` (1120 px column with gutters), `max-w-content`, `max-w-reading` (35rem: about 68 characters of body text), `hit-40` (40 px hit
 area for a small control), `link` and `link-quiet`, `select-chevron`, `.on-brand` (white focus ring and selection inside a brand panel).
 An anchor **without a class** is styled as a content link automatically.
 
@@ -229,6 +229,8 @@ Extensions to the shadcn APIs:
 ### 8.4 Decisions that extend this document
 
 - **Form-control boundary** darker than `--line-strong` (§3.1).
+- **Reading column** is 35rem, not `68ch`: the CSS `ch` unit is the width of "0", and with Inter's tabular figures `68ch` held
+  about 85 characters a line. 35rem gives 66–72 characters at 16 px and about 63 at 18 px.
 - **Amber text** uses `--accent-ink` (§3.1).
 - **Card and dialog titles**: UI headings in Inter; the serif is kept for page, section and sub-section headings.
 - **Mobile navigation**: bottom tab bar plus an account sheet that rises from the bottom edge (workspace switcher, plan, sign out).

@@ -11,7 +11,7 @@ export function SupplierPageVisual({ elevated = false, className }: { elevated?:
       elevated={elevated}
       className={className}
       title="bidfolio.co.uk/suppliers/harlow-finch-facilities"
-      label="Sample supplier page for Harlow & Finch Facilities Ltd: 14 contracts won, 3.2 million pounds of published award value, 6 public buyers. Two open tenders like the ones it has won, with closing dates, and one competitor contract ending on 31 March 2027."
+      label="Sample supplier page for Harlow & Finch Facilities Ltd: 14 contracts won since 2021, 3.2 million pounds of published award value, 6 public buyers. Two open tenders like the ones it has won, with closing dates, and one competitor contract ending on 31 March 2027."
     >
       <div className="p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -23,14 +23,14 @@ export function SupplierPageVisual({ elevated = false, className }: { elevated?:
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-3 rounded-card border border-line bg-paper px-4 py-3">
-          <SampleStat value="14" label="Contracts won" context="Since 2021" />
+          <SampleStat value="14" label="Contracts" context="Won since 2021" />
           <SampleStat value="£3.2m" label="Award value" context="As published" />
-          <SampleStat value="6" label="Public buyers" context="4 councils" />
+          <SampleStat value="6" label="Buyers" context="4 councils" />
         </div>
 
         <div className="mt-5 flex items-baseline justify-between gap-3">
           <p className="text-sm font-semibold text-ink">Open tenders like the ones you&apos;ve won</p>
-          <p className="text-xs text-ink-2 tabular-nums">2 of 7</p>
+          <p className="shrink-0 text-xs whitespace-nowrap text-ink-2 tabular-nums">2 of 7</p>
         </div>
         <ul className="mt-2 space-y-2">
           <li className="rounded-card border border-line p-3">
@@ -61,7 +61,7 @@ export function SupplierPageVisual({ elevated = false, className }: { elevated?:
 
         <div className="mt-5 flex items-baseline justify-between gap-3">
           <p className="text-sm font-semibold text-ink">Contracts ending soon in your trade</p>
-          <p className="text-xs text-ink-2 tabular-nums">1 of 5</p>
+          <p className="shrink-0 text-xs whitespace-nowrap text-ink-2 tabular-nums">1 of 5</p>
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-card border border-line p-3">
           <div className="min-w-0">

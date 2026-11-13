@@ -112,13 +112,21 @@ for (const viewport of viewports) {
     const context = await contextFor(entry.auth);
     const page = await context.newPage();
     try {
-      await page.goto(`${BASE_URL}${entry.path}`, { waitUntil: "networkidle" });
+      await page.goto(`${BASE_URL}${entry.path}`, { waitUntil: "load" });
       await page.evaluate(() => document.fonts.ready);
       if (entry.prepare) await entry.prepare(page);
-      await page.waitForTimeout(250);
+      await page.waitForTimeout(500);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       if (overflow > 0) problems.push(`${entry.name} @ ${viewport.name}: horizontal overflow of ${overflow}px`);
-      await page.screenshot({ path: resolve(OUT_DIR, `${entry.name}-${viewport.name}.png`), fullPage: entry.fullPage ?? true });
+      const fullPage = entry.fullPage ?? true;
+      if (fullPage && entry.auth && viewport.width < 1024) {
+        // The app's bottom tab bar is fixed: grow the viewport to the page height so that it is captured at the bottom.
+        const height = await page.evaluate(() => document.documentElement.scrollHeight);
+        await page.setViewportSize({ width: viewport.width, height: Math.max(height, viewport.height) });
+        await page.waitForTimeout(150);
+      }
+      await page.screenshot({ path: resolve(OUT_DIR, `${entry.name}-${viewport.name}.png`), fullPage });
+      if (fullPage && entry.auth && viewport.width < 1024) await page.setViewportSize({ width: viewport.width, height: viewport.height });
       console.log(`ok  ${entry.name}-${viewport.name}.png${overflow > 0 ? `  (overflow ${overflow}px)` : ""}`);
     } catch (error) {
       problems.push(`${entry.name} @ ${viewport.name}: ${error.message.split("\n")[0]}`);

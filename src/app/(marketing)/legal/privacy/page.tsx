@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const { company, facts } = site;
 
 const summary = [
-  "If we emailed your business about its public contracts and you want that to stop: use the [opt-out page](/optout) or reply to the email. That is all it takes. The details are in [section 2](#contacted).",
+  "If we emailed your business about its public contracts and you want that to stop: use the [opt‑out page](/optout) or reply to the email. That is all it takes. The details are in [section 2](#contacted).",
   "We hold little personal data: account details of the people who use the Service, and, for outreach, the business email address a supplier published in a public contract notice.",
   "Files you upload are your confidential data. They are not used to train AI models and are deleted when you ask.",
   "No advertising cookies. No tracking pixels in our emails. We do not sell personal data.",
@@ -34,7 +34,7 @@ const sections: LegalSection[] = [
     id: "contacted",
     body: [
       {
-        note: "You can object at any time and we will stop. Use the [opt-out page](/optout) or reply to the email. You do not need to give a reason, and there are no grounds on which we can refuse.",
+        note: "You can object at any time and we will stop. Use the [opt‑out page](/optout) or reply to the email. You do not need to give a reason, and there are no grounds on which we can refuse.",
       },
       { subheading: "Where we got your details" },
       "From contract and award notices that are published on the UK Government’s Find a Tender service and made available under the Open Government Licence. That is a publicly accessible source. A supplier’s contact email appears in a notice because the supplier or the buyer supplied it for the contract. We did not buy a list and we do not obtain details from anywhere else.",

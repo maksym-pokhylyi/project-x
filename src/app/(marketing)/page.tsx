@@ -130,12 +130,13 @@ export default function LandingPage() {
           <SupplierPageVisual className="lg:col-span-7" />
         </div>
 
-        {/* Two rows shared by all three columns (subgrid), so the visuals end and the headings start on one line. */}
-        <ul className="mt-16 grid gap-x-8 gap-y-5 md:grid-cols-3 md:grid-rows-[auto_auto]">
+        {/* From 1024 px: two rows shared by all three columns (subgrid), so the visuals end and the headings start on one
+            line. On tablets each point is a row: visual on the left, words on the right. On phones they stack. */}
+        <ul className="mt-16 grid gap-y-12 lg:grid-cols-3 lg:grid-rows-[auto_auto] lg:gap-x-8 lg:gap-y-5">
           {radar.columns.map((column, index) => {
             const Mini = radarMinis[index]!;
             return (
-              <li key={column.title} className="grid gap-y-5 max-md:not-first:mt-7 md:row-span-2 md:grid-rows-subgrid">
+              <li key={column.title} className="grid min-w-0 gap-5 md:max-lg:grid-cols-2 md:max-lg:items-center md:max-lg:gap-8 lg:row-span-2 lg:grid-rows-subgrid">
                 <Mini className="h-full" />
                 <div>
                   <h3 className="type-h3 text-ink">{column.title}</h3>

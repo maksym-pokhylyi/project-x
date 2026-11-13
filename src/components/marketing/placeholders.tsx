@@ -12,7 +12,7 @@ export function Placeholders({ text }: { text: string }) {
     <>
       {text.split(PATTERN).map((part, index) =>
         part.startsWith("[[") ? (
-          <mark key={index} className="rounded-xs bg-accent-tint px-1 font-mono text-[0.875em] text-accent-ink" title="To be confirmed before launch">
+          <mark key={index} className="rounded-xs bg-accent-tint box-decoration-clone px-1 font-mono text-[0.875em] [overflow-wrap:anywhere] text-accent-ink" title="To be confirmed before launch">
             {part}
           </mark>
         ) : (

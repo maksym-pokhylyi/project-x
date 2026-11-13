@@ -68,7 +68,7 @@ export default async function OpenGraphImage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", fontSize: 24, color: colors.ink2 }}>{site.domain} · The cited bid check is free</div>
+          <div style={{ display: "flex", fontSize: 24, color: colors.ink2 }}>{site.domain} · Your first cited bid check is free</div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", width: 404 }}>

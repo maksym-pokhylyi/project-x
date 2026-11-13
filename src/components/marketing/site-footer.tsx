@@ -10,8 +10,8 @@ const OGL_URL = "https://www.nationalarchives.gov.uk/doc/open-government-licence
 export function SiteFooter() {
   return (
     <footer data-slot="site-footer" className="border-t border-line bg-surface-sunken">
-      <div data-slot="site-footer-nav" className="container-content grid gap-x-8 gap-y-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:py-16">
-        <div className="max-w-xs">
+      <div data-slot="site-footer-nav" className="container-content grid grid-cols-2 gap-x-8 gap-y-10 py-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:py-16">
+        <div className="col-span-2 max-w-xs lg:col-span-1">
           <Logo />
           <p className="mt-3 text-sm text-ink-2">{site.tagline}.</p>
           <p className="mt-4 text-sm text-ink-2">

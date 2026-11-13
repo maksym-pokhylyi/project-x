@@ -118,7 +118,7 @@
 
   /* --- Layout ----------------------------------------------------------------------- */
   --container-content: 70rem; /* 1120 px content width */
-  --container-reading: 68ch; /* reading column */
+  --container-reading: 35rem; /* reading column: about 68 characters of 16 px Inter (the ch unit would be ~85) */
 
   /* --- Motion: 120–180 ms ease-out, for state changes only -------------------------- */
   --ease-out: cubic-bezier(0.2, 0, 0, 1);

@@ -50,7 +50,7 @@ export default function ContactPage() {
           </Row>
           <Row title="Stop emails from us">
             <p>
-              If we emailed your business about its public contracts, use the <Link href="/optout">opt-out page</Link> or reply to the email. We will not contact you
+              If we emailed your business about its public contracts, use the <Link href="/optout">opt‑out page</Link> or reply to the email. We will not contact you
               again.
             </p>
           </Row>

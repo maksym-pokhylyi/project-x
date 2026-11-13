@@ -63,7 +63,7 @@ export function SectionHeading({
       <h2 id={id} className={cn("type-h2 text-ink lg:text-3xl", eyebrow && "mt-3")}>
         {title}
       </h2>
-      {lead ? <p className="type-lead mt-4">{lead}</p> : null}
+      {lead ? <p className={cn("type-lead mt-4 max-w-xl", align === "center" && "mx-auto")}>{lead}</p> : null}
     </div>
   );
 }

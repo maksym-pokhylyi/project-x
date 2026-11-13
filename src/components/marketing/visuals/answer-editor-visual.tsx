@@ -51,7 +51,7 @@ export function AnswerEditorVisual({ className }: { className?: string }) {
               Every transferring employee is offered a one-to-one meeting within ten working days of award, and keeps their existing terms.
               <Source n={2} /> <EvidenceNeeded>number of staff transferred under TUPE on a previous contract, and how many stayed after six months.</EvidenceNeeded>
             </p>
-            <p>
+            <p className="max-sm:hidden">
               On the first day a supervisor is present in every building until the opening clean has been checked against the specification and signed off with the
               site contact.
               <Source n={1} />

@@ -1,14 +1,12 @@
-import { Check, Minus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Fragment } from "react";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { Faq, type FaqItem } from "@/components/marketing/faq";
 import { JsonLd, faqJsonLd, softwareApplicationJsonLd } from "@/components/marketing/json-ld";
 import { MarketingPricing } from "@/components/marketing/marketing-pricing";
+import { PlanComparison } from "@/components/marketing/plan-comparison";
 import { Eyebrow, Section, SectionHeading } from "@/components/marketing/section";
-import { BID_PASS, COMPARISON, type ComparisonValue } from "@/config/plan-display";
-import { PLANS, PLAN_KEYS } from "@/config/plans";
+import { BID_PASS } from "@/config/plan-display";
 import { site } from "@/config/site";
 import { appUrl } from "@/env";
 
@@ -78,30 +76,6 @@ const billingFaq: FaqItem[] = [
   },
 ];
 
-function Cell({ value, plan, label }: { value: ComparisonValue; plan: string; label: string }) {
-  if (value === true) {
-    return (
-      <>
-        <Check aria-hidden className="mx-auto size-4 text-success" />
-        <span className="sr-only">
-          {label}: included in {plan}
-        </span>
-      </>
-    );
-  }
-  if (value === false) {
-    return (
-      <>
-        <Minus aria-hidden className="mx-auto size-4 text-ink-3" />
-        <span className="sr-only">
-          {label}: not included in {plan}
-        </span>
-      </>
-    );
-  }
-  return <>{value}</>;
-}
-
 export default function PricingPage() {
   return (
     <>
@@ -114,7 +88,7 @@ export default function PricingPage() {
           <h1 id="pricing-title" className="type-h1 mt-3 text-ink">
             Pricing
           </h1>
-          <p className="type-lead mt-4">
+          <p className="type-lead mx-auto mt-4 max-w-xl">
             Start free. Pay monthly if you bid most months, or by the bid if you bid a few times a year. Every price is on this page: there is no demo call.
           </p>
         </header>
@@ -135,56 +109,9 @@ export default function PricingPage() {
 
       <Section labelledBy="compare-title" tone="sunken">
         <SectionHeading id="compare-title" title="Compare plans" lead={`What each plan includes. A ${BID_PASS.name} adds one full bid to any plan, including Free.`} />
-        <div className="relative mt-8 overflow-x-auto rounded-card border border-line bg-surface" tabIndex={0} role="region" aria-labelledby="compare-title">
-          <table className="w-full min-w-[720px] border-separate border-spacing-0 text-sm">
-            <thead>
-              <tr>
-                <th scope="col" className="w-[34%] border-b border-line bg-surface px-4 py-3 text-left align-bottom text-13 font-medium text-ink-2">
-                  What you get
-                </th>
-                {PLAN_KEYS.map((key) => (
-                  <th key={key} scope="col" className="border-b border-line bg-surface px-3 py-3 text-center align-bottom">
-                    <span className="block text-sm font-semibold text-ink">{PLANS[key].name}</span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON.map((group) => (
-                <Fragment key={group.title}>
-                  <tr>
-                    <th scope="colgroup" colSpan={PLAN_KEYS.length + 1} className="border-b border-line bg-surface-sunken px-4 py-2 text-left">
-                      <span className="type-eyebrow text-ink-2">{group.title}</span>
-                    </th>
-                  </tr>
-                  {group.rows.map((row) => (
-                    <tr key={row.label} className="hover:bg-brand-tint/40">
-                      <th scope="row" className="border-b border-line px-4 py-3 text-left align-top font-normal">
-                        <span className="block font-medium text-ink">{row.label}</span>
-                        {row.detail ? <span className="mt-0.5 block text-13 text-ink-2">{row.detail}</span> : null}
-                      </th>
-                      {PLAN_KEYS.map((key) => (
-                        <td key={key} className="border-b border-line px-3 py-3 text-center align-top text-ink tabular-nums">
-                          <Cell value={row.values[key]} plan={PLANS[key].name} label={row.label} />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </Fragment>
-              ))}
-              <tr>
-                <th scope="row" className="px-4 py-3 text-left align-top font-normal">
-                  <span className="block font-medium text-ink">{BID_PASS.name}</span>
-                  <span className="mt-0.5 block text-13 text-ink-2">{BID_PASS.summary}</span>
-                </th>
-                <td colSpan={PLAN_KEYS.length} className="px-3 py-3 text-center align-top text-ink">
-                  {BID_PASS.price} {BID_PASS.period}, on any plan
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="mt-8">
+          <PlanComparison labelledBy="compare-title" />
         </div>
-        <p className="mt-3 text-13 text-ink-2 md:hidden">Scroll the table sideways to see every plan.</p>
       </Section>
 
       <Section labelledBy="billing-faq-title">
