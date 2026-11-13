@@ -32,7 +32,8 @@ SCENARIOS = {
      organic_visits_m12=3000, organic_signup=.04, organic_pay=.09,
      partners=[0, 0, 0] + [1.0]*9, churn=.04, pass_rate=.35),
 }
-FIXED_USD = dict(vercel=20, neon=19, email_tx=20, domain=2, outbound_stack=225, misc=30)  # per month
+FIXED_USD = dict(vercel=20, neon=19, email_tx=20, domain=2, outbound_stack=180, uk_representative=50, ico_fee=6, misc=30)  # per month
+# outbound_stack: sending domains + mailboxes + tooling ($110-250 per report P2); uk_representative: Art. 27 UK GDPR (EUR 35-100/month per P2); ico_fee: GBP 52/year
 PADDLE_PCT, PADDLE_FIXED_USD = 0.05, 0.50
 TAX_PCT = 0.06          # FOP group 3: 5% single tax + 1% military levy (assumption to confirm with accountant)
 ESV_USD = 42            # unified social contribution per month (approx. 1,902 UAH)
