@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { NavLink } from "@/components/ui/nav-link";
-import { tabListClasses } from "@/components/ui/tabs";
+import { tabListClasses } from "@/components/ui/tab-classes";
 import { cn } from "@/lib/utils";
 
 /** Settings sections as link tabs (same look as the Tabs primitive; real links, so they deep-link). */

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import { NavLink, navLinkVariants } from "@/components/ui/nav-link";
+import { NavLink } from "@/components/ui/nav-link";
+import { navLinkVariants } from "@/components/ui/nav-link-variants";
 import { HeaderSessionLink } from "./header-session-link";
 import { MobileNav } from "./mobile-nav";
 import { findCompany, primaryNav } from "./site-nav";
