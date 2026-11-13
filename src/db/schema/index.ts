@@ -5,7 +5,9 @@
  *              regenerate after adding/removing a Better Auth plugin.
  * - ./app.ts   Everything this product owns (billing, usage, jobs, logs, ...).
  * - ./procurement.ts  Find a Tender data platform + Radar tenant tables.
+ * - ./outreach.ts  Founder outreach tooling: suppressions, campaigns, prospects, audit (no tenant data).
  */
 export * from "./auth";
 export * from "./app";
 export * from "./procurement";
+export * from "./outreach";

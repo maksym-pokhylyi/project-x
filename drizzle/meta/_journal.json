@@ -22,6 +22,13 @@
       "when": 1794577943857,
       "tag": "0002_procurement",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794579779215,
+      "tag": "0003_outreach",
+      "breakpoints": true
     }
   ]
 }

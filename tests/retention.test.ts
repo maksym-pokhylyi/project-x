@@ -42,6 +42,9 @@ describe("data retention (F-14)", () => {
       aiUsage: 395,
       auditLog: 730,
       checkoutNonces: 90,
+      outreachProspects: 365,
+      outreachNamedAddresses: 90,
+      outreachAudit: 730,
     });
   });
 
