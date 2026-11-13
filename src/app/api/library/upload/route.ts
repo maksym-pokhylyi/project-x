@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export const PUT = route(async (request, _context, { requestId }) => {
-  const ctx = await requireOrg();
+  const ctx = await requireOrg({ write: true });
   const url = new URL(request.url);
   const docId = z.uuid().safeParse(url.searchParams.get("docId"));
   const name = (url.searchParams.get("name") ?? "").trim();

@@ -5,12 +5,14 @@ import { redirect } from "next/navigation";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { libraryDocs } from "@/db/schema";
+import { BreadcrumbTrail } from "@/components/app/breadcrumbs";
 import { getBidAccess, type BidAccessSummary } from "@/features/bids/access";
 import { NewBidForm, type ExistingFile } from "@/features/bids/components/new-bid-form";
 import { UpgradeNotice } from "@/features/bids/components/ui";
 import { getBid, listBidFiles } from "@/features/bids/server/bids";
 import { factsConfirmed } from "@/features/bids/server/page-data";
-import { cleanTenderReference, lookupTender } from "@/features/bids/tender-lookup";
+import { lookupTender } from "@/features/bids/server/tender";
+import { cleanTenderReference } from "@/features/bids/tender-lookup";
 import { NotFoundError } from "@/lib/errors";
 import { requireOrgForPage } from "@/server/session";
 
@@ -85,14 +87,8 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="bid-scope flex flex-col">
-      <nav aria-label="Breadcrumb" className="flex flex-wrap gap-2 text-sm text-(--bid-muted)">
-        <Link href="/app/bids" className="bid-link-quiet">
-          Bids
-        </Link>
-        <span aria-hidden>/</span>
-        <span>New bid check</span>
-      </nav>
-      <h1 className="bid-h1 mt-3.5">New bid check</h1>
+      <BreadcrumbTrail items={[{ label: "Bids", href: "/app/bids" }, { label: "New bid check" }]} />
+      <h1 className="bid-h1">New bid check</h1>
       <p className="mt-2 max-w-[760px] text-[17px] leading-[1.45]">Upload the tender pack as the buyer sent it. You get every requirement quoted and cited, checked against your company, with a plain verdict.</p>
 
       {!access.next ? (

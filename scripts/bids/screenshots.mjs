@@ -16,7 +16,7 @@ mkdirSync(outDir, { recursive: true });
 
 const browser = await chromium.launch();
 const errors = [];
-for (const width of [1440, 1280, 768, 390]) {
+for (const width of (process.env.SHOT_WIDTHS ?? "1440,1280,768,390").split(",").map(Number)) {
   const context = await browser.newContext({ viewport: { width, height: width === 390 ? 800 : 900 } });
   const page = await context.newPage();
   page.on("console", (message) => {

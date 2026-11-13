@@ -134,7 +134,7 @@ async function report(packs: string[], models: string[]) {
   const cell = (pair: [number, number]) => `${pair[0]}/${pair[1]}`.padEnd(7);
   const print = (label: string, row: Row, packCount = 1) =>
     console.log(
-      `${label.padEnd(26)} ${row.config.padEnd(38)} pf ${cell(row.pf)} q ${cell(row.q)} dl ${cell(row.dl)} all ${cell(row.all)} wrong ${String(row.wrong).padEnd(3)} cites ${cell(row.cites)} (${Math.round((row.cites[0] / Math.max(1, row.cites[1])) * 100)}%) notfound ${String(row.notFound).padEnd(3)} fig ${String(row.figure).padEnd(2)} ${String(Math.round(row.seconds / packCount)).padStart(4)}s $${(row.cost / packCount).toFixed(3)}${row.failed.length ? ` FAILED: ${row.failed.join(",")}` : ""}`,
+      `${label.padEnd(26)} ${row.config.padEnd(row.config.startsWith("brief ") ? 74 : 38)} pf ${cell(row.pf)} q ${cell(row.q)} dl ${cell(row.dl)} all ${cell(row.all)} wrong ${String(row.wrong).padEnd(3)} cites ${cell(row.cites)} (${Math.round((row.cites[0] / Math.max(1, row.cites[1])) * 100)}%) notfound ${String(row.notFound).padEnd(3)} fig ${String(row.figure).padEnd(2)} ${String(Math.round(row.seconds / packCount)).padStart(4)}s $${(row.cost / packCount).toFixed(3)}${row.failed.length ? ` FAILED: ${row.failed.join(",")}` : ""}`,
     );
 
   for (const slug of packs) {
@@ -144,8 +144,9 @@ async function report(packs: string[], models: string[]) {
       .filter((model) => TASKS.every((task) => existsSync(fileOf(slug, model, task))))
       .map((model) => ({ model, parts: Object.fromEntries(TASKS.map((task) => [task, JSON.parse(readFileSync(fileOf(slug, model, task), "utf8")) as Stored])) as Record<Task, Stored> }));
 
-    const score = (config: string, members: Reading[]): Row => {
-      const lead = members[0]!;
+    // `briefFrom` set: the brief (overview) is read by that model alone and the lists by the members.
+    const score = (config: string, members: Reading[], briefFrom?: Reading): Row => {
+      const lead = briefFrom ?? members[0]!;
       const overview = (lead.parts.overview.value ?? {}) as Record<string, unknown>;
       const requirements = dedupeRequirements(members.flatMap((member) => ((member.parts.requirements.value?.requirements as never[]) ?? []) as Array<{ requirement: string; threshold: string | null; quote: string | null }>));
       const questions = dedupeQuestions(members.flatMap((member) => ((member.parts.questions.value?.questions as never[]) ?? []) as Array<{ id: string; title: string; text: string; quote: string | null }>));
@@ -183,7 +184,9 @@ async function report(packs: string[], models: string[]) {
         if (verifyCitation(index, { file: raw.file, loc: raw.loc, quote: raw.quote }).verified) verified += 1;
         else notFound += 1;
       }
-      const stored = members.flatMap((member) => TASKS.map((task) => ({ member, task, part: member.parts[task] })));
+      const stored = briefFrom
+        ? [{ member: briefFrom, task: "overview" as Task, part: briefFrom.parts.overview }, ...members.flatMap((member) => (["requirements", "questions"] as Task[]).map((task) => ({ member, task, part: member.parts[task] })))]
+        : members.flatMap((member) => TASKS.map((task) => ({ member, task, part: member.parts[task] })));
       return {
         config,
         pf: pick("pass_fail"),
@@ -211,6 +214,15 @@ async function report(packs: string[], models: string[]) {
         const row = score(`${short(readings[i]!.model)} + ${short(readings[j]!.model)}`, [readings[i]!, readings[j]!]);
         print(slug, row);
         add(row);
+      }
+    }
+    // Brief by a third model, lists by a pair.
+    for (const brief of readings) {
+      for (let i = 0; i < readings.length; i += 1) {
+        for (let j = i + 1; j < readings.length; j += 1) {
+          if (readings[i] === brief || readings[j] === brief) continue;
+          add(score(`brief ${short(brief.model)} | lists ${short(readings[i]!.model)} + ${short(readings[j]!.model)}`, [readings[i]!, readings[j]!], brief));
+        }
       }
     }
     console.log("");

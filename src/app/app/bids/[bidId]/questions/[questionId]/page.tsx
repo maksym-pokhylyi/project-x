@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { companyFacts, libraryDocs } from "@/db/schema";
+import { BreadcrumbTrail } from "@/components/app/breadcrumbs";
 import { getBidAccess, getBidCapabilities } from "@/features/bids/access";
 import { effectiveWordLimit } from "@/features/bids/answer-text";
 import { AnswerEditor, type EditorNavItem, type EditorSource } from "@/features/bids/components/answer-editor";
@@ -80,30 +81,33 @@ export default async function AnswerPage({ params }: { params: Promise<{ bidId: 
   });
 
   return (
-    <AnswerEditor
-      bidId={bid.id}
-      key={editorKey(question)}
-      question={toEditorQuestion(question)}
-      scale={usePack ? packScale : DEFAULT_SCALE}
-      scaleKind={usePack ? "pack" : "default"}
-      links={{ kind: "app", bidId: bid.id }}
-      locked={locked}
-      canUnlock={bid.accessLevel !== "full" && (access.bidPasses > 0 || access.drafting)}
-      library={{ factsConfirmed: Boolean(factsRow?.confirmedAt), documents: docCount?.count ?? 0 }}
-      bid={{
-        title: bid.title,
-        buyerName: bid.buyerName,
-        deadline: bid.submissionDeadline ? bid.submissionDeadline.toISOString() : null,
-        briefHref: base,
-        exportHref: capabilities.exportAnswers ? `/api/bids/${bid.id}/export/answers` : null,
-      }}
-      nav={{
-        items,
-        qualityWeight: bid.evaluationModel?.qualityWeight ?? null,
-        previousHref: index > 0 ? items[index - 1]!.href : null,
-        nextHref: index >= 0 && index < items.length - 1 ? items[index + 1]!.href : null,
-      }}
-      sources={sources}
-    />
+    <>
+      <BreadcrumbTrail items={[{ label: "Bids", href: "/app/bids" }, { label: bid.buyerName ?? "Bid check", href: base }, { label: `Answer ${question.ref}` }]} />
+      <AnswerEditor
+        bidId={bid.id}
+        key={editorKey(question)}
+        question={toEditorQuestion(question)}
+        scale={usePack ? packScale : DEFAULT_SCALE}
+        scaleKind={usePack ? "pack" : "default"}
+        links={{ kind: "app", bidId: bid.id }}
+        locked={locked}
+        canUnlock={bid.accessLevel !== "full" && (access.bidPasses > 0 || access.drafting)}
+        library={{ factsConfirmed: Boolean(factsRow?.confirmedAt), documents: docCount?.count ?? 0 }}
+        bid={{
+          title: bid.title,
+          buyerName: bid.buyerName,
+          deadline: bid.submissionDeadline ? bid.submissionDeadline.toISOString() : null,
+          briefHref: base,
+          exportHref: capabilities.exportAnswers ? `/api/bids/${bid.id}/export/answers` : null,
+        }}
+        nav={{
+          items,
+          qualityWeight: bid.evaluationModel?.qualityWeight ?? null,
+          previousHref: index > 0 ? items[index - 1]!.href : null,
+          nextHref: index >= 0 && index < items.length - 1 ? items[index + 1]!.href : null,
+        }}
+        sources={sources}
+      />
+    </>
   );
 }

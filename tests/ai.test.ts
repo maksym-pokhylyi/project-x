@@ -41,8 +41,10 @@ describe("AI wrapper", () => {
   });
 
   it("estimates cost from the price table and is pessimistic for unknown models", () => {
-    expect(MODEL_PRICES["anthropic/claude-haiku-5.5"]).toEqual({ inputPerMTok: 0.1, outputPerMTok: 0.5 });
-    expect(estimateCostUsd("anthropic/claude-haiku-5.5", 1_000_000, 1_000_000)).toBeCloseTo(0.6, 6);
+    expect(MODEL_PRICES["anthropic/claude-haiku-5.5"]).toMatchObject({ inputPerMTok: 0.1, outputPerMTok: 0.5 });
+    expect(estimateCostUsd("anthropic/claude-haiku-5.5", 100_000, 1_000_000)).toBeCloseTo(0.51, 6);
+    // Haiku 5.5 charges five times the rate for the whole request once the prompt passes 100K tokens.
+    expect(estimateCostUsd("anthropic/claude-haiku-5.5", 1_000_000, 1_000_000)).toBeCloseTo(3, 6);
     expect(estimateCostUsd("anthropic/claude-sonnet-5.5", 2000, 1000)).toBeCloseTo(0.014, 6);
     expect(estimateCostUsd("vendor/unknown", 1_000_000, 0)).toBe(FALLBACK_PRICE.inputPerMTok);
     expect(estimateCostUsd("anthropic/claude-haiku-5.5", 0, 0)).toBe(0);

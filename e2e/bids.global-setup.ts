@@ -1,12 +1,8 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
-import { applyBidsSchema } from "../scripts/bids/apply-schema";
 
-/**
- * Rebuilds the e2e database from the committed migrations, then makes sure the bid desk
- * tables exist (a no-op once their migration has been generated at integration).
- */
+/** Rebuilds the e2e database from the committed migrations. */
 export default async function globalSetup() {
   const url = process.env.E2E_DATABASE_URL ?? "postgres://app:app@localhost:5432/bidfolio_b2_e2e";
   const database = new URL(url).pathname.replace(/^\//, "");
@@ -18,5 +14,4 @@ export default async function globalSetup() {
   } finally {
     await client.end({ timeout: 5 });
   }
-  await applyBidsSchema(url);
 }

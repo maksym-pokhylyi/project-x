@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/headers", () => import("../helpers/next-headers"));
 
@@ -14,7 +14,7 @@ import { FetchFailedError, isPublicAddress, parsePublicUrl, safeFetchText, Unsaf
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { runWorker } from "@/lib/jobs/worker";
 import { storage } from "@/lib/storage";
-import { addLibraryDoc, buildPdf, ensureBidsSchema, installMockModel, scopeOf, taskOf, type Scope } from "../bids/helpers";
+import { addLibraryDoc, buildPdf, installMockModel, scopeOf, taskOf, type Scope } from "../bids/helpers";
 import { actAs, createTestUser, type TestUser } from "../helpers/auth";
 import { resetDatabase } from "../helpers/db";
 
@@ -146,7 +146,6 @@ let scope: Scope;
 let otherScope: Scope;
 let mock: ReturnType<typeof installMockModel> | null = null;
 
-beforeAll(ensureBidsSchema);
 beforeEach(async () => {
   await resetDatabase();
   user = await createTestUser();

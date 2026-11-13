@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { unzipSync } from "fflate";
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/db";
 import { aiUsage, bidQuestions, bids, events } from "@/db/schema";
 import { answerHash } from "@/features/bids/answer-text";
@@ -12,7 +12,7 @@ import type { CompanyFacts, EvaluationModel } from "@/features/bids/types";
 import { ConflictError, ValidationError } from "@/lib/errors";
 import { createTestUser, type TestUser } from "../helpers/auth";
 import { resetDatabase } from "../helpers/db";
-import { addLibraryDoc, confirmFacts, createBidWithFiles, ensureBidsSchema, installMockModel, scopeOf, taskOf, type MockCall, type Scope } from "./helpers";
+import { addLibraryDoc, confirmFacts, createBidWithFiles, installMockModel, scopeOf, taskOf, type MockCall, type Scope } from "./helpers";
 
 /**
  * Grounded drafting and evaluator-style marking with a scripted model. What matters here
@@ -67,7 +67,6 @@ function respond(overrides: Partial<Record<ReturnType<typeof taskOf>, (call: Moc
   };
 }
 
-beforeAll(ensureBidsSchema);
 beforeEach(async () => {
   await resetDatabase();
   user = await createTestUser();

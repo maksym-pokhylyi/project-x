@@ -1,4 +1,5 @@
 import "server-only";
+import { errorReason } from "@/lib/describe-error";
 import { randomUUID } from "node:crypto";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
@@ -118,7 +119,7 @@ function parseTranscription(text: string): Map<number, string> {
  * transcription. Capped per call and per bid; anything over the cap stays unread and is
  * reported as a warning (never silently).
  */
-async function transcribe(bid: BidRow, file: FileRow, bytes: Uint8Array, pages: number[]): Promise<{ texts: Map<number, string>; usage: AiUsage; model: string | null }> {
+async function transcribe(bid: BidRow, file: FileRow, bytes: Uint8Array, pages: number[], totalPages: number): Promise<{ texts: Map<number, string>; usage: AiUsage; model: string | null }> {
   const texts = new Map<number, string>();
   let usage = ZERO_USAGE;
   let model: string | null = null;
@@ -141,6 +142,8 @@ async function transcribe(bid: BidRow, file: FileRow, bytes: Uint8Array, pages: 
       ],
       maxOutputTokens: Math.min(32_000, 2_000 + batch.length * 1_500),
       timeoutMs: 170_000,
+      // The whole file is attached each time, so every page is reserved, not only this batch.
+      filePages: totalPages,
     });
     usage = addUsage(usage, result.usage);
     model = result.model;
@@ -194,7 +197,7 @@ export async function stepExtract(bid: BidRow, deadline: number): Promise<Extrac
           warnings.push(`This looks like a scanned document. The limit of ${MAX_TRANSCRIBED_PAGES_PER_BID} transcribed pages per bid was reached, so it was not read.`);
         } else {
           try {
-            const result = await transcribe(bid, file, bytes, wanted);
+            const result = await transcribe(bid, file, bytes, wanted, document.pages);
             usage = addUsage(usage, result.usage);
             model = result.model ?? model;
             units = units.map((unit) => {
@@ -211,7 +214,7 @@ export async function stepExtract(bid: BidRow, deadline: number): Promise<Extrac
             );
           } catch (error) {
             if (error instanceof AiBudgetExceededError) throw error;
-            log.warn("bids: transcription failed", { bidId: bid.id, fileId: file.id, reason: error instanceof Error ? error.message : "unknown" });
+            log.warn("bids: transcription failed", { bidId: bid.id, fileId: file.id, reason: errorReason(error) });
             warnings.push("This looks like a scanned document and could not be transcribed. Upload a version with selectable text.");
           }
         }
@@ -241,7 +244,7 @@ export async function stepExtract(bid: BidRow, deadline: number): Promise<Extrac
     } catch (error) {
       if (error instanceof AiBudgetExceededError) throw error;
       const message = error instanceof ExtractionError ? error.message : "This file could not be read.";
-      if (!(error instanceof ExtractionError)) log.warn("bids: extraction failed", { bidId: bid.id, fileId: file.id, reason: error instanceof Error ? error.message : "unknown" });
+      if (!(error instanceof ExtractionError)) log.warn("bids: extraction failed", { bidId: bid.id, fileId: file.id, reason: errorReason(error) });
       await db.update(bidFiles).set({ extractionStatus: "failed", error: message, updatedAt: new Date() }).where(eq(bidFiles.id, file.id));
     }
     await touchBid(bid.id);

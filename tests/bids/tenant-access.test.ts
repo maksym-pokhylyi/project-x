@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/headers", () => import("../helpers/next-headers"));
 
@@ -19,14 +19,13 @@ import { runCompanyCheck } from "@/features/bids/server/pipeline/step-company";
 import { NotFoundError } from "@/lib/errors";
 import { actAs, createTestUser, type TestUser } from "../helpers/auth";
 import { resetDatabase } from "../helpers/db";
-import { createBidWithFiles, ensureBidsSchema, scopeOf, type Scope } from "./helpers";
+import { createBidWithFiles, scopeOf, type Scope } from "./helpers";
 
 let userA: TestUser;
 let userB: TestUser;
 let a: Scope;
 let b: Scope;
 
-beforeAll(ensureBidsSchema);
 beforeEach(async () => {
   await resetDatabase();
   userA = await createTestUser();

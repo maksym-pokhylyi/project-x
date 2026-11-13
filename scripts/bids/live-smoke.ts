@@ -42,7 +42,7 @@ async function main() {
   // Imported lazily: these modules validate env at import time.
   const { eq, and, gte, sql } = await import("drizzle-orm");
   const { db, pg } = await import("../../src/db");
-  const { aiUsage, bidCredits, bidQuestions, bidRequirements, bids, companyFacts, organizations, users, members } = await import("../../src/db/schema");
+  const { aiUsage, bidCredits, bidQuestions, bidRequirements, bids, companyFacts, organizations, subscriptions, users, members } = await import("../../src/db/schema");
   const { storage } = await import("../../src/lib/storage");
   const { runWorker } = await import("../../src/lib/jobs/worker");
   const bidsApi = await import("../../src/features/bids/server/bids");
@@ -56,6 +56,10 @@ async function main() {
   await db.insert(users).values({ id: userId, name: "Smoke Test", email: `smoke-${stamp}@example.com`, emailVerified: true });
   await db.insert(organizations).values({ id: organizationId, name: "Example Facilities Ltd", slug: `smoke-${stamp}`, createdAt: new Date() });
   await db.insert(members).values({ id: `smoke_member_${stamp}`, organizationId, userId, role: "owner", createdAt: new Date() });
+  // Every call reserves its worst-case cost first (src/lib/ai.ts). A paid plan's AI allowance
+  // has room for that; BIDS_SMOKE_PLAN=free shows what the Free plan's allowance does.
+  const plan = process.env.BIDS_SMOKE_PLAN ?? "pro";
+  if (plan !== "free") await db.insert(subscriptions).values({ organizationId, status: "active", planKey: plan, paddleSubscriptionId: `sub_smoke_${stamp}` });
   // Confirmed company facts for a clearly fictional bidder, so the company check has something to compare.
   await db.insert(companyFacts).values({
     organizationId,
@@ -85,7 +89,9 @@ async function main() {
   const ctx = { organization: { id: organizationId }, user: { id: userId } } as unknown as Parameters<typeof bidsApi.createBid>[0];
 
   console.log(`\n== Live smoke: ${slug} ==`);
-  console.log(`models: extract=${modelIdsFor("extract").primary} verify=${modelIdsFor("verify").primary} company=${modelIdsFor("company").primary}`);
+  console.log(
+    `models: brief=${modelIdsFor("overview").primary} lists=${modelIdsFor("extract").primary}+${modelIdsFor("extract2").primary} verify=${modelIdsFor("verify").primary} company=${modelIdsFor("company").primary} draft=${modelIdsFor("draft").primary} claims=${modelIdsFor("claims").primary} mark=${modelIdsFor("evaluate").primary} (plan: ${plan})`,
+  );
   const started = Date.now();
   const bid = await bidsApi.createBid(ctx, {});
   let uploaded = 0;

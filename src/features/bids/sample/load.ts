@@ -1,4 +1,5 @@
 import "server-only";
+import { errorReason } from "@/lib/describe-error";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { bidFiles, bidQuestions, bidRequirements, bids } from "@/db/schema";
@@ -125,7 +126,7 @@ export async function loadSampleCheck(): Promise<SampleCheck | null> {
     data = await fromDatabase();
   } catch (error) {
     // No table yet, or no database at build time: the snapshot is the same content.
-    log.warn("sample-check: database not available, rendering the committed snapshot", { reason: error instanceof Error ? error.message.slice(0, 120) : "unknown" });
+    log.warn("sample-check: database not available, rendering the committed snapshot", { reason: errorReason(error) });
   }
   data ??= fromSnapshot();
   const urlByName = new Map(snapshot.source.files.map((file) => [file.name, file.url]));

@@ -1,10 +1,11 @@
 import "server-only";
 import type { ModelMessage } from "ai";
 import { z } from "zod";
-import { generateAiText } from "@/lib/ai";
+import { AiBudgetExceededError, generateAiText } from "@/lib/ai";
+import { errorReason } from "@/lib/describe-error";
 import { log } from "@/lib/logger";
 import { ModelJsonError, parseModelJson, salvageTruncatedJson, sanitizeModelValue } from "./json";
-import { isModelUnavailable, isZdrUnavailable, resolveModel, ZdrUnavailableError, type ModelStep } from "./models";
+import { isModelUnavailable, isZdrUnavailable, resolveModel, scaleFor, ZdrUnavailableError, type ModelStep } from "./models";
 
 export type AiUsage = { calls: number; inputTokens: number; outputTokens: number; costUsd: number };
 
@@ -32,23 +33,86 @@ export type AiCallBase = {
   maxOutputTokens: number;
   /** Hard stop for one model call. */
   timeoutMs?: number;
+  /** Pages of the PDF attached to the prompt (transcription), so its size is reserved by page. */
+  filePages?: number;
 };
 
 export type AiTextResult = { text: string; model: string; usage: AiUsage };
 
+/**
+ * Calls of one workspace that are running in this process right now.
+ *
+ * The wrapper reserves the WORST-CASE cost of a call before it is sent and holds it until
+ * the call settles. A pack is read by several models at once, so their reservations add
+ * up: a later call can be refused although every call fits the budget on its own. When
+ * that happens while another call of the same workspace holds a reservation here, wait for
+ * it to settle (the reservation shrinks to what the call really cost) and try again.
+ * A call that was itself refused never held anything, so it is not waited for: when no
+ * running call can free budget, the refusal is the real answer and is passed on.
+ */
+type Running = { calls: Set<Promise<boolean>>; holders: number };
+const inFlight = new Map<string, Running>();
+
+/** True as soon as one of the calls ends having held a reservation; false when none of them did. */
+function firstRelease(calls: Array<Promise<boolean>>): Promise<boolean> {
+  return new Promise((resolve) => {
+    let pending = calls.length;
+    if (pending === 0) return resolve(false);
+    for (const call of calls) {
+      void call.then((released) => {
+        pending -= 1;
+        if (released) resolve(true);
+        else if (pending === 0) resolve(false);
+      });
+    }
+  });
+}
+
+async function withBudgetRetry<T>(organizationId: string, run: () => Promise<T>): Promise<T> {
+  let running = inFlight.get(organizationId);
+  if (!running) inFlight.set(organizationId, (running = { calls: new Set(), holders: 0 }));
+  running.holders += 1;
+  try {
+    for (;;) {
+      const attempt = run();
+      // Resolves when the attempt is over: true if it got as far as holding a reservation.
+      const released = attempt.then(
+        () => true,
+        (error) => !(error instanceof AiBudgetExceededError),
+      );
+      running.calls.add(released);
+      try {
+        return await attempt;
+      } catch (error) {
+        running.calls.delete(released);
+        if (!(error instanceof AiBudgetExceededError) || !(await firstRelease([...running.calls]))) throw error;
+      } finally {
+        running.calls.delete(released);
+      }
+    }
+  } finally {
+    running.holders -= 1;
+    if (running.holders === 0 && inFlight.get(organizationId) === running) inFlight.delete(organizationId);
+  }
+}
+
 async function runOn(options: AiCallBase, which: "primary" | "fallback"): Promise<AiTextResult> {
   const resolved = resolveModel(options.step, which);
   if (!resolved) throw new Error(`No ${which} model configured for step "${options.step}"`);
-  const result = await generateAiText({
-    organizationId: options.organizationId,
-    userId: options.userId ?? null,
-    feature: options.feature,
-    model: resolved.model,
-    instructions: options.system,
-    prompt: options.messages,
-    maxOutputTokens: options.maxOutputTokens,
-    abortSignal: AbortSignal.timeout(options.timeoutMs ?? 180_000),
-  });
+  const result = await withBudgetRetry(options.organizationId, () =>
+    generateAiText({
+      organizationId: options.organizationId,
+      userId: options.userId ?? null,
+      feature: options.feature,
+      model: resolved.model,
+      instructions: options.system,
+      prompt: options.messages,
+      maxOutputTokens: options.maxOutputTokens,
+      abortSignal: AbortSignal.timeout(options.timeoutMs ?? 180_000),
+      scale: scaleFor(options.step),
+      filePages: options.filePages,
+    }),
+  );
   return {
     text: result.text,
     model: resolved.id,
@@ -157,7 +221,7 @@ export async function callJson<T>(options: AiCallBase & { schema: z.ZodType<T> }
     problem = secondTry.problem;
   } catch (error) {
     if (!(error instanceof Error) || /budget/i.test(error.name)) throw error;
-    problem = `${problem} (the repair call failed: ${error.message})`;
+    problem = `${problem} (the repair call failed: ${errorReason(error)})`;
   }
 
   const fallback = resolveModel(options.step, "fallback");

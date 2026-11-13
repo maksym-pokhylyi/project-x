@@ -8,9 +8,20 @@ import type { StoredText, TextUnit } from "./extract/types";
  *
  *   org/<org>/bids/<bid>/src/<fileId>.<ext>     uploaded pack files (and ZIP members)
  *   org/<org>/bids/<bid>/text/<fileId>.json     extracted text units
+ *   org/<org>/bids/<bid>/work/<pass>.json       the models' intermediate readings
  *   org/<org>/library/src/<docId>.<ext>         library documents
  *   org/<org>/library/text/<docId>.json         their extracted text
  */
+/** Everything stored for one bid: uploads, extracted text and working files. */
+export function bidFolder(organizationId: string, bidId: string): string {
+  return orgFileKey(organizationId, "bids", bidId);
+}
+
+/** The models' intermediate readings of a pack (kept so a retry does not pay twice). */
+export function bidWorkFolder(organizationId: string, bidId: string): string {
+  return orgFileKey(organizationId, "bids", bidId, "work");
+}
+
 export function bidSourceKey(organizationId: string, bidId: string, fileId: string, extension: string): string {
   return orgFileKey(organizationId, "bids", bidId, "src", `${fileId}.${extension}`);
 }

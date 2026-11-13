@@ -1,4 +1,5 @@
 import "server-only";
+import { errorReason } from "@/lib/describe-error";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
@@ -69,7 +70,7 @@ export async function processLibraryDocJob(payload: { docId: string }, context: 
     await db.update(libraryDocs).set({ textStorageKey: textKey, tokenCount: estimateTokens(text), updatedAt: new Date() }).where(eq(libraryDocs.id, doc.id));
   } catch (error) {
     const message = error instanceof ExtractionError ? error.message : "This file could not be read.";
-    if (!(error instanceof ExtractionError)) log.warn("library: extraction failed", { docId: doc.id, reason: error instanceof Error ? error.message : "unknown" });
+    if (!(error instanceof ExtractionError)) log.warn("library: extraction failed", { docId: doc.id, reason: errorReason(error) });
     await db.update(libraryDocs).set({ status: "failed", error: message, updatedAt: new Date() }).where(eq(libraryDocs.id, doc.id));
     return;
   }

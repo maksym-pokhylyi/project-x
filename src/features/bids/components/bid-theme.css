@@ -1,15 +1,13 @@
 /*
- * Bid desk theme — the tokens of the design handoff (docs/design/handoff), defined locally
- * until the shared theme ships them.
+ * Bid desk theme — the tokens of the design handoff (docs/design/handoff).
  *
- * Every token reads the shared variable first (`--ink`, `--paper`, `--brand` …) and falls
- * back to the handoff's exact value, so the shared theme takes over after the merge with
- * no change here. "Muted" and "amber" deliberately do NOT read `--muted` / `--accent`:
- * those names already mean something else in the current shadcn theme.
+ * Every token reads the shared design-system variable (src/app/globals.css: `--ink`,
+ * `--paper`, `--brand`, `--accent` …), so the shared theme governs; the fallback is the
+ * handoff's exact value and only applies where this stylesheet is used without it.
  */
 :root {
   --bid-ink: var(--ink, #161a1d);
-  --bid-muted: var(--ink-muted, #5a6165);
+  --bid-muted: var(--ink-2, #5a6165);
   --bid-paper: var(--paper, #faf8f3);
   --bid-paper-deep: var(--paper-deep, #f2eee4);
   --bid-surface: var(--surface, #ffffff);
@@ -17,15 +15,15 @@
   --bid-line-strong: var(--line-strong, #857f70);
   --bid-brand: var(--brand, #0f5a47);
   --bid-brand-tint: var(--brand-tint, #e6efeb);
-  --bid-amber: var(--amber, #b4690e);
-  --bid-amber-ink: var(--amber-ink, #925207);
-  --bid-amber-tint: var(--amber-tint, #f7ebd7);
+  --bid-amber: var(--accent, #b4690e);
+  --bid-amber-ink: var(--accent-ink, #925207);
+  --bid-amber-tint: var(--accent-tint, #f7ebd7);
   --bid-danger: var(--danger, #a3271c);
   --bid-danger-tint: var(--danger-tint, #f6e3e0);
   --bid-info: var(--info, #1f4f8f);
   --bid-info-tint: var(--info-tint, #e3eaf4);
   --bid-serif: var(--font-serif, "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif);
-  --bid-mono: var(--font-plex-mono, "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  --bid-mono: var(--font-mono, "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
 }
 
 .bid-scope {

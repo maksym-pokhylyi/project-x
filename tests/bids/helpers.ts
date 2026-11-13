@@ -1,21 +1,16 @@
 import { MockLanguageModelV4 } from "ai/test";
 import { eq, sql } from "drizzle-orm";
 import { zipSync } from "fflate";
+import { MODEL_PRICES } from "@/config/ai";
 import { db } from "@/db";
 import { companyFacts, jobs } from "@/db/schema";
-import { setBidModelResolverForTests, type ModelStep } from "@/features/bids/server/ai/models";
+import { MODEL_STEPS, setBidModelResolverForTests, type ModelStep } from "@/features/bids/server/ai/models";
 import * as bidsApi from "@/features/bids/server/bids";
 import type { CompanyFacts } from "@/features/bids/types";
 import { getLibraryDoc, planLibraryUpload, registerLibraryDoc, type LibraryDocRow } from "@/features/library/server/docs";
 import { runWorker } from "@/lib/jobs/worker";
 import { storage } from "@/lib/storage";
-import { applyBidsSchema } from "../../scripts/bids/apply-schema";
 import type { TestUser } from "../helpers/auth";
-
-/** The bid desk tables are created on demand until their migration exists (see apply-schema.ts). */
-export async function ensureBidsSchema(): Promise<void> {
-  await applyBidsSchema(process.env.DATABASE_URL!);
-}
 
 export type Scope = bidsApi.Scope;
 
@@ -46,8 +41,18 @@ function flatten(prompt: unknown): string {
  * "model" answers (or throws to simulate a failure). Calls are recorded for assertions.
  * Usage is tiny so budgets are never the reason a test fails.
  */
+/**
+ * The wrapper reserves the worst case of every call before it is sent, at the model's list
+ * price — and an unlisted model is priced high on purpose. The mock models get a list price
+ * here so a scripted pipeline fits a Free workspace's allowance, as real calls are meant to.
+ */
+export function priceMockModels(price: { inputPerMTok: number; outputPerMTok: number } = { inputPerMTok: 0.01, outputPerMTok: 0.01 }): void {
+  for (const step of Object.keys(MODEL_STEPS)) for (const which of ["primary", "fallback"]) MODEL_PRICES[`mock/${step}-${which}`] = price;
+}
+
 export function installMockModel(respond: (call: MockCall) => MockAnswer | Promise<MockAnswer>): { calls: MockCall[]; restore: () => void } {
   const calls: MockCall[] = [];
+  priceMockModels();
   setBidModelResolverForTests((step, which) => {
     return new MockLanguageModelV4({
       provider: "mock",

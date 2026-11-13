@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BreadcrumbTrail } from "@/components/app/breadcrumbs";
 import { getBidCapabilities } from "@/features/bids/access";
 import { BidActions, ExportMenu } from "@/features/bids/components/bid-actions";
 import { BidTabs } from "@/features/bids/components/bid-tabs";
@@ -31,21 +32,10 @@ export default async function BidLayout({ children, params }: { children: ReactN
 
   return (
     <div className="bid-scope flex flex-col">
-      <nav aria-label="Breadcrumb" className="flex flex-wrap gap-2 text-sm text-(--bid-muted)">
-        <Link href="/app/bids" className="bid-link-quiet">
-          Bids
-        </Link>
-        <span aria-hidden>/</span>
-        {bid.buyerName ? (
-          <>
-            <span className="max-w-[16rem] truncate">{bid.buyerName}</span>
-            <span aria-hidden>/</span>
-          </>
-        ) : null}
-        <span>Bid check</span>
-      </nav>
+      {/* The shell renders the trail above the title (and "‹ Bids" on phones). */}
+      <BreadcrumbTrail items={[{ label: "Bids", href: "/app/bids" }, ...(bid.buyerName ? [{ label: bid.buyerName }] : []), { label: "Bid check" }]} />
 
-      <div className="mt-3.5 flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
+      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
         <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-2">
           <p className="bid-mono text-xs text-(--bid-muted)" data-testid="bid-meta">
             Bid check

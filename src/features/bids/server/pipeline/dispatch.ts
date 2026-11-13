@@ -1,4 +1,5 @@
 import "server-only";
+import { errorReason } from "@/lib/describe-error";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { DbOrTx } from "@/db";
 import { appUrl, env } from "@/env";
@@ -53,6 +54,6 @@ export async function nudgeWorker(): Promise<void> {
       cache: "no-store",
     });
   } catch (error) {
-    log.warn("bids: could not nudge the worker (cron will pick the job up)", { reason: error instanceof Error ? error.message : "unknown" });
+    log.warn("bids: could not nudge the worker (cron will pick the job up)", { reason: errorReason(error) });
   }
 }

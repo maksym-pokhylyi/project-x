@@ -8,4 +8,4 @@ import { requireOrg } from "@/server/session";
  */
 export const dynamic = "force-dynamic";
 
-export const POST = route(async (request) => handleBlobUpload(request, null, () => requireOrg()));
+export const POST = route(async (request) => handleBlobUpload(request, null, () => requireOrg({ write: true })));

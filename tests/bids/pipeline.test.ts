@@ -1,5 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { db } from "@/db";
 import { aiUsage, bidFiles, bidQuestions, bidRequirements, bids, emailOutbox, events, jobs } from "@/db/schema";
@@ -16,7 +16,7 @@ import type { CompanyFacts } from "@/features/bids/types";
 import { runWorker } from "@/lib/jobs/worker";
 import { createTestUser, type TestUser } from "../helpers/auth";
 import { resetDatabase } from "../helpers/db";
-import { confirmFacts, createBidWithFiles, EMPTY_PATCH, emptyOverview, ensureBidsSchema, installMockModel, NOT_STATED, runPipeline, scopeOf, taskOf, type MockCall, type Scope } from "./helpers";
+import { confirmFacts, createBidWithFiles, EMPTY_PATCH, emptyOverview, installMockModel, NOT_STATED, runPipeline, scopeOf, taskOf, type MockCall, type Scope } from "./helpers";
 
 /**
  * The pack pipeline end to end against a real database, with a scripted model:
@@ -152,7 +152,6 @@ async function startBid(): Promise<string> {
   return bid.id;
 }
 
-beforeAll(ensureBidsSchema);
 beforeEach(async () => {
   await resetDatabase();
   user = await createTestUser();

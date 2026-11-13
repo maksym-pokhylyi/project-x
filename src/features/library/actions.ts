@@ -12,7 +12,7 @@ import { discardFactsDraft, draftCompanyFactsFromWebsite, saveCompanyFacts } fro
 
 export async function saveCompanyFactsAction(input: unknown): Promise<ActionResult<{ confirmedAt: string }>> {
   return runAction("library.facts.save", async () => {
-    const ctx = await requireOrg();
+    const ctx = await requireOrg({ write: true });
     const record = await saveCompanyFacts(ctx, input);
     revalidatePath("/app/library");
     return { confirmedAt: (record.confirmedAt ?? new Date()).toISOString() };
@@ -22,7 +22,7 @@ export async function saveCompanyFactsAction(input: unknown): Promise<ActionResu
 /** Reads the company's website and stores a DRAFT for review. Never confirms anything. */
 export async function draftFactsFromWebsiteAction(url: string): Promise<ActionResult<{ pages: number }>> {
   return runAction("library.facts.draft", async () => {
-    const ctx = await requireOrg();
+    const ctx = await requireOrg({ write: true });
     const result = await draftCompanyFactsFromWebsite(ctx, url);
     revalidatePath("/app/library");
     return { pages: result.pages.length };
@@ -31,7 +31,7 @@ export async function draftFactsFromWebsiteAction(url: string): Promise<ActionRe
 
 export async function discardFactsDraftAction(): Promise<ActionResult> {
   return runAction("library.facts.discard_draft", async () => {
-    const ctx = await requireOrg();
+    const ctx = await requireOrg({ write: true });
     await discardFactsDraft(ctx);
     revalidatePath("/app/library");
     return undefined;
@@ -42,7 +42,7 @@ export type LibraryUploadTarget = { docId: string; pathname: string; contentType
 
 export async function planLibraryUploadAction(file: { name: string; size: number }): Promise<ActionResult<LibraryUploadTarget>> {
   return runAction("library.plan_upload", async () => {
-    const ctx = await requireOrg();
+    const ctx = await requireOrg({ write: true });
     const plan = await planLibraryUpload(ctx, file);
     return {
       docId: plan.docId,
@@ -56,7 +56,7 @@ export async function planLibraryUploadAction(file: { name: string; size: number
 
 export async function registerLibraryDocAction(input: { docId: string; name: string; kind?: string }): Promise<ActionResult<{ id: string }>> {
   return runAction("library.register", async () => {
-    const ctx = await requireOrg();
+    const ctx = await requireOrg({ write: true });
     const doc = await registerLibraryDoc(ctx, input);
     await nudgeWorker();
     revalidatePath("/app/library");
@@ -66,7 +66,7 @@ export async function registerLibraryDocAction(input: { docId: string; name: str
 
 export async function updateLibraryDocAction(docId: string, input: unknown): Promise<ActionResult> {
   return runAction("library.update", async () => {
-    const ctx = await requireOrg();
+    const ctx = await requireOrg({ write: true });
     await updateLibraryDoc(ctx, docId, input);
     revalidatePath("/app/library");
     return undefined;

@@ -301,7 +301,7 @@ const CROSS_CHECKED: SummaryField[] = ["submission_deadline", "clarification_dea
  */
 export async function runOverview(bid: BidRow, loaded: LoadedPack, attempt: number): Promise<PartResult> {
   const overviewPass = () =>
-    cachedPass(bid, "overview-primary", overviewOutputSchema, () => extraction(bid, loaded, { feature: "bids.overview", step: "extract", task: OVERVIEW_TASK, schema: overviewOutputSchema, base: 12_000 }));
+    cachedPass(bid, "overview-primary", overviewOutputSchema, () => extraction(bid, loaded, { feature: "bids.overview", step: "overview", task: OVERVIEW_TASK, schema: overviewOutputSchema, base: 12_000 }));
   const keyFactsPass = () =>
     cachedPass(bid, "keyfacts-second", keyFactsOutputSchema, () => extraction(bid, loaded, { feature: "bids.keyfacts", step: "extract2", task: KEYFACTS_TASK, schema: keyFactsOutputSchema, base: 5_000 }));
 

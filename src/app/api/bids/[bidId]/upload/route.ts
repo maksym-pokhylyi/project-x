@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export const PUT = route<{ params: Promise<{ bidId: string }> }>(async (request, context, { requestId }) => {
-  const ctx = await requireOrg();
+  const ctx = await requireOrg({ write: true });
   const { bidId } = await context.params;
   const url = new URL(request.url);
   const fileId = z.uuid().safeParse(url.searchParams.get("fileId"));

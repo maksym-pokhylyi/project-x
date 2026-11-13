@@ -2,6 +2,8 @@ import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type Page } from "@playwright/test";
+import postgres from "postgres";
+import { E2E_DEV_TOOLS_SECRET } from "../playwright.bids.config";
 
 /**
  * The bid desk's main journey against a production build, offline:
@@ -15,12 +17,14 @@ import { expect, test, type Page } from "@playwright/test";
  * The pack is a real, publicly published UK council request for quotation. In the repo it
  * lives in e2e/fixtures/pack; BIDS_E2E_PACK_DIR can point at another folder.
  */
+test.skip(!process.env.BIDS_E2E, "run with: playwright test -c playwright.bids.config.ts");
+
 const PACK_DIR = process.env.BIDS_E2E_PACK_DIR ?? path.join(path.dirname(fileURLToPath(import.meta.url)), "fixtures", "pack");
 const run = Date.now().toString(36);
 const user = { name: "Bea Bidder", email: `bea-${run}@e2e.test`, password: "bidder-password-123" };
 
 async function followOutboxLink(page: Page, to: string, template: string) {
-  await page.goto("/dev/outbox");
+  await page.goto(`/dev/outbox?key=${E2E_DEV_TOOLS_SECRET}`);
   const email = page.locator(`[data-testid="outbox-email"][data-to="${to}"][data-template="${template}"]`).first();
   await expect(email).toBeVisible();
   await email.getByTestId("outbox-link").first().click();
@@ -119,8 +123,11 @@ test("upload a pack, get a cited check, draft and mark an answer, export", async
   expect(source.status()).toBe(200);
   await page.keyboard.press("Escape");
 
-  // Tick "checked" on the first requirement; it persists.
+  // Tick "checked" on the first requirement; it persists. The tick is shown at once and saved
+  // by a Server Action: wait for that request before reloading, or the reload cancels it.
+  const saved = page.waitForResponse((response) => response.request().method() === "POST" && response.url().includes("/requirements"));
   await rows.first().getByRole("checkbox").check();
+  await saved;
   await page.reload();
   await expect(page.getByTestId("requirement-row").first().getByRole("checkbox")).toBeChecked();
 
@@ -162,6 +169,24 @@ test("upload a pack, get a cited check, draft and mark an answer, export", async
   const csv = await page.request.get(`${bidUrl.replace("/app/bids/", "/api/bids/")}/export/requirements-csv`);
   expect(csv.status()).toBe(200);
   expect(await csv.text()).toContain("Quote found in documents");
+
+  // --- the page while a check is being built, with partial results -------------------------
+  // The offline run is too quick to catch, so the state is set directly: the same rows, shown
+  // as "found so far". (This render once failed on the server while every other page worked.)
+  const bidId = bidUrl.split("/").pop()!;
+  const sql = postgres(process.env.E2E_DATABASE_URL!, { prepare: false, max: 1, onnotice: () => {} });
+  try {
+    await sql`update bids set status = 'processing', processing_lock_at = now() + interval '4 minutes' where id = ${bidId}`;
+    await page.goto(bidUrl);
+    await expect(page.getByTestId("processing-state")).toBeVisible();
+    await expect(page.getByTestId("partial-requirement").first()).toBeVisible();
+    await expect(page.getByTestId("partial-requirement").first().getByTestId("citation-mark")).toBeVisible();
+    await expect(page.getByTestId("coverage-card")).toBeVisible();
+    await expect(page.getByTestId("verdict")).toHaveCount(0);
+  } finally {
+    await sql`update bids set status = 'ready', processing_lock_at = null where id = ${bidId}`;
+    await sql.end({ timeout: 5 });
+  }
 
   // --- another workspace cannot see any of it --------------------------------------------
   const stranger = await page.context().browser()!.newContext();

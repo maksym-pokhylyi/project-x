@@ -33,8 +33,13 @@ export const MAX_ZIP_EXPANDED_BYTES = 200 * MB;
 /**
  * Size of pack text sent to the model, in estimated tokens. Above it the least relevant
  * files (terms and conditions, drawings) are left out and listed in a warning.
+ *
+ * Bounded twice: the smallest input window among the models in use (272K tokens), and the
+ * wrapper's document-scale ceiling, AI_DOCUMENT_MAX_INPUT_TOKENS, which counts one token
+ * per two bytes — 220K of these tokens is about 0.8 MB of text, which with the task and
+ * the merged draft stays under that ceiling.
  */
-export const MAX_PACK_TOKENS = 300_000;
+export const MAX_PACK_TOKENS = 220_000;
 
 /** Rough token estimate for English text extracted from documents. */
 export function estimateTokens(text: string): number {

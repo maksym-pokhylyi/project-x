@@ -40,7 +40,9 @@ export const jobHandlers: { [T in JobType]: JobHandler<T> } = {
   "maintenance.cleanup": async () => {
     // Retention for every operational table: see src/config/retention.ts.
     const summary = await runMaintenance();
-    log.info("maintenance.cleanup done", summary);
+    // The bid desk's working files follow the same config; its module does the storage sweep.
+    const { runBidRetention } = await import("@/features/bids/server/retention");
+    log.info("maintenance.cleanup done", { ...summary, ...(await runBidRetention()) });
   },
 
   "procurement.backfill": async (payload) => {

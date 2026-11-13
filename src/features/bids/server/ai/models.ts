@@ -1,5 +1,6 @@
 import "server-only";
 import { defaultSettingsMiddleware, gateway, wrapLanguageModel, type LanguageModel } from "ai";
+import { MODEL_PRICES } from "@/config/ai";
 import { offlineModel } from "./offline-model";
 
 /**
@@ -11,25 +12,41 @@ import { offlineModel } from "./offline-model";
  * secondary is tried once, automatically, when the primary is not available to the
  * account (see `isModelUnavailable`). Override per step with env, no code change:
  *
- *   AI_MODEL_EXTRACT   AI_MODEL_EXTRACT2  AI_MODEL_DOCUMENT  AI_MODEL_VERIFY    AI_MODEL_COMPANY
- *   AI_MODEL_TRANSCRIBE  AI_MODEL_DRAFT   AI_MODEL_CLAIMS    AI_MODEL_EVALUATE  AI_MODEL_FACTS
- *   AI_MODEL_<STEP>_FALLBACK (per step)  or  AI_MODEL_FALLBACK (all steps)
+ *   AI_MODEL_OVERVIEW  AI_MODEL_EXTRACT   AI_MODEL_EXTRACT2  AI_MODEL_DOCUMENT  AI_MODEL_VERIFY
+ *   AI_MODEL_COMPANY   AI_MODEL_TRANSCRIBE  AI_MODEL_DRAFT   AI_MODEL_CLAIMS    AI_MODEL_EVALUATE
+ *   AI_MODEL_FACTS     AI_MODEL_<STEP>_FALLBACK (per step)  or  AI_MODEL_FALLBACK (all steps)
  *
- * Defaults follow the bid-pack spike (REPORT.md §8.1). The Claude models could not be
- * measured (blocked on the gateway's free tier), so the defaults are the two mid-tier
- * models whose UNION gave the best pass/fail recall — gemini-2.5-flash + gpt-5-mini — and
- * never the nano / flash-lite class for extraction, drafting or marking. Once Claude
- * models are enabled, switch by config and re-run the live smoke test, e.g.
- *   AI_MODEL_EXTRACT=anthropic/claude-haiku-5.5  AI_MODEL_EXTRACT2=openai/gpt-5-mini
- *   AI_MODEL_DRAFT=anthropic/claude-sonnet-5.5   AI_MODEL_EVALUATE=anthropic/claude-sonnet-5.5
+ * The defaults are MEASURED (2026-11-13; scripts/bids/model-eval.ts and draft-eval.ts, three
+ * real packs with hand-checked ground truth of 138 facts, two fictional bidders; every call
+ * with zero data retention):
+ *
+ *  - Brief (one reader, nothing to union with): claude-sonnet-5.5 was the only model with
+ *    every brief fact right (88/88) and every citation found in the source. gpt-5-mini
+ *    missed one, gemini-2.5-flash missed two and got one wrong, claude-haiku-5.5 missed 21.
+ *  - Requirements and questions (two readers, unioned in code): gpt-5-mini + gemini-2.5-flash
+ *    found 19/19 pass/fail requirements and 25/25 questions; alone they found 18 and 17
+ *    requirements. Sonnet as a list reader costs eight times as much and missed four
+ *    questions; Haiku missed two.
+ *    Together: 138/138 facts, none wrong, 98% of citations verified, 61 s and $0.19 per pack.
+ *  - Drafts: claude-haiku-5.5 made the fewest claims its evidence does not support (6 in four
+ *    drafts; Sonnet 13, gpt-5-mini 28, gemini 39 — the same order under a second judge), kept
+ *    to the word limit most often and is the cheapest.
+ *  - Claims check: claude-sonnet-5.5 flagged the most real problems, including an invented
+ *    asset the other three let through. Every model caught the two planted fabrications.
+ *  - Marking: every model challenged the planted fabrication and scores agreed within one
+ *    band, so it stays on a model from a different vendor than the one that wrote the draft.
+ *
+ * Never the nano / flash-lite class for extraction, drafting or marking.
  */
 export const MODEL_STEPS = {
   /** Scanned pages -> text (native PDF input). */
   transcribe: { primary: "google/gemini-2.5-flash", fallback: "openai/gpt-5-mini" },
-  /** First whole-pack reading: brief, requirements, questions. */
-  extract: { primary: "google/gemini-2.5-flash", fallback: "openai/gpt-5-mini" },
-  /** Second, independent whole-pack reading on a DIFFERENT model (results are unioned in code). */
-  extract2: { primary: "openai/gpt-5-mini", fallback: "google/gemini-2.5-flash" },
+  /** The brief: summary, key dates, evaluation model, documents to return. One reader. */
+  overview: { primary: "anthropic/claude-sonnet-5.5", fallback: "openai/gpt-5-mini" },
+  /** First whole-pack reading of requirements and questions. */
+  extract: { primary: "openai/gpt-5-mini", fallback: "google/gemini-2.5-flash" },
+  /** Second, independent reading on a DIFFERENT model (unioned in code); also re-reads the key facts. */
+  extract2: { primary: "google/gemini-2.5-flash", fallback: "openai/gpt-5-mini" },
   /** Per-document reading of questionnaires, response templates and clarification files. */
   document: { primary: "openai/gpt-5-mini", fallback: "google/gemini-2.5-flash" },
   /** "What did we miss" pass over the pack with the merged draft in hand. */
@@ -39,14 +56,24 @@ export const MODEL_STEPS = {
   /** Company facts draft from a website; library document summaries. */
   facts: { primary: "google/gemini-2.5-flash-lite", fallback: "openai/gpt-5-mini" },
   /** First drafts and revisions of answers. */
-  draft: { primary: "openai/gpt-5-mini", fallback: "google/gemini-2.5-flash" },
+  draft: { primary: "anthropic/claude-haiku-5.5", fallback: "openai/gpt-5-mini" },
   /** Checking a draft's claims against the evidence it was given. */
-  claims: { primary: "openai/gpt-5-mini", fallback: "google/gemini-2.5-flash" },
+  claims: { primary: "anthropic/claude-sonnet-5.5", fallback: "openai/gpt-5-mini" },
   /** Evaluator-style marking. */
   evaluate: { primary: "openai/gpt-5-mini", fallback: "google/gemini-2.5-flash" },
 } as const satisfies Record<string, { primary: string; fallback: string }>;
 
 export type ModelStep = keyof typeof MODEL_STEPS;
+
+/**
+ * Steps that read a whole pack or return a long structured list: they use the wrapper's
+ * document-scale ceilings (src/config/ai.ts). Drafting, checking and marking do not.
+ */
+const DOCUMENT_SCALE_STEPS: ReadonlySet<ModelStep> = new Set<ModelStep>(["transcribe", "overview", "extract", "extract2", "document", "verify", "company"]);
+
+export function scaleFor(step: ModelStep): "standard" | "document" {
+  return DOCUMENT_SCALE_STEPS.has(step) ? "document" : "standard";
+}
 
 export type ResolvedModel = {
   /** What to hand to generateAiText: a gateway id, or a wrapped/mocked model instance. */
@@ -54,6 +81,8 @@ export type ResolvedModel = {
   /** Gateway id ("provider/model") used for cost attribution and recorded on the bid. */
   id: string;
 };
+
+const OFFLINE_MODEL_ID = "offline/pattern-matcher";
 
 type TestResolver = (step: ModelStep, which: "primary" | "fallback") => Exclude<LanguageModel, string> | null | undefined;
 let testResolver: TestResolver | null = null;
@@ -115,7 +144,9 @@ export function resolveModel(step: ModelStep, which: "primary" | "fallback" = "p
   }
   // Offline pattern-matching stand-in for e2e tests and network-free demos; never in production.
   if (process.env.BIDS_OFFLINE_AI === "1" && process.env.VERCEL_ENV !== "production") {
-    return which === "primary" ? { model: offlineModel, id: "offline/pattern-matcher" } : null;
+    // It costs nothing; without a list price the wrapper would reserve it at the (high) rate of an unknown model.
+    MODEL_PRICES[OFFLINE_MODEL_ID] ??= { inputPerMTok: 0, outputPerMTok: 0 };
+    return which === "primary" ? { model: offlineModel, id: OFFLINE_MODEL_ID } : null;
   }
   const ids = modelIdsFor(step);
   const id = which === "primary" ? ids.primary : ids.fallback;

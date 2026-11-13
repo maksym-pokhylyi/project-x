@@ -1,4 +1,5 @@
 import "server-only";
+import { errorReason } from "@/lib/describe-error";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { bidFiles, bidQuestions, bidRequirements, bids, users } from "@/db/schema";
@@ -54,10 +55,23 @@ function nextPhase(state: ProcessingState | null | undefined): Phase | null {
   return null;
 }
 
+/**
+ * The wrapper reserves the worst case of a reading before it is sent, so a pack can be
+ * refused while most of the allowance is still there. Saying "you have used your
+ * allowance" would then be untrue: say that this pack needs more than is left.
+ */
+function budgetMessage(error: AiBudgetExceededError): string {
+  const { limitUsd, spentUsd, period } = (error.details ?? {}) as { limitUsd?: number; spentUsd?: number; period?: "day" | "month" };
+  if (error.scope !== "organization" || typeof limitUsd !== "number" || typeof spentUsd !== "number" || spentUsd >= limitUsd * 0.8) return error.message;
+  return period === "day"
+    ? "Reading this tender pack needs more AI allowance than your plan has left today, so the check stopped. Try again tomorrow, or upgrade your plan."
+    : "Reading this tender pack needs more AI allowance than your plan has left this month, so the check stopped. Upgrade your plan, or try again next month.";
+}
+
 /** Message shown to the user for a failure that retries did not fix. */
 function userMessage(error: unknown): string {
   if (error instanceof PermanentPipelineError) return error.message;
-  if (error instanceof AiBudgetExceededError) return error.message;
+  if (error instanceof AiBudgetExceededError) return budgetMessage(error);
   if (error instanceof ZdrUnavailableError) return "The AI provider could not guarantee zero data retention for your documents, so they were not sent. Try again later.";
   if (error instanceof ModelJsonError) return "The AI model returned an answer we could not use. Try again — if it keeps failing, contact support.";
   const message = error instanceof Error ? error.message : "";
@@ -227,7 +241,7 @@ async function finalise(bid: BidRow): Promise<void> {
       }
     } catch (error) {
       // The check is ready either way; a failed notification must not undo that.
-      log.warn("bids: could not send the ready e-mail", { bidId: bid.id, reason: error instanceof Error ? error.message : "unknown" });
+      log.warn("bids: could not send the ready e-mail", { bidId: bid.id, reason: errorReason(error) });
     }
   }
 }

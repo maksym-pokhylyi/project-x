@@ -41,6 +41,13 @@ export const RETENTION_DAYS = {
   auditLog: 730,
   /** Consumed checkout nonces; only meaningful while their signature could be replayed (24 h). */
   checkoutNonces: 90,
+  /**
+   * Working files of a finished bid check: the models' intermediate readings of the pack,
+   * kept so that a retry does not pay for a reading twice. Removed this long after the
+   * check is ready. The check itself, the uploaded documents and the answers are customer
+   * content and are NOT touched: they stay until the customer deletes them or the workspace.
+   */
+  bidWorkFiles: 14,
 } as const;
 
 export type RetentionKey = keyof typeof RETENTION_DAYS;

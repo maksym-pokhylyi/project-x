@@ -27,7 +27,7 @@ import { storage } from "@/lib/storage";
 import type { OrgContext } from "@/server/session";
 import { enqueueBidJob, nudgeWorker } from "./pipeline/dispatch";
 import { nextRunState } from "./pipeline/state";
-import { bidSourceKey, deleteKeys } from "./store";
+import { bidFolder, bidSourceKey, deleteKeys } from "./store";
 
 /**
  * Tenant-scoped data access for bids. Every function takes the caller's context first and
@@ -176,9 +176,9 @@ export async function setBidArchived(ctx: Scope, bidId: string, archived: boolea
 export async function deleteBid(ctx: Scope, bidId: string): Promise<void> {
   const bid = await getBid(ctx, bidId);
   if (bid.status === "processing") throw new ConflictError("This bid is being analysed. Wait for it to finish before deleting it.");
-  const files = await db.select().from(bidFiles).where(and(eq(bidFiles.bidId, bid.id), eq(bidFiles.organizationId, ctx.organization.id)));
   await db.delete(bids).where(and(eq(bids.id, bid.id), eq(bids.organizationId, ctx.organization.id)));
-  await deleteKeys(files.flatMap((file) => [file.extractionStatus === "skipped" ? null : file.storageKey, file.textStorageKey]));
+  // The whole folder: uploads (also ones that were never registered), extracted text and working files.
+  await storage.deletePrefix(bidFolder(ctx.organization.id, bid.id));
 }
 
 // --- Files ------------------------------------------------------------------------------

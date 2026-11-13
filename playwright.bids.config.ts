@@ -14,9 +14,13 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = Number(process.env.E2E_PORT ?? 3115);
 const BASE_URL = `http://localhost:${PORT}`;
 export const E2E_DATABASE_URL = process.env.E2E_DATABASE_URL ?? "postgres://app:app@localhost:5432/bidfolio_b2_e2e";
+/** On a production build the dev outbox needs this key (`/dev/outbox?key=…`). */
+export const E2E_DEV_TOOLS_SECRET = "e2e-dev-tools-secret-0123456789";
 
 process.env.PLAYWRIGHT_BROWSERS_PATH ??= "/opt/pw-browsers";
 process.env.E2E_DATABASE_URL = E2E_DATABASE_URL;
+// The spec skips itself unless it runs under this config (the server needs the offline model).
+process.env.BIDS_E2E = "1";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -44,6 +48,7 @@ export default defineConfig({
       NEXT_PUBLIC_APP_URL: BASE_URL,
       CRON_SECRET: "e2e-cron-secret-0123456789",
       DEV_TOOLS: "1",
+      DEV_TOOLS_SECRET: E2E_DEV_TOOLS_SECRET,
       LOG_LEVEL: "warn",
       BIDS_OFFLINE_AI: "1",
       BIDS_SIMULATE_PLAN: "bid_desk",
