@@ -238,7 +238,7 @@ Restyled to the artboards: Alert, Avatar, Badge, Breadcrumb, Button, Card, Check
 Pagination, Popover, Progress, RadioGroup, Select, Separator, Skeleton, Spinner, Switch, Table, Tabs (+ `tabListClasses` /
 `tabTriggerClasses` for link tabs, `TabsCount`), Textarea, Toaster (sonner), Tooltip, FormField / FieldHint / FieldError / FormError,
 NativeSelect. Added for the bid screens: StatusPill, ReferenceChip, DeadlineMarker (+ `timeLeft`), FilterChip / FilterChipGroup
-(+ `filterChipClasses`), ScoreBars.
+(+ `filterChipClasses`), ScoreBars, ToggleButton.
 
 Extensions to the shadcn APIs:
 
@@ -255,6 +255,14 @@ Extensions to the shadcn APIs:
 - `Disclosure`: `variant="inline"` for a secondary step inside a card or a table row — a link-styled summary with the chevron
   (the default stays the serif question of the FAQ).
 - `Progress`: `tone` = `brand` | `warning` | `danger`.
+- `ReferenceChip`: `state` = `verified` | `check` | `unverified` puts what our own check found for the quote in front of the
+  reference, as a mark whose shape differs as well as its colour (tick, amber dot, hollow dot) with the word for screen readers;
+  `quiet` drops the box (an underlined reference for fact cards and side lists). `ReferenceChipButton` is the chip as a button
+  (the trigger of the citation popover; it is named by the text it shows, so give it no `aria-label`); `ReferenceStateMark` is
+  the mark on its own, for a legend.
+- `ToggleButton`: a button that is on or off, always with `aria-pressed`. `variant="check"` is a small labelled tick ("I have
+  checked this" / "Confirmed by you"); `variant="marker"` is a numbered source marker in or beside running text, with
+  `tone="danger"` for a marker that matches no source. For a row of exclusive choices use FilterChip; for an action, Button.
 
 ### 8.3 App shell patterns
 
