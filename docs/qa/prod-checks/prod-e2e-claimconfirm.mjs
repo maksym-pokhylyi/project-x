@@ -1,0 +1,25 @@
+// Signed-in visitor confirms the claim and lands on the radar (first run).
+import { chromium } from '/opt/node-tools/node_modules/playwright/index.mjs';
+const base = 'https://bidfolio.co.uk';
+const slug = process.argv[2];
+const b = await chromium.launch({ proxy: { server: process.env.HTTPS_PROXY } });
+const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, storageState: '/home/user/.secrets/qa3-state.json' });
+const page = await ctx.newPage();
+const errs = [];
+page.on('console', m => { if (m.type() === 'error') errs.push(m.text().slice(0, 140)); });
+page.on('response', r => { if (r.status() >= 500) errs.push(r.status() + ' ' + r.url().slice(0, 80)); });
+await page.goto(`${base}/claim/${slug}`, { waitUntil: 'networkidle' });
+const tick = page.getByTestId('claim-authorised');
+console.log('tick state before:', await tick.getAttribute('aria-checked').catch(() => null) ?? await tick.getAttribute('data-state').catch(() => null));
+if ((await tick.getAttribute('aria-checked')) !== 'true') await tick.click();
+await page.getByRole('button', { name: 'Confirm and open my radar' }).click();
+await page.waitForURL(/\/app(\?|$)/, { timeout: 40000 }).catch(() => {});
+await page.waitForLoadState('networkidle');
+await page.waitForTimeout(1500);
+console.log('after confirm:', page.url().replace(base, '').slice(0, 100));
+await page.screenshot({ path: '/home/user/qa/look/claim-3-radar.png', fullPage: true });
+console.log('radar text:', (await page.locator('main').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 700));
+console.log('tabs:', (await page.locator('[data-testid^="tab-"]').allInnerTexts().catch(() => [])).join(' | ').replace(/\s+/g, ' ').slice(0, 200));
+console.log('errors:', errs.length ? errs.slice(0, 4).join(' | ') : 'none');
+await ctx.storageState({ path: '/home/user/.secrets/qa3-state.json' });
+await b.close();

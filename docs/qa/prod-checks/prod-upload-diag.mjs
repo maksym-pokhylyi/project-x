@@ -1,0 +1,13 @@
+import { chromium } from '/opt/node-tools/node_modules/playwright/index.mjs';
+const base = 'https://bidfolio.co.uk';
+const b = await chromium.launch({ proxy: { server: process.env.HTTPS_PROXY }, args: ['--disable-http2'] });
+const ctx = await b.newContext({ viewport: { width: 1280, height: 900 }, storageState: '/home/user/.secrets/qa-state.json' });
+const page = await ctx.newPage();
+page.on('console', m => { if (['error', 'warning'].includes(m.type())) console.log('CONSOLE', m.type(), m.text().slice(0, 300)); });
+page.on('requestfailed', r => console.log('REQFAILED', r.method(), r.url().slice(0, 140), r.failure()?.errorText));
+page.on('response', async r => { const u = r.url(); if (/blob|upload|\/api\/bids/.test(u)) { let body = ''; try { body = (await r.text()).slice(0, 300); } catch {} console.log('RESP', r.status(), r.request().method(), u.replace(base, '').slice(0, 130), '|', body.replace(/\s+/g, ' ').replace(/vercel_blob_[A-Za-z0-9_]+/g, '<token>')); } });
+await page.goto(base + '/app/bids/new', { waitUntil: 'networkidle' });
+await page.getByTestId('file-input').setInputFiles(['/home/user/spikes/bid-pack/packs/ryde-data-audit/files/03_References-1.docx']);
+await page.waitForTimeout(25000);
+console.log('LIST', (await page.getByTestId('file-list').innerText().catch(() => '')).replace(/\s+/g, ' '));
+await b.close();
