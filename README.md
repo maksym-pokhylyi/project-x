@@ -171,7 +171,7 @@ Without `RESEND_API_KEY`, e-mails are stored instead of sent: open
 | `pnpm test` | Vitest against database `app_test` (rebuilt from migrations each run; override with `TEST_DATABASE_URL`) |
 | `pnpm e2e` | Builds, starts `next start` on :3210 with database `app_e2e`, runs Playwright (`E2E_SKIP_BUILD=1` reuses `.next`) |
 | `pnpm db:generate` | Create a SQL migration from schema changes (`drizzle-kit generate`) |
-| `pnpm db:migrate` | Apply committed migrations (non-interactive, idempotent) |
+| `pnpm db:migrate` | Apply committed migrations (non-interactive, idempotent). On Vercel it runs for production deployments only |
 | `pnpm db:seed` | Demo data for local development (refuses non-localhost databases) |
 | `pnpm paddle:setup [--dry-run]` | Create/update Paddle products and prices from `src/config/plans.ts`, print env lines |
 | `pnpm paddle:simulate <orgId> [plan] [interval] [status]` | Send a signed fake subscription webhook to the local app |
@@ -211,6 +211,7 @@ real production deployment.
 | `LOG_LEVEL` | no (info) | — | Log verbosity |
 | `DEV_TOOLS` | no | — | `1` exposes `/dev/outbox` on a production build (e2e). Ignored on Vercel production |
 | `SKIP_DB_MIGRATE` | no | — | `1` makes `pnpm db:migrate` a no-op |
+| `MIGRATE_PREVIEW_DATABASE` | no | — | `1` lets a Vercel **Preview** build run migrations — only for a Preview environment with its own database (Neon branch). Without it, only production builds migrate |
 
 `src/env.ts` also exports `features` (which integrations are live) and `appUrl`.
 
@@ -394,13 +395,23 @@ in the layout alone does not protect the page.
    `DATABASE_URL_UNPOOLED`.
 2. **Vercel**: create the project from this repo (Node.js 22, Fluid compute on). Set the
    environment variables from the table above for the Production environment.
-3. **Build**: `vercel.json` sets `buildCommand` to `pnpm db:migrate && pnpm build`, so
-   committed migrations are applied during every build, before the new code goes live.
+3. **Build**: `vercel.json` sets `buildCommand` to `pnpm db:migrate && pnpm build`.
+   `pnpm db:migrate` applies the committed migrations **only when `VERCEL_ENV=production`**
+   (and always on a local machine or CI); every other Vercel build logs
+   `[db:migrate] SKIPPED — …` and touches no database (`scripts/migrate-policy.mjs`).
    Keep migrations backward compatible with the code that is still serving traffic (add
    columns/tables first; remove them in a later deploy).
-4. **Preview deployments** run the same build command. Give the Preview environment its
-   own database (a Neon branch) — or set `SKIP_DB_MIGRATE=1` there. Never point previews at
-   the production `DATABASE_URL`.
+4. **Preview deployments must not share production's database.** In Vercel → Settings →
+   Environment Variables, scope the production `DATABASE_URL` / `DATABASE_URL_UNPOOLED`
+   to **Production only**. For Preview either
+   - set **no** `DATABASE_URL` (the build fails fast — previews are then not used), or
+   - give Preview its **own** database — a Neon branch — by setting `DATABASE_URL` (and
+     `DATABASE_URL_UNPOOLED`) for the Preview scope to the branch's connection strings, plus
+     `MIGRATE_PREVIEW_DATABASE=1` so preview builds migrate that branch.
+
+   Never set `MIGRATE_PREVIEW_DATABASE=1` while Preview still points at production: a
+   preview build of an unreviewed branch would then alter production's schema, and preview
+   code would read and write production data either way.
 5. **Cron**: `vercel.json` schedules `GET /api/cron/jobs` every 5 minutes (production
    deployment only). Vercel sends `Authorization: Bearer $CRON_SECRET` automatically once
    the variable exists. Every-5-minutes requires a paid Vercel plan (Hobby allows daily
