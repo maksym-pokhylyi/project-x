@@ -252,6 +252,8 @@ Extensions to the shadcn APIs:
   the state. Default role is `alert`; pass `role="status"` or `role="note"` when it should not interrupt.
 - `Card`: no shadow by default. `CardTitle` is serif 20/26; a utility card adds `font-sans text-base`.
 - `Table`: `framed`, `containerClassName` (give it a max height for the sticky header), `numeric` on `TableHead` / `TableCell`.
+- `Disclosure`: `variant="inline"` for a secondary step inside a card or a table row — a link-styled summary with the chevron
+  (the default stays the serif question of the FAQ).
 - `Progress`: `tone` = `brand` | `warning` | `danger`.
 
 ### 8.3 App shell patterns
