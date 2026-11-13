@@ -63,7 +63,9 @@ const STOP_WORDS = new Set(
     "the a an of to and or for in on be must shall should will is are with by at as that this their its it any all each have has hold holds held " +
     "bidder bidders supplier suppliers tenderer tenderers contractor contractors applicant company organisation " +
     "provide provides provided providing submit include confirm confirmation evidence details detail copy copies give show demonstrate " +
-    "required requirement requirements least minimum than not less no from which where if when per"
+    "required requirement requirements least minimum than not less no from which where if when per " +
+    // Number words are compared as figures (see magnitudeSet), not as wording.
+    "one two three four five six seven eight nine ten twelve"
   ).split(" "),
 );
 
@@ -184,6 +186,9 @@ export function sameRequirement(a: Pick<DraftRequirement, "requirement" | "thres
   if (similarity >= 0.6) return true;
   // Same subject (shared discriminators) and one wording inside the other.
   if (textContainment(a.requirement, b.requirement) >= 0.8 && (aboutA.length > 0 || similarity >= 0.4)) return true;
+  // Same named subject and the same figures ("professional indemnity insurance of £1m" and
+  // "professional indemnity cover of £1,000,000 is required"): wording may differ more.
+  if (aboutA.length > 0 && figuresA && figuresA === figuresB && similarity >= 0.4) return true;
   const quoteA = tightText(a.quote ?? "");
   const quoteB = tightText(b.quote ?? "");
   // Same evidence sentence, same subject, same figures: one requirement worded twice.

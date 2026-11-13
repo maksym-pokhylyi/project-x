@@ -97,7 +97,8 @@ export const STANDING_NOTICE = "AI-assisted analysis. Check against the tender d
 
 /** Counts words the way buyers do: whitespace-separated tokens. Evidence markers are not words. */
 export function countWords(text: string): number {
-  const cleaned = text.replace(/\[E\d+\]/g, " ").trim();
+  // The marker goes together with the space before it, so "monthly [E2]." is one word, not two.
+  const cleaned = text.replace(/\s*\[E\d+\]/g, "").trim();
   if (!cleaned) return 0;
   return cleaned.split(/\s+/).length;
 }

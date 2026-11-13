@@ -21,14 +21,19 @@ const CONTROL_CHARS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/;
 
 /**
  * Repairs a corruption measured in the spike (REPORT.md §4.6 #7): some models return
- * non-ASCII characters as NUL + two hex digits ("£" arrives as NUL + "A3"), as runs of
- * NULs, or as other control characters. Left alone it shows users "A314,000" for
- * "£14,000" and breaks quote matching.
+ * non-ASCII characters as NUL + hex digits ("£" arrives as NUL + "A3", a curly quote as
+ * NUL + "2019"), as runs of NULs, or as other control characters. Left alone it shows
+ * users "A314,000" for "£14,000" and breaks quote matching.
+ *
+ * Only two unambiguous forms are decoded: a four-digit code point from the General
+ * Punctuation block (20xx: quotes, dashes, bullets) and a two-digit Latin-1 character
+ * (A0–FF: £, ©, é …). Anything else loses its control character and keeps its text.
  */
 export function sanitizeModelString(value: string): string {
   if (!CONTROL_CHARS.test(value)) return value;
   return value
-    .replace(/\u0000([0-9A-F]{2})(?![0-9A-Fa-f]{2}\b)/g, (_whole, hex: string) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\u0000(20[0-9A-F]{2})/g, (_whole, hex: string) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\u0000([A-F][0-9A-F])/g, (_whole, hex: string) => String.fromCharCode(parseInt(hex, 16)))
     .replace(/\u0002s/g, "'s")
     .replace(new RegExp(CONTROL_CHARS.source, "g"), "");
 }

@@ -68,7 +68,8 @@ export function trimToWordLimit(text: string, limit: number): string {
   let cut = 0;
   for (let i = 0; i < tokens.length; i += 1) {
     const token = tokens[i]!;
-    if (token.trim() === "" || /^\[E\d+\]$/.test(token)) continue;
+    // An evidence marker, alone or with punctuation attached ("[E2]."), is not a word.
+    if (token.trim() === "" || (token.includes("[E") && !/[\p{L}\p{N}]/u.test(token.replace(/\[E\d+\]/g, "")))) continue;
     words += 1;
     if (words > limit) break;
     cut = i + 1;
