@@ -1,6 +1,6 @@
 # Действия владельца
 
-Обновлено: 2026-11-13 15:15 UTC. Здесь всё, что требует человека: покупки, аккаунты, подтверждения.
+Обновлено: 2026-11-13 19:40 UTC. Здесь всё, что требует человека: покупки, аккаунты, подтверждения.
 Статусы: ☐ ждёт · ◐ в процессе · ☑ сделано.
 
 ## Сейчас (влияет на сборку и запуск)
@@ -21,6 +21,8 @@
 | C | Реквизиты продавца для футера и юридических страниц | ответом в чат | — | Обязательные сведения о продавце; имя должно совпадать с документами при проверке Paddle | ☑ 13.11: Maksym Pokhylyi (FOP Pokhylyi Maksym Ihorovych), 14 Stoliarnyi Lane, Kremenchuk, Poltava Oblast, Ukraine — написание подтверждено владельцем; в футере имя и город, полный адрес на юридических страницах |
 | D | Входящая почта для `hello@bidfolio.co.uk` | improvmx.com (бесплатная переадресация на личный ящик) | $0 | Адрес указан на сайте и в письмах как контактный: вопросы клиентов, запросы на удаление данных, письма Paddle и регулятора | ☑ 13.11: владелец настроил ImprovMX; MX-записи (`mx1/mx2.improvmx.com`) и SPF добавлены через Vercel, в DNS видны; тестовое письмо отправлено 14:47 UTC — владельцу проверить, что оно пришло в личный ящик. Отвечать с адреса `hello@` пока нельзя (только приём) — при необходимости Google Workspace (~$7/мес) |
 | E | Задать «Default payment link» в тестовом аккаунте Paddle: `https://bidfolio.co.uk/pay` | sandbox-vendors.paddle.com → Checkout → Checkout settings → Default payment link → Save | — | Без этой настройки Paddle отклоняет любое оформление заказа и любую транзакцию (ответ API `transaction_default_checkout_url_not_set`) — тестовая оплата не начнётся. То же самое нужно будет сделать в боевом аккаунте | ☑ 13.11 задано владельцем в тестовом аккаунте; в боевом аккаунте — повторить при переходе на реальные платежи |
+| F | Создать клиентский токен Paddle (тестовый аккаунт) и положить его в Vercel | sandbox-vendors.paddle.com → Developer Tools → Authentication → вкладка «Client-side tokens» → New client-side token (имя `Bidfolio web`) → скопировать значение (`test_…`). Затем Vercel → проект `bidfolio` → Settings → Environment Variables → `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN` (Production + Preview, обычная переменная — токен публичный, он и так виден в браузере) | — | Без него на сайте не открывается окно оплаты Paddle. Создать сам не могу: среда запрещает мне выпускать любые ключи и токены | ☐ |
+| G | Создать адрес уведомлений (webhook) в Paddle и положить его секрет в Vercel | sandbox-vendors.paddle.com → Developer Tools → Notifications → New destination: Description `Bidfolio production`, Type `Webhook`, URL `https://bidfolio.co.uk/api/webhooks/paddle`, Usage type `Platform`, события — отметить группы **Subscription** (created, activated, updated, canceled, paused, resumed, past_due, trialing), **Transaction** (completed, payment_failed), **Customer** (created, updated), **Adjustment** (created, updated) → Save. Открыть созданный адрес → скопировать «Secret key» (`pdl_ntfset_…`). Затем Vercel → `PADDLE_WEBHOOK_SECRET` (только Production, тип Sensitive) | — | По этим уведомлениям сайт узнаёт об оплате и включает тариф или начисляет Bid Pass. Без секрета уведомления отклоняются | ☐ |
 
 ## На этой неделе (до первой рассылки)
 
