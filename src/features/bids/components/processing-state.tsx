@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { retryProcessingAction } from "@/features/bids/actions";
 import { PROCESSING_STAGE_LABELS, type ProcessingStage } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type StageStatus = "pending" | "running" | "done" | "failed";
 
@@ -48,26 +49,26 @@ function StageIcon({ status }: { status: StageStatus }) {
   if (status === "done") {
     return (
       <svg viewBox="0 0 20 20" width="20" height="20" role="img" aria-label="Done" className="mt-px shrink-0">
-        <circle cx="10" cy="10" r="8" fill="none" stroke="var(--bid-brand)" strokeWidth="1.8" />
-        <path d="M6.3 10.3l2.6 2.6 4.8-5" fill="none" stroke="var(--bid-brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="10" cy="10" r="8" fill="none" stroke="var(--brand)" strokeWidth="1.8" />
+        <path d="M6.3 10.3l2.6 2.6 4.8-5" fill="none" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     );
   }
   if (status === "failed") {
     return (
       <svg viewBox="0 0 20 20" width="20" height="20" role="img" aria-label="Stopped" className="mt-px shrink-0">
-        <circle cx="10" cy="10" r="8" fill="none" stroke="var(--bid-danger)" strokeWidth="1.8" />
-        <path d="M10 5.8v5M10 13.8v.4" fill="none" stroke="var(--bid-danger)" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="10" cy="10" r="8" fill="none" stroke="var(--danger)" strokeWidth="1.8" />
+        <path d="M10 5.8v5M10 13.8v.4" fill="none" stroke="var(--danger)" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     );
   }
   return status === "running" ? (
     <svg viewBox="0 0 20 20" width="20" height="20" role="img" aria-label="In progress" className="mt-px shrink-0">
-      <circle cx="10" cy="10" r="7.2" fill="none" stroke="var(--bid-ink)" strokeWidth="3.4" />
+      <circle cx="10" cy="10" r="7.2" fill="none" stroke="var(--ink)" strokeWidth="3.4" />
     </svg>
   ) : (
     <svg viewBox="0 0 20 20" width="20" height="20" role="img" aria-label="Waiting" className="mt-px shrink-0">
-      <circle cx="10" cy="10" r="8" fill="none" stroke="var(--bid-muted)" strokeWidth="1.5" />
+      <circle cx="10" cy="10" r="8" fill="none" stroke="var(--ink-2)" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -144,16 +145,16 @@ export function ProcessingState({ bidId, initial }: { bidId: string; initial: St
   const stageNumber = current >= 0 ? current + 1 : Math.min(stages.length, stages.filter((entry) => entry.status === "done").length + 1);
 
   return (
-    <section aria-labelledby="progress-h" data-testid="processing-state" data-status={state.status} className={cn("bid-card bid-scope px-5 py-6 sm:px-7", state.status === "failed" ? "border-(--bid-danger)" : "")}>
+    <section aria-labelledby="progress-h" data-testid="processing-state" data-status={state.status} className={cn("bid-card bid-scope px-5 py-6 sm:px-7", state.status === "failed" ? "border-danger" : "")}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="progress-h" className="bid-h3">
           {state.status === "failed" ? "The check stopped" : "Building the check"}{" "}
-          <span className="font-normal text-(--bid-muted)">
+          <span className="font-normal text-ink-2">
             · stage {stageNumber} of {stages.length}
           </span>
         </h2>
         {active ? (
-          <p className="bid-mono text-xs text-(--bid-muted) tabular-nums" aria-hidden>
+          <p className="bid-mono text-xs text-ink-2 tabular-nums" aria-hidden>
             {elapsedLabel(state.startedAt, now)}
           </p>
         ) : null}
@@ -164,14 +165,14 @@ export function ProcessingState({ bidId, initial }: { bidId: string; initial: St
           <li key={entry.stage} data-stage={entry.stage} data-stage-status={entry.status} aria-current={entry.status === "running" ? "step" : undefined} className="flex flex-col gap-3.5">
             <span
               aria-hidden
-              className={cn("h-1.5 rounded-[3px]", entry.status === "done" ? "bg-(--bid-brand)" : entry.status === "running" ? "bg-(--bid-ink) motion-safe:animate-pulse" : entry.status === "failed" ? "bg-(--bid-danger)" : "bg-(--bid-line)")}
+              className={cn("h-1.5 rounded-chip", entry.status === "done" ? "bg-brand" : entry.status === "running" ? "bg-ink motion-safe:animate-pulse" : entry.status === "failed" ? "bg-danger" : "bg-line")}
             />
             <div className="flex gap-2.5">
               <StageIcon status={entry.status} />
               <div className="flex min-w-0 flex-col gap-0.5">
-                <span className={cn("text-[15px]", entry.status === "running" ? "font-semibold" : "font-medium", entry.status === "pending" ? "text-(--bid-muted)" : "")}>{PROCESSING_STAGE_LABELS[entry.stage]}</span>
-                <span className={cn("text-[13px] tabular-nums", entry.status === "running" ? "" : "text-(--bid-muted)")}>{detail(entry.stage, entry.status, state.counts)}</span>
-                {entry.status !== "done" && entry.note && state.status !== "failed" ? <span className="text-[13px] text-(--bid-amber-ink)">{entry.note}</span> : null}
+                <span className={cn("text-15", entry.status === "running" ? "font-semibold" : "font-medium", entry.status === "pending" ? "text-ink-2" : "")}>{PROCESSING_STAGE_LABELS[entry.stage]}</span>
+                <span className={cn("text-13 tabular-nums", entry.status === "running" ? "" : "text-ink-2")}>{detail(entry.stage, entry.status, state.counts)}</span>
+                {entry.status !== "done" && entry.note && state.status !== "failed" ? <span className="text-13 text-accent-ink">{entry.note}</span> : null}
               </div>
             </div>
           </li>
@@ -179,29 +180,29 @@ export function ProcessingState({ bidId, initial }: { bidId: string; initial: St
       </ol>
 
       {active ? (
-        <p className="mt-5 border-t border-(--bid-line) pt-4 text-[15px]">
+        <p className="mt-5 border-t border-line pt-4 text-15">
           You can leave this page. The check carries on, and it will be here when you come back. It usually takes two to four minutes; we e-mail you when it is ready.
         </p>
       ) : null}
 
       {state.status === "failed" && state.failure ? (
-        <div role="alert" className="mt-5 rounded-lg bg-(--bid-danger-tint) px-4 py-3.5 text-sm">
-          <p className="font-semibold text-(--bid-danger)">Stopped at “{PROCESSING_STAGE_LABELS[state.failure.stage]}”</p>
+        <div role="alert" className="mt-5 rounded-card bg-danger-tint px-4 py-3.5 text-sm">
+          <p className="font-semibold text-danger">Stopped at “{PROCESSING_STAGE_LABELS[state.failure.stage]}”</p>
           <p className="mt-1">{state.failure.message}</p>
           <p className="mt-1">Nothing found so far has been lost. Trying again continues from this stage and does not use another check from your plan.</p>
           <div className="mt-3 flex flex-wrap items-center gap-4">
-            <button type="button" className="bid-btn bid-btn-primary bid-btn-sm" onClick={retry} disabled={retrying} data-testid="retry-check">
+            <Button size="sm" type="button"  onClick={retry} disabled={retrying} data-testid="retry-check">
               <RotateCw aria-hidden className={cn("size-4", retrying ? "animate-spin" : "")} />
               {retrying ? "Trying again…" : "Try again"}
-            </button>
+            </Button>
             <a href="/contact" className="bid-link text-sm font-medium">
               Contact support
             </a>
           </div>
-          {retryError ? <p className="mt-2 text-sm text-(--bid-danger)">{retryError}</p> : null}
+          {retryError ? <p className="mt-2 text-sm text-danger">{retryError}</p> : null}
         </div>
       ) : null}
-      {pollError && active ? <p className="mt-3 text-[13px] text-(--bid-muted)">Connection lost — still trying. The check carries on at our end.</p> : null}
+      {pollError && active ? <p className="mt-3 text-13 text-ink-2">Connection lost — still trying. The check carries on at our end.</p> : null}
     </section>
   );
 }

@@ -45,9 +45,9 @@ export function PartialResults({
         <section aria-labelledby="partial-req-h" className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <h2 id="partial-req-h" className="bid-h2">
-              Requirements found so far <span className="bid-mono text-sm font-normal text-(--bid-muted) tabular-nums">· {requirements.length}</span>
+              Requirements found so far <span className="bid-mono text-sm font-normal text-ink-2 tabular-nums">· {requirements.length}</span>
             </h2>
-            <p className="text-sm text-(--bid-muted)">Each line is quoted word for word from the pack. Open a reference to read it on the page. They are checked against your company in the last stage.</p>
+            <p className="text-sm text-ink-2">Each line is quoted word for word from the pack. Open a reference to read it on the page. They are checked against your company in the last stage.</p>
             <SourceLegend className="mt-1" />
           </div>
           <div className="bid-card">
@@ -55,8 +55,8 @@ export function PartialResults({
               <ul aria-hidden className="flex flex-col">
                 {[72, 56, 64].map((width, index) => (
                   <li key={index} className={cn("flex flex-col gap-3 px-4 py-5 sm:px-6", index > 0 ? "bid-rule" : "")}>
-                    <span className="h-3.5 rounded bg-(--bid-paper-deep)" style={{ width: `${width}%` }} />
-                    <span className="h-3 w-40 rounded bg-(--bid-paper-deep)" />
+                    <span className="h-3.5 rounded bg-paper-deep" style={{ width: `${width}%` }} />
+                    <span className="h-3 w-40 rounded bg-paper-deep" />
                   </li>
                 ))}
               </ul>
@@ -66,9 +66,9 @@ export function PartialResults({
                   const quoted = Boolean(item.citation?.quote) && item.citation !== null && verificationState(item.citation) !== "unverified";
                   return (
                     <li key={item.id} className={cn("flex flex-wrap items-start gap-x-6 gap-y-3 px-4 py-[18px] sm:px-6", index > 0 ? "bid-rule" : "")} data-testid="partial-requirement">
-                      <span className="bid-mono w-full shrink-0 pt-1 text-[13px] font-medium sm:w-14">{displayRef(item.ref)}</span>
+                      <span className="bid-mono w-full shrink-0 pt-1 text-13 font-medium sm:w-14">{displayRef(item.ref)}</span>
                       <div className="flex min-w-0 flex-[1_1_380px] flex-col items-start gap-2.5">
-                        {quoted ? <p className="bid-quote">“{item.citation!.quote}”</p> : <p className="text-[15px] leading-[1.5]">{item.text}</p>}
+                        {quoted ? <p className="bid-quote">“{item.citation!.quote}”</p> : <p className="text-15 leading-[1.5]">{item.text}</p>}
                         <CitationMark citation={item.citation} links={links} />
                       </div>
                       <div className="flex-[0_1_160px]">{companyChecked ? <StatusPill status={item.companyStatus} /> : <span className="bid-pill bid-pill-neutral">Not checked yet</span>}</div>
@@ -90,49 +90,49 @@ export function PartialResults({
         <section aria-labelledby="partial-q-h" className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <h2 id="partial-q-h" className="bid-h2">
-              Scored questions found so far <span className="bid-mono text-sm font-normal text-(--bid-muted) tabular-nums">· {scored.length}</span>
+              Scored questions found so far <span className="bid-mono text-sm font-normal text-ink-2 tabular-nums">· {scored.length}</span>
             </h2>
-            <p className="text-sm text-(--bid-muted)">Weights and word limits are the buyer&rsquo;s. {questionsListed ? "" : "More questions may still be listed."}</p>
+            <p className="text-sm text-ink-2">Weights and word limits are the buyer&rsquo;s. {questionsListed ? "" : "More questions may still be listed."}</p>
           </div>
           <div className="bid-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[520px] border-collapse text-sm">
                 <thead>
-                  <tr className="text-left text-xs text-(--bid-muted)">
-                    <th scope="col" className="border-b border-(--bid-line) py-3 pr-3 pl-6 font-semibold">Question</th>
-                    <th scope="col" className="border-b border-(--bid-line) p-3 text-right font-semibold">Weight</th>
-                    <th scope="col" className="border-b border-(--bid-line) py-3 pr-6 pl-3 text-right font-semibold">Word limit</th>
+                  <tr className="text-left text-xs text-ink-2">
+                    <th scope="col" className="border-b border-line py-3 pr-3 pl-6 font-semibold">Question</th>
+                    <th scope="col" className="border-b border-line p-3 text-right font-semibold">Weight</th>
+                    <th scope="col" className="border-b border-line py-3 pr-6 pl-3 text-right font-semibold">Word limit</th>
                   </tr>
                 </thead>
                 <tbody>
                   {scored.map((question) => (
                     <tr key={question.id}>
-                      <td className="border-b border-(--bid-line) py-3.5 pr-3 pl-6">
-                        {question.ref ? <span className="bid-mono mr-2.5 text-[13px] text-(--bid-muted)">{question.ref}</span> : null}
+                      <td className="border-b border-line py-3.5 pr-3 pl-6">
+                        {question.ref ? <span className="bid-mono mr-2.5 text-13 text-ink-2">{question.ref}</span> : null}
                         <span className="font-semibold">{question.title ?? question.text.slice(0, 90)}</span>
                       </td>
-                      <td className="border-b border-(--bid-line) px-3 py-3.5 text-right tabular-nums">{question.weighting !== null ? `${question.weighting}%` : "—"}</td>
-                      <td className="border-b border-(--bid-line) py-3.5 pr-6 pl-3 text-right tabular-nums">{question.wordLimit ? question.wordLimit.toLocaleString("en-GB") : "—"}</td>
+                      <td className="border-b border-line px-3 py-3.5 text-right tabular-nums">{question.weighting !== null ? `${question.weighting}%` : "—"}</td>
+                      <td className="border-b border-line py-3.5 pr-6 pl-3 text-right tabular-nums">{question.wordLimit ? question.wordLimit.toLocaleString("en-GB") : "—"}</td>
                     </tr>
                   ))}
                   {questionsListed
                     ? null
                     : [44, 28].map((width, index) => (
                         <tr key={`skeleton-${index}`} aria-hidden>
-                          <td className={cn("py-4 pr-3 pl-6", index === 0 ? "border-b border-(--bid-line)" : "")}>
-                            <span className="block h-3 rounded bg-(--bid-paper-deep)" style={{ width: `${width}%` }} />
+                          <td className={cn("py-4 pr-3 pl-6", index === 0 ? "border-b border-line" : "")}>
+                            <span className="block h-3 rounded bg-paper-deep" style={{ width: `${width}%` }} />
                           </td>
-                          <td className={cn("px-3 py-4", index === 0 ? "border-b border-(--bid-line)" : "")}>
-                            <span className="ml-auto block h-3 w-8 rounded bg-(--bid-paper-deep)" />
+                          <td className={cn("px-3 py-4", index === 0 ? "border-b border-line" : "")}>
+                            <span className="ml-auto block h-3 w-8 rounded bg-paper-deep" />
                           </td>
-                          <td className={cn("py-4 pr-6 pl-3", index === 0 ? "border-b border-(--bid-line)" : "")}>
-                            <span className="ml-auto block h-3 w-10 rounded bg-(--bid-paper-deep)" />
+                          <td className={cn("py-4 pr-6 pl-3", index === 0 ? "border-b border-line" : "")}>
+                            <span className="ml-auto block h-3 w-10 rounded bg-paper-deep" />
                           </td>
                         </tr>
                       ))}
                   {questionsListed && scored.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="px-6 py-5 text-(--bid-muted)">
+                      <td colSpan={3} className="px-6 py-5 text-ink-2">
                         No scored written questions were found in the pack.
                       </td>
                     </tr>
@@ -148,23 +148,23 @@ export function PartialResults({
         <section aria-labelledby="coverage-h" className="bid-card px-5 pt-[18px] pb-2" data-testid="coverage-card">
           <h2 id="coverage-h" className="bid-h3">
             Coverage{" "}
-            <span className="font-normal text-(--bid-muted)">
+            <span className="font-normal text-ink-2">
               · {coverage.read} {coverage.read === 1 ? "file" : "files"} read{skipped > 0 ? `, ${skipped} skipped` : ""}
             </span>
           </h2>
           <ul className="mt-2 flex flex-col text-xs">
             {files.map((file) => (
-              <li key={file.id} className="flex min-h-10 items-center justify-between gap-3 border-t border-(--bid-line)">
+              <li key={file.id} className="flex min-h-10 items-center justify-between gap-3 border-t border-line">
                 {file.read ? (
                   <a href={`/api/bids/${bidId}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="bid-mono bid-link-quiet min-w-0 truncate" title={file.name}>
                     {file.name}
                   </a>
                 ) : (
-                  <span className="bid-mono min-w-0 truncate text-(--bid-muted)" title={file.name}>
+                  <span className="bid-mono min-w-0 truncate text-ink-2" title={file.name}>
                     {file.name}
                   </span>
                 )}
-                <span className={cn("max-w-[55%] shrink-0 text-right", file.read ? "text-(--bid-muted)" : file.size === "reading…" ? "text-(--bid-muted)" : "font-semibold")} title={file.note ?? undefined}>
+                <span className={cn("max-w-[55%] shrink-0 text-right", file.read ? "text-ink-2" : file.size === "reading…" ? "text-ink-2" : "font-semibold")} title={file.note ?? undefined}>
                   {file.read ? file.size : file.size === "reading…" ? "reading…" : `Skipped: ${file.note ? file.note.replace(/\.$/, "").slice(0, 60) : "not readable"}`}
                 </span>
               </li>

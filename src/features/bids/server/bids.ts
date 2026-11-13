@@ -57,7 +57,7 @@ function parse<T>(schema: z.ZodType<T>, input: unknown): T {
 
 // --- Bids -------------------------------------------------------------------------------
 
-export type BidListItem = BidRow & { requirementCount: number; questionCount: number; draftedCount: number; finalCount: number };
+export type BidListItem = BidRow & { requirementCount: number; questionCount: number; draftedCount: number; finalCount: number; /** Drafted answers that have been marked. */ markedCount: number };
 
 export async function listBids(ctx: Scope, options: { includeArchived?: boolean } = {}): Promise<BidListItem[]> {
   const rows = await db
@@ -79,6 +79,7 @@ export async function listBids(ctx: Scope, options: { includeArchived?: boolean 
         count: sql<number>`count(*)::int`,
         drafted: sql<number>`count(*) filter (where ${bidQuestions.status} <> 'not_started')::int`,
         final: sql<number>`count(*) filter (where ${bidQuestions.status} = 'final')::int`,
+        marked: sql<number>`count(*) filter (where ${bidQuestions.status} <> 'not_started' and ${bidQuestions.evaluation} is not null)::int`,
       })
       .from(bidQuestions)
       .where(and(eq(bidQuestions.organizationId, ctx.organization.id), inArray(bidQuestions.bidId, ids)))
@@ -92,6 +93,7 @@ export async function listBids(ctx: Scope, options: { includeArchived?: boolean 
     questionCount: questionsById.get(row.id)?.count ?? 0,
     draftedCount: questionsById.get(row.id)?.drafted ?? 0,
     finalCount: questionsById.get(row.id)?.final ?? 0,
+    markedCount: questionsById.get(row.id)?.marked ?? 0,
   }));
 }
 

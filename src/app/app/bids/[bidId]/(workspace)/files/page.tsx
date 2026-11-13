@@ -40,32 +40,32 @@ export default async function FilesPage({ params }: { params: Promise<{ bidId: s
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse text-sm">
             <thead>
-              <tr className="text-left text-xs text-(--bid-muted)">
-                <th scope="col" className="border-b border-(--bid-line) py-3 pr-3 pl-6 font-semibold">File</th>
-                <th scope="col" className="border-b border-(--bid-line) p-3 text-right font-semibold">Read</th>
-                <th scope="col" className="border-b border-(--bid-line) p-3 text-right font-semibold">Items citing it</th>
-                <th scope="col" className="border-b border-(--bid-line) py-3 pr-6 pl-3 font-semibold">Notes</th>
+              <tr className="text-left text-xs text-ink-2">
+                <th scope="col" className="border-b border-line py-3 pr-3 pl-6 font-semibold">File</th>
+                <th scope="col" className="border-b border-line p-3 text-right font-semibold">Read</th>
+                <th scope="col" className="border-b border-line p-3 text-right font-semibold">Items citing it</th>
+                <th scope="col" className="border-b border-line py-3 pr-6 pl-3 font-semibold">Notes</th>
               </tr>
             </thead>
             <tbody>
               {items.map((file, index) => {
-                const cell = cn("py-3 align-top", index < items.length - 1 ? "border-b border-(--bid-line)" : "");
+                const cell = cn("py-3 align-top", index < items.length - 1 ? "border-b border-line" : "");
                 return (
                   <tr key={file.id} data-testid="pack-file" data-read={file.read ? "true" : "false"}>
                     <td className={cn(cell, "pr-3 pl-6")}>
                       {file.read ? (
-                        <a href={`/api/bids/${bid.id}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="bid-mono bid-link-quiet text-[13px] break-all">
+                        <a href={`/api/bids/${bid.id}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="bid-mono bid-link-quiet text-13 break-all">
                           {file.name}
                         </a>
                       ) : (
-                        <span className="bid-mono text-[13px] break-all">{file.name}</span>
+                        <span className="bid-mono text-13 break-all">{file.name}</span>
                       )}
                     </td>
-                    <td className={cn(cell, "px-3 text-right whitespace-nowrap tabular-nums", file.read && file.analysed ? "" : "font-semibold text-(--bid-danger)")}>
+                    <td className={cn(cell, "px-3 text-right whitespace-nowrap tabular-nums", file.read && file.analysed ? "" : "font-semibold text-danger")}>
                       {file.read && !file.analysed ? "not analysed" : file.size}
                     </td>
                     <td className={cn(cell, "px-3 text-right tabular-nums")}>{file.items === null ? "—" : file.items}</td>
-                    <td className={cn(cell, "pr-6 pl-3 text-[13px]")}>
+                    <td className={cn(cell, "pr-6 pl-3 text-13")}>
                       {file.note ??
                         (file.transcribedPages > 0
                           ? `${file.transcribedPages} scanned page${file.transcribedPages === 1 ? "" : "s"} transcribed by AI — check quotes against the original.`
@@ -93,7 +93,7 @@ export default async function FilesPage({ params }: { params: Promise<{ bidId: s
           {passes.length > 0 ? (
             <div>
               <p className="font-medium">Readings that completed</p>
-              <ul className="mt-1 flex list-disc flex-col gap-0.5 pl-5 text-[13px]">
+              <ul className="mt-1 flex list-disc flex-col gap-0.5 pl-5 text-13">
                 {passes.map((pass) => (
                   <li key={pass}>{pass}</li>
                 ))}
@@ -102,19 +102,19 @@ export default async function FilesPage({ params }: { params: Promise<{ bidId: s
           ) : null}
           {coverage.failedPasses.length > 0 ? (
             <div>
-              <p className="font-medium text-(--bid-danger)">Readings that did not complete</p>
-              <ul className="mt-1 flex list-disc flex-col gap-0.5 pl-5 text-[13px]">
+              <p className="font-medium text-danger">Readings that did not complete</p>
+              <ul className="mt-1 flex list-disc flex-col gap-0.5 pl-5 text-13">
                 {coverage.failedPasses.map((pass) => (
                   <li key={pass}>{pass}</li>
                 ))}
               </ul>
             </div>
           ) : null}
-          <p className="text-[13px] text-(--bid-muted)">
+          <p className="text-13 text-ink-2">
             Two different AI models read the whole pack independently; questionnaires, response templates and clarification files get a reading of their own. Their findings are combined and every quote is checked by
             program, not by a model. Errors are far more often omissions than inventions — so skim the files for anything the check does not mention.
           </p>
-          {Object.keys(stats.models).length > 0 ? <p className="bid-mono text-xs text-(--bid-muted)">Models: {[...new Set(Object.values(stats.models).flatMap((value) => value.split(" + ")))].join(", ")}</p> : null}
+          {Object.keys(stats.models).length > 0 ? <p className="bid-mono text-xs text-ink-2">Models: {[...new Set(Object.values(stats.models).flatMap((value) => value.split(" + ")))].join(", ")}</p> : null}
         </section>
       ) : null}
     </div>

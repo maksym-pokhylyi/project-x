@@ -1,9 +1,9 @@
 {
-  "buttonAsChildLink": 55,
+  "buttonAsChildLink": 54,
   "controlHeightOverride": 5,
-  "magicOffset": 2,
+  "magicOffset": 0,
   "hardCodedColor": 1,
-  "arbitraryFontSize": 159,
-  "inlineStyle": 12,
-  "legacyToken": 327
+  "arbitraryFontSize": 16,
+  "inlineStyle": 11,
+  "legacyToken": 259
 }
