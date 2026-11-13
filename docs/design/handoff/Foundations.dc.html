@@ -16,7 +16,7 @@ ul{padding:0;list-style:none}
 a{color:#161A1D}a:hover{color:#0F5A47}
 </style>
 </helmet>
-<div style="width: 1000px; height: 1800px; box-sizing: border-box; padding: 56px; background: #FAF8F3; color: #161A1D; font-family: Inter, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; gap: 28px">
+<div style="width: 1000px; height: 2040px; box-sizing: border-box; padding: 56px; background: #FAF8F3; color: #161A1D; font-family: Inter, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; gap: 28px">
 
   <div style="display: flex; justify-content: space-between; align-items: baseline">
     <span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #5A6165">Bidfolio identity</span>
@@ -223,6 +223,33 @@ a{color:#161A1D}a:hover{color:#0F5A47}
   </div>
 
   <div style="display: flex; flex-direction: column; gap: 12px">
+    <h2 style="font-size: 13px; font-weight: 600">Control sizes <span style="font-weight: 400; color: #5A6165">· an input and the button beside it are always the same height</span></h2>
+    <div style="display: flex; gap: 40px">
+      <div style="width: 400px; display: flex; flex-direction: column; gap: 8px">
+        <p style="font-size: 13px; line-height: 1.55">Inputs and buttons share one scale of three heights: <span style="font-weight: 600">44 px</span> in app toolbars, tables and filters, <span style="font-weight: 600">48 px</span> in forms, <span style="font-weight: 600">52 px</span> for search rows and forms on a phone.</p>
+        <p style="font-size: 13px; line-height: 1.55">Never mix two heights in one row. A button beside an input takes the input’s height, and a form’s submit button takes the height of its fields. Text inside is 15 px at 44 and 16 px at 48 and 52.</p>
+      </div>
+      <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="box-sizing: border-box; height: 44px; flex: 1 1 0; display: flex; align-items: center; padding: 0 12px; font-size: 15px; color: #5A6165; background: #FFFFFF; border: 1px solid #857F70; border-radius: 6px">Search documents</span>
+          <span style="box-sizing: border-box; height: 44px; display: flex; align-items: center; padding: 0 16px; font-size: 15px; font-weight: 600; color: #FFFFFF; background: #0F5A47; border-radius: 6px">Upload</span>
+          <span style="width: 76px; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; color: #5A6165">44 · app</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="box-sizing: border-box; height: 48px; flex: 1 1 0; display: flex; align-items: center; padding: 0 14px; font-size: 16px; color: #5A6165; background: #FFFFFF; border: 1px solid #857F70; border-radius: 6px">Work email</span>
+          <span style="box-sizing: border-box; height: 48px; display: flex; align-items: center; padding: 0 18px; font-size: 16px; font-weight: 600; color: #FFFFFF; background: #0F5A47; border-radius: 6px">Send</span>
+          <span style="width: 76px; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; color: #5A6165">48 · forms</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="box-sizing: border-box; height: 52px; flex: 1 1 0; display: flex; align-items: center; padding: 0 14px; font-size: 16px; color: #5A6165; background: #FFFFFF; border: 1px solid #857F70; border-radius: 6px">Company name or number</span>
+          <span style="box-sizing: border-box; height: 52px; display: flex; align-items: center; padding: 0 22px; font-size: 16px; font-weight: 600; color: #FFFFFF; background: #0F5A47; border-radius: 6px">Search</span>
+          <span style="width: 76px; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; color: #5A6165">52 · search</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px">
     <h2 style="font-size: 13px; font-weight: 600">Source reference states <span style="font-weight: 400; color: #5A6165">· every reference chip carries one</span></h2>
     <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
       <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px">
@@ -242,7 +269,7 @@ a{color:#161A1D}a:hover{color:#0F5A47}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1000,"height":1800}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1000,"height":2040}}'>
 class Component extends DCLogic {
   renderVals() {
     return {};
