@@ -22,10 +22,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SourceMark } from "@/components/ui/source-mark";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsCount, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipText, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function LoadingButtonDemo() {
   const [loading, setLoading] = useState(false);
@@ -223,13 +224,7 @@ export function CitationPopoverDemo() {
       On our current responsive repairs contract we attended 96.2% of emergency call-outs within two hours across 4,180 jobs in 2025–26.{" "}
       <Popover>
         <PopoverTrigger asChild>
-          <button
-            type="button"
-            className="hit-40 inline-flex min-w-5 items-center justify-center rounded-[3px] bg-brand-tint px-1 font-mono text-xs leading-5 font-medium text-brand transition-colors hover:bg-brand-mark data-[state=open]:bg-brand data-[state=open]:text-white"
-            aria-label="Source 3: KPI report Q4 2025-26.pdf, page 3"
-          >
-            3
-          </button>
+          <SourceMark number={3} label="KPI report Q4 2025-26.pdf, page 3" />
         </PopoverTrigger>
         <PopoverContent className="w-96">
           <p className="text-13 font-semibold text-ink">From your documents</p>
@@ -251,14 +246,9 @@ export function CitationPopoverDemo() {
 export function TooltipDemo() {
   return (
     <div className="flex items-center gap-6">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button type="button" className="rounded-sm text-sm font-medium text-ink underline decoration-ink-2 decoration-dotted underline-offset-4">
-            £102k
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>£101,950 as published</TooltipContent>
-      </Tooltip>
+      <TooltipText tip="£101,950 as published" className="text-sm">
+        £102k
+      </TooltipText>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="ghost" size="icon" aria-label="Copy link">
