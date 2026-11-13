@@ -365,7 +365,7 @@ export function NewBidForm({
           }}
           className={cn(
             "flex flex-col items-center justify-center gap-3 rounded-card border border-dashed px-6 py-8 text-center",
-            disabled ? "border-line bg-paper-deep opacity-70" : dragging ? "border-brand bg-brand-tint" : "border-line-strong bg-surface",
+            disabled ? "border-line bg-paper-deep text-ink-2" : dragging ? "border-brand bg-brand-tint" : "border-line-strong bg-surface",
           )}
         >
           <Upload aria-hidden className="size-6" strokeWidth={1.6} />
@@ -374,6 +374,7 @@ export function NewBidForm({
             ref={input}
             id="pack-files"
             data-testid="file-input"
+            aria-label="Tender pack files"
             multiple
             accept={ACCEPT_ATTRIBUTE}
             className="sr-only"
@@ -389,6 +390,7 @@ export function NewBidForm({
             className="sr-only"
             tabIndex={-1}
             aria-hidden
+            aria-label="Replacement file"
             onChange={(event) => {
               const file = event.target.files?.[0];
               const old = replacing.current;

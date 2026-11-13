@@ -717,7 +717,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
               <p className="mt-1">{evaluatorError} Your answer is saved; try marking it again in a moment.</p>
             </div>
           ) : evaluation ? (
-            <div data-testid="evaluation-result" className={cn("flex flex-col", evaluationStale ? "opacity-80" : "")}>
+            <div data-testid="evaluation-result" data-stale={evaluationStale ? "true" : undefined} className="flex flex-col">
               {evaluationStale ? (
                 <Callout tone="warning" className="mt-4">
                   The answer has changed since it was marked. Mark it again before relying on this.

@@ -167,7 +167,7 @@ export function QuestionsView({
                       {question.section ? <span className="text-ink-2">{question.section}</span> : null}
                       <CitationMark citation={question.citation} links={links} />
                       {(question.provenance?.notes ?? []).map((note) => (
-                        <span key={note} className="text-warning">
+                        <span key={note} className="text-accent-ink">
                           {note}
                         </span>
                       ))}
@@ -175,12 +175,12 @@ export function QuestionsView({
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
                       <StatusStepper status={question.status} />
                       {question.status !== "not_started" ? (
-                        <span className={cn("text-xs tabular-nums", limitState === "over" ? "font-medium text-danger" : limitState === "near" ? "text-warning" : "text-ink-2")}>
+                        <span className={cn("text-xs tabular-nums", limitState === "over" ? "font-medium text-danger" : limitState === "near" ? "text-accent-ink" : "text-ink-2")}>
                           {question.wordCount} words{limit ? ` of ${limit}` : ""}
                           {limitState === "over" ? " — over limit" : ""}
                         </span>
                       ) : null}
-                      {question.gaps > 0 ? <span className="text-xs font-medium text-warning">{question.gaps} evidence gap{question.gaps === 1 ? "" : "s"}</span> : null}
+                      {question.gaps > 0 ? <span className="text-xs font-medium text-accent-ink">{question.gaps} evidence gap{question.gaps === 1 ? "" : "s"}</span> : null}
                       {question.score !== null ? (
                         <span className="text-xs text-ink-2">
                           Marked {question.score}/{question.maxEvaluated}

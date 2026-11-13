@@ -16,7 +16,7 @@ export function FactConfirm({ bidId, field, confirmedAt, readOnly }: { bidId: st
   const [pending, startTransition] = useTransition();
   if (readOnly) {
     return confirmed ? (
-      <span className="inline-flex items-center gap-1 text-xs text-success">
+      <span className="inline-flex items-center gap-1 text-xs text-brand">
         <Check aria-hidden className="size-3" /> Confirmed against the documents
       </span>
     ) : null;

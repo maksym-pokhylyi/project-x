@@ -2,8 +2,7 @@
 
 import { ExternalLink, X } from "lucide-react";
 import { Popover } from "radix-ui";
-import { VERIFICATION_LABELS, verificationState, type VerificationState } from "@/features/bids/citation-state";
-import { describeLoc } from "@/features/bids/locations";
+import { verificationState, type VerificationState } from "@/features/bids/citation-state";
 import type { Citation } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
 import { ReferenceChipButton, ReferenceStateMark } from "@/components/ui/reference-chip";
@@ -131,6 +130,10 @@ export function SourceLegend({ className }: { className?: string }) {
  * that page. `variant="chip"` is the boxed reference under a quoted line; `variant="ref"`
  * is the quiet underlined reference used in fact cards and side lists. Both always carry
  * the verification state — a quote our own check could not find never looks verified.
+ *
+ * The trigger has no `aria-label`: its accessible name is the text it shows (file, page,
+ * place) followed by the state word the chip carries for screen readers, so what is heard
+ * starts with what is seen (WCAG 2.5.3, label in name).
  */
 export function CitationMark({
   citation,
@@ -156,7 +159,6 @@ export function CitationMark({
         <ReferenceChipButton
           data-testid="citation-mark"
           data-verified={citation.verified ? "true" : "false"}
-          aria-label={`Source, ${VERIFICATION_LABELS[state].toLowerCase()}: ${citation.fileName}${citation.loc ? `, ${describeLoc(citation.loc)}` : ""}`}
           file={parts.file}
           page={parts.page}
           clause={parts.clause}
@@ -172,6 +174,7 @@ export function CitationMark({
           sideOffset={6}
           collisionPadding={12}
           data-testid="citation-popover"
+          aria-label={`Source: ${citationLabel(citation)}`}
           className="rounded-card border border-line bg-surface text-ink shadow-overlay z-50 w-[min(27rem,calc(100vw-1.5rem))] p-4 text-sm outline-none"
         >
           <div className="flex items-start justify-between gap-2">

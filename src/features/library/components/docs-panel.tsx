@@ -135,6 +135,7 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
           className="sr-only"
           tabIndex={-1}
           aria-hidden
+          aria-label="Replacement document"
           onChange={(event) => {
             const file = event.target.files?.[0];
             const old = replacing.current;
