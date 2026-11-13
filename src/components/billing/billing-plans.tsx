@@ -101,7 +101,7 @@ export function BillingPlans({
   function renderAction(plan: Plan, interval: BillingInterval) {
     if (plan.key === "free") {
       return (
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="flex min-h-11 items-center text-13 text-ink-2">
           {hasLiveSubscription ? "Cancel your subscription under “Manage billing” to return to Free." : "Included with every workspace."}
         </p>
       );
@@ -122,7 +122,7 @@ export function BillingPlans({
             Billing not configured
           </Button>
           {config.showSetupHints ? (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-ink-2">
               Set <code>NEXT_PUBLIC_PADDLE_CLIENT_TOKEN</code> and the <code>PADDLE_PRICE_*</code> variables (run{" "}
               <code>pnpm paddle:setup</code>).
             </p>
@@ -148,7 +148,7 @@ export function BillingPlans({
 
   return (
     <>
-      <PricingTable renderAction={renderAction} currentPlan={currentPlan} defaultInterval={defaultInterval} />
+      <PricingTable renderAction={renderAction} currentPlan={currentPlan} defaultInterval={defaultInterval} layout="compact" highlightRecommended={false} />
       <Dialog open={pendingChange !== null} onOpenChange={(open) => (open ? undefined : setPendingChange(null))}>
         <DialogContent>
           <DialogHeader>

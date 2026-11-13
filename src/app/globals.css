@@ -2,96 +2,669 @@
 @import "tw-animate-css";
 
 /*
- * Design tokens.
+ * Bidfolio design tokens — the implementation of docs/design/DESIGN.md §3–4, with the values
+ * of the designer's artboards (docs/design/handoff), which are the visual source of truth.
  *
- * Everything visual is driven by the CSS variables in :root below (shadcn/ui naming).
- * To apply a brand theme, change these values — components never hard-code colours.
- * The palette is intentionally neutral; `--primary` is the single accent to rebrand first.
- * Dark mode is not implemented: add a `.dark { … }` block with the same variables if needed.
+ * How this file is organised
+ *   1. @theme           raw tokens. Every colour here becomes a utility: bg-paper, text-ink-2,
+ *                       border-line, bg-brand-tint, text-accent-ink …
+ *   2. @theme inline    shadcn/ui semantic names mapped onto the tokens, so every primitive in
+ *                       src/components/ui (and anything written shadcn-style) picks them up.
+ *   3. :root            the short DESIGN.md names (--paper, --ink …) for hand-written CSS.
+ *   4. @layer base      element defaults: focus ring, selection, links, headings, motion, print.
+ *   5. @utility         type roles (type-hero … type-ref) and a few shared helpers.
+ *
+ * Light theme only in v1. Components never hard-code colours: change a value here and it
+ * changes everywhere. Contrast of every pair is checked by scripts/design/contrast.mjs.
  */
-:root {
-  --radius: 0.5rem;
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.47 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.55 0.22 27);
-  --success: oklch(0.52 0.14 150);
-  --warning: oklch(0.62 0.15 70);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.87 0 0);
-  --ring: oklch(0.556 0 0);
+@theme {
+  /* --- Surfaces ------------------------------------------------------------------- */
+  --color-paper: #faf8f3; /* page background (warm off-white) */
+  --color-paper-deep: #f2eee4; /* bands, wells, quiet chips, the footer */
+  --color-surface: #ffffff; /* cards, panels, inputs, the app bar */
 
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-accent: oklch(0.955 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
+  /* --- Text ----------------------------------------------------------------------- */
+  --color-ink: #161a1d; /* text. Body copy is ink, not grey */
+  --color-ink-2: #5a6165; /* muted text: captions, meta lines, descriptions under a heading */
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans",
-    sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  /* --- Lines ---------------------------------------------------------------------- */
+  --color-line: #e3ded2; /* dividers and card edges only (1.3:1) */
+  --color-line-strong: #857f70; /* the edge of a control: inputs, tick boxes, outline buttons (≥3:1) */
+
+  /* --- Brand ---------------------------------------------------------------------- */
+  --color-brand: #0f5a47; /* primary actions, the underline of links, "met" with a tick */
+  --color-brand-hover: #0b4636; /* hover and pressed */
+  --color-brand-tint: #e6efeb; /* selected rows, verdict panel, source markers */
+  --color-brand-mark: #d5e6de; /* highlighter on a quoted sentence in a source document */
+  --color-brand-on-dark: #bfe0d3; /* pale green: secondary text on brand green, the dark-theme favicon */
+
+  /* --- Status roles (each with a tint). There is no separate success colour. ------- */
+  --color-accent: #b4690e; /* amber: markers, rules and large numerals only — never small text */
+  --color-accent-ink: #925207; /* amber for small text */
+  --color-accent-tint: #f7ebd7; /* the "14 days left" pill */
+  --color-danger: #a3271c; /* errors, gaps */
+  --color-danger-hover: #861f15; /* destructive button, hover and pressed */
+  --color-danger-tint: #f6e3e0;
+  --color-success-tint: #e4efe7; /* background of a "Met" pill; the text and tick are brand green */
+  --color-info: #1f4f8f; /* neutral labels such as notice types and "For you to confirm" — never links */
+  --color-info-tint: #e3eaf4;
+
+  /* --- Focus ---------------------------------------------------------------------- */
+  --color-focus: #0f5a47; /* 2 px ring + 2 px offset on keyboard focus */
+  --color-focus-on-dark: #ffffff; /* the same ring on brand green or ink */
+
+  /* --- Type families (the --font-* variables are set by next/font in layout.tsx) --- */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-source-serif), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-serif: var(--font-source-serif), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  /*
+   * Type scale (px / line-height), read from the artboards:
+   * 12/16, 13/20, 14/20, 15/22, 16/24, 17/24, 18/28, 20/26, 24/30, 28/34, 36/42, 40/45, 50/54.
+   * The Tailwind size names are remapped so that every text-* class lands on the scale.
+   */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-13: 0.8125rem;
+  --text-13--line-height: 1.25rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-15: 0.9375rem;
+  --text-15--line-height: 1.375rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-17: 1.0625rem;
+  --text-17--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.625rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.875rem;
+  --text-2xl--letter-spacing: -0.005em;
+  --text-3xl: 1.75rem;
+  --text-3xl--line-height: 2.125rem;
+  --text-3xl--letter-spacing: -0.01em;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 2.625rem;
+  --text-4xl--letter-spacing: -0.015em;
+  --text-5xl: 2.5rem;
+  --text-5xl--line-height: 2.8125rem;
+  --text-5xl--letter-spacing: -0.015em;
+  --text-6xl: 3.125rem;
+  --text-6xl--line-height: 3.375rem;
+  --text-6xl--letter-spacing: -0.02em;
+
+  /* --- Radius: 4 px chips and pills, 6 px controls, 10 px cards, 12 px panels and modals --- */
+  --radius-chip: 0.25rem;
+  --radius-control: 0.375rem;
+  --radius-card: 0.625rem;
+  --radius-modal: 0.75rem;
+  /* The Tailwind size names snap to the same steps (lg, 8 px, is for a card inside a card). */
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 0.75rem;
+  --radius-4xl: 0.75rem;
+
+  /* --- Shadows: rare. Borders do the work ------------------------------------------- */
+  --shadow-raised: 0 1px 2px rgb(22 26 29 / 0.06);
+  --shadow-overlay: 0 12px 32px rgb(22 26 29 / 0.14);
+  --shadow-float: 0 1px 2px rgb(22 26 29 / 0.06), 0 28px 60px -32px rgb(22 26 29 / 0.3); /* a product figure on a marketing page */
+  --shadow-2xs: 0 1px 2px rgb(22 26 29 / 0.06);
+  --shadow-xs: 0 1px 2px rgb(22 26 29 / 0.06);
+  --shadow-sm: 0 1px 2px rgb(22 26 29 / 0.06);
+  --shadow-md: 0 1px 2px rgb(22 26 29 / 0.06);
+  --shadow-lg: 0 12px 32px rgb(22 26 29 / 0.14);
+  --shadow-xl: 0 12px 32px rgb(22 26 29 / 0.14);
+  --shadow-2xl: 0 12px 32px rgb(22 26 29 / 0.14);
+
+  /* --- Layout ----------------------------------------------------------------------- */
+  --container-content: 75rem; /* 1200 px: public pages */
+  --container-app: 80rem; /* 1280 px: the signed-in app */
+  --container-reading: 35rem; /* reading column: about 68 characters of 16 px Inter (the ch unit would be ~85) */
+
+  /* --- Motion: 120–180 ms ease-out, for state changes only -------------------------- */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
+/* shadcn/ui semantic names → Bidfolio tokens. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: var(--color-brand);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-paper-deep);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: var(--color-paper-deep);
+  --color-muted-foreground: var(--color-ink-2);
+  /* NOTE: `accent` is the amber role from DESIGN.md, not shadcn's neutral hover grey.
+     For hover and selected surfaces use bg-paper-deep or bg-brand-tint. */
+  --color-accent-foreground: #ffffff;
+  --color-destructive: var(--color-danger);
+  --color-destructive-foreground: #ffffff;
+  --color-warning: var(--color-accent);
+  --color-border: var(--color-line);
+  --color-input: var(--color-line-strong);
+  --color-ring: var(--color-focus);
+  --color-sidebar: var(--color-paper);
+  --color-sidebar-foreground: var(--color-ink);
+  --color-sidebar-border: var(--color-line);
+  --color-sidebar-accent: var(--color-brand-tint);
+  --color-sidebar-accent-foreground: var(--color-brand);
+}
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+:root {
+  /* DESIGN.md names, for hand-written CSS and inline styles. */
+  --paper: var(--color-paper);
+  --paper-deep: var(--color-paper-deep);
+  --surface: var(--color-surface);
+  --ink: var(--color-ink);
+  --ink-2: var(--color-ink-2);
+  --line: var(--color-line);
+  --line-strong: var(--color-line-strong);
+  --brand: var(--color-brand);
+  --brand-hover: var(--color-brand-hover);
+  --brand-tint: var(--color-brand-tint);
+  --accent: var(--color-accent);
+  --accent-ink: var(--color-accent-ink);
+  --accent-tint: var(--color-accent-tint);
+  --danger: var(--color-danger);
+  --danger-tint: var(--color-danger-tint);
+  --success-tint: var(--color-success-tint);
+  --info: var(--color-info);
+  --info-tint: var(--color-info-tint);
+  --focus: var(--color-focus);
 
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
+  /* Height of the sticky header; used for anchor offsets. 56 px on phones, 72 px from 768 px. */
+  --header-height: 3.5rem;
+  @media (width >= 48rem) {
+    --header-height: 4.5rem;
+  }
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  *,
+  ::before,
+  ::after,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--header-height) + 1rem);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headings: display serif, 600. Sizes come from type-* or text-*. A heading that is a UI
+     label (a row title, a card label) sets font-sans itself. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-wrap: balance;
+  }
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+  }
+
+  p,
+  li,
+  dd,
+  figcaption {
+    text-wrap: pretty;
+  }
+
+  /* Figures line up down a column: pounds, dates, counts. */
+  table,
+  time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Keyboard focus: one ring, everywhere, always visible. */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  /* On brand green or ink the ring switches to white. */
+  :is(.on-brand, .on-ink) :focus-visible {
+    outline-color: var(--color-focus-on-dark);
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-brand) 20%, transparent);
+    color: var(--color-ink);
+  }
+  :is(.on-brand, .on-ink) ::selection {
+    background-color: color-mix(in srgb, #ffffff 28%, transparent);
+    color: #ffffff;
+  }
+
+  /* Content links: ink with a green underline — never blue. Any anchor without a class of
+     its own gets this; styled components opt out by having one. */
+  a:where(:not([class])) {
+    color: var(--color-ink);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--color-brand);
+    transition: color 150ms var(--ease-out);
+  }
+  a:where(:not([class])):hover {
+    color: var(--color-brand);
+  }
+  :is(.on-brand, .on-ink) a:where(:not([class])) {
+    color: inherit;
+    text-decoration-color: currentColor;
+  }
+  :is(.on-brand, .on-ink) a:where(:not([class])):hover {
+    color: #ffffff;
+  }
+
+  ::placeholder {
+    color: var(--color-ink-2);
+    opacity: 1;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+  }
+  :where(p, li, dd, td) > code {
+    border-radius: var(--radius-chip);
+    background-color: var(--color-paper-deep);
+    padding: 0.0625rem 0.3125rem;
+    font-size: 0.875em;
+  }
+
+  mark {
+    background-color: var(--color-brand-mark);
+    color: inherit;
+  }
+
+  /* The summary marker is drawn by the component, not the browser. */
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ----------------------------------------------------------------------------------------
+ * Type roles. Use these instead of assembling family + size + weight by hand.
+ * (Named type-*, not text-*, so tailwind-merge never mistakes them for a colour.)
+ * ------------------------------------------------------------------------------------- */
+
+/* Hero headline: 34/38 on phones, 44/48 from 640 px, 50/54 from 1024 px. */
+@utility type-hero {
+  font-family: var(--font-display);
+  font-size: 2.125rem;
+  line-height: 2.375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  @media (width >= 40rem) {
+    font-size: 2.75rem;
+    line-height: 3rem;
+  }
+  @media (width >= 64rem) {
+    font-size: 3.125rem;
+    line-height: 3.375rem;
+  }
+}
+
+/* Title of a public page: 30/34 on phones, 40/44 from 640 px, 44/48 from 1024 px. */
+@utility type-h1 {
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  line-height: 2.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  @media (width >= 40rem) {
+    font-size: 2.5rem;
+    line-height: 2.75rem;
+  }
+  @media (width >= 64rem) {
+    font-size: 2.75rem;
+    line-height: 3rem;
+  }
+}
+
+/* Title of a page inside the app: 26/30 on phones, 36/42 from 768 px. */
+@utility type-title {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  line-height: 1.875rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  @media (width >= 48rem) {
+    font-size: 2.25rem;
+    line-height: 2.625rem;
+  }
+}
+
+/* Section heading on a public page: 28/32 on phones, 36/41 from 768 px, 40/45 from 1024 px. */
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  @media (width >= 48rem) {
+    font-size: 2.25rem;
+    line-height: 2.5625rem;
+  }
+  @media (width >= 64rem) {
+    font-size: 2.5rem;
+    line-height: 2.8125rem;
+  }
+}
+
+/* Section heading inside a page or the app: 24/29 on phones, 28/34 from 768 px. */
+@utility type-section {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  @media (width >= 48rem) {
+    font-size: 1.75rem;
+    line-height: 2.125rem;
+  }
+}
+
+/* Sub-section heading, step and plan names: 22/27 on phones, 24/29 from 640 px. */
+@utility type-h3 {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.6875rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+  @media (width >= 40rem) {
+    font-size: 1.5rem;
+    line-height: 1.8125rem;
+  }
+}
+
+/* Lead paragraph under a heading: 16/26 on phones, 18/28 from 640 px. Ink, not grey. */
+@utility type-lead {
+  font-size: 1rem;
+  line-height: 1.625rem;
+  text-wrap: pretty;
+  @media (width >= 40rem) {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+}
+
+/* Running text: 16/26. Marketing paragraphs, FAQ answers, legal pages. */
+@utility type-reading {
+  font-size: 1rem;
+  line-height: 1.625rem;
+  text-wrap: pretty;
+}
+
+/* The small green line above a heading: 14 px, 600, sentence case. */
+@utility type-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--color-brand);
+}
+
+/* References in mono: file names, pages, clauses, notice numbers, CPV codes. Add text-ink-2
+   for the meta line above a title ("Bid brief · built 13 Nov 2026 · 6 files"). */
+@utility type-ref {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  font-weight: 400;
+  font-variant-numeric: normal;
+}
+
+/* The buyer's own words, quoted: serif 17/25. */
+@utility type-quote {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1.5625rem;
+  font-weight: 400;
+  text-wrap: pretty;
+}
+
+/* A quote that leads a card: serif 20/28 on phones, 25/34 from 640 px. */
+@utility type-quote-lg {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 400;
+  text-wrap: pretty;
+  @media (width >= 40rem) {
+    font-size: 1.5625rem;
+    line-height: 2.125rem;
+  }
+}
+
+/* A large numeral in the serif: stat blocks and prices. Set the size with text-*. */
+@utility type-figure {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-variant-numeric: lining-nums;
+}
+
+/* Link style for anchors that carry classes of their own: ink, green underline. */
+@utility link {
+  color: var(--color-ink);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--color-brand);
+  transition: color 150ms var(--ease-out);
+  &:hover {
+    color: var(--color-brand);
+  }
+  :is(.on-brand, .on-ink) & {
+    color: inherit;
+    text-decoration-color: currentColor;
+  }
+  :is(.on-brand, .on-ink) &:hover {
+    color: #ffffff;
+  }
+}
+
+/* Quiet link: no underline, turns green on hover. Navigation and footers. */
+@utility link-quiet {
+  color: var(--color-ink);
+  text-decoration-line: none;
+  transition: color 150ms var(--ease-out);
+  &:hover {
+    color: var(--color-brand);
+  }
+}
+
+/* A reference that is a link (a file and page in mono): grey underline, as in breadcrumbs. */
+@utility link-ref {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  color: var(--color-ink-2);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--color-line-strong);
+  &:hover {
+    color: var(--color-brand);
+    text-decoration-color: var(--color-brand);
+  }
+}
+
+/* Extends the hit area of a small control to at least 44 px without changing its look. */
+@utility hit-40 {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 2.75rem);
+    height: max(100%, 2.75rem);
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Chevron for native selects (stroke = ink). */
+@utility select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23161A1D' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 6l4.5 4.5L12.5 6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+/* Public pages: the 1200 px column with 20 px gutters on phones and 24 px from 640 px. */
+@utility container-content {
+  width: 100%;
+  max-width: calc(var(--container-content) + 2.5rem);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (width >= 40rem) {
+    max-width: calc(var(--container-content) + 3rem);
+    padding-inline: 1.5rem;
+  }
+}
+
+/* The app: a 1280 px column with 20 px gutters on phones and 32 px from 768 px. */
+@utility container-app {
+  width: 100%;
+  max-width: calc(var(--container-app) + 2.5rem);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (width >= 48rem) {
+    max-width: calc(var(--container-app) + 4rem);
+    padding-inline: 2rem;
+  }
+}
+
+/* ----------------------------------------------------------------------------------------
+ * Print: public pages and legal documents must print as clean documents.
+ * ------------------------------------------------------------------------------------- */
+@media print {
+  @page {
+    margin: 18mm 16mm;
   }
   html {
-    @apply scroll-smooth;
+    font-size: 11pt;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    background: #ffffff !important;
+    color: #000000 !important;
   }
-  /* Visible keyboard focus everywhere, including custom controls. */
-  :focus-visible {
-    @apply outline-2 outline-offset-2 outline-ring;
+  /* Chrome that has no meaning on paper. */
+  [data-print="hide"],
+  [data-slot="site-header"],
+  [data-slot="site-footer-nav"],
+  [data-slot="app-topbar"],
+  [data-slot="app-menu"],
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+  *,
+  ::before,
+  ::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+  p,
+  li,
+  blockquote {
+    orphans: 3;
+    widows: 3;
+  }
+  table,
+  figure,
+  blockquote,
+  [data-slot="card"] {
+    break-inside: avoid;
+  }
+  thead {
+    display: table-header-group;
+  }
+  a {
+    color: inherit !important;
+  }
+  /* Show where external links point. */
+  [data-print="urls"] a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+  /* Closed disclosures print open. */
+  details > :not(summary) {
+    display: block !important;
+  }
+  details::details-content {
+    content-visibility: visible;
+    block-size: auto;
   }
 }

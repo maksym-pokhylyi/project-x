@@ -44,6 +44,12 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
+  async redirects() {
+    return [
+      // The free deliverable was renamed from "bid brief" to "cited bid check".
+      { source: "/free-bid-brief", destination: "/free-bid-check", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;
