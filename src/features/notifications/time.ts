@@ -87,8 +87,9 @@ export function weekdayOfDayKey(dayKey: string): number {
 
 /**
  * The instant at which UK clocks show the given wall time. On the night the clocks go
- * forward 01:00–01:59 does not exist (the next real moment is returned); on the night they
- * go back it happens twice (the first is returned). Neither touches 07:30 or 08:00.
+ * forward 01:00–01:59 does not exist (the answer is that long after 01:00, i.e. 02:00–02:59
+ * summer time); on the night they go back it happens twice (the second, winter-time one is
+ * returned). Neither touches 07:30 or 08:00.
  */
 export function londonWallTimeToUtc(dayKey: string, hour: number, minute = 0): Date {
   const { year, month, day } = parseDayKey(dayKey);

@@ -76,7 +76,7 @@ function isStale(payload: SendPayload, now: Date): boolean {
 type Prepared = { asOf: Date; refs: NotificationItemRef[]; itemCount: number; compose: (context: ComposeContext) => ComposedEmail; track: () => Promise<void> };
 
 /** What there is to say, or null when there is nothing. */
-async function prepare(kind: ScheduledKind, ctx: OrgContext, now: Date): Promise<Prepared | null> {
+async function prepare(kind: ScheduledKind, period: string, ctx: OrgContext, now: Date): Promise<Prepared | null> {
   const who = { organizationId: ctx.organization.id, userId: ctx.user.id };
   if (kind === "digest" || kind === "alert") {
     const content = kind === "digest" ? await buildDigest(ctx, now) : await buildAlert(ctx, now);
@@ -105,7 +105,9 @@ async function prepare(kind: ScheduledKind, ctx: OrgContext, now: Date): Promise
     };
   }
   const content = await buildRenewal(ctx, now);
-  if (!content) return null;
+  // One reminder per paid period: a job made for another period (the subscription has since
+  // renewed or changed) is not this one's.
+  if (!content || content.periodKey !== period) return null;
   return {
     asOf: content.asOf,
     refs: [],
@@ -129,8 +131,8 @@ export async function sendNotification(payload: SendPayload, options: { now?: Da
 
   const prefs = await getNotificationPrefs(payload.userId, payload.organizationId);
   if (!wantsKind(prefs, payload.kind)) {
-    await recordSkip(key, "skipped_pref", { asOf: now });
-    return "skipped_pref";
+    // (Not written: another attempt settled this period in the meantime.)
+    return (await recordSkip(key, "skipped_pref", { asOf: now })) ? "skipped_pref" : "already_done";
   }
   if (payload.kind === "alert") {
     if (!notificationAccess(ctx.entitlements).dailyAlerts) return "not_eligible";
@@ -164,12 +166,12 @@ export async function sendNotification(payload: SendPayload, options: { now?: Da
   }
 
   try {
-    const prepared = await prepare(payload.kind, ctx, now);
+    const prepared = await prepare(payload.kind, payload.period, ctx, now);
     if (!prepared) {
       // A renewal that is no longer due simply does not apply; the others had nothing new to say.
       if (payload.kind === "renewal") return "not_eligible";
-      await recordSkip(key, "skipped_empty", { asOf: now });
-      return "skipped_empty";
+      // A racing attempt that already sent this period leaves nothing new for this one: its row stands.
+      return (await recordSkip(key, "skipped_empty", { asOf: now })) ? "skipped_empty" : "already_done";
     }
     const sent = await db.transaction(async (tx) => {
       const logId = await claimSend(tx, key, { asOf: prepared.asOf, sentAt: now, items: prepared.refs, itemCount: prepared.itemCount });

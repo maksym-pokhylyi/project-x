@@ -72,6 +72,9 @@ function footerFor(kind: ScheduledKind, reason: string, context: ComposeContext)
 
 const subjectFor = (subject: string, context: ComposeContext) => (context.preview ? `[Preview] ${subject}`.slice(0, 120) : subject);
 
+/** "Closes 26 Nov 2026" inside a sentence: "closes 26 Nov 2026" (the month keeps its capital). */
+const lowerFirst = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
+
 export function composeRadarEmail(content: RadarEmailContent, context: ComposeContext): ComposedEmail {
   const company = content.company.short;
   const { footer, headers } = footerFor(content.kind, radarReason(content.kind, content.company), context);
@@ -87,8 +90,8 @@ export function composeRadarEmail(content: RadarEmailContent, context: ComposeCo
       context,
     ),
     preview: previewLine([
-      firstMatch ? `${firstMatch.title}: ${firstMatch.closes.toLowerCase()}` : null,
-      !firstMatch && firstContract ? `${firstContract.title}: ${firstContract.ends.toLowerCase()}` : null,
+      firstMatch ? `${firstMatch.title}: ${lowerFirst(firstMatch.closes)}` : null,
+      !firstMatch && firstContract ? `${firstContract.title}: ${lowerFirst(firstContract.ends)}` : null,
       content.matches.total > 1 ? `and ${content.matches.total - 1} more` : null,
     ]),
     greeting: greeting(firstName(context.recipient.name)),

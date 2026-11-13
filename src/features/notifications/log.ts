@@ -44,15 +44,24 @@ export async function attachOutbox(tx: DbOrTx, logId: string, outboxId: string):
 }
 
 /**
- * Records that nothing was sent for this key, and why. Never overwrites an existing row:
- * a period that was sent stays sent. Returns true when the row was written.
+ * Records that nothing was sent for this key, and why. Returns true when the row was written.
+ *
+ * A period that was sent, or deliberately skipped, keeps its row: nothing here overwrites
+ * it. A deliberate skip (nothing new, preference off) does replace the trace an earlier
+ * FAILED attempt left; a new failure never replaces anything.
  */
 export async function recordSkip(key: LogKey, status: SkipStatus, data: { asOf: Date; detail?: string | null }): Promise<boolean> {
-  const rows = await db
-    .insert(notificationLog)
-    .values({ ...key, status, asOf: data.asOf, detail: data.detail ?? null })
-    .onConflictDoNothing()
-    .returning({ id: notificationLog.id });
+  const insert = db.insert(notificationLog).values({ ...key, status, asOf: data.asOf, detail: data.detail ?? null });
+  const rows =
+    status === "failed"
+      ? await insert.onConflictDoNothing().returning({ id: notificationLog.id })
+      : await insert
+          .onConflictDoUpdate({
+            target: [notificationLog.userId, notificationLog.organizationId, notificationLog.kind, notificationLog.periodKey],
+            set: { status, asOf: data.asOf, detail: data.detail ?? null },
+            setWhere: eq(notificationLog.status, "failed"),
+          })
+          .returning({ id: notificationLog.id });
   return rows.length > 0;
 }
 
