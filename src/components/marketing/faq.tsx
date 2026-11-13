@@ -9,12 +9,16 @@ export type FaqItem = {
   render?: ReactNode;
 };
 
-/** FAQ list on native disclosures: readable without JavaScript and findable with in-page search. */
-export function Faq({ items }: { items: FaqItem[] }) {
+/**
+ * FAQ list on native disclosures: readable without JavaScript and findable with in-page
+ * search. `openFirst` shows the first answer, as in the landing artboard, so the pattern
+ * explains itself.
+ */
+export function Faq({ items, openFirst = false }: { items: readonly FaqItem[]; openFirst?: boolean }) {
   return (
     <DisclosureGroup>
-      {items.map((item) => (
-        <Disclosure key={item.question} summary={item.question}>
+      {items.map((item, index) => (
+        <Disclosure key={item.question} summary={item.question} open={openFirst && index === 0 ? true : undefined}>
           {item.render ?? <p>{item.answer}</p>}
         </Disclosure>
       ))}

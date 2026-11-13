@@ -1,19 +1,19 @@
-import { ArrowRight, CalendarClock, CircleHelp, FileSearch, Flag, ListChecks, Scale, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CtaBand } from "@/components/marketing/cta-band";
 import { Faq, type FaqItem } from "@/components/marketing/faq";
 import { JsonLd, faqJsonLd } from "@/components/marketing/json-ld";
-import { Eyebrow, Section, SectionHeading } from "@/components/marketing/section";
-import { KeyDatesCard, QuestionsCard } from "@/components/marketing/visuals/check-details";
-import { CheckVisual } from "@/components/marketing/visuals/check-visual";
+import { Eyebrow, Point, Section, SectionHeading } from "@/components/marketing/section";
+import { KeyDatesCard, ScoredQuestionsCard, VerdictPanel } from "@/components/marketing/visuals/brief-visuals";
+import { DocumentExcerpt, ProofBridge, RequirementCard } from "@/components/marketing/visuals/proof-visuals";
 import { Button } from "@/components/ui/button";
+import { landing } from "@/config/landing";
 import { site } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Free cited bid check",
   description:
-    "Upload a tender pack and get a free cited bid check: every pass/fail requirement, key date and scored question quoted from the buyer's documents with file and page, and a plain verdict.",
+    "Upload a tender pack and get a free cited bid check: every pass-or-fail requirement, key date and scored question quoted from the buyer's documents with file and page, and a plain verdict.",
   alternates: { canonical: "/free-bid-check" },
 };
 
@@ -23,41 +23,35 @@ const { facts } = site;
 
 const contents = [
   {
-    icon: Scale,
     title: "A verdict, with its reasons",
-    body: "Bid, bid with gaps, or likely not eligible. The requirements behind the verdict are listed under it.",
+    body: "A plain sentence on whether you can comply, and the requirements behind it listed underneath.",
   },
   {
-    icon: ShieldCheck,
-    title: "Every pass/fail requirement",
-    body: "Insurance, finance, accreditations, experience, policies. Each one quoted, with file and page, and marked Met, Gap or Verify against your company.",
+    title: "Every pass-or-fail requirement",
+    body: "Insurance, finance, accreditations, experience, policies. Each one quoted, with file and page, and marked Met, Gap or For you to confirm.",
   },
   {
-    icon: CalendarClock,
     title: "Key dates",
-    body: "Clarification deadline, site visits, the tender deadline and the contract start, each with the page it was read from.",
+    body: "The clarification deadline, site visits, the tender deadline and the contract start, each with the page it was read from.",
   },
   {
-    icon: ListChecks,
     title: "The scored questions",
     body: "Every question the buyer will mark, with its weighting and its word or page limit.",
   },
   {
-    icon: FileSearch,
-    title: "How the bid is scored",
+    title: "How the bid is marked",
     body: "The split between quality and price, the scoring scale and any minimum score that fails a bid.",
   },
   {
-    icon: Flag,
-    title: "Red flags",
-    body: "Terms that deserve a second look before you commit: TUPE, liquidated damages, a short mobilisation.",
+    title: "Terms to read yourself",
+    body: "Clauses that change your price or your risk: TUPE, deductions for late attendance, fixed rates.",
   },
 ];
 
 /** Set apart from the list above: it is the part that makes the rest trustworthy. */
 const notFound = {
   title: "And what we could not find",
-  body: "Anything a pack of this kind normally contains but this one does not, and any quote we could not match to the source text, is listed separately and marked “Verify in documents”, so that you know exactly what to check yourself.",
+  body: "Anything a pack of this kind normally contains but this one does not, and any quote that could not be matched to the source text, is listed separately and marked “For you to confirm”, so you know exactly what to check yourself.",
 };
 
 const steps = [
@@ -72,7 +66,7 @@ const steps = [
     title: "The pack is read",
     body: "You see each stage as it happens. You can close the tab: the check carries on and is there when you come back.",
   },
-  { time: "As long as you like", title: "Read the check", body: "Open any citation to see the quote at its source page. Edit anything that is wrong." },
+  { time: "As long as you like", title: "Read the check", body: "Open any reference to see the quote on its page. Correct anything that is wrong." },
 ];
 
 const privacy = [
@@ -93,7 +87,8 @@ const faq: FaqItem[] = [
   },
   {
     question: "What if the pack is a scan?",
-    answer: "Scanned and low-quality files can be read less reliably. The check warns you when a file looks like a scan, and marks anything it could not match to the text as “Verify in documents”.",
+    answer:
+      "Scanned and low-quality files are read less reliably. The check warns you when a file looks like a scan, and marks anything it could not match to the text as “For you to confirm”.",
   },
   {
     question: "Our tender pack came with confidentiality terms. Can we upload it?",
@@ -108,137 +103,158 @@ const faq: FaqItem[] = [
 ];
 
 export default function FreeBidCheckPage() {
+  const { proof } = landing;
   return (
     <>
       <JsonLd data={faqJsonLd(faq)} />
 
-      <section aria-labelledby="check-hero-title" className="overflow-hidden">
-        <div className="container-content grid gap-12 pt-12 pb-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)] lg:items-center lg:gap-14 lg:pt-16 lg:pb-24">
-          <div className="max-w-xl">
+      {/* Hero ---------------------------------------------------------------------------- */}
+      <section aria-labelledby="check-hero-title">
+        <div className="container-content grid gap-y-10 pt-8 pb-14 md:pt-14 md:pb-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:items-center lg:gap-x-12 lg:pt-16 lg:pb-[5.5rem] xl:gap-x-14">
+          <div className="flex max-w-[38rem] flex-col gap-5 md:gap-6">
             <Eyebrow>Free cited bid check</Eyebrow>
-            <h1 id="check-hero-title" className="type-h1 mt-3 text-ink">
+            <h1 id="check-hero-title" className="type-h1 text-ink">
               Check a tender pack before you spend a week on it.
             </h1>
-            <p className="type-lead mt-5">
-              Upload the pack. A few minutes later you have every pass/fail requirement, key date and scored question, each quoted from the buyer’s documents with its
-              file and page, and a plain verdict: bid, bid with gaps, or likely not eligible.
+            <p className="type-lead text-ink">
+              Upload the pack as the buyer sent it. A few minutes later you have every pass-or-fail requirement, key date and scored question, each quoted word for
+              word with its file and page, and a plain verdict on whether you can comply.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-1 flex flex-col gap-2.5 sm:flex-row md:mt-2">
               <Button asChild size="lg">
                 <Link href={START_HREF}>
-                  Create an account and upload <ArrowRight aria-hidden />
+                  Create an account and upload <ArrowRight aria-hidden strokeWidth={2.2} />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link href="/sample-check">See a sample check</Link>
               </Button>
             </div>
-            <p className="mt-4 text-sm text-ink-2">Your first check is free. No card needed.</p>
+            <p className="text-13 text-ink-2">Your first check is free. No card needed.</p>
           </div>
-          <CheckVisual elevated />
+          <VerdictPanel className="w-full max-w-[38rem] lg:max-w-none" />
         </div>
       </section>
 
-      <Section labelledBy="contents-title" tone="sunken">
+      {/* What it contains ---------------------------------------------------------------- */}
+      <Section labelledBy="contents-title" tone="deep" containerClassName="flex flex-col gap-9 md:gap-14">
         <SectionHeading
           id="contents-title"
           eyebrow="What you get"
           title="What the free check contains"
           lead="It is the same check that starts every paid bid, on your own tender pack."
         />
-        <ul className="mt-10 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
           {contents.map((item) => (
-            <li key={item.title} className="grid grid-cols-[1.5rem_1fr] gap-x-3">
-              <item.icon aria-hidden className="mt-0.5 size-5 text-brand" />
-              <div>
-                <h3 className="font-sans text-base leading-6 font-semibold text-ink">{item.title}</h3>
-                <p className="mt-1 text-base text-ink-2">{item.body}</p>
-              </div>
+            <li key={item.title}>
+              <Point title={item.title}>{item.body}</Point>
             </li>
           ))}
         </ul>
-        <div role="note" className="mt-8 grid grid-cols-[1.5rem_1fr] gap-x-3 rounded-card border border-line bg-surface p-5">
-          <CircleHelp aria-hidden className="mt-0.5 size-5 text-accent-ink" />
-          <div>
-            <h3 className="font-sans text-base leading-6 font-semibold text-ink">{notFound.title}</h3>
-            <p className="mt-1 max-w-reading text-base text-ink-2">{notFound.body}</p>
-          </div>
+        <div role="note" className="flex flex-col gap-1.5 rounded-card border border-line bg-surface px-5 py-5 sm:px-6">
+          <h3 className="font-sans text-17 font-semibold text-ink">{notFound.title}</h3>
+          <p className="max-w-[45rem] text-15 leading-[1.45rem] text-ink">{notFound.body}</p>
         </div>
-        <div className="mt-12 grid gap-4 md:grid-cols-2">
+      </Section>
+
+      {/* Proof --------------------------------------------------------------------------- */}
+      <Section labelledBy="check-proof-title" containerClassName="flex flex-col gap-9 md:gap-14">
+        <SectionHeading id="check-proof-title" eyebrow={proof.eyebrow} title={proof.title} lead={proof.lead} />
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-10">
+          <DocumentExcerpt className="min-w-0 lg:flex-[1_1_27.5rem]" />
+          <ProofBridge className="lg:hidden">{proof.bridge}</ProofBridge>
+          <RequirementCard className="min-w-0 lg:flex-[1.25_1_31.25rem]" />
+        </div>
+        <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
           <KeyDatesCard />
-          <QuestionsCard />
+          <ScoredQuestionsCard />
         </div>
-        <p className="mt-4 text-13 text-ink-2">Samples with fictional data. AI-assisted analysis: check it against the tender documents. You remain responsible for your submission.</p>
+        <p className="text-13 text-ink-2">
+          Samples with fictional data. AI-assisted analysis: check it against the tender documents. You remain responsible for your submission.
+        </p>
       </Section>
 
-      <Section labelledBy="time-title">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-12">
-          <SectionHeading
-            id="time-title"
-            eyebrow="How long it takes"
-            title="About ten minutes, start to finish."
-            lead="Most packs are read in one to three minutes. Large packs with many files take a little longer."
-            className="lg:col-span-5"
-          />
-          <ol className="lg:col-span-7">
-            {steps.map((step, index) => (
-              <li key={step.title} className="grid grid-cols-[2rem_1fr] gap-x-3 border-t border-line-strong py-5 sm:grid-cols-[2rem_1fr_9rem]">
-                <span aria-hidden className="font-display text-xl leading-6 font-medium text-brand tabular-nums">
-                  {index + 1}
-                </span>
-                <div>
-                  <h3 className="font-sans text-base leading-6 font-semibold text-ink">{step.title}</h3>
-                  <p className="mt-1 text-base text-ink-2">{step.body}</p>
-                </div>
-                <p className="col-start-2 mt-2 text-13 text-ink-2 tabular-nums sm:col-start-3 sm:mt-0.5 sm:text-right">{step.time}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </Section>
-
-      <Section labelledBy="privacy-title" tone="sunken">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-12">
-          <div className="lg:col-span-5">
-            <SectionHeading
-              id="privacy-title"
-              eyebrow="Your files"
-              title="A tender pack is commercial. We treat it that way."
-              lead="Four things you can rely on, and where they are written down."
-            />
-            <p className="mt-4 text-base text-ink-2">
-              The detail is in the <Link href="/legal/privacy">privacy notice</Link>, the <Link href="/legal/terms">terms</Link> and the{" "}
-              <Link href="/legal/dpa">data processing agreement</Link>.
-            </p>
-          </div>
-          <dl className="grid gap-x-8 sm:grid-cols-2 lg:col-span-7">
-            {privacy.map((item) => (
-              <div key={item.title} className="border-t border-line-strong py-5">
-                <dt className="text-base leading-6 font-semibold text-ink">{item.title}</dt>
-                <dd className="mt-1 text-base text-ink-2">{item.body}</dd>
+      {/* How long it takes --------------------------------------------------------------- */}
+      <Section labelledBy="time-title" tone="deep" containerClassName="flex flex-wrap gap-x-20 gap-y-8">
+        <SectionHeading
+          id="time-title"
+          eyebrow="How long it takes"
+          title="About ten minutes, start to finish"
+          lead="Most packs are read in one to three minutes. Large packs with many files take a little longer."
+          className="min-w-0 flex-[1_1_18.75rem]"
+        />
+        <ol className="min-w-0 flex-[2_1_35rem] border-b border-line">
+          {steps.map((step, index) => (
+            <li key={step.title} className="grid grid-cols-[2.25rem_1fr] gap-x-2 border-t border-line py-5 sm:grid-cols-[2.25rem_1fr_9rem]">
+              <span aria-hidden className="pt-0.5 font-mono text-13 text-ink-2">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <div>
+                <h3 className="font-sans text-17 font-semibold text-ink">{step.title}</h3>
+                <p className="mt-1 text-15 leading-[1.45rem] text-ink">{step.body}</p>
               </div>
-            ))}
-          </dl>
+              <p className="col-start-2 mt-2 text-13 text-ink-2 tabular-nums sm:col-start-3 sm:mt-1 sm:text-right">{step.time}</p>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      {/* Your files ---------------------------------------------------------------------- */}
+      <Section labelledBy="privacy-title" containerClassName="flex flex-wrap gap-x-20 gap-y-9">
+        <div className="flex min-w-0 flex-[1_1_18.75rem] flex-col gap-3">
+          <Eyebrow>Your files</Eyebrow>
+          <h2 id="privacy-title" className="type-h2 text-ink">
+            A tender pack is commercial. We treat it that way.
+          </h2>
+          <p className="type-reading mt-1 text-ink-2">
+            The detail is in the <Link href="/legal/privacy">privacy notice</Link>, the <Link href="/legal/terms">terms</Link> and the{" "}
+            <Link href="/legal/dpa">data processing agreement</Link>.
+          </p>
+        </div>
+        <dl className="grid min-w-0 flex-[2_1_35rem] gap-x-8 gap-y-7 sm:grid-cols-2">
+          {privacy.map((item) => (
+            <div key={item.title} className="flex flex-col gap-1.5 border-t-2 border-ink pt-[1.125rem]">
+              <dt className="text-17 font-semibold text-ink">{item.title}</dt>
+              <dd className="text-15 leading-[1.45rem] text-ink">{item.body}</dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
+
+      {/* Questions ----------------------------------------------------------------------- */}
+      <Section labelledBy="check-faq-title" tone="surface" containerClassName="flex flex-wrap gap-x-20 gap-y-8">
+        <div className="flex min-w-0 flex-[1_1_18.75rem] flex-col gap-3">
+          <Eyebrow>Questions</Eyebrow>
+          <h2 id="check-faq-title" className="type-h2 text-ink">
+            Before you upload
+          </h2>
+        </div>
+        <div className="min-w-0 flex-[2_1_35rem]">
+          <Faq items={faq} />
         </div>
       </Section>
 
-      <Section labelledBy="check-faq-title">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-12">
-          <SectionHeading id="check-faq-title" title="Before you upload" className="lg:col-span-5" />
-          <div className="lg:col-span-7">
-            <Faq items={faq} />
+      {/* Closing call to action ---------------------------------------------------------- */}
+      <section aria-labelledby="check-cta-title">
+        <div className="container-content flex flex-wrap items-center justify-between gap-x-14 gap-y-7 py-14 md:py-20">
+          <h2 id="check-cta-title" className="max-w-[35rem] min-w-0 flex-[1_1_26.25rem] font-display text-3xl font-semibold tracking-[-0.015em] text-ink md:text-4xl">
+            Have a live tender? Check it now.
+          </h2>
+          <div className="flex min-w-0 flex-[0_1_auto] flex-col gap-3">
+            <div className="flex flex-col gap-2.5 sm:flex-row">
+              <Button asChild size="lg">
+                <Link href={START_HREF}>
+                  Create an account and upload <ArrowRight aria-hidden strokeWidth={2.2} />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/sample-check">See a sample check</Link>
+              </Button>
+            </div>
+            <p className="text-13 text-ink-2">Your first check is free. No card needed.</p>
           </div>
         </div>
-      </Section>
-
-      <CtaBand
-        id="check-cta-title"
-        title="Have a live tender? Check it now."
-        lead="Create a free account, upload the pack and read your cited check a few minutes later."
-        primary={{ label: "Create an account and upload", href: START_HREF }}
-        secondary={{ label: "See a sample check", href: "/sample-check" }}
-        footnote="Your first check is free. No card needed."
-      />
+      </section>
     </>
   );
 }

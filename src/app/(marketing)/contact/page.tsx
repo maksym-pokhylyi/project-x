@@ -15,9 +15,9 @@ const { company } = site;
 
 function Row({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="grid gap-x-8 gap-y-1 border-t border-line py-5 sm:grid-cols-[14rem_1fr]">
-      <dt className="text-base leading-6 font-semibold text-ink">{title}</dt>
-      <dd className="space-y-2 text-base text-ink-2">{children}</dd>
+    <div className="grid gap-x-10 gap-y-1.5 border-t border-line py-5 sm:grid-cols-[15rem_1fr] md:py-6">
+      <dt className="text-17 font-semibold text-ink">{title}</dt>
+      <dd className="type-reading flex flex-col gap-2 text-ink">{children}</dd>
     </div>
   );
 }
@@ -27,11 +27,11 @@ const Mail = ({ address }: { address: string }) =>
 
 export default function ContactPage() {
   return (
-    <div className="container-content py-12 lg:py-16">
-      <div className="max-w-3xl">
+    <div className="container-content pt-10 pb-14 md:pt-16 md:pb-24">
+      <div className="max-w-[52.5rem]">
         <Eyebrow>Contact</Eyebrow>
         <h1 className="type-h1 mt-3 text-ink">Talk to the person who builds it.</h1>
-        <p className="type-lead mt-4">
+        <p className="type-lead mt-4 max-w-[42.5rem] text-ink">
           {site.name} is run by one founder. Write by email and a person replies, usually within one working day.
         </p>
 

@@ -1,40 +1,42 @@
-/** Navigation shared by the marketing header, its mobile menu and the footer. */
+/** Navigation shared by the public header, its phone menu and the footer. */
 export const primaryNav = [
-  { label: "How it works", href: "/#how-it-works" },
+  { label: "How it works", href: "/#how" },
   { label: "Pricing", href: "/pricing" },
-  { label: "Free bid check", href: "/free-bid-check" },
+  { label: "Questions", href: "/#questions" },
 ] as const;
 
-export const findCompany = { label: "Find your company", href: "/find" } as const;
+/** The one call to action of the public site. */
+export const findCompany = { label: "Find your page", href: "/find" } as const;
 
 export const footerGroups = [
   {
     title: "Product",
     links: [
-      { label: "Find your company", href: "/find" },
-      { label: "Free bid check", href: "/free-bid-check" },
-      { label: "Sample check", href: "/sample-check" },
+      { label: "How it works", href: "/#how" },
       { label: "Pricing", href: "/pricing" },
-      { label: "How it works", href: "/#how-it-works" },
+      { label: "Free bid check", href: "/free-bid-check" },
+      { label: "Sample bid check", href: "/sample-check" },
+      { label: "Find your page", href: "/find" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About the data", href: "/about-the-data" },
+      { label: "Independence", href: "/#independence" },
+      { label: "Questions", href: "/#questions" },
       { label: "Contact", href: "/contact" },
       { label: "Sign in", href: "/sign-in" },
-      { label: "Create a free account", href: "/sign-up" },
     ],
   },
   {
     title: "Legal",
     links: [
-      { label: "Terms of Service", href: "/legal/terms" },
       { label: "Privacy notice", href: "/legal/privacy" },
+      { label: "Terms of Service", href: "/legal/terms" },
       { label: "Refund policy", href: "/legal/refunds" },
       { label: "Acceptable use", href: "/legal/acceptable-use" },
       { label: "Data processing agreement", href: "/legal/dpa" },
+      { label: "Data sources", href: "/about-the-data" },
       { label: "Stop emails from us", href: "/optout" },
     ],
   },

@@ -101,7 +101,7 @@ export function BillingPlans({
   function renderAction(plan: Plan, interval: BillingInterval) {
     if (plan.key === "free") {
       return (
-        <p className="flex min-h-10 items-center justify-center text-center text-13 text-ink-2">
+        <p className="flex min-h-11 items-center text-13 text-ink-2">
           {hasLiveSubscription ? "Cancel your subscription under “Manage billing” to return to Free." : "Included with every workspace."}
         </p>
       );
@@ -148,7 +148,7 @@ export function BillingPlans({
 
   return (
     <>
-      <PricingTable renderAction={renderAction} currentPlan={currentPlan} defaultInterval={defaultInterval} layout="compact" />
+      <PricingTable renderAction={renderAction} currentPlan={currentPlan} defaultInterval={defaultInterval} layout="compact" highlightRecommended={false} />
       <Dialog open={pendingChange !== null} onOpenChange={(open) => (open ? undefined : setPendingChange(null))}>
         <DialogContent>
           <DialogHeader>

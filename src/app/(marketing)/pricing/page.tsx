@@ -5,14 +5,15 @@ import { Faq, type FaqItem } from "@/components/marketing/faq";
 import { JsonLd, faqJsonLd, softwareApplicationJsonLd } from "@/components/marketing/json-ld";
 import { MarketingPricing } from "@/components/marketing/marketing-pricing";
 import { PlanComparison } from "@/components/marketing/plan-comparison";
-import { Eyebrow, Section, SectionHeading } from "@/components/marketing/section";
+import { Eyebrow, Point, Section, SectionHeading } from "@/components/marketing/section";
+import { landing } from "@/config/landing";
 import { BID_PASS } from "@/config/plan-display";
 import { site } from "@/config/site";
 import { appUrl } from "@/env";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: `${site.name} pricing: a free radar and one free cited bid check, Radar Pro at £29 a month, Bid Desk at £149 a month, or a £99 Bid Pass for one full bid. No demo call.`,
+  description: `${site.name} pricing: your supplier page and one cited bid check are free, Radar Pro is £29 a month, Bid Desk £149 a month, or a £99 Bid Pass for one full bid. No demo call.`,
   alternates: { canonical: "/pricing" },
 };
 
@@ -41,7 +42,7 @@ const billingFaq: FaqItem[] = [
   },
   {
     question: "Can I pause instead of cancelling?",
-    answer: "Yes. You can pause a subscription for one to three months. Nothing is charged while it is paused, and your data, library and saved tenders stay where they are.",
+    answer: "Yes. You can pause a subscription for one to three months. Nothing is charged while it is paused, and your documents and saved tenders stay where they are.",
   },
   {
     question: "What happens to my data if I cancel, or if a payment fails?",
@@ -51,7 +52,7 @@ const billingFaq: FaqItem[] = [
   {
     question: "What counts as a full bid?",
     answer:
-      "One tender pack taken from upload to export: the cited check, the scored-question matrix, first drafts of every scored question, evaluator-style marking and the Word export. Redrafting and re-marking answers within that bid are included.",
+      "One tender pack taken from upload to export: the cited bid check, the scored questions, first drafts of every scored question, evaluator-style marking and the export to Word. Redrafting and re-marking answers within that bid are included.",
   },
   {
     question: "Do unused bids roll over?",
@@ -77,65 +78,61 @@ const billingFaq: FaqItem[] = [
 ];
 
 export default function PricingPage() {
+  const { pricing } = landing;
   return (
     <>
       <JsonLd data={softwareApplicationJsonLd(appUrl)} />
       <JsonLd data={faqJsonLd(billingFaq)} />
 
-      <section aria-labelledby="pricing-title" className="container-content pt-12 pb-16 lg:pt-16 lg:pb-24">
-        <header className="mx-auto max-w-2xl text-center">
-          <Eyebrow>Plans and prices</Eyebrow>
-          <h1 id="pricing-title" className="type-h1 mt-3 text-ink">
+      <section aria-labelledby="pricing-title" className="container-content flex flex-col gap-8 pt-10 pb-14 md:gap-10 md:pt-16 md:pb-24">
+        <header className="flex max-w-[45rem] flex-col gap-3">
+          <Eyebrow>{pricing.title}</Eyebrow>
+          <h1 id="pricing-title" className="type-h1 text-ink">
             Pricing
           </h1>
-          <p className="type-lead mx-auto mt-4 max-w-xl text-balance">
-            Start free. Pay monthly if you bid most months, or by the bid if you bid a few times a year. Every price is on this page: there is no demo call.
+          <p className="type-lead mt-1 max-w-[42.5rem] text-ink">
+            {pricing.lead} If you bid a few times a year, pay by the bid instead. Every price is on this page: there is no demo call.
           </p>
         </header>
 
-        <div className="mt-10">
-          <MarketingPricing />
-        </div>
+        <MarketingPricing />
 
-        <ul className="mt-12 grid gap-x-8 gap-y-6 md:grid-cols-3">
+        <ul className="mt-4 grid gap-x-8 gap-y-7 md:grid-cols-3">
           {terms.map((term) => (
-            <li key={term.title} className="border-t border-line-strong pt-4">
-              <h2 className="font-sans text-base leading-6 font-semibold text-ink">{term.title}</h2>
-              <p className="mt-1 text-sm text-ink-2">{term.body}</p>
+            <li key={term.title}>
+              <Point title={term.title}>{term.body}</Point>
             </li>
           ))}
         </ul>
       </section>
 
-      <Section labelledBy="compare-title" tone="sunken">
-        <SectionHeading id="compare-title" title="Compare plans" lead={`What each plan includes. A ${BID_PASS.name} adds one full bid to any plan, including Free.`} />
-        <div className="mt-8">
-          <PlanComparison labelledBy="compare-title" />
+      <Section labelledBy="compare-title" tone="deep" containerClassName="flex flex-col gap-8 md:gap-10">
+        <SectionHeading
+          id="compare-title"
+          eyebrow="Plan by plan"
+          title="Compare the plans"
+          lead={`What each plan includes. A ${BID_PASS.name} adds one full bid to any plan, including Free.`}
+        />
+        <PlanComparison labelledBy="compare-title" />
+      </Section>
+
+      <Section labelledBy="billing-faq-title" tone="surface" className="border-t-0" containerClassName="flex flex-wrap gap-x-20 gap-y-8">
+        <div className="flex min-w-0 flex-[1_1_18.75rem] flex-col gap-3">
+          <Eyebrow>Questions</Eyebrow>
+          <h2 id="billing-faq-title" className="type-h2 text-ink">
+            Billing and cancellation
+          </h2>
+          <p className="type-reading mt-1 text-ink-2">
+            The full terms are in the <Link href="/legal/terms">Terms of Service</Link> and the <Link href="/legal/refunds">refund policy</Link>. Questions about an
+            invoice? Write to <a href={`mailto:${site.supportEmail}`}>{site.supportEmail}</a>.
+          </p>
+        </div>
+        <div className="min-w-0 flex-[2_1_35rem]">
+          <Faq items={billingFaq} />
         </div>
       </Section>
 
-      <Section labelledBy="billing-faq-title">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-12">
-          <div className="lg:col-span-5">
-            <SectionHeading id="billing-faq-title" title="Billing and cancellation" />
-            <p className="mt-4 text-base text-ink-2">
-              The full terms are in the <Link href="/legal/terms">Terms of Service</Link> and the <Link href="/legal/refunds">refund policy</Link>. Questions about an
-              invoice? Write to <a href={`mailto:${site.supportEmail}`}>{site.supportEmail}</a>.
-            </p>
-          </div>
-          <div className="lg:col-span-7">
-            <Faq items={billingFaq} />
-          </div>
-        </div>
-      </Section>
-
-      <CtaBand
-        id="pricing-cta-title"
-        title="Start with what is free."
-        lead="Find your company’s page, claim your radar and run one cited bid check on a live tender. No card needed."
-        primary={{ label: "Find your company", href: "/find" }}
-        secondary={{ label: "Get a free bid check", href: "/free-bid-check" }}
-      />
+      <CtaBand id="pricing-cta-title" title="Start with what is free: your company’s page." note="No account needed to look. Your first cited bid check is free too." />
     </>
   );
 }

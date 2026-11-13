@@ -14,7 +14,7 @@ import { site } from "./site";
 export type PlanPriceDisplay = {
   /** "£29", "£290", "£0" */
   amount: string;
-  /** "per month" | "per year" | "" (free) */
+  /** "a month" | "a year" | "" (free) */
   period: string;
   /** Line under the price. */
   note: string;
@@ -24,6 +24,8 @@ export type PlanDisplay = {
   key: PlanKey;
   name: string;
   summary: string;
+  /** "Everything in Radar Pro, and:" — the line above the bullets; null for the first plan. */
+  leadIn: string | null;
   bullets: string[];
   recommended: boolean;
   seats: number | null;
@@ -46,20 +48,24 @@ export function planPrice(key: PlanKey, interval: BillingInterval): PlanPriceDis
   if (interval === "year") {
     return {
       amount: formatPrice(prices.year),
-      period: "per year",
+      period: "a year",
       note: `Two months free. Works out at ${formatPrice(Math.round(prices.year / 12))} a month.`,
     };
   }
-  return { amount: formatPrice(prices.month), period: "per month", note: "Billed monthly." };
+  return { amount: formatPrice(prices.month), period: "a month", note: "Billed monthly." };
 }
 
 export function planDisplay(key: PlanKey): PlanDisplay {
   const plan = PLANS[key];
+  /* A highlight that starts "Everything in …" is the lead-in of the list, not a bullet. */
+  const [first, ...rest] = plan.highlights;
+  const inherits = first?.startsWith("Everything in ") ?? false;
   return {
     key,
     name: plan.name,
     summary: plan.description,
-    bullets: plan.highlights,
+    leadIn: inherits ? `${first}, and:` : null,
+    bullets: inherits ? rest : plan.highlights,
     recommended: Boolean(plan.recommended),
     seats: plan.limits.seats,
     footnote: FOOTNOTES[key],

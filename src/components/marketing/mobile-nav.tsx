@@ -1,6 +1,5 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useState } from "react";
@@ -9,8 +8,19 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { findCompany, primaryNav } from "./site-nav";
 
+const iconButton = "grid size-11 shrink-0 cursor-pointer place-items-center rounded-control text-ink transition-colors duration-150 hover:bg-paper-deep";
+
+/** The three-line menu sign and the cross, drawn as in the artboards (1.8 px, round caps). */
+function MenuIcon({ open = false }: { open?: boolean }) {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden className="size-[1.375rem] fill-none stroke-current stroke-[1.8] [stroke-linecap:round]">
+      {open ? <path d="M4.5 4.5l11 11M15.5 4.5l-11 11" /> : <path d="M3 6h14M3 10h14M3 14h14" />}
+    </svg>
+  );
+}
+
 /**
- * Marketing navigation below 1024 px: a full-width sheet that drops from the header.
+ * Public navigation below 768 px: a sheet that drops from the header.
  * Built on Radix Dialog, so focus is trapped while it is open, Escape closes it and focus
  * returns to the menu button. Every row is at least 48 px tall.
  */
@@ -23,17 +33,17 @@ export function MobileNav() {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
       <DialogPrimitive.Trigger asChild>
-        <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu">
-          <Menu aria-hidden className="size-5" />
-        </Button>
+        <button type="button" className={`${iconButton} md:hidden`} aria-label="Open menu">
+          <MenuIcon />
+        </button>
       </DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/45 duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 lg:hidden" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/45 duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 md:hidden" />
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          className="fixed inset-x-0 top-0 z-50 max-h-dvh overflow-y-auto border-b border-line bg-paper shadow-overlay duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-2 lg:hidden"
+          className="fixed inset-x-0 top-0 z-50 max-h-dvh overflow-y-auto border-b border-line bg-paper shadow-overlay duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-2 md:hidden"
         >
-          <div className="container-content flex h-16 items-center justify-between">
+          <div className="container-content flex min-h-14 items-center justify-between border-b border-line pr-2">
             <DialogPrimitive.Title asChild>
               <span>
                 <span className="sr-only">Menu</span>
@@ -41,27 +51,27 @@ export function MobileNav() {
               </span>
             </DialogPrimitive.Title>
             <DialogPrimitive.Close asChild>
-              <Button variant="ghost" size="icon" aria-label="Close menu">
-                <X aria-hidden className="size-5" />
-              </Button>
+              <button type="button" className={iconButton} aria-label="Close menu">
+                <MenuIcon open />
+              </button>
             </DialogPrimitive.Close>
           </div>
-          <nav aria-label="Main" className="container-content pb-6">
-            <ul className="divide-y divide-line border-y border-line">
+          <nav aria-label="Main" className="container-content pt-2 pb-6">
+            <ul className="divide-y divide-line border-b border-line">
               {primaryNav.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} onClick={close} className="flex min-h-12 items-center py-3 text-base font-medium text-ink">
+                  <Link href={item.href} onClick={close} className="link-quiet flex min-h-[3.25rem] items-center text-17 font-medium">
                     {item.label}
                   </Link>
                 </li>
               ))}
               <li>
-                <Link href={signedIn ? "/app" : "/sign-in"} onClick={close} className="flex min-h-12 items-center py-3 text-base font-medium text-ink">
+                <Link href={signedIn ? "/app" : "/sign-in"} onClick={close} className="link-quiet flex min-h-[3.25rem] items-center text-17 font-medium">
                   {signedIn ? "Open your radar" : "Sign in"}
                 </Link>
               </li>
             </ul>
-            <div className="mt-5 grid gap-3">
+            <div className="mt-5 grid gap-2.5">
               <Button asChild size="lg">
                 <Link href={findCompany.href} onClick={close}>
                   {findCompany.label}

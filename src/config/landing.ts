@@ -1,136 +1,119 @@
 import { BID_PASS } from "./plan-display";
-import { PLANS, formatPrice } from "./plans";
 import { site } from "./site";
 
 /**
  * ALL copy of the landing page ("/"), in one place so it can be edited without touching
- * components. Voice: plain British English, second person, short sentences, numbers before
- * adjectives, the buyer's words (tender, bid, buyer, contract, award, framework).
+ * components. The page follows the designer's artboards (docs/design/handoff/Landing-*),
+ * with the corrections from the handoff README applied: Find a Tender only, the real plans
+ * and prices, "cited bid check" as the name of the first deliverable, and no score prediction.
  *
- * Rules that are easy to break (see docs/design/DESIGN.md §2 and the research notes):
- *  - never promise wins, win rates, "100% compliant" or score prediction;
- *  - every figure about the market names its source;
- *  - facts about hosting, refresh rate and trials come from src/config/site.ts.
+ * Voice: plain British English, second person, short sentences, numbers before adjectives,
+ * the buyer's words (tender, bid, buyer, contract, award).
+ *
+ * Rules that are easy to break:
+ *  - never promise wins, win rates, "100% compliant" or a predicted score;
+ *  - facts about hosting, refresh rate and trials come from src/config/site.ts;
+ *  - all companies, buyers and figures in the product pictures are fictional samples.
  */
 
 const { facts } = site;
-const radarPro = PLANS.starter.prices ? formatPrice(PLANS.starter.prices.month) : "";
 
 export const landing = {
   hero: {
-    eyebrow: "For UK suppliers to the public sector",
-    title: "Know which public contracts are worth your time.",
-    subtitle:
-      "Upload a tender pack and get a straight answer: can we bid, and what would get us thrown out? Every pass/fail requirement, deadline and scored question is quoted from the buyer’s documents, with file and page. Your first check is free, and your radar is already built.",
-    primaryCta: { label: "Find your company", href: "/find" },
-    secondaryCta: { label: "Get a free bid check", href: "/free-bid-check" },
-    sampleLink: { label: "See a sample check", href: "/sample-check" },
-    note: "Free to start. No card needed.",
+    eyebrow: "The bid desk for small suppliers",
+    titleLead: "Know which public contracts are worth your time",
+    titleRest: "and get a compliant first draft in hours, not days.",
+    lead: "Bidfolio builds a free page for your company from published procurement notices: your wins, open tenders like them, and rival contracts about to end. When you decide to bid, upload the tender pack and get every requirement quoted and cited, with first-draft answers written only from your own documents.",
+    note: "No account needed to look.",
+    sampleLink: { before: "Or ", label: "see a sample bid check", href: "/sample-check" },
   },
 
-  facts: [
-    {
-      title: "Official Find a Tender data",
-      body: "Contract and award notices from the UK’s Find a Tender service, used under the Open Government Licence.",
-    },
-    {
-      title: `Refreshed every ${facts.dataRefreshMinutes} minutes`,
-      body: "New tenders and awards reach your radar the day they are published.",
-    },
-    {
-      title: "Independent of government",
-      body: "Bidfolio is a private service. It is not part of, or endorsed by, the UK Government.",
-    },
-  ],
+  /** The company search that opens a supplier page. Sends ?q= to /find. */
+  search: {
+    label: "Find your company’s page. It’s free.",
+    placeholder: "Company name or Companies House number",
+    placeholderShort: "Company name or number",
+    submit: "Show my page",
+    action: "/find",
+  },
 
-  check: {
-    eyebrow: "The cited bid check",
-    title: "Can we bid — and what would get us thrown out?",
-    lead: "Read the pack in minutes, not evenings. A bid takes a small firm about five days to prepare. The check tells you whether to start.",
-    leadSource: "Five days per bid: Federation of Small Businesses, December 2025.",
-    points: [
+  strip: {
+    data: {
+      strong: "Built from open data.",
+      text: "Tender, award and contract notices from Find a Tender, used under the Open Government Licence v3.0.",
+    },
+    independent: {
+      strong: "Independent.",
+      text: "Not a government service.",
+      link: { label: "How we relate to GOV.UK", href: "#independence" },
+    },
+  },
+
+  how: {
+    eyebrow: "How it works",
+    title: "From published notice to first draft in three steps",
+    steps: [
       {
-        title: "Every requirement, quoted",
-        body: "Insurance levels, turnover thresholds, accreditations, policies, experience. Each one shows the buyer’s exact words, the file and the page.",
+        title: "Find your page",
+        body: "Type your company name. Your page is already built from published notices: the contracts you have won, open tenders like them, rival contracts ending soon and the buyers in your trade. It is free and needs no account.",
       },
       {
-        title: "Checked against your company",
-        body: "Each requirement is marked Met, Gap or Verify against the facts you have confirmed. You see the gaps before you write a word.",
+        title: "Upload the tender pack",
+        body: "Drop in the documents as the buyer sent them. You get a cited bid check: every requirement quoted word for word and cited to its file and page, the scored questions with weightings and word limits, and a plain verdict on whether you can comply.",
+      },
+      {
+        title: "Draft, mark, improve",
+        body: "Each answer gets a first draft written only from documents you have uploaded: policies, certificates, case studies, past bids. Every draft is then marked the way an evaluator would mark it, against the buyer’s own scoring scheme, so you know what to fix before you submit.",
+      },
+    ],
+  },
+
+  proof: {
+    eyebrow: "Inside a cited bid check",
+    title: "Every requirement, quoted and cited",
+    lead: "No summaries to take on trust. Each line in a check is the buyer’s own sentence, with the file and page it came from, so you can verify it in seconds.",
+    bridge: "appears in your check as",
+    points: [
+      {
+        title: "Quoted, not paraphrased",
+        body: "The requirement is the buyer’s sentence, copied exactly. If the pack says “must”, your check says “must”.",
+        short: "The buyer’s sentence, copied exactly.",
+      },
+      {
+        title: "File, page and clause on every line",
+        body: "Open the source at the right page and read the sentence in context before you rely on it.",
+        short: "Check the source in seconds.",
       },
       {
         title: "Gaps shown as gaps",
-        body: "If a quote cannot be matched to the source text, it is marked “Verify in documents”. Nothing is filled in to look complete.",
+        body: "Each requirement is checked against the documents you have uploaded. Where there is no evidence, the check says so.",
+        short: "No evidence in your documents? It says so.",
       },
     ],
-    detailsTitle: "From a sample check",
-    disclaimer: "AI-assisted analysis. Check it against the tender documents: you remain responsible for your submission.",
-    primaryCta: { label: "Get a free bid check", href: "/free-bid-check" },
-    sampleLink: { label: "See a sample check", href: "/sample-check" },
+    sampleLink: { label: "See a whole sample check", href: "/sample-check" },
+    note: "Your first cited bid check is free.",
   },
 
-  radar: {
-    eyebrow: "Your radar",
-    title: "Your radar, already built.",
-    lead: "We have read the award notices. If your company has won a public contract, its page is already here: open and free, with no sign-in to see it.",
-    columns: [
-      {
-        title: "Open tenders like the ones you’ve won",
-        body: "Matched on what you have delivered, not on keywords you had to guess. Each match says why it is there and when it closes.",
-      },
-      {
-        title: "Contracts ending soon in your trade",
-        body: "Who holds them, what they are worth and when they end. Usually the first sign that a tender is coming.",
-      },
-      {
-        title: "Buyers who award without a tender in your trade",
-        body: "About four in ten UK procedures are direct awards. See which buyers place work like yours directly, and introduce yourself before the next one.",
-        source: "Direct awards: Open Contracting Partnership, on the first year of Procurement Act data.",
-      },
-    ],
-    primaryCta: { label: "Find your company", href: "/find" },
-    note: "No public contract yet? Create a free account and set up a radar by trade and region.",
+  pricing: {
+    eyebrow: "Pricing",
+    title: "Free to look. Pay when you bid.",
+    lead: "Your page costs nothing. Add alerts when you want to hear first, and the bid desk when there is a tender on your table.",
+    smallPrint: `Prices in pounds sterling, excluding VAT. Annual billing gives two months free. Bid Desk starts with a ${facts.trialDays}-day trial. Pause or cancel in two clicks.`,
+    compare: { label: "Compare the plans in full", href: "/pricing" },
   },
 
-  drafts: {
-    eyebrow: "Bid Desk",
-    title: "Drafts built from your own evidence.",
-    lead: "A generic answer scores low. Bidfolio drafts each scored question only from your company facts and the documents in your library: policies, case studies, past bids.",
-    points: [
-      { title: "Sources marked", body: "Every claim in a draft points to the document it came from." },
-      { title: "Gaps marked, not invented", body: "Where your library has no evidence, the draft says “Evidence needed” and tells you what to add." },
-      {
-        title: "Read like an evaluator would",
-        body: "Each answer is marked against the buyer’s own scoring guide, with the changes most likely to earn marks. A second read, not a score prediction.",
-      },
-      { title: "Word limits watched", body: "A live count against the limit. Export every answer to Word when you are done." },
-    ],
-  },
-
-  howItWorks: {
-    title: "How it works",
-    lead: "Three steps. The first two are free.",
-    steps: [
-      {
-        title: "Find your company",
-        body: "Search by name or Companies House number. Your page shows your public contract wins and the tenders open now.",
-        cta: { label: "Find your company", href: "/find" },
-      },
-      {
-        title: "Claim your radar",
-        body: "Create a free account to see every match, save tenders and get a weekly digest. No card needed.",
-        cta: { label: "Create a free account", href: "/sign-up" },
-      },
-      {
-        title: "Upload a tender pack",
-        body: "PDF, Word, Excel or a zip. Your cited bid check is ready in a few minutes. The first one is free.",
-        cta: { label: "Get a free bid check", href: "/free-bid-check" },
-      },
-    ],
+  bidPass: {
+    eyebrow: "One tender, no subscription",
+    title: BID_PASS.name,
+    body: "One full bid, paid once: the cited bid check, the scored questions, first-draft answers from your own documents, evaluator-style marking and export to Word. Works on any plan, including Free.",
+    cta: { label: "Start a bid with a Bid Pass", href: "/sign-up?next=/app/bids/new" },
+    note: BID_PASS.footnote,
   },
 
   straightAnswers: {
+    eyebrow: "Before you upload anything",
     title: "Straight answers",
-    lead: "You are being asked to upload commercial documents to a service you have not used before. Here is what you should know first.",
+    lead: "You are being asked to trust a service you have not used with commercial documents. Here is what you should know first.",
     items: [
       {
         question: "Who runs Bidfolio?",
@@ -142,7 +125,11 @@ export const landing = {
       },
       {
         question: "Are my files used to train AI?",
-        answer: "No. Your tender packs and library are used only to produce your results. Delete them at any time, or ask us to.",
+        answer: "No. Your tender packs and documents are used only to produce your own results. Delete them at any time, or ask us to.",
+      },
+      {
+        question: "What will it not do?",
+        answer: "Price your bid, submit it, or forecast the buyer’s score. It reads the pack, drafts from your evidence and marks against the scheme. The decisions stay with you.",
       },
       {
         question: "Will a renewal surprise me?",
@@ -152,39 +139,39 @@ export const landing = {
         question: "Who takes the payment?",
         answer: "Paddle, our merchant of record. Paddle handles cards, invoices and VAT.",
       },
-      {
-        question: "Is this an official service?",
-        answer: "No. Bidfolio is independent. The data comes from the official Find a Tender service under the Open Government Licence.",
-      },
     ],
   },
 
-  pricingTeaser: {
-    title: "Pay monthly, or by the bid.",
-    lead: `Start free. The full radar is ${radarPro} a month. A ${BID_PASS.name} is ${BID_PASS.price} for one full bid, with no subscription.`,
-    cta: { label: "Compare plans", href: "/pricing" },
-  },
-
-  faq: {
-    title: "Questions people ask first",
+  questions: {
+    eyebrow: "Questions",
+    title: "What suppliers ask first",
+    contact: { before: "Something else? Write to ", after: ". A person replies." },
     items: [
       {
-        question: "Is Bidfolio an official government service?",
+        question: "Where does the information on my page come from?",
+        answer: `From notices that UK public bodies publish openly: tender, award and contract notices on Find a Tender, fetched every ${facts.dataRefreshMinutes} minutes. We match them to your company by name and Companies House number. Notices that appear only on other portals, such as Contracts Finder, Public Contracts Scotland or Sell2Wales, are not included yet. If a notice is wrong or missing, you can flag it from your page.`,
+      },
+      {
+        question: "Is Bidfolio part of GOV.UK?",
         answer:
-          "No. Bidfolio is an independent, private service. It is not affiliated with, or endorsed by, the UK Government, the Cabinet Office or Find a Tender. You never need Bidfolio to see or respond to a public tender: the official notices are free.",
+          "No. Bidfolio is an independent company. We use public notices under the Open Government Licence and have no connection to the Cabinet Office or Find a Tender. You still submit your bid through the buyer’s own portal.",
       },
       {
-        question: "Where does the data come from?",
-        answer: `From contract and award notices published on the UK Government’s Find a Tender service, licensed under the Open Government Licence v3.0. We fetch new notices every ${facts.dataRefreshMinutes} minutes. Public pages show company-level information only: no names, email addresses or phone numbers of individuals.`,
-      },
-      {
-        question: "Is my tender pack kept private?",
-        answer: `Yes. Files you upload are your confidential data. Only members of your workspace can open them. They are stored in ${facts.hostingRegion}, are never used to train AI models, and are deleted when you delete them or ask us to.`,
-      },
-      {
-        question: "Does AI write my bid?",
+        question: "Will the drafts invent things about my company?",
         answer:
-          "It writes first drafts, only from your own evidence, and you stay in control. Where your library has no evidence for a claim, the draft says “Evidence needed” instead of making something up. You edit, decide and submit, and you remain responsible for your submission.",
+          "No. Drafts are written only from documents you upload, and each claim carries a marker back to the document and page it came from. Where your documents do not support a point the question asks for, the draft leaves a labelled gap for you to fill instead of guessing.",
+      },
+      {
+        question: "Does it write the whole bid for me?",
+        answer: "It gives you a compliant first draft and an honest mark. Pricing, the final wording and the decision to submit stay with you.",
+      },
+      {
+        question: "What happens to the documents I upload?",
+        answer: `Your tender packs and company documents stay in your workspace and are used only to produce your checks and drafts. They are stored in ${facts.hostingRegion}, are never used to train AI models, and are deleted when you delete them or ask us to.`,
+      },
+      {
+        question: "Can I cancel when the bid is in?",
+        answer: `Yes. Pause or cancel in two clicks from Settings. You keep what you paid for until the end of the period, and your page and documents stay. If you change your mind within ${site.legal.refundWindowDays} days of your first payment, ask for a refund. If you only have one tender, a ${BID_PASS.name} is ${BID_PASS.price} with no subscription.`,
       },
       {
         question: "Do buyers allow AI-assisted bids?",
@@ -196,22 +183,18 @@ export const landing = {
         answer:
           "Yes. Create a free account and set up a radar by trade, region and contract value. The cited bid check works on any tender pack, whether or not you have won before.",
       },
-      {
-        question: "Can I cancel any time?",
-        answer: `Yes. Pause or cancel in two clicks from Settings. You keep what you paid for until the end of the period, and your data stays. If you change your mind within ${site.legal.refundWindowDays} days of your first payment, ask for a refund.`,
-      },
-      {
-        question: "Which parts of the UK are covered?",
-        answer:
-          "UK-wide notices published on Find a Tender. Notices that appear only on other portals, such as Contracts Finder, Public Contracts Scotland, Sell2Wales or eTendersNI, are not included yet.",
-      },
     ],
   },
 
   finalCta: {
-    title: "See what the public record says about your company.",
-    lead: "Your page is free and already built. Finding it takes about 30 seconds.",
-    primaryCta: { label: "Find your company", href: "/find" },
-    secondaryCta: { label: "Get a free bid check", href: "/free-bid-check" },
+    title: "See what the notices already say about your company.",
+  },
+
+  independence: {
+    title: "Bidfolio is independent.",
+    paragraphs: [
+      "Bidfolio is a private company. It is not part of GOV.UK, and it is not endorsed by or connected to the Cabinet Office, Find a Tender or any contracting authority.",
+      "Pages are built from published notices and contain public sector information licensed under the Open Government Licence v3.0. Notices can be late, incomplete or wrong, so always check the original notice and the tender documents before you bid.",
+    ],
   },
 } as const;
