@@ -77,9 +77,11 @@ export const POST = route(async (request, _context, { requestId }) => {
   const logoUrl = `/api/files/${key}`;
   await db.update(organizations).set({ logo: logoUrl }).where(eq(organizations.id, ctx.organization.id));
 
-  // Best-effort removal of the previous logo (only if it lives in this workspace's namespace).
+  // Best-effort removal of the previous logo — only a file in THIS workspace's logo folder,
+  // whatever the stored value says (it must never be usable to delete another file).
   const previousKey = logoKeyFromUrl(ctx.organization.logo);
-  if (previousKey && organizationIdFromKey(previousKey) === ctx.organization.id) {
+  const logoFolder = `${orgFileKey(ctx.organization.id, "logo")}/`;
+  if (previousKey && previousKey !== key && organizationIdFromKey(previousKey) === ctx.organization.id && previousKey.startsWith(logoFolder)) {
     await storage.delete(previousKey).catch(() => undefined);
   }
 

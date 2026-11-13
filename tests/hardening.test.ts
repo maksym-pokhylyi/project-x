@@ -119,6 +119,24 @@ describe("state-changing route handlers refuse cross-site requests (F-22)", () =
       expect((await db.select().from(organizations))[0]!.logo).toMatch(/^\/api\/files\/org\/.+\/logo\/.+\.png$/);
     });
 
+    it("replacing a logo only ever deletes a file from the workspace's own logo folder", async () => {
+      const { orgFileKey, storage } = await import("@/lib/storage");
+      const { eq } = await import("drizzle-orm");
+      const document = orgFileKey(owner.organizationId, "documents", "tender.pdf");
+      await storage.put(document, new TextEncoder().encode("confidential"), { contentType: "application/pdf" });
+      // A stored logo value pointing at another file (e.g. written before the hooks validated it).
+      await db.update(organizations).set({ logo: `/api/files/${document}` }).where(eq(organizations.id, owner.organizationId));
+      expect((await upload({ origin: ORIGIN })).status).toBe(200);
+      expect(await storage.get(document)).not.toBeNull();
+
+      // The normal case still cleans up: the previous logo file is removed.
+      const [first] = await db.select().from(organizations);
+      const firstKey = first!.logo!.replace("/api/files/", "");
+      expect((await upload({ origin: ORIGIN })).status).toBe(200);
+      expect(await storage.get(firstKey)).toBeNull();
+      await storage.delete(document);
+    });
+
     it("stops reading an oversized body even when Content-Length is missing or wrong", async () => {
       const big = new Uint8Array(3 * 1024 * 1024);
       big.set(PNG);
