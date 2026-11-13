@@ -5,7 +5,9 @@
  *              regenerate after adding/removing a Better Auth plugin.
  * - ./app.ts   Everything this product owns (billing, usage, jobs, logs, ...).
  * - ./procurement.ts  Find a Tender data platform + Radar tenant tables.
+ * - ./notifications.ts  Scheduled e-mails: preferences per member and the send log.
  */
 export * from "./auth";
 export * from "./app";
 export * from "./procurement";
+export * from "./notifications";

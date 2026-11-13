@@ -39,8 +39,10 @@ export async function deliverOutboxEmail(outboxId: string): Promise<void> {
   }
 
   resend ??= new Resend(env.RESEND_API_KEY);
+  // Extra headers stored with the message (List-Unsubscribe on scheduled e-mails) go out unchanged.
+  const headers = row.headers && Object.keys(row.headers).length > 0 ? { headers: row.headers } : {};
   const { data, error } = await resend.emails.send(
-    { from: emailFrom(), to: row.toEmail, subject: row.subject, html: row.html, text: row.text },
+    { from: emailFrom(), to: row.toEmail, subject: row.subject, html: row.html, text: row.text, ...headers },
     { idempotencyKey: `outbox-${row.id}` },
   );
   if (error) {
@@ -49,9 +51,9 @@ export async function deliverOutboxEmail(outboxId: string): Promise<void> {
     await db.update(emailOutbox).set({ status: "failed", error: reason }).where(eq(emailOutbox.id, outboxId));
     throw new Error(`Resend rejected the e-mail: ${reason}`);
   }
-  // Bodies contain one-time links; do not keep them once the provider has the message.
+  // Bodies (and headers) contain one-time or signed links; do not keep them once the provider has the message.
   await db
     .update(emailOutbox)
-    .set({ status: "sent", sentAt: new Date(), providerMessageId: data?.id ?? null, error: null, html: null, text: null })
+    .set({ status: "sent", sentAt: new Date(), providerMessageId: data?.id ?? null, error: null, html: null, text: null, headers: null })
     .where(eq(emailOutbox.id, outboxId));
 }
