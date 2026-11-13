@@ -218,6 +218,13 @@ No card for the free check · Files stored in the EU · Deleted when you ask · 
 > councils may follow it, so read each tender's own instructions. Our rule is simple: Bidfolio drafts only from your
 > own documents, marks anything it cannot evidence, and you check and own what you submit. If a buyer asks, say yes.
 
+*Абзац о раскрытии, который клиент может адаптировать, если заказчик спрашивает об AI (последнее предложение — только
+после письменного подтверждения условий провайдера моделей, см. раздел 5):*
+
+> We used an AI-assisted software tool (Bidfolio) to help analyse the tender documents and to prepare first drafts of
+> some responses from our own company documents. All content was reviewed, corrected and approved by [name, role], who
+> confirms that it is accurate. The tender documents were not used to train any AI model.
+
 **"We rarely bid – a subscription makes no sense."**
 > Agreed, so don't take one. Your company page and weekly digest are free. When a tender does come up, the first check
 > is free and a full bid is £99, one-off. A subscription only makes sense if you bid most months.

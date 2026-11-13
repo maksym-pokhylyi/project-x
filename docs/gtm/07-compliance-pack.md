@@ -35,7 +35,8 @@ Version / date:    v1.0 / [date]          Prepared by: [name]          Next revi
 
 ### 1.1 Scope
 
-This assessment covers work email addresses that identify a person (for example `jane.smith@company.co.uk`) where the
+This assessment covers work email addresses that identify a person (a first-name or first-name-and-surname local part on
+the company's own domain) where the
 address is published as the supplier contact of an **incorporated UK supplier** in a contract award notice or contract
 details notice on the UK Government's Find a Tender service.
 
