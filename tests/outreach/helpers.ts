@@ -93,22 +93,6 @@ export async function signInFounder(): Promise<TestUser> {
   return founder;
 }
 
-/** Sender details the export needs, set for the duration of a suite. */
-export const SENDER_ENV: Record<string, string> = {
-  OUTREACH_SENDER_FIRST_NAME: "Fay",
-  OUTREACH_SENDER_FULL_NAME: "Fay Founder",
-  OUTREACH_SENDER_LEGAL_NAME: "Fay Founder",
-  OUTREACH_SENDER_REGISTER_REFERENCE: "register entry 2 000 000 0000",
-  OUTREACH_SENDER_POSTAL_ADDRESS: "1 Example Street, Poltava, 36000, Ukraine",
-  OUTREACH_SENDER_CONTACT_EMAIL: "fay@getbidfolio.example",
-  OUTREACH_UK_REPRESENTATIVE: "Example Rep Ltd, 2 Sample Road, London",
-};
-
-export function setSenderEnv(values: Record<string, string | undefined> = SENDER_ENV): void {
-  for (const key of Object.keys(SENDER_ENV)) delete process.env[key];
-  for (const [key, value] of Object.entries(values)) if (value !== undefined) process.env[key] = value;
-}
-
 export const count = async (table: string): Promise<number> => {
   const rows = (await db.execute(sql.raw(`select count(*)::int as n from "${table}"`))) as unknown as Array<{ n: number }>;
   return Number(rows[0]?.n ?? 0);

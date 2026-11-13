@@ -9,9 +9,10 @@ import { recordOutreachAudit } from "./audit";
 import { addSuppressionEntry } from "./suppression-store";
 
 /**
- * The founder's view of `data_requests`: what people asked for on /about-the-data and on
- * the opt-out page ("hide my company page", "delete the contact details you hold").
- * Requests are acted on within five working days (docs/gtm/07-compliance-pack.md §4).
+ * The founder's view of `data_requests`: what people asked for with the request form on
+ * /about-the-data, which the opt-out page links to ("hide my company's page", "delete the
+ * contact details you hold"). Requests are acted on within five working days
+ * (docs/gtm/07-compliance-pack.md §4).
  * Cross-tenant by design: every function starts with requireAdmin().
  */
 export type DataRequestRow = {
@@ -94,7 +95,7 @@ export async function resolveDataRequest(input: { id: string; action: DataReques
       // First make sure it can never be listed again, then forget it everywhere else.
       await addSuppressionEntry({ kind: "email", value: email.email, domain: email.domain }, { reason: "data_request", source: "admin", createdBy: admin.id }, tx);
       const prospects = await tx.execute(sql`
-        update outreach_prospects set email = null, merge_fields = null, erased_at = coalesce(erased_at, now()), updated_at = now()
+        update outreach_prospects set email = null, email_hash = null, merge_fields = null, erased_at = coalesce(erased_at, now()), updated_at = now()
         where email = ${email.email} returning 1
       `);
       const contacts = await tx.execute(sql`delete from supplier_contacts where email = ${email.email} returning 1`);

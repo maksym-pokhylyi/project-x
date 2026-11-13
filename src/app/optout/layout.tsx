@@ -2,31 +2,43 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/logo";
 import { site } from "@/config/site";
+import { operatorFooterLine } from "@/features/outreach/config";
+import { INDEPENDENCE_STATEMENT, OGL_ATTRIBUTION } from "@/features/procurement/config";
 
-/** A quiet shell for the opt-out page: the name of the sender, the content, and where to read more. No navigation to sell anything. */
+const navLink = "link-quiet inline-flex min-h-11 items-center rounded-sm text-15 font-medium max-md:underline max-md:decoration-brand max-md:underline-offset-[3px]";
+
+/**
+ * Shell of the opt-out page, as in the "Unsubscribed" artboard (docs/design/handoff,
+ * Unsubscribe-1440 / -390): the public header reduced to the lockup and two links, one
+ * 640 px column, and a paper-deep band that says who operates the service. Nothing here
+ * tries to sell anything.
+ */
 export default function OptOutLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-muted/30">
-      <header className="px-4 py-5">
-        <div className="mx-auto max-w-2xl">
+    <div className="flex min-h-dvh flex-col">
+      <header className="border-b border-line">
+        <div className="container-content flex min-h-14 flex-wrap items-center justify-between gap-x-8 gap-y-1 md:min-h-[4.5rem]">
           <Logo />
+          <nav aria-label="Main" className="flex flex-wrap items-center gap-x-5 md:gap-x-8">
+            <Link href="/" className={navLink}>
+              What is {site.name}?
+            </Link>
+            <Link href="/sign-in" className={navLink}>
+              Sign in
+            </Link>
+          </nav>
         </div>
       </header>
-      <main id="main" className="flex-1 px-4 pb-12 pt-2 sm:pt-6">
-        <div className="mx-auto max-w-2xl">{children}</div>
+
+      <main id="main" className="px-5 pt-8 pb-12 md:px-6 md:pt-16 md:pb-[4.5rem]">
+        <div className="mx-auto flex w-full max-w-[40rem] flex-col">{children}</div>
       </main>
-      <footer className="px-4 py-6 text-xs text-muted-foreground">
-        <div className="mx-auto flex max-w-2xl flex-wrap gap-x-4 gap-y-1">
-          <span>{site.name} is an independent commercial service, not part of the UK Government.</span>
-          <Link href="/legal/privacy" className="underline underline-offset-4">
-            Privacy notice
-          </Link>
-          <Link href="/about-the-data" className="underline underline-offset-4">
-            About the data
-          </Link>
-          <Link href="/contact" className="underline underline-offset-4">
-            Contact
-          </Link>
+
+      <footer className="flex-1 bg-paper-deep" data-testid="optout-operator">
+        <div className="container-content pt-8 pb-9">
+          <p className="max-w-[61.25rem] text-13 leading-[1.6] text-ink-2">
+            {operatorFooterLine()} · Payments are processed by Paddle. · {OGL_ATTRIBUTION} · {INDEPENDENCE_STATEMENT}
+          </p>
         </div>
       </footer>
     </div>

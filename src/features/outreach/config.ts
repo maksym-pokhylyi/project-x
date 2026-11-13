@@ -6,21 +6,31 @@ import { site } from "@/config/site";
  * The rules behind the numbers are in docs/research/round2/P2-outreach-legal-deliverability.md
  * (P2), docs/gtm/02-outreach-kit.md and docs/research/DECISION.md §6. Change a number here,
  * not in the code that uses it.
- *
- * SENDER IDENTITY. Every letter must say who is writing (PECR reg. 23(a)); the CSV export
- * is refused until the details below are real. They come from `site.company`
- * (src/config/site.ts) where the site already knows them, and each can be set per
- * deployment with an environment variable (all optional, none of them secret):
- *
- *   OUTREACH_SENDER_FIRST_NAME          "Jane"                — closes the letter
- *   OUTREACH_SENDER_FULL_NAME           "Jane Doe"            — first line of the signature
- *   OUTREACH_SENDER_CONTACT_EMAIL       a mailbox that is read every day
- *   OUTREACH_SENDER_LEGAL_NAME          default: site.company.legalName
- *   OUTREACH_SENDER_REGISTER_REFERENCE  default: site.company.registrationNumber (optional line)
- *   OUTREACH_SENDER_POSTAL_ADDRESS      default: site.company.address
- *   OUTREACH_UK_REPRESENTATIVE          name and UK address; REQUIRED before a named address is exported
- *   OUTREACH_ICO_NUMBER                 optional line
  */
+
+/**
+ * WHO IS WRITING — the seller identity the owner confirmed on 13 November 2026
+ * (docs/OWNER_ACTIONS.md, item C). Every letter and the opt-out page state it
+ * (PECR reg. 23(a): the sender's identity must not be concealed).
+ *
+ * The same values are being added to src/config/site.ts as `site.operator`. When they are
+ * there, make this ONE line read `const OPERATOR = site.operator;` — nothing else in the
+ * outreach module holds them.
+ */
+const OPERATOR = {
+  /** The person behind the brand: signs the letter and heads its signature. */
+  name: "Maksym Pokhylyi",
+  /** As registered. */
+  legalName: "FOP Pokhylyi Maksym Ihorovych",
+  /** What he is, in the words agreed for letters and public pages. */
+  description: "an independent sole trader registered in Ukraine",
+  /** Named in the one-line footer, where the full address would be too long. */
+  town: "Kremenchuk",
+  /** Where post is received. */
+  address: "14 Stoliarnyi Lane, Kremenchuk, Poltava Oblast, Ukraine",
+  /** A mailbox that is read every day. */
+  contactEmail: "hello@bidfolio.co.uk",
+} as const;
 
 /** A value that is missing or still a `[[PLACEHOLDER]]` from src/config/site.ts. */
 function real(value: string | undefined | null): string | null {
@@ -28,55 +38,91 @@ function real(value: string | undefined | null): string | null {
   return trimmed && !trimmed.includes("[[") ? trimmed : null;
 }
 
-/** `site.company` gains fields in other branches (UK representative, ICO number): read them if they are there. */
-const company = site.company as Readonly<Record<string, string | undefined>>;
-
 export type OutreachSender = {
+  /** Closes the letter. */
   firstName: string | null;
+  /** First line of the signature. */
   fullName: string | null;
   legalName: string | null;
-  registerReference: string | null;
+  /** "an independent sole trader registered in Ukraine" */
+  description: string | null;
   postalAddress: string | null;
   contactEmail: string | null;
+  /** UK GDPR Art. 27 representative, name and UK address. Null until one is appointed. */
   ukRepresentative: string | null;
   icoNumber: string | null;
 };
 
-export function outreachSender(env: Readonly<Record<string, string | undefined>> = process.env): OutreachSender {
+/**
+ * The identity block of a letter. The operator comes from OPERATOR above; the UK
+ * representative and the ICO number come from `site.company`, where they are still
+ * placeholders — a placeholder counts as "not there", so neither is named in a letter.
+ */
+export function outreachSender(): OutreachSender {
+  const fullName = real(OPERATOR.name);
   return {
-    firstName: real(env.OUTREACH_SENDER_FIRST_NAME),
-    fullName: real(env.OUTREACH_SENDER_FULL_NAME),
-    legalName: real(env.OUTREACH_SENDER_LEGAL_NAME) ?? real(company.legalName),
-    registerReference: real(env.OUTREACH_SENDER_REGISTER_REFERENCE) ?? real(company.registrationNumber),
-    postalAddress: real(env.OUTREACH_SENDER_POSTAL_ADDRESS) ?? real(company.address),
-    contactEmail: real(env.OUTREACH_SENDER_CONTACT_EMAIL),
-    ukRepresentative: real(env.OUTREACH_UK_REPRESENTATIVE) ?? real(company.ukRepresentative),
-    icoNumber: real(env.OUTREACH_ICO_NUMBER) ?? real(company.icoRegistrationNumber),
+    firstName: fullName?.split(" ")[0] ?? null,
+    fullName,
+    legalName: real(OPERATOR.legalName),
+    description: real(OPERATOR.description),
+    postalAddress: real(OPERATOR.address),
+    contactEmail: real(OPERATOR.contactEmail),
+    ukRepresentative: real(site.company.ukRepresentative),
+    icoNumber: real(site.company.icoRegistrationNumber),
   };
 }
 
-export type SenderProblem = { field: keyof OutreachSender; label: string; envVar: string };
+/**
+ * The small print under a public page of this module, in the wording agreed for every legal
+ * footer: who operates the service, how to reach him, and the UK representative — named
+ * once there is one, "being appointed" until then.
+ */
+export function operatorFooterLine(sender: OutreachSender = outreachSender()): string {
+  const where = real(OPERATOR.town) ? ` (${OPERATOR.town})` : "";
+  return [
+    `${site.name} is operated by ${sender.fullName}, ${sender.description}${where}. Contact: ${sender.contactEmail}`,
+    `UK representative: ${sender.ukRepresentative ?? "being appointed"}`,
+  ].join(" · ");
+}
+
+/**
+ * Has a UK representative been appointed (UK GDPR Art. 27)? Until then an address that
+ * identifies a person must not be written to — P2 §3.2: "appoint a UK representative before
+ * the first email to a named person". The builder then lists generic mailboxes only.
+ */
+export function ukRepresentativeAppointed(sender: OutreachSender = outreachSender()): boolean {
+  return sender.ukRepresentative !== null;
+}
+
+/** The blocking notice of the builder, and what the server answers when a named address is asked for without a representative. */
+export const NAMED_ADDRESSES_BLOCKED = "Do not send to named addresses until a UK representative is appointed";
+
+export type SenderProblem = { field: keyof OutreachSender; label: string; where: string };
 
 const REQUIRED: SenderProblem[] = [
-  { field: "firstName", label: "Your first name (closes the letter)", envVar: "OUTREACH_SENDER_FIRST_NAME" },
-  { field: "fullName", label: "Your full name (first line of the signature)", envVar: "OUTREACH_SENDER_FULL_NAME" },
-  { field: "legalName", label: "Full legal name of the operator", envVar: "OUTREACH_SENDER_LEGAL_NAME" },
-  { field: "postalAddress", label: "Postal address where post is received", envVar: "OUTREACH_SENDER_POSTAL_ADDRESS" },
-  { field: "contactEmail", label: "A contact e-mail address that is read every day", envVar: "OUTREACH_SENDER_CONTACT_EMAIL" },
+  { field: "fullName", label: "The operator’s full name", where: "OPERATOR in src/features/outreach/config.ts" },
+  { field: "legalName", label: "The operator’s registered name", where: "OPERATOR in src/features/outreach/config.ts" },
+  { field: "postalAddress", label: "A postal address where post is received", where: "OPERATOR in src/features/outreach/config.ts" },
+  { field: "contactEmail", label: "A contact address that is read every day", where: "OPERATOR in src/features/outreach/config.ts" },
 ];
 const REQUIRED_FOR_NAMED: SenderProblem = {
   field: "ukRepresentative",
-  label: "UK data-protection representative (name and UK address) — needed before any named address is written to",
-  envVar: "OUTREACH_UK_REPRESENTATIVE",
+  label: "A UK data-protection representative (name and UK address)",
+  where: "site.company.ukRepresentative in src/config/site.ts",
 };
 
 /**
  * What is still missing before letters may be exported. A list that contains named
- * (personal-data) addresses also needs the UK representative: P2 §3.2, UK GDPR Art. 14(1)(a).
+ * (personal-data) addresses also needs the UK representative: UK GDPR Art. 14(1)(a).
  */
 export function senderProblems(sender: OutreachSender, options: { includesNamed: boolean }): SenderProblem[] {
   const needed = options.includesNamed ? [...REQUIRED, REQUIRED_FOR_NAMED] : REQUIRED;
   return needed.filter((item) => !sender[item.field]);
+}
+
+/** Where someone asks for a page to be corrected or hidden, or their details removed (the "Flag a mistake" form). */
+export function requestFormHref(pagePath?: string): string {
+  return pagePath ? `/about-the-data?page=${encodeURIComponent(pagePath)}#request` : "/about-the-data#request";
 }
 
 export const outreachConfig = {
@@ -84,7 +130,7 @@ export const outreachConfig = {
   coolOffDays: 180,
   batchSize: { default: 100, max: 400 },
   publishedWithinDays: { default: 30, max: 180 },
-  /** Most candidate addresses one preview will rank; a segment wider than this is cut to its newest awards. */
+  /** Most candidate rows one preview will rank; a segment wider than this is cut to its newest awards. */
   maxCandidates: 20_000,
   /** Notice types whose supplier contact may be used: award decisions (UK6) and contract details (UK7). See 02-outreach-kit §1. */
   noticeTypes: ["UK6", "UK7"] as readonly string[],
@@ -124,6 +170,4 @@ export const OPTOUT_RATE_LIMITS = {
   link: { limit: 30, windowSeconds: 3600 },
   /** Typing an address into the form: anyone can do it for any address. */
   form: { limit: 5, windowSeconds: 3600 },
-  /** "Hide my page" / "delete my details" requests. */
-  followUp: { limit: 10, windowSeconds: 3600 },
 } as const;

@@ -33,7 +33,8 @@ export type FunnelCounts = {
 };
 
 export type Verdict = "too_early" | "pass" | "kill" | "between" | "stopped";
-export type LineState = "pass" | "below" | "kill" | "unknown";
+/** `not_judged`: too few e-mails for the figure to mean anything. `unknown`: it cannot be measured yet. */
+export type LineState = "pass" | "below" | "kill" | "unknown" | "not_judged";
 
 export type ThresholdLine = {
   key: "visits" | "claims" | "packs" | "cardPayments";
@@ -50,6 +51,8 @@ export type FunnelReading = {
   headline: string;
   detail: string;
   lines: ThresholdLine[];
+  /** False below `percentagesFrom` e-mails: the lines then carry counts beside the test's thresholds as written, and no state. */
+  judged: boolean;
   /** True when the thresholds were scaled from the 400-e-mail test. */
   scaled: boolean;
 };
@@ -83,25 +86,30 @@ const DAY_MS = 86_400_000;
 
 export function readFunnel(counts: FunnelCounts, now: Date = new Date(), config: typeof outreachConfig = outreachConfig): FunnelReading {
   const { experiment } = config;
-  const thresholds = thresholdsFor(counts.sent, experiment);
+  // A handful of e-mails is not judged: a threshold scaled down to "2 visits" would be noise.
+  // The lines then show the counts beside the test's thresholds as they are written.
+  const judged = counts.sent >= config.percentagesFrom;
+  const thresholds = thresholdsFor(judged ? counts.sent : experiment.emails, experiment);
   const share = (count: number) => describeShare(count, counts.sent, config.percentagesFrom);
+  const state = (value: LineState): LineState => (judged || value === "unknown" ? value : "not_judged");
+  const ofTest = judged ? "" : ` of ${experiment.emails}`;
 
-  const visitsState: LineState = counts.visited >= thresholds.passVisits ? "pass" : counts.visited < thresholds.killVisitsBelow ? "kill" : "below";
-  const claimsState: LineState = counts.claimed >= thresholds.passClaims ? "pass" : counts.claimed <= experiment.kill.claimsAtMost ? "kill" : "below";
-  const packsState: LineState = counts.bidChecks === null ? "unknown" : counts.bidChecks >= thresholds.passPacks ? "pass" : "below";
-  const cardsState: LineState = counts.cardPayments === null ? "unknown" : counts.cardPayments >= thresholds.passCardPayments ? "pass" : "below";
+  const visitsState = state(counts.visited >= thresholds.passVisits ? "pass" : counts.visited < thresholds.killVisitsBelow ? "kill" : "below");
+  const claimsState = state(counts.claimed >= thresholds.passClaims ? "pass" : counts.claimed <= experiment.kill.claimsAtMost ? "kill" : "below");
+  const packsState = state(counts.bidChecks === null ? "unknown" : counts.bidChecks >= thresholds.passPacks ? "pass" : "below");
+  const cardsState = state(counts.cardPayments === null ? "unknown" : counts.cardPayments >= thresholds.passCardPayments ? "pass" : "below");
 
   const lines: ThresholdLine[] = [
-    { key: "visits", label: "Opened their page", value: share(counts.visited), target: `pass at ${thresholds.passVisits}, kill below ${thresholds.killVisitsBelow}`, state: visitsState },
-    { key: "claims", label: "Claimed their page", value: share(counts.claimed), target: `pass at ${thresholds.passClaims}, kill at 0`, state: claimsState },
-    { key: "packs", label: "Started a bid check", value: counts.bidChecks === null ? "—" : share(counts.bidChecks), target: `pass at ${thresholds.passPacks} (or the next line)`, state: packsState },
-    { key: "cardPayments", label: "Paying", value: counts.cardPayments === null ? "—" : share(counts.cardPayments), target: `pass at ${thresholds.passCardPayments} (or the line above)`, state: cardsState },
+    { key: "visits", label: "Opened their page", value: share(counts.visited), target: `pass at ${thresholds.passVisits}${ofTest}, kill below ${thresholds.killVisitsBelow}`, state: visitsState },
+    { key: "claims", label: "Claimed their page", value: share(counts.claimed), target: `pass at ${thresholds.passClaims}${ofTest}, kill at 0`, state: claimsState },
+    { key: "packs", label: "Started a bid check", value: counts.bidChecks === null ? "—" : share(counts.bidChecks), target: `pass at ${thresholds.passPacks}${ofTest} (or the next line)`, state: packsState },
+    { key: "cardPayments", label: "Paying", value: counts.cardPayments === null ? "—" : share(counts.cardPayments), target: `pass at ${thresholds.passCardPayments}${ofTest} (or the line above)`, state: cardsState },
   ];
 
   const daysSinceLast = counts.lastSentAt ? Math.floor((now.getTime() - counts.lastSentAt.getTime()) / DAY_MS) : null;
   const passed = visitsState === "pass" && claimsState === "pass" && (packsState === "pass" || cardsState === "pass");
   const killed = visitsState === "kill" || claimsState === "kill";
-  const base = { lines, scaled: thresholds.scaled };
+  const base = { lines, judged, scaled: judged && thresholds.scaled };
 
   if (counts.complaints > experiment.maxComplaints) {
     return {

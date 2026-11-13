@@ -2,6 +2,9 @@ import { eq, sql } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/headers", () => import("../helpers/next-headers"));
+// A UK representative is appointed here, so named addresses may be listed. The state
+// without one (generic mailboxes only) is in representative.test.ts.
+vi.mock("@/config/site", async () => (await import("./mocks/site")).siteModule(true));
 
 import { db } from "@/db";
 import { orgSupplierLinks, outreachAudit, outreachCampaigns, outreachProspects, suppliers } from "@/db/schema";

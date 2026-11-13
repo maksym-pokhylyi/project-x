@@ -17,7 +17,12 @@ const SHORT_WORDS = new Set([
   "bio", "mid", "age", "aid", "arc", "ace", "bar", "bed", "bin", "bit", "bow", "boy", "cup", "cut", "dot", "dry", "ear", "end", "era", "far", "fen", "few", "fly",
   "fog", "gap", "gem", "hat", "hay", "hen", "hop", "hot", "ivy", "jet", "joy", "lea", "lee", "let", "lid", "lit", "lot", "low", "mac", "max", "may", "mix", "nut",
   "oat", "odd", "off", "pan", "pen", "pin", "pit", "pod", "raw", "ray", "rex", "rig", "rod", "row", "run", "set", "sir", "six", "tap", "tec", "tek", "tip", "ton",
-  "up", "us", "use", "vet", "wax", "wet", "zen", "go", "my", "we", "be", "do", "it", "is", "me", "no", "so",
+  "up", "us", "use", "vet", "wax", "wet", "zen", "go", "my", "we", "be", "do", "it", "is", "me", "no", "so", "get", "its", "pop", "how", "ark", "are", "med", "de",
+  // Given names and short place names: "IAN WILLIAMS LIMITED" is a person's company, not an abbreviation.
+  "ian", "tom", "jim", "bob", "sam", "joe", "ben", "dan", "ken", "roy", "tim", "guy", "kay", "amy", "eve", "ann", "sue", "pat", "don", "les", "reg", "rob", "ron", "stu",
+  "ted", "vic", "wes", "zoe", "mel", "jon", "jan", "jay", "gus", "len", "lou", "ned", "nat", "ada", "ava", "eva", "ida", "kim", "liz", "meg", "viv", "alf", "bev", "des",
+  "dom", "gil", "hal", "huw", "jed", "lyn", "nev", "raj", "ros", "sid", "sol", "syd", "val", "wyn", "jo", "al", "ed", "ely", "rye", "wye", "exe", "usk", "ayr", "esk",
+  "tay", "dee", "doe",
 ]);
 /** Forms that keep their capitals whatever the rest of the name does. */
 const KEEP_UPPER = new Set([
@@ -26,7 +31,7 @@ const KEEP_UPPER = new Set([
 ]);
 /** Words with one fixed spelling. */
 const FIXED_FORMS: Record<string, string> = {
-  limited: "Limited", ltd: "Ltd", cyf: "Cyf", cyfyngedig: "Cyfyngedig", st: "St", mr: "Mr", mrs: "Mrs", ms: "Ms", dr: "Dr", jnr: "Jnr", snr: "Snr",
+  limited: "Limited", ltd: "Ltd", cyf: "Cyf", cyfyngedig: "Cyfyngedig", st: "St", mr: "Mr", mrs: "Mrs", ms: "Ms", dr: "Dr", jnr: "Jnr", snr: "Snr", inc: "Inc",
 };
 
 function capitalise(word: string): string {

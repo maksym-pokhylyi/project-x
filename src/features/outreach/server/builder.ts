@@ -8,7 +8,7 @@ import { sha256Hex } from "@/lib/crypto";
 import { ConflictError, ValidationError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
 import { requireAdmin } from "@/server/session";
-import { outreachConfig } from "../config";
+import { NAMED_ADDRESSES_BLOCKED, outreachConfig, ukRepresentativeAppointed } from "../config";
 import { isKnownTemplate } from "../domain/letter";
 import { displayName, letterValue, longDate, quotedTitle, shortCompanyName } from "../domain/names";
 import { describeSegment, segmentSchema, type OutreachSegment } from "../domain/segment";
@@ -171,8 +171,16 @@ export async function loadSelectionContext(now: Date, executor: DbOrTx = db): Pr
   };
 }
 
-/** Candidates + context + the pure selection. No authorisation: callers check it. */
+/**
+ * Candidates + context + the pure selection. No authorisation: callers check it.
+ *
+ * Refuses a segment that asks for named addresses while no UK representative is appointed
+ * (UK GDPR Art. 27): until then only generic mailboxes may be listed, whatever the form sent.
+ */
 export async function buildSelection(segment: OutreachSegment, now: Date, executor: DbOrTx = db): Promise<Selection> {
+  if (segment.mailbox !== "generic" && !ukRepresentativeAppointed()) {
+    throw new ConflictError(`${NAMED_ADDRESSES_BLOCKED}. Until then a list can hold generic mailboxes only.`);
+  }
   const [candidates, context] = await Promise.all([loadCandidates(segment, now, executor), loadSelectionContext(now, executor)]);
   return selectProspects(candidates, segment, context, now);
 }

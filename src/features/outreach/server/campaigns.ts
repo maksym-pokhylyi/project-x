@@ -1,9 +1,9 @@
 import "server-only";
-import { desc, eq, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { RETENTION_DAYS } from "@/config/retention";
 import { site } from "@/config/site";
 import { db, type DbOrTx } from "@/db";
-import { outreachAudit, outreachCampaigns, outreachProspects, type OutreachBuildSummaryJson, type ProspectEligibilityJson, type ProspectMergeFieldsJson, type ProspectStatus } from "@/db/schema";
+import { outreachCampaigns, outreachProspects, type OutreachBuildSummaryJson, type ProspectEligibilityJson, type ProspectMergeFieldsJson, type ProspectStatus } from "@/db/schema";
 import { appUrl } from "@/env";
 import { iso, str, textArrayParam } from "@/features/procurement/ingest/sql";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/errors";
@@ -189,12 +189,12 @@ function decide(row: ExportRow, kind: LetterKind, check: { suppressed: (row: Exp
 }
 
 function letterSender(sender: OutreachSender): LetterSender | null {
-  if (!sender.firstName || !sender.fullName || !sender.legalName || !sender.postalAddress || !sender.contactEmail) return null;
+  if (!sender.firstName || !sender.fullName || !sender.legalName || !sender.description || !sender.postalAddress || !sender.contactEmail) return null;
   return {
     firstName: sender.firstName,
     fullName: sender.fullName,
     legalName: sender.legalName,
-    registerReference: sender.registerReference,
+    description: sender.description,
     postalAddress: sender.postalAddress,
     contactEmail: sender.contactEmail,
     ukRepresentative: sender.ukRepresentative,
@@ -202,17 +202,17 @@ function letterSender(sender: OutreachSender): LetterSender | null {
   };
 }
 
-/** Shown in place of a detail that is not configured yet, so a preview still reads as a letter. */
-const MISSING = (problem: string) => `[[${problem}]]`;
+/** Shown in place of a detail that is not configured, so a preview still reads as a letter. */
+const MISSING = (what: string) => `[[${what}]]`;
 
 function previewSender(sender: OutreachSender): LetterSender {
   return {
-    firstName: sender.firstName ?? MISSING("YOUR FIRST NAME"),
-    fullName: sender.fullName ?? MISSING("YOUR FULL NAME"),
-    legalName: sender.legalName ?? MISSING("FULL LEGAL NAME"),
-    registerReference: sender.registerReference,
+    firstName: sender.firstName ?? MISSING("FIRST NAME"),
+    fullName: sender.fullName ?? MISSING("FULL NAME"),
+    legalName: sender.legalName ?? MISSING("REGISTERED NAME"),
+    description: sender.description ?? MISSING("WHAT THE OPERATOR IS"),
     postalAddress: sender.postalAddress ?? MISSING("POSTAL ADDRESS"),
-    contactEmail: sender.contactEmail ?? MISSING("CONTACT E-MAIL"),
+    contactEmail: sender.contactEmail ?? MISSING("CONTACT ADDRESS"),
     ukRepresentative: sender.ukRepresentative,
     icoNumber: sender.icoNumber,
   };
@@ -421,20 +421,53 @@ export async function exportCampaignCsv(campaignId: string, kind: LetterKind = "
   });
 }
 
-export type MarkSentInput = { campaignId: string; sentOn: string; prospectIds?: string[]; allExported?: boolean };
-export type MarkSentResult = { marked: number; notChanged: number; afterContactBy: number; sentOn: string };
+export type MarkSentInput = {
+  campaignId: string;
+  sentOn: string;
+  /** These prospects (a partial selection). */
+  prospectIds?: string[];
+  /** Every prospect that was exported and has no date yet. */
+  allExported?: boolean;
+  /** The first so many of those, in the order of the list — which is the order of the exported file. */
+  firstExported?: number;
+};
+export type MarkSentResult = {
+  marked: number;
+  /** Ticked prospects that already had a date or cannot be marked. */
+  notChanged: number;
+  /** Asked for the first N, but this many fewer were exported and without a date. */
+  shortBy: number;
+  /** Named addresses written to after their contact-by date. */
+  afterContactBy: number;
+  sentOn: string;
+};
+
+/** A prospect that can be given a sent date: listed or exported, or opted out after its letter was exported. */
+const MARKABLE = sql`p.sent_at is null and (p.status in ('listed', 'exported') or (p.status = 'opted_out' and p.exported_at is not null))`;
+
+function parseSelection(prospectIds: string[] | undefined): string[] {
+  const ids = [...new Set(prospectIds ?? [])];
+  if (ids.some((id) => !UUID.test(id)) || ids.length > outreachConfig.batchSize.max) throw new ValidationError("That selection is not valid.");
+  return ids;
+}
 
 /**
  * Records that the founder sent the first letter to these prospects on `sentOn`: the legal
- * record of first contact. A selection may be partial; "all exported" takes every prospect
- * that was exported and has no date yet. Prospects that were skipped are never marked.
+ * record of first contact. Three ways to say which: a selection (it may be partial), the
+ * first N exported prospects without a date in list order (a day's batch), or all of them.
+ * Prospects that were skipped are never marked. A mistake is undone with clearSentMarks.
  */
 export async function markProspectsSent(input: MarkSentInput, now: Date = new Date()): Promise<MarkSentResult> {
   const admin = await requireAdmin();
   if (!UUID.test(input.campaignId)) throw new NotFoundError("Campaign not found.");
-  const ids = [...new Set(input.prospectIds ?? [])];
-  if (ids.some((id) => !UUID.test(id)) || ids.length > outreachConfig.batchSize.max) throw new ValidationError("That selection is not valid.");
-  if (!input.allExported && ids.length === 0) throw new ValidationError("Select at least one company, or choose every exported company.", { ids: ["Nothing is selected."] });
+  const ids = parseSelection(input.prospectIds);
+  const first = input.firstExported;
+  if (first !== undefined && (!Number.isInteger(first) || first < 1 || first > outreachConfig.batchSize.max)) {
+    throw new ValidationError(undefined, { count: [`Enter how many companies to mark: a whole number from 1 to ${outreachConfig.batchSize.max}.`] });
+  }
+  if (!input.allExported && first === undefined && ids.length === 0) {
+    throw new ValidationError("Tick at least one company, or say how many to mark.", { ids: ["Nothing is ticked."] });
+  }
 
   const sentAt = /^\d{4}-\d{2}-\d{2}$/.test(input.sentOn) ? new Date(`${input.sentOn}T12:00:00.000Z`) : new Date(Number.NaN);
   if (Number.isNaN(sentAt.getTime()) || sentAt.toISOString().slice(0, 10) !== input.sentOn) throw new ValidationError(undefined, { sentOn: ["Enter the date the letters were sent."] });
@@ -447,15 +480,19 @@ export async function markProspectsSent(input: MarkSentInput, now: Date = new Da
     const created = new Date(String(iso(campaign.created_at)));
     if (sentAt.getTime() < created.getTime() - DAY_MS) throw new ValidationError(undefined, { sentOn: ["The date cannot be before the campaign was created."] });
 
-    const scope = input.allExported ? sql`p.exported_at is not null` : sql`p.id = any(${textArrayParam(ids)}::uuid[])`;
+    const scope = input.allExported || first !== undefined ? sql`p.exported_at is not null` : sql`p.id = any(${textArrayParam(ids)}::uuid[])`;
+    const limit = first !== undefined && !input.allExported ? sql`limit ${first}::int` : sql``;
     const rows = (await tx.execute(sql`
-      update outreach_prospects p set
+      update outreach_prospects set
         sent_at = ${sentAt.toISOString()}::timestamptz,
-        status = case when p.status = 'opted_out' then 'opted_out' else 'sent' end,
+        status = case when status = 'opted_out' then 'opted_out' else 'sent' end,
         updated_at = ${now.toISOString()}::timestamptz
-      where p.campaign_id = ${input.campaignId}::uuid and p.sent_at is null and ${scope}
-        and (p.status in ('listed', 'exported') or (p.status = 'opted_out' and p.exported_at is not null))
-      returning p.eligibility
+      where id in (
+        select p.id from outreach_prospects p
+        where p.campaign_id = ${input.campaignId}::uuid and ${MARKABLE} and ${scope}
+        order by p.created_at asc, p.id asc ${limit}
+      )
+      returning eligibility
     `)) as unknown as Row[];
     const afterContactBy = rows.filter((row) => {
       const eligibility = row.eligibility as ProspectEligibilityJson;
@@ -464,7 +501,40 @@ export async function markProspectsSent(input: MarkSentInput, now: Date = new Da
     if (rows.length > 0) {
       await recordOutreachAudit({ actorId: admin.id, action: "campaign.marked_sent", campaignId: input.campaignId, count: rows.length, metadata: { sentOn: input.sentOn, afterContactBy } }, tx);
     }
-    return { marked: rows.length, notChanged: input.allExported ? 0 : ids.length - rows.length, afterContactBy, sentOn: input.sentOn };
+    const byCount = !input.allExported && first !== undefined;
+    return {
+      marked: rows.length,
+      notChanged: input.allExported || byCount ? 0 : ids.length - rows.length,
+      shortBy: byCount ? first - rows.length : 0,
+      afterContactBy,
+      sentOn: input.sentOn,
+    };
+  });
+}
+
+/**
+ * Takes the sent date off prospects that were marked by mistake (the wrong rows, the wrong
+ * day). They go back to "exported" or "listed"; an opt-out stays an opt-out. The audit trail
+ * keeps both the mark and its correction.
+ */
+export async function clearSentMarks(input: { campaignId: string; prospectIds: string[] }, now: Date = new Date()): Promise<{ cleared: number; notChanged: number }> {
+  const admin = await requireAdmin();
+  if (!UUID.test(input.campaignId)) throw new NotFoundError("Campaign not found.");
+  const ids = parseSelection(input.prospectIds);
+  if (ids.length === 0) throw new ValidationError("Tick the companies whose sent date is wrong.", { ids: ["Nothing is ticked."] });
+  return db.transaction(async (tx) => {
+    const campaign = await loadCampaignRow(input.campaignId, tx, true);
+    if (!campaign) throw new NotFoundError("Campaign not found.");
+    const rows = (await tx.execute(sql`
+      update outreach_prospects set
+        sent_at = null,
+        status = case when status = 'sent' then (case when exported_at is not null then 'exported' else 'listed' end) else status end,
+        updated_at = ${now.toISOString()}::timestamptz
+      where campaign_id = ${input.campaignId}::uuid and sent_at is not null and id = any(${textArrayParam(ids)}::uuid[])
+      returning 1
+    `)) as unknown as Row[];
+    if (rows.length > 0) await recordOutreachAudit({ actorId: admin.id, action: "campaign.sent_cleared", campaignId: input.campaignId, count: rows.length }, tx);
+    return { cleared: rows.length, notChanged: ids.length - rows.length };
   });
 }
 
@@ -490,8 +560,39 @@ export async function discardCampaign(campaignId: string): Promise<{ discarded: 
   });
 }
 
-/** Newest audit entries, for the foot of the outreach pages. */
-export async function listOutreachAudit(limit = 20) {
+export type AuditRow = {
+  id: string;
+  at: string;
+  action: string;
+  /** Name of the founder's account; null for the system (retention). */
+  actor: string | null;
+  campaignId: string | null;
+  /** Null when the entry is not about a campaign, or the campaign was discarded. */
+  campaignName: string | null;
+  count: number;
+  /** Small, non-personal details (never an address: recordOutreachAudit refuses one). */
+  metadata: Record<string, unknown>;
+};
+
+/** Newest entries of the audit trail: who, when, what and how many — never whom. */
+export async function listOutreachAudit(limit = 20): Promise<AuditRow[]> {
   await requireAdmin();
-  return db.select().from(outreachAudit).orderBy(desc(outreachAudit.createdAt)).limit(Math.min(Math.max(limit, 1), 100));
+  const rows = (await db.execute(sql`
+    select a.id, a.created_at, a.action, a.campaign_id, a.count, a.metadata, u.name as actor, c.name as campaign_name
+    from outreach_audit a
+    left join users u on u.id = a.actor_id
+    left join outreach_campaigns c on c.id = a.campaign_id
+    order by a.created_at desc, a.id desc
+    limit ${Math.min(Math.max(Math.trunc(limit) || 1, 1), 100)}::int
+  `)) as unknown as Row[];
+  return rows.map((row) => ({
+    id: String(row.id),
+    at: iso(row.created_at) ?? "",
+    action: String(row.action),
+    actor: str(row.actor),
+    campaignId: str(row.campaign_id),
+    campaignName: str(row.campaign_name),
+    count: Number(row.count ?? 0),
+    metadata: (row.metadata as Record<string, unknown> | null) ?? {},
+  }));
 }

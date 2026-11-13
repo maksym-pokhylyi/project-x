@@ -6,6 +6,7 @@ export type OutreachAuditAction =
   | "campaign.created"
   | "campaign.exported"
   | "campaign.marked_sent"
+  | "campaign.sent_cleared"
   | "campaign.discarded"
   | "suppression.added"
   | "suppression.imported"

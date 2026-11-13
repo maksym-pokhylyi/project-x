@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { outreachSender, senderProblems } from "@/features/outreach/config";
+import { RETENTION_DAYS } from "@/config/retention";
+import { site } from "@/config/site";
+import { operatorFooterLine, outreachSender, senderProblems, ukRepresentativeAppointed } from "@/features/outreach/config";
 import { CSV_BOM, csvField, guardCell, parseCsv, toCsv } from "@/features/outreach/domain/csv";
 import { describeShare, readFunnel, thresholdsFor, type FunnelCounts } from "@/features/outreach/domain/funnel";
 import { LETTER_TEMPLATES, renderLetter, subjectVariants, type LetterInput } from "@/features/outreach/domain/letter";
@@ -26,6 +28,12 @@ describe("names and figures as a letter writes them", () => {
     expect(displayName("NHS ENGLAND")).toBe("NHS England");
     expect(displayName("ST HELENS BOROUGH COUNCIL")).toBe("St Helens Borough Council");
     expect(displayName("A1 24/7 SECURITY LTD")).toBe("A1 24/7 Security Ltd");
+    // A short given name is a name; a short run of initials is not.
+    expect(displayName("IAN WILLIAMS LIMITED")).toBe("Ian Williams Limited");
+    expect(displayName("TOM JONES & SONS LTD")).toBe("Tom Jones & Sons Ltd");
+    expect(displayName("PJC ELECTRICAL LIMITED")).toBe("PJC Electrical Limited");
+    expect(displayName("JCB FINANCE LTD T/A JCB")).toBe("JCB Finance Ltd T/A JCB");
+    expect(displayName("DE MONTFORT FINE ART LTD")).toBe("De Montfort Fine Art Ltd");
     // Already mixed case: exactly as published (only whitespace is tidied).
     expect(displayName("  eXPD8  Analytics Ltd ")).toBe("eXPD8 Analytics Ltd");
     expect(displayName("")).toBe("");
@@ -84,8 +92,8 @@ const letterInput = (overrides: Partial<LetterInput> = {}): LetterInput => ({
   sender: {
     firstName: "Fay",
     fullName: "Fay Founder",
-    legalName: "Fay Founder",
-    registerReference: "register entry 2 000 000 0000",
+    legalName: "FOP Founder Fay Example",
+    description: "an independent sole trader registered in Ukraine",
     postalAddress: "1 Example Street, Poltava, 36000, Ukraine",
     contactEmail: "fay@getbidfolio.example",
     ukRepresentative: "Example Rep Ltd, 2 Sample Road, London",
@@ -118,7 +126,7 @@ describe("letters (docs/gtm/02-outreach-kit.md)", () => {
     // Who is writing (PECR reg. 23(a)): the real person behind the brand, where they are, how to reach them.
     expect(paragraphs).toContain("--\nFay Founder, Bidfolio – bidfolio.co.uk");
     expect(paragraphs).toContain(
-      "Bidfolio is operated by Fay Founder, a sole proprietor registered in Ukraine (register entry 2 000 000 0000). 1 Example Street, Poltava, 36000, Ukraine. Contact: fay@getbidfolio.example.\n" +
+      "Bidfolio is operated by Fay Founder, an independent sole trader registered in Ukraine (legal name FOP Founder Fay Example). 1 Example Street, Poltava, 36000, Ukraine. Contact: fay@getbidfolio.example.\n" +
         "UK data-protection representative: Example Rep Ltd, 2 Sample Road, London.\n" +
         "ICO registration number: ZB0000000",
     );
@@ -191,40 +199,54 @@ describe("letters (docs/gtm/02-outreach-kit.md)", () => {
     }
   });
 
-  it("omits optional identity lines that are not configured, and cannot be broken by line breaks in a name", () => {
-    const sender = { ...letterInput().sender, registerReference: null, ukRepresentative: null, icoNumber: null };
+  it("names no UK representative and no ICO number until there is one, and cannot be broken by line breaks in a name", () => {
+    // No bracket either when the registered name is the name already given.
+    const sender = { ...letterInput().sender, legalName: "Fay Founder", ukRepresentative: null, icoNumber: null };
     const { body, subject } = renderLetter(letterInput({ sender, fields: { ...letterInput().fields, company: "Acme\r\nGrounds Ltd" } }));
-    expect(body).toContain("Bidfolio is operated by Fay Founder, a sole proprietor registered in Ukraine. 1 Example Street, Poltava, 36000, Ukraine. Contact: fay@getbidfolio.example.\n\nTo stop these emails");
-    expect(body).not.toContain("UK data-protection representative");
+    expect(body).toContain("Bidfolio is operated by Fay Founder, an independent sole trader registered in Ukraine. 1 Example Street, Poltava, 36000, Ukraine. Contact: fay@getbidfolio.example.\n\nTo stop these emails");
+    expect(body).not.toMatch(/representative/i);
+    expect(body).not.toContain("ICO registration");
     expect(subject).toBe("Acme Grounds Ltd: your public contract awards on one page (from Bidfolio)");
     expect(Object.keys(LETTER_TEMPLATES)).toEqual(["award_page_v1"]);
   });
 });
 
 describe("sender details", () => {
-  it("come from the environment, then from site.ts; placeholders do not count", () => {
-    const sender = outreachSender({ OUTREACH_SENDER_FIRST_NAME: " Fay ", OUTREACH_SENDER_FULL_NAME: "Fay Founder", OUTREACH_SENDER_CONTACT_EMAIL: "[[TODO]]" });
-    expect(sender.firstName).toBe("Fay");
-    expect(sender.contactEmail).toBeNull();
-    // site.company still holds [[PLACEHOLDERS]] in this repository.
-    expect(sender.legalName).toBeNull();
-    expect(senderProblems(sender, { includesNamed: false }).map((problem) => problem.envVar)).toEqual([
-      "OUTREACH_SENDER_LEGAL_NAME",
-      "OUTREACH_SENDER_POSTAL_ADDRESS",
-      "OUTREACH_SENDER_CONTACT_EMAIL",
-    ]);
+  it("are the operator's own, kept in one place; a placeholder in site.ts does not count", () => {
+    const sender = outreachSender();
+    // Everything a letter must say about who is writing is there (PECR reg. 23(a)).
+    expect(senderProblems(sender, { includesNamed: false })).toEqual([]);
+    expect(sender.fullName).toBeTruthy();
+    expect(sender.fullName!.startsWith(`${sender.firstName} `)).toBe(true);
+    expect(sender.description).toBe("an independent sole trader registered in Ukraine");
+    expect(sender.postalAddress).toContain("Ukraine");
+    expect(sender.contactEmail).toBe(`hello@${site.domain}`);
+    // The representative and the ICO number are read from site.company, where a [[PLACEHOLDER]] means "not there".
+    const configured = (value: string) => (value.includes("[[") ? null : value);
+    expect(sender.ukRepresentative).toBe(configured(site.company.ukRepresentative));
+    expect(sender.icoNumber).toBe(configured(site.company.icoRegistrationNumber));
+    expect(ukRepresentativeAppointed(sender)).toBe(sender.ukRepresentative !== null);
   });
 
-  it("a list with named addresses also needs the UK representative", () => {
-    const complete = outreachSender({
-      OUTREACH_SENDER_FIRST_NAME: "Fay",
-      OUTREACH_SENDER_FULL_NAME: "Fay Founder",
-      OUTREACH_SENDER_LEGAL_NAME: "Fay Founder",
-      OUTREACH_SENDER_POSTAL_ADDRESS: "1 Example Street",
-      OUTREACH_SENDER_CONTACT_EMAIL: "fay@getbidfolio.example",
-    });
+  it("a letter cannot be exported without the operator's details; a named address also needs the UK representative", () => {
+    const complete = { ...outreachSender(), ukRepresentative: null };
     expect(senderProblems(complete, { includesNamed: false })).toEqual([]);
     expect(senderProblems(complete, { includesNamed: true }).map((problem) => problem.field)).toEqual(["ukRepresentative"]);
+    expect(senderProblems({ ...complete, ukRepresentative: "Example Rep Ltd, 2 Sample Road, London" }, { includesNamed: true })).toEqual([]);
+    expect(senderProblems({ ...complete, postalAddress: null, contactEmail: null }, { includesNamed: false }).map((problem) => problem.field)).toEqual(["postalAddress", "contactEmail"]);
+    expect(ukRepresentativeAppointed(complete)).toBe(false);
+  });
+
+  it("the footer line says who operates the service, and never invents a representative", () => {
+    const sender = { ...outreachSender(), fullName: "Fay Founder", contactEmail: "fay@getbidfolio.example" };
+    expect(operatorFooterLine({ ...sender, ukRepresentative: null })).toBe(
+      "Bidfolio is operated by Fay Founder, an independent sole trader registered in Ukraine (Kremenchuk). Contact: fay@getbidfolio.example · UK representative: being appointed",
+    );
+    expect(operatorFooterLine({ ...sender, ukRepresentative: "Example Rep Ltd, London" })).toContain("· UK representative: Example Rep Ltd, London");
+  });
+
+  it("the letter and the privacy notice promise the same number of days for a named address", () => {
+    expect(RETENTION_DAYS.outreachNamedAddresses).toBe(site.facts.outreachRetentionDays);
   });
 });
 
@@ -541,7 +563,19 @@ describe("results against the falsification test (DECISION.md §6)", () => {
     expect(reading.headline).toBe("Too few e-mails to judge: 40 sent");
     expect(reading.lines.map((line) => line.value)).toEqual(["7 of 40", "2 of 40", "0 of 40", "0 of 40"]);
     expect(JSON.stringify(reading)).not.toContain("%");
-    expect(readFunnel(counts({ sent: 0, lastSentAt: null }), NOW)).toMatchObject({ verdict: "too_early", headline: "Nothing sent yet" });
+    // No line is called met or failed either: a threshold scaled down to "3 visits" would be noise.
+    // The counts stand beside the test's thresholds as they are written.
+    expect(reading.judged).toBe(false);
+    expect(reading.scaled).toBe(false);
+    expect(reading.lines.map((line) => line.state)).toEqual(["not_judged", "not_judged", "not_judged", "not_judged"]);
+    expect(reading.lines[0]!.target).toBe("pass at 30 of 400, kill below 12");
+    expect(readFunnel(counts({ sent: 40, visited: 0, claimed: 0 }), NOW).lines.every((line) => line.state === "not_judged")).toBe(true);
+    expect(readFunnel(counts({ sent: 0, lastSentAt: null }), NOW)).toMatchObject({ verdict: "too_early", headline: "Nothing sent yet", judged: false });
+    // From 100 e-mails the lines are judged, against thresholds in proportion.
+    const judged = readFunnel(counts({ sent: 100, visited: 8, claimed: 0 }), NOW);
+    expect(judged).toMatchObject({ judged: true, scaled: true, verdict: "kill" });
+    expect(judged.lines.map((line) => line.state)).toEqual(["pass", "kill", "below", "below"]);
+    expect(judged.lines[0]!.target).toBe("pass at 8, kill below 3");
   });
 
   it("more than two complaints stops the test whatever else happened", () => {

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { clientIp, enforceRateLimit } from "@/lib/rate-limit";
 import { runAction } from "@/server/http";
 import { OPTOUT_RATE_LIMITS } from "./config";
-import { confirmOptOut, optOutByAddress, OPTOUT_CODE, requestFollowUp, type FollowUpKind } from "./server/optout";
+import { confirmOptOut, optOutByAddress, OPTOUT_CODE } from "./server/optout";
 
 /**
  * Server Actions of the public opt-out page. No session, so each one is rate-limited per
@@ -51,19 +51,4 @@ export async function optOutByAddressAction(formData: FormData): Promise<void> {
   });
   if (!result.ok) redirect(`/optout?error=${result.error.code === "RATE_LIMITED" ? "rate" : "failed"}`);
   redirect(result.data.valid ? "/optout?done=1" : "/optout?error=email");
-}
-
-const FOLLOW_UPS: readonly FollowUpKind[] = ["hide_page", "delete_details"];
-
-/** "Also hide my company page" / "Delete the contact details you hold". */
-export async function requestFollowUpAction(formData: FormData): Promise<void> {
-  const code = text(formData, "c");
-  const kind = text(formData, "kind") as FollowUpKind;
-  if (!OPTOUT_CODE.test(code) || !FOLLOW_UPS.includes(kind)) redirect("/optout");
-  const result = await runAction("optout.follow_up", async () => {
-    await limited("followUp");
-    return requestFollowUp(code, kind);
-  });
-  if (!result.ok) redirect(`/optout?c=${code}&error=${result.error.code === "RATE_LIMITED" ? "rate" : "failed"}`);
-  redirect(`/optout?c=${code}`);
 }

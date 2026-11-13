@@ -28,18 +28,21 @@ function ago(date: Date | null, now: Date): string {
   return `${days} days ago`;
 }
 
-function Stat({ label, value, hint, href, testId }: { label: string; value: string; hint?: string; href?: string; testId?: string }) {
+/**
+ * One cell of the key numbers, after the design system's stat block: a large serif numeral
+ * over its label, then one muted line of context. The cells share one white card and are
+ * divided by hairlines (the grid's 1 px gaps).
+ */
+function Stat({ label, value, hint, href, linkLabel = "Open", testId }: { label: string; value: string; hint?: string; href?: string; linkLabel?: string; testId?: string }) {
   return (
-    <div className="rounded-xl border bg-card p-4" data-testid="admin-stat" data-kpi={testId}>
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
+    <div className="flex flex-col gap-1 bg-surface px-5 py-4" data-testid="admin-stat" data-kpi={testId}>
+      <dt className="order-2 text-sm font-semibold text-ink">{label}</dt>
+      <dd className="type-figure order-1 text-3xl text-ink">{value}</dd>
+      {hint ? <dd className="order-3 text-13 text-ink-2">{hint}</dd> : null}
       {href ? (
-        <p className="mt-1 text-xs">
-          <Link href={href} className="font-medium underline underline-offset-4">
-            Open
-          </Link>
-        </p>
+        <dd className="order-4 text-13">
+          <Link href={href}>{linkLabel}</Link>
+        </dd>
       ) : null}
     </div>
   );
@@ -70,65 +73,69 @@ export default async function AdminOverviewPage() {
         </section>
       ) : null}
 
-      <section aria-label="Key numbers" className="grid grid-cols-2 gap-3 md:grid-cols-4" data-testid="founder-kpis">
-        <Stat testId="signups" label="Sign-ups" value={count(kpis.signups.total)} hint={inWindows(kpis.signups)} />
-        <Stat testId="verified" label="Verified accounts" value={count(kpis.verifiedAccounts.total)} hint={`${inWindows(kpis.verifiedAccounts)} (by sign-up date)`} />
-        <Stat testId="workspaces" label="Workspaces" value={count(kpis.workspaces.total)} hint={inWindows(kpis.workspaces)} />
-        <Stat testId="claimed" label="Claimed companies" value={count(kpis.claimedCompanies.total)} hint={inWindows(kpis.claimedCompanies)} />
-        <Stat
-          testId="activated"
-          label="Activated workspaces"
-          value={kpis.activatedWorkspaces ? count(kpis.activatedWorkspaces.total) : DASH}
-          hint={kpis.activatedWorkspaces ? `First bid check built · ${inWindows(kpis.activatedWorkspaces)}` : "First bid check built — the bid desk is not installed here yet"}
-        />
-        <Stat
-          testId="paying"
-          label="Paying workspaces"
-          value={count(kpis.paying.total)}
-          hint={`${byPlan || "No paid plans yet"} · ${kpis.paying.pastDue} past due · ${kpis.paying.trialing} trialing`}
-        />
-        <Stat testId="mrr" label="MRR" value={money(kpis.mrr.minor, kpis.mrr.currency)} hint="Active subscriptions at catalogue prices, annual ÷ 12, before tax and discounts" />
-        <Stat
-          testId="bid-pass"
-          label="Bid Pass sales"
-          value={kpis.bidPassSales ? count(kpis.bidPassSales.total) : DASH}
-          hint={kpis.bidPassSales ? inWindows(kpis.bidPassSales) : "The bid desk is not installed here yet"}
-        />
-        <Stat label="Trial → paid" value={conversion} hint={`${metrics.trials.converted} of ${metrics.trials.started} trials`} />
-        <Stat label="Churned (30 days)" value={String(metrics.subscriptions.churnedLast30Days)} hint="Subscriptions canceled" />
-        <Stat
-          testId="ai-spend"
-          label="AI spend today"
-          value={usd(kpis.aiSpendUsd.today)}
-          hint={`of ${usd(aiBudget)} a day${aiShare} · 7 days ${usd(kpis.aiSpendUsd.last7Days)} · 30 days ${usd(kpis.aiSpendUsd.last30Days)} · estimated`}
-        />
-        <Stat
-          testId="jobs"
-          label="Job queue"
-          value={`${count(kpis.jobs.pending)} pending`}
-          hint={`${kpis.jobs.failedLast24Hours} failed in 24 hours · ${kpis.jobs.running} running${kpis.jobs.oldestPendingAt ? ` · oldest due ${ago(kpis.jobs.oldestPendingAt, now)}` : ""}`}
-        />
-        <Stat
-          testId="ingestion"
-          label="Data ingestion"
-          value={ago(kpis.ingestion.lastSuccessAt, now)}
-          hint={kpis.ingestion.lastError ? "Last run reported an error" : kpis.ingestion.lastSuccessAt ? `Last successful run ${when(kpis.ingestion.lastSuccessAt)}` : "No successful run recorded"}
-          href="/admin/ingestion"
-        />
-        <Stat
-          testId="outreach"
-          label="Outreach"
-          value={`${count(funnel.sent)} sent`}
-          hint={`${count(funnel.visited)} opened their page · ${count(funnel.claimed)} claimed · ${funnel.bidChecks === null ? DASH : count(funnel.bidChecks)} bid checks · ${count(funnel.optedOut)} opted out`}
-          href="/admin/outreach"
-        />
-        <Stat
-          testId="suppressions"
-          label="Do-not-contact list"
-          value={count(funnel.suppressions)}
-          hint={funnel.openDataRequests > 0 ? `${funnel.openDataRequests} open data ${funnel.openDataRequests === 1 ? "request" : "requests"}, oldest ${ago(funnel.oldestDataRequestAt, now)} — act within five working days` : "No open data requests"}
-          href="/admin/outreach/suppressions"
-        />
+      <section aria-label="Key numbers" data-testid="founder-kpis">
+        {/* Sixteen cells: every row is full at one, two and four columns. */}
+        <dl className="grid gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+          <Stat testId="signups" label="Sign-ups" value={count(kpis.signups.total)} hint={inWindows(kpis.signups)} />
+          <Stat testId="verified" label="Verified accounts" value={count(kpis.verifiedAccounts.total)} hint={`${inWindows(kpis.verifiedAccounts)} (by sign-up date)`} />
+          <Stat testId="workspaces" label="Workspaces" value={count(kpis.workspaces.total)} hint={inWindows(kpis.workspaces)} />
+          <Stat testId="claimed" label="Claimed companies" value={count(kpis.claimedCompanies.total)} hint={inWindows(kpis.claimedCompanies)} />
+          <Stat
+            testId="activated"
+            label="Activated workspaces"
+            value={kpis.activatedWorkspaces ? count(kpis.activatedWorkspaces.total) : DASH}
+            hint={kpis.activatedWorkspaces ? `First bid check built · ${inWindows(kpis.activatedWorkspaces)}` : "First bid check built — the bid desk is not installed here yet"}
+          />
+          <Stat
+            testId="paying"
+            label="Paying workspaces"
+            value={count(kpis.paying.total)}
+            hint={`${byPlan || "No paid plans yet"} · ${kpis.paying.pastDue} past due · ${kpis.paying.trialing} trialing`}
+          />
+          <Stat testId="mrr" label="MRR" value={money(kpis.mrr.minor, kpis.mrr.currency)} hint="Active subscriptions at catalogue prices, annual ÷ 12, before tax and discounts" />
+          <Stat
+            testId="bid-pass"
+            label="Bid Pass sales"
+            value={kpis.bidPassSales ? count(kpis.bidPassSales.total) : DASH}
+            hint={kpis.bidPassSales ? inWindows(kpis.bidPassSales) : "The bid desk is not installed here yet"}
+          />
+          <Stat label="Trial → paid" value={conversion} hint={`${metrics.trials.converted} of ${metrics.trials.started} trials`} />
+          <Stat label="Churned (30 days)" value={String(metrics.subscriptions.churnedLast30Days)} hint="Subscriptions canceled" />
+          <Stat
+            testId="ai-spend"
+            label="AI spend today"
+            value={usd(kpis.aiSpendUsd.today)}
+            hint={`of ${usd(aiBudget)} a day${aiShare} · 7 days ${usd(kpis.aiSpendUsd.last7Days)} · 30 days ${usd(kpis.aiSpendUsd.last30Days)} · estimated`}
+          />
+          <Stat
+            testId="jobs"
+            label="Job queue"
+            value={`${count(kpis.jobs.pending)} pending`}
+            hint={`${kpis.jobs.failedLast24Hours} failed in 24 hours · ${kpis.jobs.running} running${kpis.jobs.oldestPendingAt ? ` · oldest due ${ago(kpis.jobs.oldestPendingAt, now)}` : ""}`}
+          />
+          <Stat
+            testId="ingestion"
+            label="Data ingestion"
+            value={ago(kpis.ingestion.lastSuccessAt, now)}
+            hint={kpis.ingestion.lastError ? "Last run reported an error" : kpis.ingestion.lastSuccessAt ? `Last successful run ${when(kpis.ingestion.lastSuccessAt)}` : "No successful run recorded"}
+            href="/admin/ingestion"
+          />
+          <Stat
+            testId="outreach"
+            label="Outreach"
+            value={`${count(funnel.sent)} sent`}
+            hint={`${count(funnel.visited)} opened their page · ${count(funnel.claimed)} claimed · ${funnel.bidChecks === null ? DASH : count(funnel.bidChecks)} bid checks · ${count(funnel.optedOut)} opted out`}
+            href="/admin/outreach"
+          />
+          <Stat testId="suppressions" label="Do-not-contact list" value={count(funnel.suppressions)} hint="Addresses and domains that are never listed or exported" href="/admin/outreach/suppressions" />
+          <Stat
+            testId="data-requests"
+            label="Correction and removal requests"
+            value={`${count(funnel.openDataRequests)} open`}
+            hint={funnel.openDataRequests > 0 ? `Oldest received ${ago(funnel.oldestDataRequestAt, now)}. Act within five working days.` : "Nothing waiting"}
+            href="/admin/outreach/suppressions#requests"
+          />
+        </dl>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">

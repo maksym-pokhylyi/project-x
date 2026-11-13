@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { FieldError, FormError } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { site } from "@/config/site";
-import { outreachConfig } from "@/features/outreach/config";
-import { confirmOptOutAction, optOutByAddressAction, requestFollowUpAction } from "@/features/outreach/optout-actions";
-import { getOptOutView, type FollowUpKind } from "@/features/outreach/server/optout";
+import { outreachConfig, outreachSender, requestFormHref } from "@/features/outreach/config";
+import { confirmOptOutAction, optOutByAddressAction } from "@/features/outreach/optout-actions";
+import { getOptOutView } from "@/features/outreach/server/optout";
 import { OGL_URL } from "@/features/procurement/config";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Stop e-mails",
-  description: `Stop e-mails from ${site.name} to a business address.`,
+  title: "Stop emails",
+  description: `Stop emails from ${site.name} to a business address.`,
   alternates: { canonical: "/optout" },
   robots: { index: false, follow: false },
 };
@@ -22,72 +24,141 @@ type Params = Record<string, string | string[] | undefined>;
 const one = (value: string | string[] | undefined): string => (Array.isArray(value) ? (value[0] ?? "") : (value ?? ""));
 
 const ERRORS: Record<string, string> = {
-  rate: "Too many requests from your network just now, so nothing was changed. Please try again in an hour — or reply “stop” to our e-mail, which works just as well.",
-  failed: "Something went wrong on our side and nothing was changed. Please try again, or reply “stop” to our e-mail.",
-  email: "Enter the e-mail address in full, for example info@yourcompany.co.uk.",
+  rate: "Too many requests from your network just now, so nothing was changed. Try again in an hour — or reply “stop” to our email, which works just as well.",
+  failed: "Something went wrong on our side and nothing was changed. Try again, or reply “stop” to our email.",
   link: "We could not match that link — a mail program may have cut it short. Enter the address we wrote to instead.",
 };
+const EMAIL_ERROR = "Enter the email address in full, for example info@yourcompany.co.uk.";
 
-function ErrorNote({ code }: { code: string }) {
-  const message = ERRORS[code];
-  if (!message) return null;
+/** The tick of the artboard: brand green on a brand-tint disc. Decorative; the headline says it. */
+function Tick() {
   return (
-    <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive" data-testid="optout-error">
-      {message}
-    </p>
+    <div aria-hidden className="grid size-10 place-items-center rounded-full bg-brand-tint sm:size-11">
+      <svg viewBox="0 0 16 16" className="size-5 fill-none stroke-brand stroke-[1.8] [stroke-linecap:round] [stroke-linejoin:round] sm:size-[1.375rem]">
+        <path d="M3 8.5l3.2 3.2L13 4.8" />
+      </svg>
+    </div>
   );
 }
 
-function Shell({ title, children, testId }: { title: string; children: ReactNode; testId: string }) {
+function Panel({ id, title, className, children }: { id: string; title: string; className?: string; children: ReactNode }) {
   return (
-    <Card data-testid={testId}>
-      <CardHeader>
-        <CardTitle>
-          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 text-sm leading-6">{children}</CardContent>
-    </Card>
+    <section aria-labelledby={id} className={cn("flex flex-col rounded-card border border-line bg-surface p-5 sm:p-7", className)}>
+      <h2 id={id} className="text-[1.375rem] leading-[1.25] text-ink">
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }
-
-/** The form for someone without a working link. The answer is the same for every address. */
-function AddressForm({ error }: { error: string }) {
-  return (
-    <Shell title={`Stop e-mails from ${site.name}`} testId="optout-form">
-      <ErrorNote code={error} />
-      <p>Enter the address we wrote to and we will not e-mail it again.</p>
-      <form action={optOutByAddressAction} className="space-y-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="optout-email">E-mail address</Label>
-          <Input id="optout-email" name="email" type="email" required autoComplete="email" maxLength={254} aria-invalid={error === "email" ? true : undefined} />
-        </div>
-        <Button type="submit">Stop e-mails to this address</Button>
-      </form>
-      <p className="text-muted-foreground">
-        We answer in the same way for every address, so this page cannot be used to find out who we have written to. You can also reply “stop” to any e-mail from us.
-      </p>
-    </Shell>
-  );
-}
-
-const FOLLOW_UP_COPY: Record<FollowUpKind, { button: string; explain: (company: string) => string; requested: string }> = {
-  hide_page: {
-    button: "Also hide my company page",
-    explain: (company) => `We take down the public page about ${company} within five working days.`,
-    requested: "You have asked us to hide the company page. We will do it within five working days.",
-  },
-  delete_details: {
-    button: "Delete the contact details you hold",
-    explain: () => "We delete the address from our copy of the notices and keep it only on the do-not-contact list, which is what stops us writing to it again.",
-    requested: "You have asked us to delete the contact details. We will do it within five working days.",
-  },
-};
 
 /**
- * Public opt-out page. OPENING IT CHANGES NOTHING — mail scanners and link previews follow
- * the links in a letter. Only the button (a POST) stops the e-mails. The page names the
- * company the letter was about, never the address. No script is needed and no cookie is set.
+ * "What we hold" and "Have it removed", as in the artboard. `company` and `pagePath` are
+ * known only after a personal link; the version after the address form says the same to
+ * everyone, whatever was typed.
+ */
+function WhatWeHold({ company, pagePath }: { company?: string; pagePath?: string }) {
+  const contact = outreachSender().contactEmail;
+  const row = "border-t border-line py-3 sm:py-3.5";
+  return (
+    <>
+      <div className="mt-5 sm:mt-7" data-testid="optout-held">
+        <Panel id="hold" title="What we hold">
+          <ul className="mt-3 flex flex-col text-15 leading-[1.55] text-ink sm:mt-3.5">
+            <li className={row}>
+              {company ? `The page about ${company} is` : "A company’s page here is"} built from contract notices published on Find a Tender under the{" "}
+              <a href={OGL_URL} rel="license noopener">
+                Open Government Licence v3.0
+              </a>
+              . Those notices stay public whether or not you use {site.name}.
+              {pagePath ? (
+                <>
+                  {" "}
+                  <Link href={pagePath}>See the page</Link>.
+                </>
+              ) : null}
+            </li>
+            <li className={row}>
+              {company
+                ? "The contact address one of those notices gives for the company. We used it to say that the page exists. It is now on a do-not-contact list, so that we do not write to it again."
+                : "The address you entered, on a do-not-contact list, so that we do not write to it. If a public notice gives it as a company’s contact address, we hold it for that reason too."}
+            </li>
+            <li className="border-t border-line pt-3 sm:pt-3.5">Nothing else, unless you have an account: no contact name and no telephone number.</li>
+          </ul>
+        </Panel>
+      </div>
+
+      <div className="mt-3 sm:mt-4" data-testid="optout-remove">
+        {/* On a phone the last line is the 44 px "Or write to…" row, so the panel needs less room under it. */}
+        <Panel id="remove" title="Have it removed" className={contact ? "max-sm:pb-2" : undefined}>
+          <p className="mt-2 text-15 leading-[1.55] text-ink">
+            Ask us to hide {company ? `the page about ${company}` : "your company’s page"} or to delete the contact address. We review every request and reply by email within five working days.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1">
+            <ButtonLink href={requestFormHref(pagePath)} variant="outline" size="lg" className="max-sm:w-full" data-testid="optout-request">
+              Send a request
+            </ButtonLink>
+            {contact ? (
+              <p className="flex min-h-11 flex-wrap items-center text-sm text-ink-2 max-sm:w-full max-sm:justify-center">
+                <span className="mr-1">Or write to</span>
+                <a href={`mailto:${contact}`}>{contact}</a>
+                <span>.</span>
+              </p>
+            ) : null}
+          </div>
+        </Panel>
+      </div>
+    </>
+  );
+}
+
+/** For someone without a working link: type the address. The answer is the same for every address. */
+function AddressForm({ error }: { error: string }) {
+  const message = ERRORS[error];
+  return (
+    <div data-testid="optout-form">
+      <h1 className="type-h1 text-ink">Stop emails from {site.name}</h1>
+      <p className="type-lead mt-2.5 text-ink sm:mt-3.5">Enter the address we wrote to and we will not email it again.</p>
+      {message ? (
+        <div className="mt-5" data-testid="optout-error">
+          <FormError message={message} />
+        </div>
+      ) : null}
+      <form action={optOutByAddressAction} className="mt-6 flex flex-col gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="optout-email">Email address</Label>
+          <Input
+            id="optout-email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            maxLength={254}
+            aria-invalid={error === "email" ? true : undefined}
+            aria-describedby={error === "email" ? "optout-email-error" : undefined}
+          />
+          {error === "email" ? <FieldError id="optout-email-error">{EMAIL_ERROR}</FieldError> : null}
+        </div>
+        <div>
+          <Button type="submit" className="max-sm:w-full" data-testid="optout-button">
+            Unsubscribe
+          </Button>
+        </div>
+      </form>
+      <p className="mt-5 text-15 text-ink-2">
+        We answer in the same way for every address, so this page cannot be used to find out who we have written to. You can also reply “stop” to any email from us.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Public opt-out page ("Unsubscribed" artboard, docs/design/handoff/Unsubscribe-*, and the
+ * state before it asked for in REPLY-3-to-designer §15).
+ *
+ * OPENING IT CHANGES NOTHING — mail scanners and link previews follow the links in a letter.
+ * Only the button (a POST) stops the emails. The page names the company the letter was
+ * about, never the address. It needs no script and sets no cookie.
  */
 export default async function OptOutPage({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
@@ -97,15 +168,15 @@ export default async function OptOutPage({ searchParams }: { searchParams: Promi
   if (!code) {
     if (one(params.done) === "1") {
       return (
-        <Shell title="Done. We will not e-mail that address again." testId="optout-form-done">
-          <p>The address is on our do-not-contact list. You do not need to do anything else.</p>
-          <p className="text-muted-foreground">
-            If we wrote to more than one address at your company, do the same for each — or reply “stop” to our e-mail and we will remove the whole company.{" "}
-            <Link href="/optout" className="underline underline-offset-4">
-              Stop another address
-            </Link>
+        <div data-testid="optout-form-done">
+          <Tick />
+          <h1 className="type-h1 mt-4 text-ink sm:mt-5">You are unsubscribed</h1>
+          <p className="type-lead mt-2.5 text-ink sm:mt-3.5">We will not email that address again, unless you ask us to.</p>
+          <p className="mt-2 text-15 text-ink-2">
+            If we wrote to more than one address at your company, do the same for each — or reply “stop” to our email and we will stop writing to the whole company. <Link href="/optout">Stop another address</Link>
           </p>
-        </Shell>
+          <WhatWeHold />
+        </div>
       );
     }
     return <AddressForm error={error} />;
@@ -115,115 +186,41 @@ export default async function OptOutPage({ searchParams }: { searchParams: Promi
   if (view.state === "unknown") return <AddressForm error={error || "link"} />;
 
   if (view.state === "pending") {
+    const message = ERRORS[error];
     return (
-      <Shell title={`Stop e-mails from ${site.name}`} testId="optout-confirm">
-        <ErrorNote code={error} />
-        <p>
-          We wrote to an address that a public contract notice gives for <strong>{view.company}</strong>. Press the button and we will not e-mail that address again.
+      <div data-testid="optout-confirm">
+        <h1 className="type-h1 text-ink">Stop emails to this address?</h1>
+        <p className="type-lead mt-2.5 text-ink sm:mt-3.5">
+          We wrote to the address that a public contract notice gives for <strong className="font-semibold [overflow-wrap:anywhere]">{view.company}</strong>. Press the button and we will not email
+          it again.
         </p>
-        <form action={confirmOptOutAction}>
+        {message ? (
+          <div className="mt-5" data-testid="optout-error">
+            <FormError message={message} />
+          </div>
+        ) : null}
+        <form action={confirmOptOutAction} className="mt-6">
           <input type="hidden" name="c" value={code} />
-          <Button type="submit" size="lg" data-testid="optout-button">
-            Stop e-mails to this address
+          <Button type="submit" size="lg" className="max-sm:w-full" data-testid="optout-button">
+            Unsubscribe
           </Button>
         </form>
-        <p className="text-muted-foreground">Nothing changes until you press the button.</p>
-      </Shell>
+        <p className="mt-4 text-15 text-ink-2">Nothing changes until you press the button.</p>
+      </div>
     );
   }
 
-  const followUps = (Object.keys(FOLLOW_UP_COPY) as FollowUpKind[]).filter((kind) => kind !== "hide_page" || view.pagePublic);
   return (
-    <div className="space-y-6">
-      <Shell title="Done. We will not e-mail this address again." testId="optout-done">
-        <ErrorNote code={error} />
-        <p>
-          The address is on our do-not-contact list, and we will not contact <strong>{view.company}</strong> again. You do not need to do anything else.
-        </p>
-      </Shell>
-
-      <Card data-testid="optout-held">
-        <CardHeader>
-          <CardTitle>
-            <h2 className="text-base font-semibold">What we hold about {view.company}, and why</h2>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm leading-6">
-          <ul className="list-disc space-y-2 pl-5">
-            <li>
-              The public contract notices that name the company as a supplier — buyer, contract title, value and dates — as published on Find a Tender under the{" "}
-              <a href={OGL_URL} className="underline underline-offset-4">
-                Open Government Licence v3.0
-              </a>
-              . We built a page about the company from them
-              {view.pagePublic ? (
-                <>
-                  :{" "}
-                  <Link href={`/suppliers/${view.supplierSlug}`} className="underline underline-offset-4">
-                    see the page
-                  </Link>
-                </>
-              ) : null}
-              .
-            </li>
-            <li>
-              The contact address those notices give for the company. We used it to tell the company that the page exists, and for nothing else. It is now kept only so that we never write to it
-              again.
-            </li>
-          </ul>
-          <p className="text-muted-foreground">
-            We do not hold a contact name or a telephone number. More in our{" "}
-            <Link href={outreachConfig.privacyNoticePath} className="underline underline-offset-4">
-              privacy notice
-            </Link>
-            .
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card data-testid="optout-more">
-        <CardHeader>
-          <CardTitle>
-            <h2 className="text-base font-semibold">If you want more than that</h2>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm leading-6">
-          {view.addressErased ? (
-            <p>
-              The contact details we held have already been deleted. To have the company page corrected or taken down, use the{" "}
-              <Link href={`/about-the-data?page=${encodeURIComponent(`/suppliers/${view.supplierSlug}`)}#request`} className="underline underline-offset-4">
-                request form
-              </Link>
-              .
-            </p>
-          ) : (
-            followUps.map((kind) => {
-              const copy = FOLLOW_UP_COPY[kind];
-              return view.requested[kind] ? (
-                <p key={kind} role="status" data-testid={`optout-requested-${kind}`}>
-                  {copy.requested}
-                </p>
-              ) : (
-                <form key={kind} action={requestFollowUpAction} className="space-y-1.5">
-                  <input type="hidden" name="c" value={code} />
-                  <input type="hidden" name="kind" value={kind} />
-                  <Button type="submit" variant="outline" data-testid={`optout-request-${kind}`}>
-                    {copy.button}
-                  </Button>
-                  <p className="text-muted-foreground">{copy.explain(view.company)}</p>
-                </form>
-              );
-            })
-          )}
-          <p className="text-muted-foreground">
-            Both are optional. To complain about how we used your details, see the{" "}
-            <Link href="/legal/privacy" className="underline underline-offset-4">
-              privacy notice
-            </Link>{" "}
-            or write to {site.supportEmail}.
-          </p>
-        </CardContent>
-      </Card>
+    <div data-testid="optout-done">
+      <Tick />
+      <h1 className="type-h1 mt-4 text-ink sm:mt-5">You are unsubscribed</h1>
+      <p className="type-lead mt-2.5 text-ink sm:mt-3.5">
+        We will not email <strong className="font-semibold [overflow-wrap:anywhere]">{view.company}</strong> again, unless you ask us to.
+      </p>
+      <p className="mt-2 text-15 text-ink-2">
+        That covers the address we wrote to and anyone else at the company. More in our <Link href={outreachConfig.privacyNoticePath}>privacy notice</Link>.
+      </p>
+      <WhatWeHold company={view.company} pagePath={view.pagePublic ? `/suppliers/${view.supplierSlug}` : undefined} />
     </div>
   );
 }

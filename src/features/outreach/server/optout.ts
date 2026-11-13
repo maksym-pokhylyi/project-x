@@ -1,8 +1,7 @@
 import "server-only";
 import { and, eq, sql } from "drizzle-orm";
-import { site } from "@/config/site";
 import { db } from "@/db";
-import { dataRequests, outreachProspects } from "@/db/schema";
+import { outreachProspects } from "@/db/schema";
 import { isFreemailDomain } from "@/features/procurement/domain/normalize";
 import { track } from "@/lib/analytics";
 import { normaliseEmail, normaliseTarget } from "../domain/suppression";
@@ -20,13 +19,6 @@ import { addSuppressionEntry, findSuppression } from "./suppression-store";
 /** A link code: 10 base62 characters (see createCampaign). */
 export const OPTOUT_CODE = /^[0-9A-Za-z]{10}$/;
 
-export type FollowUpKind = "hide_page" | "delete_details";
-
-const FOLLOW_UPS: Record<FollowUpKind, { kind: "removal" | "other"; message: string }> = {
-  hide_page: { kind: "removal", message: "Opt-out page: please hide the public page about this company." },
-  delete_details: { kind: "other", message: "Opt-out page: please delete the contact details you hold for this company. Keep the address on the do-not-contact list." },
-};
-
 export type OptOutView =
   | { state: "unknown" }
   | {
@@ -36,10 +28,6 @@ export type OptOutView =
       supplierSlug: string;
       /** The company has a public page (it is not removed or unpublished). */
       pagePublic: boolean;
-      /** Follow-up requests already made from this link. */
-      requested: Record<FollowUpKind, boolean>;
-      /** The address was erased by retention: the company is blocked, but the address itself must be given again to be listed. */
-      addressErased: boolean;
     };
 
 type Prospect = {
@@ -80,19 +68,6 @@ async function findProspect(code: string): Promise<Prospect | null> {
   };
 }
 
-const pageUrlOf = (prospect: Prospect) => `https://${site.domain}/suppliers/${prospect.supplierSlug}`;
-
-async function requestedFollowUps(prospect: Prospect): Promise<Record<FollowUpKind, boolean>> {
-  const requested: Record<FollowUpKind, boolean> = { hide_page: false, delete_details: false };
-  if (!prospect.email) return requested;
-  const rows = await db
-    .select({ message: dataRequests.message })
-    .from(dataRequests)
-    .where(and(eq(dataRequests.requesterEmail, prospect.email), eq(dataRequests.pageUrl, pageUrlOf(prospect))));
-  for (const row of rows) for (const kind of Object.keys(FOLLOW_UPS) as FollowUpKind[]) if (row.message === FOLLOW_UPS[kind].message) requested[kind] = true;
-  return requested;
-}
-
 /** What the page shows for a code. READ ONLY. */
 export async function getOptOutView(code: string | null | undefined): Promise<OptOutView> {
   const prospect = code ? await findProspect(code) : null;
@@ -103,8 +78,6 @@ export async function getOptOutView(code: string | null | undefined): Promise<Op
     company: prospect.company,
     supplierSlug: prospect.supplierSlug,
     pagePublic: prospect.pagePublic,
-    requested: await requestedFollowUps(prospect),
-    addressErased: prospect.email === null,
   };
 }
 
@@ -164,24 +137,4 @@ export async function optOutByAddress(input: string): Promise<{ valid: boolean; 
   const changed = effects.created || effects.prospectsOptedOut > 0 || effects.prospectsSkipped > 0;
   if (changed) await track("optout", {}, { via: "form", campaign: null });
   return { valid: true, changed };
-}
-
-/**
- * "Also hide my company page" / "Delete the contact details you hold": files a request in
- * `data_requests`, the same queue as the form on /about-the-data, for the founder to act on
- * within five working days. Only after the opt-out itself, and once per kind.
- */
-export async function requestFollowUp(code: string, kind: FollowUpKind): Promise<{ found: boolean; created: boolean }> {
-  const prospect = await findProspect(code);
-  if (!prospect || prospect.status !== "opted_out" || !prospect.email) return { found: false, created: false };
-  if ((await requestedFollowUps(prospect))[kind]) return { found: true, created: false };
-  const spec = FOLLOW_UPS[kind];
-  await db.insert(dataRequests).values({
-    kind: spec.kind,
-    pageUrl: pageUrlOf(prospect),
-    organisationName: prospect.supplierName.slice(0, 200),
-    requesterEmail: prospect.email,
-    message: spec.message,
-  });
-  return { found: true, created: true };
 }

@@ -1,4 +1,5 @@
 import { exportCampaignCsv, LETTER_KINDS } from "@/features/outreach/server/campaigns";
+import { flashError } from "@/features/outreach/server/flash";
 import type { LetterKind } from "@/features/outreach/domain/letter";
 import { AppError, ConflictError } from "@/lib/errors";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -17,7 +18,10 @@ export const maxDuration = 60;
 
 /** Back to the campaign page with the reason (a relative Location: the browser stays on the host it is on). */
 const back = (id: string, message: string) =>
-  new Response(null, { status: 303, headers: { location: `/admin/outreach/campaigns/${encodeURIComponent(id)}?error=${encodeURIComponent(message.slice(0, 300))}`, "cache-control": "no-store" } });
+  new Response(null, {
+    status: 303,
+    headers: { location: `/admin/outreach/campaigns/${encodeURIComponent(id)}?${new URLSearchParams(flashError(message)).toString()}`, "cache-control": "no-store" },
+  });
 
 export const POST = route<{ params: Promise<{ id: string }> }>(async (request, context) => {
   const admin = await requireAdmin();

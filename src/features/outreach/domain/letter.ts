@@ -35,12 +35,17 @@ export type LetterFields = {
 };
 
 export type LetterSender = {
+  /** Closes the letter. */
   firstName: string;
+  /** The person behind the brand; first line of the signature. */
   fullName: string;
+  /** Registered name, given in brackets when it differs from the full name. */
   legalName: string;
-  registerReference: string | null;
+  /** What the operator is: "an independent sole trader registered in Ukraine". */
+  description: string;
   postalAddress: string;
   contactEmail: string;
+  /** UK GDPR Art. 27 representative. Null until one is appointed: the letter then names none. */
   ukRepresentative: string | null;
   icoNumber: string | null;
 };
@@ -145,9 +150,8 @@ const sentence = (text: string) => (/[.!?]$/.test(text) ? text : `${text}.`);
  */
 export function renderSignature(input: Pick<LetterInput, "kind" | "personalData" | "fields" | "links" | "sender" | "brand" | "namedRetentionDays">): string {
   const { sender, brand, fields, links } = input;
-  const identity = [
-    `${brand.name} is operated by ${sender.legalName}, a sole proprietor registered in Ukraine${sender.registerReference ? ` (${sender.registerReference})` : ""}. ${sentence(sender.postalAddress)} Contact: ${sender.contactEmail}.`,
-  ];
+  const registered = sender.legalName && sender.legalName !== sender.fullName ? ` (legal name ${sender.legalName})` : "";
+  const identity = [`${brand.name} is operated by ${sender.fullName}, ${sender.description}${registered}. ${sentence(sender.postalAddress)} Contact: ${sender.contactEmail}.`];
   if (sender.ukRepresentative) identity.push(`UK data-protection representative: ${sentence(sender.ukRepresentative)}`);
   if (sender.icoNumber) identity.push(`ICO registration number: ${sender.icoNumber}`);
 
