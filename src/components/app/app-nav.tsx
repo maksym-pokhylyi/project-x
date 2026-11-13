@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartNoAxesColumn, CreditCard, Home, Settings, ShieldCheck, Users, type LucideIcon } from "lucide-react";
+import { ChartNoAxesColumn, CreditCard, FileSearch, Home, LibraryBig, Settings, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,8 @@ export function AppNav({ canManageBilling, isAdmin }: { canManageBilling: boolea
   const pathname = usePathname();
   const items: Item[] = [
     { href: "/app", label: "Home", icon: Home, match: (path) => path === "/app" },
+    { href: "/app/bids", label: "Bids", icon: FileSearch, match: (path) => path.startsWith("/app/bids") },
+    { href: "/app/library", label: "Library", icon: LibraryBig, match: (path) => path.startsWith("/app/library") },
     { href: "/app/usage", label: "Usage", icon: ChartNoAxesColumn, match: (path) => path.startsWith("/app/usage") },
     { href: "/app/settings/members", label: "Members", icon: Users, match: (path) => path.startsWith("/app/settings/members") },
     ...(canManageBilling

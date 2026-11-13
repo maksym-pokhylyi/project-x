@@ -1,7 +1,7 @@
 import {
   TURNOVER_BAND_LABELS,
   TURNOVER_BAND_RANGES,
-  type BidVerdict,
+
   type Citation,
   type CompanyFacts,
   type CompanyStatus,
@@ -9,7 +9,7 @@ import {
   type RequirementCategory,
   type RequirementKind,
 } from "@/features/bids/types";
-import { normaliseText, thresholdMagnitudes, tightText } from "./quote-verify";
+import { thresholdMagnitudes, tightText } from "./quote-verify";
 
 /**
  * Company check: requirement vs company facts -> met | gap | unknown | verify, and a

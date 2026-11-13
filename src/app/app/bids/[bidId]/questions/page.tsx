@@ -1,0 +1,44 @@
+import type { Metadata } from "next";
+import { getBidAccess, getBidCapabilities } from "@/features/bids/access";
+import { UnlockButton } from "@/features/bids/components/bid-actions";
+import { QuestionsView } from "@/features/bids/components/questions-view";
+import { Callout, UpgradeNotice } from "@/features/bids/components/ui";
+import { loadBidPage } from "@/features/bids/server/page-data";
+import { toQuestionItem } from "@/features/bids/view";
+
+export const metadata: Metadata = { title: "Questions" };
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
+/** Questions tab: every question with weighting, limit, status and progress; add and edit by hand. */
+export default async function QuestionsPage({ params }: { params: Promise<{ bidId: string }> }) {
+  const { bidId } = await params;
+  const { ctx, bid, questions } = await loadBidPage(bidId);
+  const [capabilities, access] = await Promise.all([getBidCapabilities(ctx.organization.id, bid), getBidAccess(ctx.organization.id)]);
+  const canUnlock = bid.accessLevel !== "full" && ((access.drafting && (access.fullBids.remaining === null || access.fullBids.remaining > 0)) || access.bidPasses > 0);
+  return (
+    <div className="space-y-5">
+      {bid.status === "processing" ? <Callout>The pack is still being read. Questions appear here as they are found.</Callout> : null}
+      {!capabilities.drafting && bid.status !== "processing" ? (
+        <UpgradeNotice
+          title={capabilities.lockedReason === "plan_lapsed" ? "Drafting is paused on this bid" : "Drafting and marking are part of Bid Desk"}
+          secondary={
+            canUnlock ? <UnlockButton bidId={bid.id} label={access.bidPasses > 0 && !access.drafting ? `Use a Bid Pass (${access.bidPasses} held)` : "Use 1 full bid from your plan"} /> : undefined
+          }
+        >
+          {capabilities.lockedReason === "plan_lapsed"
+            ? "Your plan no longer includes drafting. Your questions and answers are safe and readable."
+            : "Your cited bid check lists every question. Bid Desk (£149/month, 3 full bids) adds grounded first drafts from your own evidence, evaluator-style marking against the tender's scoring and Word export. A Bid Pass (£99) unlocks them for this one bid."}
+        </UpgradeNotice>
+      ) : null}
+      <QuestionsView
+        bidId={bid.id}
+        questions={questions.map(toQuestionItem)}
+        links={{ kind: "app", bidId: bid.id }}
+        basePath={`/app/bids/${bid.id}`}
+        readOnly={bid.status !== "ready"}
+        canDraft={capabilities.drafting}
+      />
+    </div>
+  );
+}

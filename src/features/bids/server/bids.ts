@@ -584,3 +584,59 @@ export async function deleteQuestion(ctx: Scope, bidId: string, questionId: stri
   const current = await getQuestion(ctx, bid.id, questionId);
   await db.delete(bidQuestions).where(and(eq(bidQuestions.id, current.id), eq(bidQuestions.organizationId, ctx.organization.id)));
 }
+
+// --- Review ticks ("checked against the documents") --------------------------------------
+
+/** Records (or clears) that a person checked this requirement against the tender documents. */
+export async function setRequirementChecked(ctx: Scope, bidId: string, requirementId: string, checked: boolean): Promise<RequirementRow> {
+  const bid = await getBid(ctx, bidId);
+  assertEditable(bid);
+  const current = await getRequirement(ctx, bid.id, requirementId);
+  const [row] = await db
+    .update(bidRequirements)
+    .set({ checkedAt: checked ? new Date() : null, checkedBy: checked ? ctx.user.id : null, updatedAt: new Date() })
+    .where(and(eq(bidRequirements.id, current.id), eq(bidRequirements.organizationId, ctx.organization.id)))
+    .returning();
+  return row!;
+}
+
+const REVIEWABLE_FACTS = ["submission_deadline", "clarification_deadline", "submission_method", "estimated_value"] as const;
+
+/** Records (or clears) that a person confirmed a key fact of the brief against the documents. */
+export async function setFactConfirmed(ctx: Scope, bidId: string, field: unknown, confirmed: boolean): Promise<BidRow> {
+  const bid = await getBid(ctx, bidId);
+  assertEditable(bid);
+  const key = parse(z.enum(REVIEWABLE_FACTS), field);
+  const facts = { ...(bid.review?.facts ?? {}) };
+  if (confirmed) facts[key] = new Date().toISOString();
+  else delete facts[key];
+  const [row] = await db
+    .update(bids)
+    .set({ review: { facts }, updatedAt: new Date() })
+    .where(and(eq(bids.id, bid.id), eq(bids.organizationId, ctx.organization.id)))
+    .returning();
+  return row!;
+}
+
+/** Everything the workspace screens need for one bid, in one call. */
+export async function getBidWorkspace(ctx: Scope, bidId: string): Promise<{ bid: BidRow; files: BidFileRow[]; requirements: RequirementRow[]; questions: QuestionRow[] }> {
+  const bid = await getBid(ctx, bidId);
+  const [files, requirements, questions] = await Promise.all([
+    db
+      .select()
+      .from(bidFiles)
+      .where(and(eq(bidFiles.bidId, bid.id), eq(bidFiles.organizationId, ctx.organization.id)))
+      .orderBy(asc(bidFiles.sortOrder), asc(bidFiles.createdAt)),
+    db
+      .select()
+      .from(bidRequirements)
+      .where(and(eq(bidRequirements.bidId, bid.id), eq(bidRequirements.organizationId, ctx.organization.id)))
+      .orderBy(asc(bidRequirements.sortOrder), asc(bidRequirements.createdAt)),
+    db
+      .select()
+      .from(bidQuestions)
+      .where(and(eq(bidQuestions.bidId, bid.id), eq(bidQuestions.organizationId, ctx.organization.id)))
+      .orderBy(asc(bidQuestions.sortOrder), asc(bidQuestions.createdAt)),
+  ]);
+  return { bid, files, requirements, questions };
+}

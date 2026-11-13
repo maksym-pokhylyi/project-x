@@ -134,6 +134,17 @@ export async function deleteLibraryDoc(ctx: Scope, docId: string): Promise<void>
   await deleteKeys([existing.storageKey, existing.textStorageKey]);
 }
 
+/**
+ * Safety net for documents still "processing": their job is in the durable queue, but the
+ * nudge that starts it promptly can be lost. Called when someone opens the library.
+ */
+export async function reviveLibraryDocs(docs: LibraryDocRow[]): Promise<void> {
+  const stalled = docs.some((doc) => doc.status === "processing" && Date.now() - doc.updatedAt.getTime() > 15_000);
+  if (!stalled) return;
+  const { kickWorker } = await import("@/lib/jobs/worker");
+  kickWorker();
+}
+
 export async function readLibrarySource(ctx: Scope, docId: string): Promise<{ doc: LibraryDocRow; bytes: Uint8Array }> {
   const doc = await getLibraryDoc(ctx, docId);
   const bytes = await readBytes(doc.storageKey);

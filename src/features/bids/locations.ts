@@ -15,3 +15,15 @@ export function describeLoc(loc: string): string {
   if (loc.startsWith("sheet:")) return `sheet “${loc.slice(6)}”`;
   return loc;
 }
+
+/** True when a YYYY-MM-DD date (end of that day, UTC) is in the past. */
+export function isPastDate(date: string | null | undefined, now: number = Date.now()): boolean {
+  if (!date) return false;
+  const time = new Date(`${date.slice(0, 10)}T23:59:59Z`).getTime();
+  return !Number.isNaN(time) && time < now;
+}
+
+/** True when `date` is less than `ms` old. */
+export function isRecent(date: Date, ms: number, now: number = Date.now()): boolean {
+  return now - date.getTime() < ms;
+}

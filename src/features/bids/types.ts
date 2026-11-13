@@ -246,6 +246,8 @@ export type DraftMeta = {
   generatedAt: string;
   /** ai_draft | ai_revision */
   origin: "ai_draft" | "ai_revision";
+  /** Set once a person has edited the AI text by hand. */
+  editedAt?: string;
 };
 
 export type EvaluationImprovement = {
