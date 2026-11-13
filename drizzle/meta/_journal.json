@@ -54,8 +54,15 @@
     {
       "idx": 7,
       "version": "7",
-      "when": 1794598069507,
-      "tag": "0007_radar_first_run",
+      "when": 1794592289569,
+      "tag": "0007_contact_retention",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794601868536,
+      "tag": "0008_radar_first_run",
       "breakpoints": true
     }
   ]

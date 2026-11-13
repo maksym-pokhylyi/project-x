@@ -136,7 +136,7 @@ Bid Pass £99 — одна полная заявка на любом тариф�
 
 ## 7. Аналитика (события)
 
-`supplier_page_viewed` (с кодом рассылки), `claim_started`, `signup_completed`, `supplier_claimed`, `radar_viewed`, `tender_saved`,
+`supplier_page_viewed` (с признаком `via: outreach | direct`; сам код рассылки хранится только в `page_visits` и в аналитику не уходит), `claim_started`, `signup_completed`, `supplier_claimed`, `radar_viewed`, `tender_saved`,
 `bid_created`, `pack_uploaded`, `brief_ready`, `brief_viewed`, `question_drafted`, `answer_evaluated`, `export_done`,
 `checkout_opened`, `subscription_started`, `subscription_canceled`, `digest_sent`, `digest_clicked`, `optout`.
 Воронка: визит страницы → заявка → активация → бриф → оплата → повторная заявка в следующем месяце → отмена.

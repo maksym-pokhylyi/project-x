@@ -48,6 +48,7 @@ describe("data retention (F-14)", () => {
       outreachProspects: 365,
       outreachNamedAddresses: 90,
       outreachAudit: 730,
+      supplierNamedContacts: 30,
     });
   });
 

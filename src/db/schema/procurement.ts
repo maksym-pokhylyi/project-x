@@ -147,6 +147,10 @@ export const procurementAliases = pgTable(
  * INTERNAL ONLY — never rendered on any page. Contact addresses published next to a
  * supplier in a notice, kept for the founder's outreach gate
  * (src/features/procurement/domain/outreach.ts). The contact person's NAME is not stored.
+ *
+ * An address that identifies a person is held for RETENTION_DAYS.supplierNamedContacts and
+ * then ERASED IN PLACE (src/features/procurement/retention.ts): the row stays, `email`
+ * becomes a placeholder and `erased_at` is set. Ingestion never restores an erased address.
  */
 export const supplierContacts = pgTable(
   "supplier_contacts",
@@ -155,7 +159,14 @@ export const supplierContacts = pgTable(
     supplierId: text("supplier_id")
       .notNull()
       .references(() => suppliers.id, { onDelete: "cascade" }),
+    /** Lower-cased address — or, once erased, `erased:<first 16 hex characters of email_fingerprint>`, which no gate accepts as an address. */
     email: text("email").notNull(),
+    /**
+     * SHA-256 (hex) of the lower-cased address: how ingestion recognises an erased address
+     * when its notice is read again. Null on rows stored before the column existed, until
+     * ingestion touches them or `pnpm contacts:backfill` has run; always set on an erased row.
+     */
+    emailFingerprint: text("email_fingerprint"),
     emailDomain: text("email_domain").notNull(),
     /** generic | named | freemail */
     kind: text("kind").notNull(),
@@ -167,11 +178,16 @@ export const supplierContacts = pgTable(
     /** Publication date of the earliest / latest notice carrying the address. */
     firstSeenAt: tz("first_seen_at").notNull(),
     lastSeenAt: tz("last_seen_at").notNull(),
-    /** When WE first stored the address: starts the one-month clock for named addresses. Never updated. */
+    /**
+     * When WE first stored the address: starts the one-month clock for named addresses.
+     * Never moved later: ingestion does not touch it, and a merge keeps the earlier of two rows' dates.
+     */
     firstIngestedAt: tz("first_ingested_at").notNull().defaultNow(),
     suppressedAt: tz("suppressed_at"),
     /** optout | objection | bounce | removal_request | manual */
     suppressedReason: text("suppressed_reason"),
+    /** When retention replaced the address with its placeholder. Never cleared. */
+    erasedAt: tz("erased_at"),
   },
   (t) => [uniqueIndex("supplier_contacts_supplier_email_key").on(t.supplierId, t.email), index("supplier_contacts_domain_idx").on(t.emailDomain)],
 );

@@ -1,5 +1,5 @@
 {
-  "id": "ea6ed958-db30-4ff9-918a-cafce53139b7",
+  "id": "93b4c792-f1a9-4dbb-b6b8-9974d3eeef26",
   "prevId": "9fd91905-5054-4ddf-885d-6837103c50cd",
   "version": "7",
   "dialect": "postgresql",
@@ -3990,33 +3990,6 @@
           "notNull": true,
           "default": "'self_declared'"
         },
-        "regions": {
-          "name": "regions",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "extra_cpv_codes": {
-          "name": "extra_cpv_codes",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::text[]"
-        },
-        "excluded_cpv_codes": {
-          "name": "excluded_cpv_codes",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::text[]"
-        },
-        "first_run_pending": {
-          "name": "first_run_pending",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -4405,13 +4378,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "first_run_pending": {
-          "name": "first_run_pending",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
         "created_by": {
           "name": "created_by",
           "type": "text",
@@ -4493,6 +4459,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "email_fingerprint": {
+          "name": "email_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "email_domain": {
           "name": "email_domain",
           "type": "text",
@@ -4552,6 +4524,12 @@
         "suppressed_reason": {
           "name": "suppressed_reason",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "erased_at": {
+          "name": "erased_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }

@@ -10,6 +10,7 @@ import {
 } from "../../../db/schema/procurement";
 import type { MappedBuyer, MappedRelease, MappedSupplier } from "../domain/map-release";
 import { classifyLegalForm, slugifyName, stableId } from "../domain/normalize";
+import { contactFingerprint, contactKey, contactRowFingerprint, erasedContactKeys } from "./contact-erasure";
 import { resolveEntities, type OrgRecord } from "./resolve";
 import { bulkUpsert, chunk, iso, queryRows, str, textArrayParam, type SqlExecutor } from "./sql";
 
@@ -337,7 +338,13 @@ export async function upsertBatch(db: SqlExecutor, input: readonly MappedRelease
   const awardIds = awardRows.map((row) => String(row.id));
   await db.execute(sql`delete from awards where notice_id = any(${textArrayParam(noticeIds)}) and id <> all(${textArrayParam(awardIds)})`);
 
-  // --- 6. contacts (internal) and CPV labels ------------------------------------------------
+  // --- 6. merges ------------------------------------------------------------------------------
+  // Before the contacts are written: a row that is being folded into another may hold an
+  // erased address, and the surviving row must have it by the time step 7 looks.
+  for (const merge of supplierResolution.merges) await mergeSuppliers(db, merge.from, merge.into);
+  for (const merge of buyerResolution.merges) await mergeBuyers(db, merge.from, merge.into);
+
+  // --- 7. contacts (internal) and CPV labels ------------------------------------------------
   const contactRows = new Map<string, Record<string, unknown>>();
   for (const release of releases) {
     for (const contact of release.contacts) {
@@ -352,6 +359,7 @@ export async function upsertBatch(db: SqlExecutor, input: readonly MappedRelease
         id: stableId("ct", key),
         supplierId,
         email: contact.email,
+        emailFingerprint: contactFingerprint(contact.email),
         emailDomain: contact.domain,
         kind: contact.kind,
         namePresent: contact.namePresent || Boolean(current?.namePresent),
@@ -362,10 +370,15 @@ export async function upsertBatch(db: SqlExecutor, input: readonly MappedRelease
       });
     }
   }
-  await bulkUpsert(db, supplierContacts, [...contactRows.values()], {
-    columns: ["id", "supplierId", "email", "emailDomain", "kind", "namePresent", "domainMatchesWebsite", "sourceReleaseId", "firstSeenAt", "lastSeenAt"],
+  // An address that retention erased stays erased (./contact-erasure.ts): reading its notice
+  // again writes nothing — the address is not restored and its one-month clock is not restarted.
+  const erased = await erasedContactKeys(db, [...new Set([...contactRows.values()].map((row) => String(row.supplierId)))]);
+  const liveContacts = [...contactRows.values()].filter((row) => !erased.has(contactKey(String(row.supplierId), String(row.emailFingerprint))));
+  await bulkUpsert(db, supplierContacts, liveContacts, {
+    columns: ["id", "supplierId", "email", "emailFingerprint", "emailDomain", "kind", "namePresent", "domainMatchesWebsite", "sourceReleaseId", "firstSeenAt", "lastSeenAt"],
     conflict: ["supplierId", "email"],
-    update: ["kind", "emailDomain"],
+    // The fingerprint is filled here on rows stored before the column existed.
+    update: ["kind", "emailDomain", "emailFingerprint"],
     // first_ingested_at and the suppression fields are never touched by ingestion.
     setRaw: [
       `"name_present" = t.name_present or excluded.name_present`,
@@ -374,15 +387,11 @@ export async function upsertBatch(db: SqlExecutor, input: readonly MappedRelease
       `"last_seen_at" = greatest(t.last_seen_at, excluded.last_seen_at)`,
     ],
   });
-  summary.contacts = contactRows.size;
+  summary.contacts = liveContacts.length;
 
   const labels = new Map<string, string>();
   for (const release of releases) for (const [code, label] of Object.entries(release.cpvLabels)) if (!labels.has(code)) labels.set(code, label);
   await bulkUpsert(db, cpvCodes, [...labels].map(([code, label]) => ({ code, label })), { columns: ["code", "label"], conflict: ["code"], update: [] });
-
-  // --- 7. merges ------------------------------------------------------------------------------
-  for (const merge of supplierResolution.merges) await mergeSuppliers(db, merge.from, merge.into);
-  for (const merge of buyerResolution.merges) await mergeBuyers(db, merge.from, merge.into);
 
   // --- 8. recompute derived state for everything this batch touched ---------------------------
   const ocids = [...new Set(releases.map((release) => release.ocid))];
@@ -410,9 +419,23 @@ export async function mergeSuppliers(db: SqlExecutor, from: string, into: string
   if (from === into) return;
   await db.execute(sql`update procurement_aliases set entity_id = ${into} where kind = 'supplier' and entity_id = ${from}`);
   await db.execute(sql`update awards set supplier_id = ${into} where supplier_id = ${from}`);
+  // Contacts. "The same address" is judged by fingerprint, so that an address one of the two
+  // rows holds as erased is recognised (./contact-erasure.ts) and a merge can never bring it
+  // back. Where both rows hold an address, the surviving one takes the earlier clock and
+  // remembers that a contact name was published: it is one company, and we have held the
+  // address since the earlier day. Retention then erases it if that day is past its limit.
+  await db.execute(sql`
+    update supplier_contacts d set first_ingested_at = least(d.first_ingested_at, c.first_ingested_at), name_present = d.name_present or c.name_present
+    from supplier_contacts c
+    where c.supplier_id = ${from} and d.supplier_id = ${into} and ${contactRowFingerprint("c")} = ${contactRowFingerprint("d")}
+      and (c.first_ingested_at < d.first_ingested_at or (c.name_present and not d.name_present))
+  `);
   await db.execute(sql`
     update supplier_contacts c set supplier_id = ${into}
-    where c.supplier_id = ${from} and not exists (select 1 from supplier_contacts d where d.supplier_id = ${into} and d.email = c.email)
+    where c.supplier_id = ${from} and not exists (
+      select 1 from supplier_contacts d
+      where d.supplier_id = ${into} and (d.email = c.email or ${contactRowFingerprint("d")} = ${contactRowFingerprint("c")})
+    )
   `);
   await db.execute(sql`delete from supplier_contacts where supplier_id = ${from}`);
   await db.execute(sql`

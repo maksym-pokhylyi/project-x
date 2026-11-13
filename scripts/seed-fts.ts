@@ -25,6 +25,7 @@ import type { OcdsRelease } from "../src/features/procurement/domain/ocds";
 import { rebuildSupplierProfiles } from "../src/features/procurement/profiles/build";
 import { queryRows, type SqlExecutor } from "../src/features/procurement/ingest/sql";
 import { upsertBatch } from "../src/features/procurement/ingest/upsert";
+import { errorReason } from "../src/lib/describe-error";
 import { loadEnv } from "./load-env.mjs";
 
 loadEnv();
@@ -187,7 +188,7 @@ async function main() {
     console.log("[seed-fts] row counts", counts[0]);
   } catch (error) {
     await db
-      .execute(sql`update ingest_runs set status = 'error', finished_at = now(), error = ${error instanceof Error ? error.message.slice(0, 2000) : "unknown"} where id = ${run!.id}`)
+      .execute(sql`update ingest_runs set status = 'error', finished_at = now(), error = ${errorReason(error).slice(0, 500)} where id = ${run!.id}`)
       .catch(() => undefined);
     throw error;
   } finally {

@@ -182,6 +182,7 @@ const sections: LegalSection[] = [
             ["Receipts and one-off purchases listed on your Billing page", "For as long as the workspace exists, then deleted with it"],
             ["Billing records", "As long as tax and accounting law requires; invoices are held by Paddle"],
             ["Record of the digests, alerts and reminders we sent you: which kind, when, what each one listed and whether a link in it was followed", inMonths(RETENTION_DAYS.notificationLog)],
+            ["Contact addresses of named individuals taken from public notices", "30 days, then erased unless you are a customer or asked us not to contact you (in which case only the do-not-contact entry is kept)"],
             ["Outreach contact that never replied", `Deleted ${facts.outreachRetentionDays} days after the last email`],
             ["Opt-outs and objections", "Suppression list, kept for as long as we send email"],
             ["Record of which notices we emailed about", "24 months, as evidence that we followed this notice"],

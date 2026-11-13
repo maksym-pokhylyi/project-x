@@ -36,7 +36,7 @@ export default async function BuyerPage({ params, searchParams }: Props) {
   const data = await loadBuyerPage(slug);
   if (!data) notFound();
   const { buyer } = data;
-  if (buyer.mergedIntoSlug) permanentRedirect(`/buyers/${buyer.mergedIntoSlug}`);
+  if (buyer.mergedIntoSlug) permanentRedirect(`/buyers/${buyer.mergedIntoSlug}${cleanRefCode(query.r) ? `?r=${cleanRefCode(query.r)}` : ""}`); // a link with a code keeps it, so the visit is still counted
   await recordPageVisit({ pageType: "buyer", entityId: buyer.id, refCode: cleanRefCode(query.r) });
   const signedIn = Boolean(await getUser());
   const now = new Date();

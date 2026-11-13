@@ -26,6 +26,7 @@
     "paddle:verify-sandbox": "tsx --import ./scripts/register-server-only.mjs scripts/paddle-verify-sandbox.ts",
     "billing:purge-sandbox": "tsx --import ./scripts/register-server-only.mjs scripts/billing-purge-sandbox.ts",
     "seed:fts": "tsx scripts/seed-fts.ts",
+    "contacts:backfill": "tsx scripts/backfill-contact-fingerprints.ts",
     "erase": "tsx --import ./scripts/register-server-only.mjs scripts/erase.ts",
     "ui:audit": "node scripts/ui-smells.mjs",
     "notifications:preview": "tsx --import ./scripts/register-server-only.mjs scripts/notifications-preview.ts"
