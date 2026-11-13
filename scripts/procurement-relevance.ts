@@ -24,7 +24,7 @@ async function main() {
   const { formatMoneyShort } = await import("../src/features/procurement/domain/money");
   const { cpvDivisionLabel } = await import("../src/features/procurement/domain/cpv");
 
-  let slugs = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
+  const slugs = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
   if (slugs.length === 0) {
     for (const division of DIVISIONS) {
       // A typical outreach target: an SME with a company number and 2–8 awards, mostly in this division.
