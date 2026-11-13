@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { LockedList, LockedRow } from "@/components/ui/locked-list";
 import { NativeSelect } from "@/components/ui/native-select";
 import { NavLink } from "@/components/ui/nav-link";
+import { NoticeBand } from "@/components/ui/notice-band";
 import { ReferenceChip } from "@/components/ui/reference-chip";
 import { SkeletonRows } from "@/components/ui/skeleton";
 import { Stat, StatRow } from "@/components/ui/stat";
@@ -547,6 +548,22 @@ export function PlansSection() {
           <LockedRow title="Match 12" plan="Radar Pro" meta={<Badge variant="secondary">South Yorkshire</Badge>} deadline={<DeadlineMarker size="sm">Closes 22 Jan 2027</DeadlineMarker>} />
           <LockedRow title="Match 13" plan="Radar Pro" meta={<Badge variant="secondary">North Yorkshire</Badge>} deadline={<DeadlineMarker size="sm">Closes 2 Feb 2027</DeadlineMarker>} />
         </LockedList>
+      </Group>
+      <Group
+        title="Notice band"
+        note="One line across the page, directly under the top bar, for a condition of the whole page: test mode, a payment problem, a seat problem. The lead takes the hue of the tone and the rest is ink. The trial strip is its amber sibling with a dot."
+      >
+        <div className="flex flex-col gap-3 overflow-hidden rounded-card border border-line">
+          <NoticeBand tone="info" containerClassName="px-5">
+            <strong className="font-semibold">Test mode.</strong> Payments are simulated and no card is charged.
+          </NoticeBand>
+          <NoticeBand tone="warning" containerClassName="px-5">
+            <strong className="font-semibold">Payment failed.</strong> Paid features stay on until 20 Nov 2026.
+          </NoticeBand>
+          <NoticeBand tone="danger" containerClassName="px-5">
+            <strong className="font-semibold">Uploads are paused.</strong> Storage is not reachable right now.
+          </NoticeBand>
+        </div>
       </Group>
       <Group title="Identity line" note="Who operates the service, under every public page and in every e-mail. Every word comes from src/config/site.ts.">
         <IdentityLine />

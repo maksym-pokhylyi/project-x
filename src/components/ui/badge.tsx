@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
  *   brand        ink on brand-tint — the strongest reason, "selected"
  *   outline      line-strong edge — a quiet property that needs an edge on a tinted panel
  *   strong       ink edge — the property that matters most ("Mandatory")
- *   warning      ink on amber-tint — time left ("14 days left")
+ *   warning      amber ink on amber-tint — time left ("14 days left"), a state with a date on it ("Ending")
  *   success      brand green on success-tint — "Met", "Active" (add a tick)
  *   destructive  danger on danger-tint — "Gap", "Past due"
  *   info         info on info-tint — neutral labels: notice types, "For you to confirm"
@@ -29,7 +29,7 @@ const badgeVariants = cva(
         brand: "bg-brand-tint font-medium text-ink [a&]:hover:bg-brand-mark",
         outline: "border-line-strong bg-surface text-ink [a&]:hover:bg-paper",
         strong: "border-ink bg-surface text-ink",
-        warning: "bg-accent-tint text-ink",
+        warning: "bg-accent-tint text-accent-ink",
         success: "bg-success-tint text-brand",
         destructive: "bg-danger-tint text-danger",
         info: "bg-info-tint text-info",
