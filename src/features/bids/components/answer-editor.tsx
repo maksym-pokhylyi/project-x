@@ -584,26 +584,26 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
             </div>
 
             {!readOnly ? (
-              <div className="print:hidden flex flex-wrap items-center gap-2 border-b border-line px-5 py-2.5 sm:px-7">
-                <Button type="button" variant={question.draftText ? "outline" : "default"} onClick={draft} disabled={busy !== null} data-testid="draft-button">
+              <div className="print:hidden flex min-h-11 flex-wrap items-center gap-x-1 gap-y-2 border-b border-line px-5 py-2.5 sm:px-7">
+                <Button size="sm" type="button" variant={question.draftText ? "outline" : "default"} onClick={draft} disabled={busy !== null} data-testid="draft-button">
                   {busy === "draft" ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
                   {busy === "draft" ? "Drafting from your documents…" : question.draftText ? "Regenerate" : "Draft from my documents"}
                 </Button>
-                <Button variant="ghost" type="button"  onClick={() => setShowInstructions((value) => !value)} aria-expanded={showInstructions}>
+                <Button size="sm" variant="ghost" type="button"  onClick={() => setShowInstructions((value) => !value)} aria-expanded={showInstructions}>
                   {question.draftText ? "Regenerate with instructions" : "Add instructions"}
                 </Button>
                 <span className="ml-auto flex flex-wrap items-center gap-2">
                   {question.versions.length > 0 ? (
-                    <Button variant="ghost" type="button"  onClick={() => setShowHistory((value) => !value)} aria-expanded={showHistory}>
+                    <Button size="sm" variant="ghost" type="button"  onClick={() => setShowHistory((value) => !value)} aria-expanded={showHistory}>
                       History ({question.versions.length})
                     </Button>
                   ) : null}
                   {mode === "edit" ? (
-                    <Button variant="outline" type="button"  onClick={() => void save().then((ok) => (ok ? setMode("read") : undefined))} disabled={busy !== null} data-testid="edit-done">
+                    <Button size="sm" variant="outline" type="button"  onClick={() => void save().then((ok) => (ok ? setMode("read") : undefined))} disabled={busy !== null} data-testid="edit-done">
                       {busy === "save" ? "Saving…" : "Done"}
                     </Button>
                   ) : (
-                    <Button variant="outline" type="button"  onClick={() => setMode("edit")} disabled={busy !== null} data-testid="edit-answer">
+                    <Button size="sm" variant="outline" type="button"  onClick={() => setMode("edit")} disabled={busy !== null} data-testid="edit-answer">
                       Edit
                     </Button>
                   )}

@@ -2,7 +2,6 @@
 
 import "./bid-theme.css";
 import { useRouter } from "next/navigation";
-import { Popover } from "radix-ui";
 import { useMemo, useState, useTransition } from "react";
 import { updateRequirementAction } from "@/features/bids/actions";
 import { displayRef, gateGroup, type GateGroup } from "@/features/bids/view";
@@ -14,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { ReferenceChip } from "@/components/ui/reference-chip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 /**
  * "Pass-or-fail requirements" on the brief: each line quoted from the pack with its source
@@ -42,29 +42,29 @@ function ConfirmControl({ bidId, item, label }: { bidId: string; item: Requireme
       }
     });
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger asChild>
-        <Button variant={label === "Confirm" ? "outline" : "link"} size={label === "Confirm" ? "sm" : undefined} type="button" className={label === "Confirm" ? undefined : "text-13"} data-testid="gate-confirm">
-          {label}
-        </Button>
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content align="start" sideOffset={6} collisionPadding={12} className="rounded-card border border-line bg-surface text-ink shadow-overlay z-50 w-[min(20rem,calc(100vw-1.5rem))] p-1.5 outline-none">
-          <p className="px-3 pt-2 pb-1 text-13 text-ink-2">Read the requirement on the page first. Your answer is recorded as set by you.</p>
-          <Button variant="ghost" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" type="button"  disabled={pending} onClick={() => set("met")} data-testid="gate-confirm-met">
+    <>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant={label === "Confirm" ? "outline" : "link"} size={label === "Confirm" ? "sm" : undefined} type="button" className={label === "Confirm" ? undefined : "text-13"} data-testid="gate-confirm">
+            {label}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[min(20rem,calc(100vw-1.5rem))]">
+          <DropdownMenuLabel className="font-normal text-ink-2">Read the requirement on the page first. Your answer is recorded as set by you.</DropdownMenuLabel>
+          <DropdownMenuItem disabled={pending} onSelect={() => set("met")} data-testid="gate-confirm-met">
             We meet this
-          </Button>
-          <Button variant="ghost" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" type="button"  disabled={pending} onClick={() => set("gap")} data-testid="gate-confirm-gap">
+          </DropdownMenuItem>
+          <DropdownMenuItem disabled={pending} onSelect={() => set("gap")} data-testid="gate-confirm-gap">
             We do not meet this yet
-          </Button>
-          {error ? (
-            <p role="alert" className="px-3 py-2 text-xs text-danger">
-              {error}
-            </p>
-          ) : null}
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {error ? (
+        <p role="alert" className="text-xs text-danger">
+          {error}
+        </p>
+      ) : null}
+    </>
   );
 }
 

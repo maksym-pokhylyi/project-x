@@ -51,31 +51,6 @@
 }
 
 /* Popover / menu surface. */
-.bid-menu-item {
-  display: flex;
-  width: 100%;
-  min-height: 44px;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  text-align: left;
-  text-decoration: none;
-  color: var(--ink);
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-.bid-menu-item:hover {
-  background: var(--paper);
-}
-.bid-menu-item[aria-disabled="true"] {
-  color: var(--ink-2);
-  cursor: not-allowed;
-}
 
 @media print {
 }
