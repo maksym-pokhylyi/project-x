@@ -1219,6 +1219,11 @@ export default function StyleguidePage() {
                 </Disclosure>
               </DisclosureGroup>
             </Group>
+            <Group title="Disclosure, inline" note='variant="inline": a secondary step tucked into a card or a table row. The summary reads as a link with the same chevron; what it reveals follows in the text size around it.'>
+              <Disclosure variant="inline" summary="Marked the wrong rows, or the wrong day?">
+                <p className="text-ink-2">Tick those rows in the table and clear their date. They can then be marked again.</p>
+              </Disclosure>
+            </Group>
           </GuideSection>
 
           {/* ------------------------------------------------------------------ */}

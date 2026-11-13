@@ -13,6 +13,8 @@ export const dynamic = "force-dynamic";
 const adminSections: Array<{ href: string; label: string; match?: NavMatch }> = [
   { href: "/admin", label: "Overview", match: "exact" },
   { href: "/admin/organizations", label: "Organizations" },
+  { href: "/admin/outreach", label: "Outreach" },
+  { href: "/admin/suppressions", label: "Suppressions" },
   { href: "/admin/ingestion", label: "Ingestion" },
   { href: "/admin/notifications", label: "Notifications" },
 ];

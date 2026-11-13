@@ -45,6 +45,9 @@ describe("data retention (F-14)", () => {
       bidWorkFiles: 14,
       purchasePayload: 90,
       notificationLog: 395,
+      outreachProspects: 365,
+      outreachNamedAddresses: 90,
+      outreachAudit: 730,
     });
   });
 
