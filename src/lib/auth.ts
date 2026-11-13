@@ -8,7 +8,7 @@ import { count, eq } from "drizzle-orm";
 import { site } from "@/config/site";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
-import { appUrl, env, features } from "@/env";
+import { appUrl, env, features, trustedOrigins } from "@/env";
 import { track } from "@/lib/analytics";
 import { recordAudit } from "@/lib/audit";
 import { getOrgEntitlements } from "@/lib/billing/subscription";
@@ -51,7 +51,7 @@ export const auth = betterAuth({
   appName: site.name,
   baseURL: appUrl,
   secret: env.BETTER_AUTH_SECRET,
-  trustedOrigins: [appUrl],
+  trustedOrigins,
   database: drizzleAdapter(db, { provider: "pg", usePlural: true, schema }),
   telemetry: { enabled: false },
   // Route Better Auth's own log lines through our structured logger.
