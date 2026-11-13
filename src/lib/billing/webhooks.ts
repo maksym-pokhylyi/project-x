@@ -37,7 +37,7 @@ import {
   type PaddleTransaction,
 } from "./paddle-events";
 import { summarizePaymentMethod } from "./payment-method";
-import { planFromCheckoutPriceId } from "./trial";
+import { getNoTrialPriceId, planFromCheckoutPriceId } from "./trial";
 import { verifyPaddleSignature } from "./webhook-signature";
 
 /**
@@ -77,6 +77,14 @@ import { verifyPaddleSignature } from "./webhook-signature";
  *  - Test mode never mixes with live data: every stored event, subscription, payment and
  *    purchase carries the Paddle environment it came from (PADDLE_ENV at that moment), and
  *    an event is only processed or replayed while the deployment runs that environment.
+ *  - No event type is special for attaching: a new subscription is attached from WHICHEVER
+ *    `subscription.*` event arrives first with valid signed checkout data (Paddle does not
+ *    always send `subscription.created` for a trial), and the two events Paddle emits for one
+ *    change (same timestamp, same payload) are applied in either order, or concurrently,
+ *    with the change tracked once.
+ *  - A second trial is reported: when a workspace that has had a subscription before starts
+ *    one in trial although the price without a trial is configured for it, the operator is
+ *    told (the browser chose the price; the server cannot take a trial back).
  *
  * WHICH WORKSPACE an event belongs to (the browser opens the checkout, so its custom data
  * is attacker-controlled until proven otherwise):
@@ -535,6 +543,14 @@ async function handleSubscriptionEvent(tx: Tx, envelope: PaddleEnvelope): Promis
   const before = carriedPrevious;
   if (!before) {
     effects.push(() => track("billing.subscription_started", context, { plan: planKey, interval: billingInterval, status: data.status }));
+    // The trial is offered ONCE per workspace: a returning workspace is sent to the twin of
+    // the price that has no trial (./trial.ts). But it is the browser that opens the checkout,
+    // so it can ask Paddle for the price WITH the trial anyway. Nothing here can take that
+    // trial back — the operator is told, and decides in Paddle.
+    if (data.status === "trialing" && previous && mapping && getNoTrialPriceId(mapping.planKey, mapping.interval)) {
+      const notice = `Workspace ${organizationId} started another trial (${data.id}) although it has had a subscription before: it was offered the price without a trial, and the checkout used ${item.price.id}`;
+      effects.push(() => reportError(new Error(notice), { route: "webhook:paddle", organizationId }));
+    }
   } else {
     if (before.planKey !== planKey) {
       effects.push(() => track("billing.subscription_changed", context, { from: before.planKey, to: planKey, status: data.status }));

@@ -193,21 +193,32 @@ export function adjustmentEvent(options: {
   });
 }
 
+const SANDBOX_FIXTURES = {
+  active: "sandbox-active-lifecycle.json",
+  trial: "sandbox-trial-lifecycle.json",
+  "trial-created-pair": "sandbox-trial-created-pair.json",
+} as const;
+
 /**
  * The events Paddle really emitted for a subscription in the sandbox (recorded by
  * scripts/paddle-verify-sandbox.ts on 2026-11-13; ids replaced by fakes), in order:
  *
  *   active: activated + created → scheduled pause → cancel replaces it → undo → scheduled
  *           cancel → undo → paused (immediately) → resumed → canceled
- *   trial:  trialing (no `created` event!) → zero-value transaction.completed → scheduled
- *           cancel → undo → scheduled pause → undo → canceled
+ *   trial:  trialing — and NO `subscription.created` in this run → zero-value
+ *           transaction.completed → scheduled cancel → undo → scheduled pause → undo → canceled
+ *   trial-created-pair: how the trial of the NEXT run started: `subscription.created` AND
+ *           `subscription.trialing`, same timestamp (the first two events of that run)
+ *
+ * Events of one change carry the same timestamp and the same payload (only
+ * `subscription.created` has a `transaction_id` on top); their order differed between runs.
  *
  * Adapted to the test: checkout data signed for the workspace, the price mapped to the test
  * catalogue, and every timestamp shifted by one constant so that the first event happened
  * an hour ago (the paid period then contains "now"; microseconds and order are preserved).
  */
-export function sandboxLifecycle(name: "active" | "trial", options: { organizationId: string; priceId?: string }): Envelope[] {
-  const file = fileURLToPath(new URL(`../fixtures/paddle/sandbox-${name}-lifecycle.json`, import.meta.url));
+export function sandboxLifecycle(name: keyof typeof SANDBOX_FIXTURES, options: { organizationId: string; priceId?: string }): Envelope[] {
+  const file = fileURLToPath(new URL(`../fixtures/paddle/${SANDBOX_FIXTURES[name]}`, import.meta.url));
   const raw = readFileSync(file, "utf8");
   const first = (JSON.parse(raw) as Envelope[])[0]!;
   const shiftMs = Date.now() - 3_600_000 - Date.parse(first.occurred_at);

@@ -29,8 +29,8 @@ vi.mock("@/lib/billing/paddle", async (importOriginal) => ({
 
 import { POST } from "@/app/api/webhooks/paddle/route";
 import { db } from "@/db";
-import { auditLog, errorLog, events, subscriptions, webhookEvents } from "@/db/schema";
-import { verifyCheckoutData } from "@/lib/billing/checkout-signature";
+import { auditLog, billingCheckoutNonces, errorLog, events, subscriptions, webhookEvents } from "@/db/schema";
+import { signCheckoutData, verifyCheckoutData } from "@/lib/billing/checkout-signature";
 import {
   BillingManageError,
   cancelSubscription,
@@ -44,6 +44,7 @@ import { describePaddleFailure } from "@/lib/billing/paddle-errors";
 import { reconcileSubscriptions } from "@/lib/billing/reconcile";
 import { listReceipts } from "@/lib/billing/receipts";
 import { getOrgEntitlements } from "@/lib/billing/subscription";
+import { isTrialEligible } from "@/lib/billing/trial";
 import { processStoredEvent } from "@/lib/billing/webhooks";
 import {
   cancelSubscriptionAction,
@@ -54,7 +55,7 @@ import {
 import { requireOrg } from "@/server/session";
 import { actAs, addMember, createTestUser, type TestUser } from "./helpers/auth";
 import { resetDatabase } from "./helpers/db";
-import { createBillingOrg, paddleEvent, sandboxLifecycle, signedWebhookRequest } from "./helpers/paddle";
+import { createBillingOrg, ownerIdOf, paddleEvent, sandboxLifecycle, signedWebhookRequest } from "./helpers/paddle";
 
 /**
  * Pause / resume / cancel / undo: the rules (decideManageAction), the Paddle calls they turn
@@ -536,7 +537,7 @@ describe("webhook: scheduled pause and cancellation (events the Paddle sandbox r
     expect(await db.select().from(errorLog)).toHaveLength(0);
   });
 
-  it("trial: starts without a `subscription.created` event; pause and cancel are scheduled for the end of the trial", async () => {
+  it("trial that started with `subscription.trialing` alone (no `subscription.created` in that sandbox run): pause and cancel are scheduled for the end of the trial", async () => {
     const lifecycle = sandboxLifecycle("trial", { organizationId: ORG });
     expect(lifecycle.map((event) => event.event_type)).toEqual([
       "subscription.trialing", "transaction.updated", "transaction.updated", "transaction.completed",
@@ -619,5 +620,120 @@ describe("webhook: scheduled pause and cancellation (events the Paddle sandbox r
     expect(await reconcileSubscriptions({ fetchSubscription: async () => snapshot(4) })).toMatchObject({ checked: 1, updated: 0, unchanged: 1 });
     expect(await reconcileSubscriptions({ fetchSubscription: async () => snapshot(8) })).toMatchObject({ checked: 1, updated: 1 });
     expect(await rowOf(ORG)).toMatchObject({ pauseAt: null, cancelAt: null });
+  });
+
+  it("the two events of one change (same timestamp, same payload) may arrive in either order, or at once", async () => {
+    // The first sandbox run listed `paused` before its `updated` twin, the second one after it.
+    const lifecycle = sandboxLifecycle("active", { organizationId: ORG });
+    for (const index of [1, 0, 4]) expect(await deliver(lifecycle[index]), String(index)).toBe("processed"); // created BEFORE activated; pause scheduled
+    expect(lifecycle.slice(9, 15).map((event) => `${event.event_type}:${String(event.data.status)}`)).toEqual([
+      "subscription.paused:paused", "subscription.updated:paused",
+      "subscription.resumed:active", "subscription.updated:active",
+      "subscription.canceled:canceled", "subscription.updated:canceled",
+    ]);
+    expect(await Promise.all([deliver(lifecycle[10]), deliver(lifecycle[9])])).toEqual(["processed", "processed"]); // both at once
+    expect(await rowOf(ORG)).toMatchObject({ status: "paused", pauseAt: null });
+    for (const index of [12, 11, 14, 13]) expect(await deliver(lifecycle[index]), String(index)).toBe("processed"); // `updated` first
+    expect(await rowOf(ORG)).toMatchObject({ status: "canceled", pauseAt: null, cancelAt: null });
+
+    const names = await eventNames();
+    for (const name of ["billing.subscription_started", "billing.subscription_paused", "billing.subscription_resumed", "billing.subscription_canceled"]) {
+      expect(names.filter((tracked) => tracked === name), name).toHaveLength(1);
+    }
+    expect(await db.select().from(subscriptions)).toHaveLength(1);
+    expect(await db.select().from(errorLog)).toHaveLength(0);
+  });
+
+  describe("a NEW subscription is attached from `subscription.trialing` exactly like from `subscription.created`", () => {
+    const trialing = () => sandboxLifecycle("trial", { organizationId: ORG })[0]!;
+
+    it.each([
+      ["`subscription.created` first", [0, 1]],
+      ["`subscription.trialing` first", [1, 0]],
+      ["both at once", null],
+    ] as const)("when Paddle sends both for a trial (the second sandbox run did, same timestamp): attached once — %s", async (_label, order) => {
+      const pair = sandboxLifecycle("trial-created-pair", { organizationId: ORG });
+      expect(pair.map((event) => event.event_type)).toEqual(["subscription.created", "subscription.trialing"]);
+      expect(pair[0]!.occurred_at).toBe(pair[1]!.occurred_at);
+      const outcomes = order ? [await deliver(pair[order[0]]), await deliver(pair[order[1]])] : await Promise.all(pair.map((event) => deliver(event)));
+      expect(outcomes).toEqual(["processed", "processed"]);
+
+      const rows = await db.select().from(subscriptions);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({ organizationId: ORG, status: "trialing", planKey: "pro", paddleSubscriptionId: pair[0]!.data.id, checkoutUserId: ownerIdOf(ORG) });
+      expect(rows[0]!.verifiedAt).toBeInstanceOf(Date);
+      expect(Math.round((rows[0]!.trialEnd!.getTime() - Date.now()) / DAY)).toBe(14);
+      expect(await db.select().from(billingCheckoutNonces)).toHaveLength(1);
+      expect((await eventNames()).filter((name) => name === "billing.subscription_started")).toHaveLength(1);
+      // Each event leaves its own audit entry; neither is an error.
+      const audited = (await db.select({ action: auditLog.action }).from(auditLog)).map((entry) => entry.action).sort();
+      expect(audited).toEqual(["billing.subscription.created", "billing.subscription.trialing"]);
+      expect(await db.select().from(errorLog)).toHaveLength(0);
+      expect(await getOrgEntitlements(ORG)).toMatchObject({ planKey: "pro", source: "trialing" });
+    });
+
+    it("with valid signed checkout data: bound to the workspace, verified, nonce consumed", async () => {
+      const event = trialing();
+      expect(event.event_type).toBe("subscription.trialing");
+      expect(await deliver(event)).toBe("processed");
+      const row = await rowOf(ORG);
+      expect(row).toMatchObject({ status: "trialing", planKey: "pro", paddleSubscriptionId: event.data.id, checkoutUserId: ownerIdOf(ORG), paddleEnvironment: "sandbox" });
+      expect(row.verifiedAt).toBeInstanceOf(Date);
+      const signed = event.data.custom_data as { nonce: string };
+      expect(await db.select().from(billingCheckoutNonces)).toMatchObject([{ nonce: signed.nonce, organizationId: ORG, paddleSubscriptionId: event.data.id }]);
+      expect(await eventNames()).toContain("billing.subscription_started");
+      expect(await isTrialEligible(ORG)).toBe(false);
+    });
+
+    it("unsigned, forged, cross-workspace, expired or signed for a non-owner: not attached", async () => {
+      await createBillingOrg("org_manage_other");
+      const attempts: Array<[string, (event: ReturnType<typeof trialing>) => void, string]> = [
+        ["unsigned", (event) => void (event.data.custom_data = { organization_id: ORG, user_id: ownerIdOf(ORG) }), "ignored_unverified"],
+        ["no custom data", (event) => void (event.data.custom_data = null), "ignored_unmapped"],
+        ["made-up signature", (event) => void ((event.data.custom_data as Record<string, unknown>).sig = "A".repeat(43)), "ignored_unverified"],
+        ["cross-workspace", (event) => void ((event.data.custom_data as Record<string, unknown>).organization_id = "org_manage_other"), "ignored_unverified"],
+        ["expired", (event) => void (event.data.custom_data = signCheckoutData({ organizationId: ORG, userId: ownerIdOf(ORG), issuedAt: new Date(Date.parse(event.occurred_at) - 2 * DAY) })), "ignored_unverified"],
+        ["not an owner", (event) => void (event.data.custom_data = signCheckoutData({ organizationId: ORG, userId: "user_who_is_not_an_owner", issuedAt: new Date(Date.parse(event.occurred_at) - 60_000) })), "ignored_unverified"],
+      ];
+      for (const [label, tamper, expected] of attempts) {
+        const event = trialing();
+        tamper(event);
+        expect(await deliver(event), label).toBe(expected);
+      }
+      expect(await db.select().from(subscriptions)).toHaveLength(0);
+      expect((await getOrgEntitlements(ORG)).planKey).toBe("free");
+      expect((await getOrgEntitlements("org_manage_other")).planKey).toBe("free");
+      expect(await isTrialEligible(ORG)).toBe(true);
+    });
+
+    it("replayed checkout data cannot attach a second subscription — not while the first is live, not after it ended", async () => {
+      const lifecycle = sandboxLifecycle("trial", { organizationId: ORG });
+      const first = lifecycle[0]!;
+      expect(await deliver(first)).toBe("processed");
+      const replayOf = (subscriptionId: string) => {
+        const replay = trialing();
+        replay.data.custom_data = first.data.custom_data; // the same signed blob (same nonce)…
+        replay.data.id = subscriptionId; // …for another subscription
+        return replay;
+      };
+      expect(await deliver(replayOf("sub_01zzanotherone00000000000001"))).toBe("ignored_unverified");
+      expect(await rowOf(ORG)).toMatchObject({ paddleSubscriptionId: first.data.id, status: "trialing" });
+
+      // The trial is cancelled (Paddle's own `subscription.canceled` for it): a dead subscription
+      // may be REPLACED by a new checkout, but never by the old checkout's data.
+      expect(lifecycle[8]!.event_type).toBe("subscription.canceled");
+      expect(await deliver(lifecycle[8])).toBe("processed");
+      expect(await deliver(replayOf("sub_01zzanotherone00000000000002"))).toBe("ignored_unverified");
+      expect(await rowOf(ORG)).toMatchObject({ paddleSubscriptionId: first.data.id, status: "canceled" });
+      expect(await db.select().from(billingCheckoutNonces)).toHaveLength(1);
+
+      // A NEW checkout (fresh signed data) after the cancellation does attach — and, the
+      // workspace having had a subscription before, it is no longer eligible for a trial.
+      const again = trialing();
+      again.data.id = "sub_01zzanotherone00000000000003";
+      expect(await deliver(again)).toBe("processed");
+      expect(await rowOf(ORG)).toMatchObject({ paddleSubscriptionId: "sub_01zzanotherone00000000000003", status: "trialing" });
+      expect(await isTrialEligible(ORG)).toBe(false);
+    });
   });
 });
