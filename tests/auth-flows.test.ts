@@ -69,7 +69,7 @@ describe("authentication flows (dev outbox mode)", () => {
     expect((await signIn("new@example.com")).status).toBe(403);
     expect(await db.select().from(emailOutbox).where(eq(emailOutbox.toEmail, "new@example.com"))).toHaveLength(2);
     expect(email?.status).toBe("outbox");
-    expect(email?.subject).toContain("Verify your email");
+    expect(email?.subject).toContain("Confirm your email");
     const link = firstLink(email!.text, "/api/auth/verify-email");
     expect(link.startsWith("http://localhost:3000/api/auth/verify-email?token=")).toBe(true);
 

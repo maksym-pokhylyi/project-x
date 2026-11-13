@@ -1,26 +1,41 @@
-import { Button, Heading, Text } from "@react-email/components";
 import { site } from "@/config/site";
-import { EmailLayout, emailStyles } from "./layout";
+import { EmailAction, EmailLayout, EmailText } from "./layout";
+import { emailText, greeting } from "./text";
 
 export type ResetPasswordProps = { name: string; url: string };
 
 export const resetPasswordSubject = `Reset your ${site.name} password`;
 
+/* The link is valid for 1 hour: resetPasswordTokenExpiresIn in src/lib/auth.ts. */
+const copy = {
+  preview: `Choose a new password for your ${site.name} account.`,
+  body: `Someone asked to reset the password of your ${site.name} account. If that was you, choose a new one.`,
+  action: "Choose a new password",
+  validity: "This link works for 1 hour.",
+  ignore: "If you did not ask for this, ignore this message: your password stays as it is.",
+  reason: "You get this because a password reset was requested for this address.",
+};
+
+/** "Reset your password": sent from the "Forgot your password?" form. */
 export function ResetPassword({ name, url }: ResetPasswordProps) {
   return (
-    <EmailLayout preview={`Reset the password for your ${site.name} account.`}>
-      <Heading style={emailStyles.heading}>Reset your password</Heading>
-      <Text style={emailStyles.paragraph}>
-        Hi {name || "there"}, we received a request to reset your password. The link below is valid for 1 hour.
-      </Text>
-      <Button href={url} style={emailStyles.button}>
-        Choose a new password
-      </Button>
-      <Text style={emailStyles.muted}>
-        If the button does not work, copy this link into your browser: {url}
-        <br />
-        If you did not request this, you can ignore this email — your password stays unchanged.
-      </Text>
+    <EmailLayout preview={copy.preview} reason={copy.reason}>
+      <EmailText first>{greeting(name)}</EmailText>
+      <EmailText>{copy.body}</EmailText>
+      <EmailAction href={url} note={copy.validity}>
+        {copy.action}
+      </EmailAction>
+      <EmailText spaced>{copy.ignore}</EmailText>
     </EmailLayout>
   );
+}
+
+export function resetPasswordText({ name, url }: ResetPasswordProps): string {
+  return emailText({
+    greeting: greeting(name),
+    before: [copy.body],
+    action: { label: copy.action, url, note: copy.validity },
+    after: [copy.ignore],
+    reason: copy.reason,
+  });
 }
