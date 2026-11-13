@@ -1,5 +1,6 @@
 import "server-only";
 import { env } from "@/env";
+import { describeError, errorReason, type ErrorDescription } from "./describe-error";
 import { log } from "./logger";
 
 /**
@@ -19,7 +20,14 @@ export type SentryContext = {
   extra?: Record<string, unknown>;
 };
 
-export function buildSentryEnvelope(dsn: string, error: Error, context: SentryContext, now = new Date()) {
+/** True for a value that already went through describeError(). */
+function isDescription(value: unknown): value is ErrorDescription {
+  return typeof value === "object" && value !== null && !(value instanceof Error) && "message" in value && "stack" in value && "code" in value;
+}
+
+export function buildSentryEnvelope(dsn: string, value: Error | ErrorDescription, context: SentryContext, now = new Date()) {
+  // Always sanitised here too, so no caller can forward bind parameters or model output.
+  const error = isDescription(value) ? value : describeError(value);
   const url = new URL(dsn);
   const projectId = url.pathname.replace(/^\/+/, "");
   const eventId = crypto.randomUUID().replace(/-/g, "");
@@ -36,7 +44,7 @@ export function buildSentryEnvelope(dsn: string, error: Error, context: SentryCo
       request_id: context.requestId ?? undefined,
       organization_id: context.organizationId ?? undefined,
     },
-    extra: { ...context.extra, stack: error.stack },
+    extra: { ...context.extra, stack: error.stack ?? undefined, code: error.code ?? undefined },
     exception: { values: [{ type: error.name, value: error.message }] },
   };
   const body = [
@@ -54,7 +62,7 @@ export function buildSentryEnvelope(dsn: string, error: Error, context: SentryCo
   };
 }
 
-export async function sendToSentry(error: Error, context: SentryContext): Promise<void> {
+export async function sendToSentry(error: Error | ErrorDescription, context: SentryContext): Promise<void> {
   if (!env.SENTRY_DSN) return;
   try {
     const envelope = buildSentryEnvelope(env.SENTRY_DSN, error, context);
@@ -65,6 +73,6 @@ export async function sendToSentry(error: Error, context: SentryContext): Promis
       signal: AbortSignal.timeout(2000),
     });
   } catch (sendError) {
-    log.warn("sentry forwarding failed", { reason: sendError instanceof Error ? sendError.message : "unknown" });
+    log.warn("sentry forwarding failed", { reason: errorReason(sendError) });
   }
 }

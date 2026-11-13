@@ -4,6 +4,7 @@ import { isBillingInterval, type BillingInterval, type PaidPlanKey } from "@/con
 import { features } from "@/env";
 import { track } from "@/lib/analytics";
 import { recordAudit } from "@/lib/audit";
+import { signCheckoutData, type SignedCheckoutData } from "@/lib/billing/checkout-signature";
 import { changeSubscriptionPlan, createBillingLinks, type BillingLinks } from "@/lib/billing/paddle";
 import { getPriceId } from "@/lib/billing/prices";
 import { BillingNotConfiguredError, ConflictError } from "@/lib/errors";
@@ -15,14 +16,18 @@ import { requireOrg } from "../session";
 export type CheckoutParams = {
   priceId: string;
   customerEmail: string;
-  /** Echoed back by Paddle in webhooks; this is how a payment is tied to a workspace. */
-  customData: { organization_id: string; user_id: string };
+  /**
+   * Echoed back by Paddle in webhooks; this is how a payment is tied to a workspace.
+   * Signed by the server (HMAC over workspace, user, time and a single-use nonce): the
+   * webhook attaches a subscription to a workspace only with a valid signature for it.
+   */
+  customData: SignedCheckoutData;
 };
 
 /**
  * Prepares an overlay checkout for the ACTIVE workspace (owner only).
- * The browser only receives values derived from the session: it cannot choose which
- * workspace a payment is attributed to.
+ * The browser receives values derived from the session, and cannot usefully change them:
+ * custom data naming another workspace fails signature verification in the webhook.
  */
 export async function startCheckoutAction(input: unknown): Promise<ActionResult<CheckoutParams>> {
   return runAction("billing.start_checkout", async () => {
@@ -36,12 +41,16 @@ export async function startCheckoutAction(input: unknown): Promise<ActionResult<
     if (ctx.subscription && ["active", "trialing", "past_due"].includes(ctx.subscription.status)) {
       throw new ConflictError("This workspace already has a subscription. Change the plan instead of starting a new one.");
     }
+    if (ctx.subscription?.status === "paused" && ctx.subscription.paddleSubscriptionId) {
+      // A second subscription next to a paused one would bill twice when the first resumes.
+      throw new ConflictError("This workspace has a paused subscription. Resume or cancel it under “Manage billing” before starting a new one.");
+    }
     await enforceRateLimit(`checkout:${ctx.organization.id}`, { limit: 20, windowSeconds: 3600 });
     await track("billing.checkout_started", { organizationId: ctx.organization.id, userId: ctx.user.id }, { plan, interval });
     return {
       priceId,
       customerEmail: ctx.user.email,
-      customData: { organization_id: ctx.organization.id, user_id: ctx.user.id },
+      customData: signCheckoutData({ organizationId: ctx.organization.id, userId: ctx.user.id }),
     };
   });
 }
@@ -51,7 +60,7 @@ export async function openBillingPortalAction(): Promise<ActionResult<BillingLin
   return runAction("billing.open_portal", async () => {
     const ctx = await requireOrg({ role: "owner" });
     await enforceRateLimit(`portal:${ctx.organization.id}`, { limit: 30, windowSeconds: 3600 });
-    const links = await createBillingLinks(ctx.organization.id);
+    const links = await createBillingLinks(ctx.organization.id, ctx.user);
     await track("billing.portal_opened", { organizationId: ctx.organization.id, userId: ctx.user.id });
     return links;
   });

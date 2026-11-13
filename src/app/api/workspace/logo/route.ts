@@ -24,6 +24,32 @@ function detectImageType(bytes: Uint8Array): { contentType: string; extension: s
   return null;
 }
 
+/** Reads the request body, or returns null as soon as it exceeds `maxBytes`. */
+async function readBodyWithLimit(request: Request, maxBytes: number): Promise<Uint8Array<ArrayBuffer> | null> {
+  if (Number(request.headers.get("content-length") ?? 0) > maxBytes) return null;
+  if (!request.body) return new Uint8Array(new ArrayBuffer(0));
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel().catch(() => undefined);
+      return null;
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(new ArrayBuffer(total));
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
 function logoKeyFromUrl(logo: string | null): string | null {
   const prefix = "/api/files/";
   return logo?.startsWith(prefix) ? logo.slice(prefix.length) : null;
@@ -33,10 +59,11 @@ export const POST = route(async (request, _context, { requestId }) => {
   const ctx = await requireOrg({ role: "admin" });
   await enforceRateLimit(`logo:${ctx.organization.id}`, { limit: 20, windowSeconds: 3600 });
 
-  const declaredLength = Number(request.headers.get("content-length") ?? 0);
-  if (declaredLength > MAX_BYTES + 16 * 1024) throw new ValidationError("The logo must be 1 MB or smaller.");
-
-  const form = await request.formData().catch(() => null);
+  // The size limit is enforced while reading, so a missing or false Content-Length cannot
+  // make the function buffer an arbitrarily large upload.
+  const body = await readBodyWithLimit(request, MAX_BYTES + 16 * 1024);
+  if (!body) throw new ValidationError("The logo must be 1 MB or smaller.");
+  const form = await new Response(body, { headers: { "content-type": request.headers.get("content-type") ?? "" } }).formData().catch(() => null);
   const file = form?.get("file");
   if (!(file instanceof File)) throw new ValidationError("Choose an image to upload.");
   if (file.size === 0 || file.size > MAX_BYTES) throw new ValidationError("The logo must be 1 MB or smaller.");
@@ -50,9 +77,11 @@ export const POST = route(async (request, _context, { requestId }) => {
   const logoUrl = `/api/files/${key}`;
   await db.update(organizations).set({ logo: logoUrl }).where(eq(organizations.id, ctx.organization.id));
 
-  // Best-effort removal of the previous logo (only if it lives in this workspace's namespace).
+  // Best-effort removal of the previous logo — only a file in THIS workspace's logo folder,
+  // whatever the stored value says (it must never be usable to delete another file).
   const previousKey = logoKeyFromUrl(ctx.organization.logo);
-  if (previousKey && organizationIdFromKey(previousKey) === ctx.organization.id) {
+  const logoFolder = `${orgFileKey(ctx.organization.id, "logo")}/`;
+  if (previousKey && previousKey !== key && organizationIdFromKey(previousKey) === ctx.organization.id && previousKey.startsWith(logoFolder)) {
     await storage.delete(previousKey).catch(() => undefined);
   }
 
