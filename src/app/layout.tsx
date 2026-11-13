@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Inter, Source_Serif_4 } from "next/font/google";
 import type { ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { ScrollToTop } from "@/components/scroll-to-top";
 import { site } from "@/config/site";
 import { appUrl } from "@/env";
 import "./globals.css";
@@ -48,7 +49,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
      * With this attribute the router switches that off while it moves to another page, so a new
      * page opens at its top at once. Without it the router's own scroll is animated too, its
      * steps overtake one another, and the page ends at a later section (docs: upgrading to
-     * version 16, "scroll behavior override"). Guarded by scripts/design/controls.mjs.
+     * version 16, "scroll behavior override"). <ScrollToTop /> below covers what the router
+     * leaves a little scrolled. Guarded by scripts/design/controls.mjs.
      */
     <html lang={site.locale} data-scroll-behavior="smooth" className={`${inter.variable} ${sourceSerif.variable} ${plexMono.variable}`}>
       <body className="min-h-dvh">
@@ -59,6 +61,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Skip to content
         </a>
         {children}
+        <ScrollToTop />
         <Toaster position="top-center" closeButton />
       </body>
     </html>

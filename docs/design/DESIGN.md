@@ -385,7 +385,7 @@ Notes on the ones that differ from the shadcn originals:
   `/pricing`), Billing (owners), Settings, help and sign-out. On Free the bar also carries the "Free plan" chip and "See plans";
   below 768 px those sit with the workspace name in a 44 px bar of their own, and the sections move into the `MenuSheet`.
 - Under the bar, in this order and only when they apply: the trial strip ("Trial · 9 days left · 1 full bid included · First
-  payment £149 on 27 Nov 2026", with "Manage" for owners), the test-mode band (Billing pages), a payment problem, a seat problem.
+  payment £149 + VAT on 27 Nov 2026", with "Manage" for owners; a payment that will be taken is written with its VAT, `plusVat()` in `src/config/billing-copy.ts`), the test-mode band (Billing pages), a payment problem, a seat problem.
 - Pages render inside `<main id="main">` in a 1280 px container; start with `<PageHeader title … description … actions … />`
   (`eyebrow` is the mono meta line above the title, `meta` a row under the description). Group content with `<PageSection>`; use
   `<EmptyState>` for "nothing here yet".
@@ -396,6 +396,22 @@ Notes on the ones that differ from the shadcn originals:
   `<PageHeader level={2} …>`. Billing is a page of its own, outside the tabs, reached from the account menu.
 - Navigation lives in `src/components/app/app-nav.tsx` (`sections`).
 - Do not add a `loading.tsx` above a page that must answer 403.
+
+**Where a scroll stops** (`globals.css`, base layer; `src/components/scroll-to-top.tsx`;
+guard: rule "scroll" of `scripts/design/controls.mjs`).
+
+- Another page always opens at its very top; Back and Forward return to where a page was
+  left; an address with a `#section` stops with the section 16 px under the sticky bar.
+- In-page links glide (`scroll-behavior: smooth`, off with reduced motion). A change of page
+  never does: `<html data-scroll-behavior="smooth">` lets the router switch it off. Do not
+  remove one without the other.
+- The sticky bar is allowed for by a **scroll margin on the target** (anchor targets and
+  controls inside `<main>`: bar + 16 px), never by `scroll-padding` on the page: padding
+  makes the bar's own controls count as out of view, and the page jumps when one takes
+  focus. A target that needs another distance uses `scroll-mt-*`; anything inside an
+  element with the class `sticky` asks for none.
+- A menu or sheet whose trigger sits in a sticky bar returns focus with
+  `focus({ preventScroll: true })` (`MenuSheet` does).
 
 ### 8.4 Plans, pricing and the hand-off into Billing
 

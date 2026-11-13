@@ -46,7 +46,7 @@ async function signUpAndClaim(page: Page, user: typeof alex) {
   await page.getByTestId("claim-cta").click();
   await expect(page).toHaveURL(/\/sign-up\?redirect=%2Fclaim%2Facme-grounds-ltd-01111111$/);
   await page.getByLabel("Name").fill(user.name);
-  await page.getByLabel("Work e-mail").fill(user.email);
+  await page.getByLabel("Work email").fill(user.email);
   await page.getByLabel("Password").fill(user.password);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/verify-email/);

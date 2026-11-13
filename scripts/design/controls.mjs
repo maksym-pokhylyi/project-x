@@ -15,8 +15,8 @@
 //                     the sticky header; Back returns to where you were. Focus on a
 //                     control in the header does not move the page, and a control that
 //                     takes focus is never left behind the header. Checked as journeys
-//                     through the public site, with smooth scrolling ON: the faults
-//                     this guards do not show without it.
+//                     through the public site and one in Settings, with smooth scrolling
+//                     ON: the faults this guards do not show without it.
 //
 //   BASE_URL=http://localhost:3121 node scripts/design/controls.mjs                 the key pages
 //   BASE_URL=… node scripts/design/controls.mjs /find auth:/app/bids               … plus these
@@ -334,7 +334,9 @@ async function scrollJourneys(width) {
   console.log(`\n${where}`);
   const count = failures.length;
   const phone = width < 768;
-  const context = await browser.newContext({ viewport: { width, height: 800 } });
+  // 720 px high: a laptop. Pages that are only a little taller than the screen are where a
+  // new page was left a few pixels down.
+  const context = await browser.newContext({ viewport: { width, height: 720 } });
   const page = await context.newPage();
   const header = page.locator("[data-slot='site-header']");
   /** Follows a link of the public header; on phones the links are in the menu sheet. */
@@ -435,6 +437,25 @@ async function scrollJourneys(width) {
   }
   await context.close();
 
+  // 8. In the app, where a page first shows a skeleton shorter than itself: from far down one
+  //    Settings page another opens at its top, and stays there when its content arrives.
+  try {
+    const signedIn = await browser.newContext({ viewport: { width, height: 720 }, storageState: await demoSession() });
+    const app = await signedIn.newPage();
+    await app.goto(`${BASE_URL}/app/settings/workspace`, { waitUntil: "load" });
+    await app.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
+    const down = await settledScroll(app);
+    if (down > 0) {
+      // The tabs have left the screen by now: the link is followed where it is.
+      await app.getByRole("navigation", { name: "Settings" }).getByRole("link", { name: "Members", exact: true }).evaluate((link) => link.click());
+      await app.waitForURL((url) => url.pathname === "/app/settings/members", { timeout: 15000 });
+      const y = await settledScroll(app);
+      if (y !== 0) report(where, "scroll", `"Members" from the bottom of Settings · Workspace (y=${down}) opens at y=${y}, not at its top`);
+    }
+    await signedIn.close();
+  } catch (error) {
+    report(where, "scroll", `the Settings journey could not be finished: ${error instanceof Error ? error.message.split("\n")[0] : error}`);
+  }
   if (failures.length === count) console.log("  ok");
 }
 

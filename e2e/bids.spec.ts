@@ -237,14 +237,14 @@ test("an upload that cannot reach the storage host falls back and completes; a f
 
   await page.goto("/sign-up");
   await page.getByLabel("Name").fill(second.name);
-  await page.getByLabel("Work e-mail").fill(second.email);
+  await page.getByLabel("Work email").fill(second.email);
   await page.getByLabel("Password").fill(second.password);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/verify-email/);
   await followOutboxLink(page, second.email, "verify-email");
   await page.waitForURL(/\/(app|sign-in)/);
   if (page.url().includes("/sign-in")) {
-    await page.getByLabel("E-mail").fill(second.email);
+    await page.getByLabel("Work email").fill(second.email);
     await page.getByLabel("Password").fill(second.password);
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await page.waitForURL(/\/app/);

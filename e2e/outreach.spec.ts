@@ -88,7 +88,7 @@ test("the outreach pages are for the founder only", async ({ page }) => {
 test("the founder signs in and finds Outreach, Suppressions and Ingestion in the admin navigation", async () => {
   await admin.goto("/sign-up?redirect=/admin");
   await admin.getByLabel("Name").fill(founder.name);
-  await admin.getByLabel("Work e-mail").fill(founder.email);
+  await admin.getByLabel("Work email").fill(founder.email);
   await admin.getByLabel("Password").fill(founder.password);
   await admin.getByRole("button", { name: "Create account" }).click();
   await expect(admin).toHaveURL(/\/verify-email/);
