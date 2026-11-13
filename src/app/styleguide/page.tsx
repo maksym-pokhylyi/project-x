@@ -32,7 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Progress } from "@/components/ui/progress";
-import { ReferenceChip } from "@/components/ui/reference-chip";
+import { ReferenceChip, ReferenceChipButton } from "@/components/ui/reference-chip";
 import { ScoreBars } from "@/components/ui/score-bars";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,6 +40,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { StatusPill } from "@/components/ui/status-pill";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { ToggleButton } from "@/components/ui/toggle-button";
 
 export const metadata: Metadata = {
   title: "Styleguide",
@@ -840,6 +841,18 @@ export default function StyleguidePage() {
               <div className="flex flex-col items-start gap-3 rounded-card border border-line bg-surface p-5">
                 <ReferenceChip file="Vol 2 Specification.pdf" page="31" clause="§7.4.2" href="#bid" />
                 <ReferenceChip file="Vol 3 Quality Questionnaire.docx" page="6" clause="Q2" />
+                <ReferenceChip file="Vol 1 Instructions.pdf" page="4" state="verified" />
+                <ReferenceChip file="Vol 4 Pricing Schedule.xlsx" clause="sheet “Notes”" state="check" />
+                <ReferenceChip file="Appendix F.pdf" page="2" state="unverified" />
+                <ReferenceChipButton file="Vol 2 Specification.pdf" page="31" state="verified" quiet aria-label="Open the quote" />
+                <ToggleButton pressed={false}>I have checked this</ToggleButton>
+                <ToggleButton pressed>Confirmed by you</ToggleButton>
+                <ToggleButton variant="marker" pressed={false} aria-label="Source 1">
+                  1
+                </ToggleButton>
+                <ToggleButton variant="marker" pressed aria-label="Source 2">
+                  2
+                </ToggleButton>
                 <span className="block w-64 max-w-full">
                   <ReferenceChip file="Vol 1 Instructions to Tenderers.pdf" page="11" clause="§4.6" href="#bid" />
                 </span>

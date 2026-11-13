@@ -21,7 +21,7 @@ export function ExportMenu({ bidId, canExportAnswers, answersReady, label = "Exp
         </Button>
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content align="end" sideOffset={6} collisionPadding={12} className="bid-pop z-50 w-[min(21rem,calc(100vw-1.5rem))] p-1.5 outline-none">
+        <Popover.Content align="end" sideOffset={6} collisionPadding={12} className="rounded-card border border-line bg-surface text-ink shadow-overlay z-50 w-[min(21rem,calc(100vw-1.5rem))] p-1.5 outline-none">
           <a href={`${base}/brief`} className="bid-menu-item" data-testid="export-brief" download>
             Bid check (Word)
             <span className="text-xs font-normal text-ink-2">Verdict, key facts, requirements and questions, with sources</span>
@@ -76,7 +76,7 @@ export function BidActions({ bidId, status }: { bidId: string; status: string })
         </Button>
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content align="end" sideOffset={6} collisionPadding={12} className="bid-pop z-50 w-64 p-1.5 outline-none">
+        <Popover.Content align="end" sideOffset={6} collisionPadding={12} className="rounded-card border border-line bg-surface text-ink shadow-overlay z-50 w-64 p-1.5 outline-none">
           {status === "archived" ? (
             <Button variant="ghost" type="button" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" disabled={pending} onClick={() => run(() => setBidArchivedAction(bidId, false))}>
               <span className="inline-flex items-center gap-2">

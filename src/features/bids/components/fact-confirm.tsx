@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { setFactConfirmedAction } from "@/features/bids/actions";
-import { cn } from "@/lib/utils";
+import { ToggleButton } from "@/components/ui/toggle-button";
 
 /**
  * "Confirmed by you" tick on the key facts where one wrong value is fatal (deadline, how
@@ -22,9 +22,8 @@ export function FactConfirm({ bidId, field, confirmedAt, readOnly }: { bidId: st
     ) : null;
   }
   return (
-    <button
-      type="button"
-      aria-pressed={confirmed}
+    <ToggleButton
+      pressed={confirmed}
       disabled={pending}
       onClick={() =>
         startTransition(async () => {
@@ -35,13 +34,9 @@ export function FactConfirm({ bidId, field, confirmedAt, readOnly }: { bidId: st
           else router.refresh();
         })
       }
-      className={cn(
-        "inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs font-medium transition-colors",
-        confirmed ? "border-success/30 bg-success/10 text-success" : "border-dashed text-ink-2 hover:border-solid hover:text-ink",
-      )}
     >
-      <Check aria-hidden className={cn("size-3", confirmed ? "" : "opacity-40")} />
+      <Check aria-hidden className={confirmed ? "size-3" : "size-3 opacity-40"} />
       {confirmed ? "Confirmed by you" : "I have checked this"}
-    </button>
+    </ToggleButton>
   );
 }

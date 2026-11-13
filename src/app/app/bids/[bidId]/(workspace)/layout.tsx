@@ -32,26 +32,26 @@ export default async function BidLayout({ children, params }: { children: ReactN
   const packFiles = files.filter((file) => file.kind !== "zip");
 
   return (
-    <div className="bid-scope flex flex-col">
+    <div className="text-15 text-ink flex flex-col">
       {/* The shell renders the trail above the title (and "‹ Bids" on phones). */}
       <BreadcrumbTrail items={[{ label: "Bids", href: "/app/bids" }, ...(bid.buyerName ? [{ label: bid.buyerName }] : []), { label: "Bid check" }]} />
 
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
         <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-2">
-          <p className="bid-mono text-xs text-ink-2" data-testid="bid-meta">
+          <p className="font-mono text-xs text-ink-2" data-testid="bid-meta">
             Bid check
             {done && bid.readyAt ? ` · built ${builtAt(bid.readyAt)}` : bid.status === "processing" ? " · being built now" : bid.status === "failed" ? " · stopped before it finished" : ""}
             {coverage.read > 0 ? ` · ${coverage.headline}` : ""}
             {coverage.read > 0 ? (
               <>
                 {" · "}
-                <Link href={`${base}/files`} className="bid-link text-ink">
+                <Link href={`${base}/files`} className="link text-ink">
                   Coverage
                 </Link>
               </>
             ) : null}
           </p>
-          <h1 className="bid-h1" data-testid="bid-title">
+          <h1 className="type-title [overflow-wrap:anywhere]" data-testid="bid-title">
             {bid.title}
           </h1>
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-15">
@@ -59,14 +59,14 @@ export default async function BidLayout({ children, params }: { children: ReactN
             {bid.reference ? (
               <>
                 <span className="text-ink-2">· Reference</span>
-                <span className="bid-mono text-13 text-ink-2">{bid.reference}</span>
+                <span className="font-mono text-13 text-ink-2">{bid.reference}</span>
               </>
             ) : null}
-            {bid.status === "archived" ? <span className="bid-tag">Archived — read-only</span> : null}
-            {bid.accessLevel === "brief" ? <span className="bid-tag">Check only</span> : null}
+            {bid.status === "archived" ? <span className="rounded-chip border border-line-strong px-2 py-0.5 text-xs font-semibold whitespace-nowrap">Archived — read-only</span> : null}
+            {bid.accessLevel === "brief" ? <span className="rounded-chip border border-line-strong px-2 py-0.5 text-xs font-semibold whitespace-nowrap">Check only</span> : null}
           </p>
         </div>
-        <div className="bid-noprint flex flex-wrap items-center gap-2.5">
+        <div className="print:hidden flex flex-wrap items-center gap-2.5">
           {done ? <ExportMenu bidId={bid.id} canExportAnswers={capabilities.exportAnswers} answersReady={answersReady} label={bid.accessLevel === "full" ? undefined : "Download the check (Word)"} /> : null}
           {done && bid.accessLevel !== "full" && bid.status === "ready" ? (
             <ButtonLink href={`${base}#upgrade-h`}  data-testid="unlock-full-bid">

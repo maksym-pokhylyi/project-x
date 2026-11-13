@@ -8,6 +8,7 @@ import type { QuestionItem } from "./questions-view";
 import type { RequirementItem } from "./requirements-view";
 import { StatusPill } from "./ui";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * What a check has found while it is still being built (design handoff: Processing).
@@ -45,17 +46,17 @@ export function PartialResults({
       <div className="flex min-w-0 flex-[999_1_640px] flex-col gap-12">
         <section aria-labelledby="partial-req-h" className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <h2 id="partial-req-h" className="bid-h2">
-              Requirements found so far <span className="bid-mono text-sm font-normal text-ink-2 tabular-nums">· {requirements.length}</span>
+            <h2 id="partial-req-h" className="type-section">
+              Requirements found so far <span className="font-mono text-sm font-normal text-ink-2 tabular-nums">· {requirements.length}</span>
             </h2>
             <p className="text-sm text-ink-2">Each line is quoted word for word from the pack. Open a reference to read it on the page. They are checked against your company in the last stage.</p>
             <SourceLegend className="mt-1" />
           </div>
-          <div className="bid-card">
+          <div className="rounded-card border border-line bg-surface">
             {shown.length === 0 ? (
               <ul aria-hidden className="flex flex-col">
                 {["w-3/4", "w-3/5", "w-2/3"].map((width, index) => (
-                  <li key={index} className={cn("flex flex-col gap-3 px-4 py-5 sm:px-6", index > 0 ? "bid-rule" : "")}>
+                  <li key={index} className={cn("flex flex-col gap-3 px-4 py-5 sm:px-6", index > 0 ? "border-t border-line" : "")}>
                     <Skeleton className={cn("h-3.5", width)} />
                     <span className="h-3 w-40 rounded bg-paper-deep" />
                   </li>
@@ -66,21 +67,21 @@ export function PartialResults({
                 {shown.map((item, index) => {
                   const quoted = Boolean(item.citation?.quote) && item.citation !== null && verificationState(item.citation) !== "unverified";
                   return (
-                    <li key={item.id} className={cn("flex flex-wrap items-start gap-x-6 gap-y-3 px-4 py-[18px] sm:px-6", index > 0 ? "bid-rule" : "")} data-testid="partial-requirement">
-                      <span className="bid-mono w-full shrink-0 pt-1 text-13 font-medium sm:w-14">{displayRef(item.ref)}</span>
+                    <li key={item.id} className={cn("flex flex-wrap items-start gap-x-6 gap-y-3 px-4 py-[18px] sm:px-6", index > 0 ? "border-t border-line" : "")} data-testid="partial-requirement">
+                      <span className="font-mono w-full shrink-0 pt-1 text-13 font-medium sm:w-14">{displayRef(item.ref)}</span>
                       <div className="flex min-w-0 flex-[1_1_380px] flex-col items-start gap-2.5">
-                        {quoted ? <p className="bid-quote">“{item.citation!.quote}”</p> : <p className="text-15 leading-[1.5]">{item.text}</p>}
+                        {quoted ? <p className="type-quote [overflow-wrap:anywhere]">“{item.citation!.quote}”</p> : <p className="text-15 leading-[1.5]">{item.text}</p>}
                         <CitationMark citation={item.citation} links={links} />
                       </div>
-                      <div className="flex-[0_1_160px]">{companyChecked ? <StatusPill status={item.companyStatus} /> : <span className="bid-pill bid-pill-neutral">Not checked yet</span>}</div>
+                      <div className="flex-[0_1_160px]">{companyChecked ? <StatusPill status={item.companyStatus} /> : <Badge variant="secondary">Not checked yet</Badge>}</div>
                     </li>
                   );
                 })}
               </ul>
             )}
             {requirements.length > shown.length ? (
-              <div className="bid-rule px-4 py-1 sm:px-6">
-                <Link href={`${basePath}/requirements`} className="bid-link inline-flex min-h-11 items-center text-sm font-medium">
+              <div className="border-t border-line px-4 py-1 sm:px-6">
+                <Link href={`${basePath}/requirements`} className="link inline-flex min-h-11 items-center text-sm font-medium">
                   Show all {requirements.length}
                 </Link>
               </div>
@@ -90,12 +91,12 @@ export function PartialResults({
 
         <section aria-labelledby="partial-q-h" className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <h2 id="partial-q-h" className="bid-h2">
-              Scored questions found so far <span className="bid-mono text-sm font-normal text-ink-2 tabular-nums">· {scored.length}</span>
+            <h2 id="partial-q-h" className="type-section">
+              Scored questions found so far <span className="font-mono text-sm font-normal text-ink-2 tabular-nums">· {scored.length}</span>
             </h2>
             <p className="text-sm text-ink-2">Weights and word limits are the buyer&rsquo;s. {questionsListed ? "" : "More questions may still be listed."}</p>
           </div>
-          <div className="bid-card overflow-hidden">
+          <div className="rounded-card border border-line bg-surface overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[520px] border-collapse text-sm">
                 <thead>
@@ -109,7 +110,7 @@ export function PartialResults({
                   {scored.map((question) => (
                     <tr key={question.id}>
                       <td className="border-b border-line py-3.5 pr-3 pl-6">
-                        {question.ref ? <span className="bid-mono mr-2.5 text-13 text-ink-2">{question.ref}</span> : null}
+                        {question.ref ? <span className="font-mono mr-2.5 text-13 text-ink-2">{question.ref}</span> : null}
                         <span className="font-semibold">{question.title ?? question.text.slice(0, 90)}</span>
                       </td>
                       <td className="border-b border-line px-3 py-3.5 text-right tabular-nums">{question.weighting !== null ? `${question.weighting}%` : "—"}</td>
@@ -146,8 +147,8 @@ export function PartialResults({
       </div>
 
       <aside className="flex min-w-0 flex-[1_1_320px] flex-col gap-6">
-        <section aria-labelledby="coverage-h" className="bid-card px-5 pt-[18px] pb-2" data-testid="coverage-card">
-          <h2 id="coverage-h" className="bid-h3">
+        <section aria-labelledby="coverage-h" className="rounded-card border border-line bg-surface px-5 pt-[18px] pb-2" data-testid="coverage-card">
+          <h2 id="coverage-h" className="text-15 font-semibold">
             Coverage{" "}
             <span className="font-normal text-ink-2">
               · {coverage.read} {coverage.read === 1 ? "file" : "files"} read{skipped > 0 ? `, ${skipped} skipped` : ""}
@@ -157,11 +158,11 @@ export function PartialResults({
             {files.map((file) => (
               <li key={file.id} className="flex min-h-10 items-center justify-between gap-3 border-t border-line">
                 {file.read ? (
-                  <a href={`/api/bids/${bidId}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="bid-mono bid-link-quiet min-w-0 truncate" title={file.name}>
+                  <a href={`/api/bids/${bidId}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="font-mono link-quiet min-w-0 truncate" title={file.name}>
                     {file.name}
                   </a>
                 ) : (
-                  <span className="bid-mono min-w-0 truncate text-ink-2" title={file.name}>
+                  <span className="font-mono min-w-0 truncate text-ink-2" title={file.name}>
                     {file.name}
                   </span>
                 )}

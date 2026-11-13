@@ -88,9 +88,9 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
   const full = access.next?.level === "full";
 
   return (
-    <div className="bid-scope flex flex-col">
+    <div className="text-15 text-ink flex flex-col">
       <BreadcrumbTrail items={[{ label: "Bids", href: "/app/bids" }, { label: "New bid check" }]} />
-      <h1 className="bid-h1">New bid check</h1>
+      <h1 className="type-title [overflow-wrap:anywhere]">New bid check</h1>
       <p className="mt-2 max-w-[760px] text-17 leading-[1.45]">Upload the tender pack as the buyer sent it. You get every requirement quoted and cited, checked against your company, with a plain verdict.</p>
 
 
@@ -107,8 +107,8 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
         </div>
 
         <aside className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
-          <section aria-labelledby="get-h" className="bid-card px-5 py-5">
-            <h2 id="get-h" className="bid-h3">
+          <section aria-labelledby="get-h" className="rounded-card border border-line bg-surface px-5 py-5">
+            <h2 id="get-h" className="text-15 font-semibold">
               What you get
             </h2>
             <ul className="mt-3 flex flex-col gap-3 text-15">
@@ -117,7 +117,7 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
                 <>
                   Each one checked against {confirmed ? "your confirmed company facts" : "your company facts, once you confirm them"}
                   {documents > 0 ? ` and ${documents} company document${documents === 1 ? "" : "s"}` : ""} ·{" "}
-                  <Link href="/app/library" className="bid-link">
+                  <Link href="/app/library" className="link">
                     Documents
                   </Link>
                 </>,
@@ -131,7 +131,7 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
               ))}
             </ul>
             <p className="mt-4 border-t border-line pt-3 text-13">
-              <Link href="/sample-check" className="bid-link font-medium">
+              <Link href="/sample-check" className="link font-medium">
                 See a sample check
               </Link>{" "}
               built from a council&rsquo;s published pack.
@@ -139,7 +139,7 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
           </section>
 
           {plan ? (
-            <section aria-label="What this uses" className="bid-card flex flex-col gap-2.5 px-5 py-5" data-testid="allowance-note">
+            <section aria-label="What this uses" className="rounded-card border border-line bg-surface flex flex-col gap-2.5 px-5 py-5" data-testid="allowance-note">
               <span className="text-xs text-ink-2">{plan.plan}</span>
               <p className="text-15">
                 <span className="font-semibold">{plan.lead}</span> {plan.rest}

@@ -4,241 +4,20 @@
  * Colours, fonts and radii come straight from the design system's variables
  * (src/app/globals.css). What is left here are the bid desk's own patterns.
  */
-.bid-scope {
-  color: var(--ink);
-  font-size: 15px;
-  line-height: 1.5;
-}
-.bid-scope :focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
-}
-
-.bid-serif {
-  font-family: var(--font-serif);
-}
-.bid-mono {
-  font-family: var(--font-mono);
-}
-.bid-muted {
-  color: var(--ink-2);
-}
-
-.bid-h1 {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  font-size: clamp(26px, 4.4vw, 36px);
-  line-height: 1.15;
-  letter-spacing: -0.015em;
-  text-wrap: balance;
-  overflow-wrap: anywhere;
-}
-.bid-h2 {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  font-size: clamp(22px, 3.4vw, 28px);
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-}
-.bid-h3 {
-  font-size: 15px;
-  font-weight: 600;
-}
-.bid-quote {
-  font-family: var(--font-serif);
-  font-size: 17px;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
-}
 
 /* Links are ink with a green underline. */
-.bid-link {
-  color: var(--ink);
-  text-decoration: underline;
-  text-decoration-color: var(--brand);
-  text-underline-offset: 3px;
-}
-.bid-link:hover {
-  color: var(--brand);
-}
-.bid-link-quiet {
-  color: inherit;
-  text-decoration: underline;
-  text-decoration-color: var(--line-strong);
-  text-underline-offset: 3px;
-}
-.bid-link-quiet:hover {
-  color: var(--brand);
-}
-
-.bid-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-.bid-rule {
-  border-top: 1px solid var(--line);
-}
 
 /* Filter chips (pressed = ink). */
-.bid-filter {
-  height: 2.75rem;
-  padding: 0 14px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink);
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  border-radius: 6px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.bid-filter[aria-pressed="true"] {
-  font-weight: 600;
-  color: #ffffff;
-  background: var(--ink);
-  border-color: var(--ink);
-}
 
 /* Source chip: file · page, in the reference face. */
-.bid-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  max-width: 100%;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: left;
-  color: var(--ink);
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 3px 8px;
-  cursor: pointer;
-}
-.bid-chip:hover {
-  border-color: var(--line-strong);
-}
-.bid-chip-state {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  flex-shrink: 0;
-  font-family: inherit;
-  font-weight: 500;
-  padding-left: 6px;
-  border-left: 1px solid var(--line);
-}
-.bid-chip-state[data-kind="verified"] {
-  color: var(--brand);
-}
-.bid-chip-state[data-kind="check"] {
-  color: var(--accent-ink);
-}
-.bid-chip-state[data-kind="unverified"] {
-  color: var(--danger);
-}
 /* The quiet form used in fact cards and side lists. */
-.bid-ref {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 100%;
-  min-width: 0;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--ink-2);
-  background: none;
-  border: 0;
-  padding: 2px 0;
-  text-align: left;
-  text-decoration: underline;
-  text-decoration-color: var(--line-strong);
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.bid-ref:hover {
-  color: var(--brand);
-}
 
 /* Status pills: always an icon and a word. */
-.bid-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  width: fit-content;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
-  border-radius: 4px;
-  padding: 3px 8px;
-  white-space: nowrap;
-}
-.bid-pill-met,
-.bid-pill-brand {
-  color: var(--brand);
-  background: var(--brand-tint);
-}
-.bid-pill-gap,
-.bid-pill-danger {
-  color: var(--danger);
-  background: var(--danger-tint);
-}
-.bid-pill-confirm,
-.bid-pill-info {
-  color: var(--info);
-  background: var(--info-tint);
-}
-.bid-pill-amber {
-  color: var(--accent-ink);
-  background: var(--accent-tint);
-}
-.bid-pill-neutral {
-  color: var(--ink);
-  background: var(--paper-deep);
-}
-.bid-tag {
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid var(--line-strong);
-  border-radius: 4px;
-  padding: 2px 8px;
-  white-space: nowrap;
-}
-.bid-tag-strong {
-  border-color: var(--ink);
-}
 
 /* Draft text. */
 .bid-draft {
   font-size: 16px;
   line-height: 1.7;
-}
-.bid-marker {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1;
-  text-decoration: none;
-  color: var(--brand);
-  background: var(--brand-tint);
-  border: 0;
-  border-radius: 3px;
-  padding: 2px 5px;
-  margin-left: 4px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.bid-marker[aria-pressed="true"],
-.bid-marker[data-selected="true"] {
-  color: #ffffff;
-  background: var(--brand);
-}
-.bid-marker[data-unknown="true"] {
-  color: var(--danger);
-  background: var(--danger-tint);
 }
 .bid-gap {
   display: block;
@@ -272,13 +51,6 @@
 }
 
 /* Popover / menu surface. */
-.bid-pop {
-  background: var(--surface);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: 0 12px 32px rgb(22 26 29 / 0.14);
-}
 .bid-menu-item {
   display: flex;
   width: 100%;
@@ -306,7 +78,4 @@
 }
 
 @media print {
-  .bid-noprint {
-    display: none !important;
-  }
 }
