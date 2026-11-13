@@ -13,6 +13,9 @@ export type EventMap = {
   "workspace.created": { personal: boolean };
   "workspace.updated": { fields: string[] };
   "workspace.logo_uploaded": { bytes: number };
+  "workspace.deleted": { files: number };
+  "workspace.exported": Record<string, never>;
+  "user.account_deleted": { workspacesDeleted: number };
   "onboarding.step_completed": { step: string };
 
   // Team

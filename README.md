@@ -493,12 +493,50 @@ Trigger the worker by hand:
 | `CRON_SECRET` | new value → redeploy | the next cron tick uses it |
 | Database password | reset the role's password in Neon, update `DATABASE_URL*`, redeploy | brief errors until the deploy finishes |
 
-**Delete a workspace / user (GDPR)** — workspace deletion is disabled in the app on
-purpose. Cancel the Paddle subscription first, then
-`delete from organizations where id = '<id>';` (cascades to members, invitations,
-subscription, usage, audit log, AI usage) and remove its files under `org/<id>/` in
-Blob. For a user: `delete from users where id = '<id>';` (cascades to sessions, accounts,
-memberships).
+**Erasure and export (GDPR Art. 15, 17, 20)** — self-service first, runbook for the rest.
+
+*What the app does itself*
+
+| Request | Where | What happens |
+| --- | --- | --- |
+| Export a workspace | Settings → Workspace → *Export data* (owner) — `GET /api/workspace/export` | One JSON file: members, invitations, subscription, usage, audit log, analytics events, AI usage, **every table that has an `organization_id` column** (feature tables included automatically) and the list of stored files |
+| Delete a workspace | Settings → Workspace → *Delete workspace* (owner, types the name) — `deleteWorkspaceAction` | Refused while a subscription is `active`/`trialing`/`past_due`/`paused`. Otherwise: all files under `org/<id>/`, every row of every tenant table, the Paddle events stored about its subscription/customer, its invitation e-mails, and the organization |
+| Delete an account | Settings → Profile → *Delete account* (types the e-mail + password) — `deleteAccountAction` | Refused while the user is the only owner of a workspace that has other members or a live subscription. Otherwise: workspaces only they belong to (as above), their memberships, sessions, credentials, pending invitations to their address, their address in `email_outbox`, `audit_log.metadata`, stored Paddle customer events and rate-limit keys; their id is cleared from `ai_usage`, `error_log`, `subscriptions.checkout_user_id` |
+
+Feature modules are covered when their tables carry `organization_id` (ideally
+`references organizations(id) on delete cascade`). Anything else — an external service, files
+outside `org/<id>/` — registers `registerTenantDataHandler({ name, onExport, onDelete })`
+(`src/server/tenant-data.ts`).
+
+*Runbook for a request you handle by hand* (the person cannot sign in, or asks by e-mail)
+
+1. **Identify** the account: `select id, email, email_verified from users where email = '<address>';`
+   Verify the requester controls that mailbox (reply to it) before acting.
+2. **Subscription**: if one of their workspaces is still billing, cancel it in Paddle →
+   Subscriptions → *Cancel immediately* and wait for the webhook (status `canceled`).
+3. **Export** if requested: sign in as an owner is not possible for you, so run
+   `select * from <table> where organization_id = '<id>'` for the tables listed by
+   `select table_name from information_schema.columns where column_name = 'organization_id' and table_schema = 'public';`
+   and download the files under `org/<id>/` from Vercel Blob.
+4. **Erase**: ask them to use the buttons above if they can. Otherwise, from a machine with
+   the production `DATABASE_URL` and `BLOB_READ_WRITE_TOKEN`:
+   `pnpm tsx --import ./scripts/register-server-only.mjs -e "import('./src/server/tenant-data').then(m => m.deleteAccount('<user id>')).then(console.log)"`
+   (or `m.deleteWorkspace('<organization id>')`). These are the same functions the buttons call; they
+   refuse the same unsafe cases.
+5. **Outside this database** — erase or anonymise by hand:
+   - **Paddle** (merchant of record; keeps invoices as its own legal obligation): Customers → the
+     customer → anonymise/archive where permitted.
+   - **PostHog** (if enabled): Persons → search the user id → *Delete person and events*.
+   - **Resend**: delivery logs expire on Resend's own schedule; delete the contact if you created one.
+   - **Sentry** (if enabled): issues contain ids only (messages are sanitised), no action normally needed.
+   - **Backups**: `pg_dump` files and Neon history keep the data until they expire; note the date
+     in your erasure record and do not restore them without re-applying the erasure.
+6. **Record** the request and the date you completed it (outside the app).
+
+What is retained on purpose after an erasure: aggregate analytics rows with the user link removed
+(`events.user_id` set null), `audit_log` entries of *other* workspaces naming the opaque user id as
+actor, and whatever Paddle must keep as merchant of record. Routine retention periods:
+`src/config/retention.ts`.
 
 **Give someone a plan manually** (e.g. a design partner) —
 `insert into subscriptions (organization_id, status, plan_key) values ('<id>', 'active', 'pro')
@@ -539,7 +577,7 @@ memberships).
 | Better Auth's built-in rate limiter disabled | It is in-memory by default (useless on serverless); the Postgres limiter wraps `/api/auth/*` instead |
 | Column is `organization_id` everywhere (the brief also says `org_id`) | One name for the tenant key across all tables |
 | `/contact` is a static page, forms use shared zod schemas without react-hook-form | Less surface (no spam endpoint), fewer dependencies |
-| Workspace deletion disabled | Deleting a workspace with a live subscription needs a human (see runbook) |
+| Workspace and account deletion go through our own Server Actions; Better Auth's `organization/delete` and `delete-user` endpoints stay disabled | One code path that also removes files, non-cascading rows and stored Paddle events, and refuses while a subscription is live |
 
 Known limits (not built or not verifiable here): nothing was run against real Paddle,
 Resend, Vercel Blob, the AI Gateway, PostHog, Sentry or Google OAuth (no credentials on

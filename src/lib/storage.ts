@@ -1,8 +1,8 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { del, get, issueSignedToken, presignUrl, put } from "@vercel/blob";
+import { del, get, issueSignedToken, list, presignUrl, put } from "@vercel/blob";
 import { appUrl, env, features } from "@/env";
 
 /**
@@ -30,6 +30,10 @@ export interface Storage {
   delete(key: string): Promise<void>;
   /** Time-limited URL that grants read access to exactly this key without a session. */
   signedUrl(key: string, options?: { expiresInSeconds?: number }): Promise<string>;
+  /** Keys under a folder prefix such as "org/<id>" (the prefix itself is a valid key). */
+  list(prefix: string): Promise<string[]>;
+  /** Deletes everything under a folder prefix. Returns the number of files removed. */
+  deletePrefix(prefix: string): Promise<number>;
 }
 
 const KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*(\/[A-Za-z0-9][A-Za-z0-9._-]*)*$/;
@@ -47,6 +51,13 @@ export function orgFileKey(organizationId: string, ...parts: string[]): string {
   const key = ["org", organizationId, ...parts].join("/");
   assertKey(key);
   return key;
+}
+
+/** Folder that holds every file of a workspace: "org/<organizationId>". */
+export function orgStoragePrefix(organizationId: string): string {
+  const prefix = `org/${organizationId}`;
+  assertKey(prefix);
+  return prefix;
 }
 
 /** The workspace a key belongs to, or null for keys outside any tenant namespace. */
@@ -113,6 +124,24 @@ const localStorage: Storage = {
     const expires = Math.floor(Date.now() / 1000) + (options?.expiresInSeconds ?? 300);
     return `${appUrl}/api/files/${key}?expires=${expires}&signature=${signatureFor(key, expires)}`;
   },
+  async list(prefix) {
+    const root = localPath(prefix);
+    try {
+      const entries = await readdir(root, { recursive: true, withFileTypes: true });
+      return entries
+        .filter((entry) => entry.isFile() && !entry.name.endsWith(".meta.json"))
+        .map((entry) => path.relative(LOCAL_ROOT, path.join(entry.parentPath, entry.name)).split(path.sep).join("/"))
+        .sort();
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+      throw error;
+    }
+  },
+  async deletePrefix(prefix) {
+    const keys = await localStorage.list(prefix);
+    await rm(localPath(prefix), { recursive: true, force: true });
+    return keys.length;
+  },
 };
 
 // --- Vercel Blob backend (private store) -----------------------------------------------
@@ -143,6 +172,23 @@ const blobStorage: Storage = {
     const token = await issueSignedToken({ pathname: key, operations: ["get"], validUntil });
     const { presignedUrl } = await presignUrl(token, { access: "private", operation: "get", pathname: key, validUntil });
     return presignedUrl;
+  },
+  async list(prefix) {
+    assertKey(prefix);
+    const keys: string[] = [];
+    let cursor: string | undefined;
+    do {
+      // Trailing slash: "org/abc" must not match "org/abcdef/…".
+      const page = await list({ prefix: `${prefix}/`, cursor, limit: 1000 });
+      keys.push(...page.blobs.map((blob) => blob.pathname));
+      cursor = page.hasMore ? page.cursor : undefined;
+    } while (cursor);
+    return keys.sort();
+  },
+  async deletePrefix(prefix) {
+    const keys = await blobStorage.list(prefix);
+    for (let index = 0; index < keys.length; index += 100) await del(keys.slice(index, index + 100));
+    return keys.length;
   },
 };
 
