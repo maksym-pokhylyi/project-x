@@ -293,8 +293,8 @@ quote.
 Across all 455 contracts: 32% invited quotes, 24% open tender, 17% no competition, 15% framework call-off,
 11% not stated. Half were worth about £107,000 or less, including VAT.
 
-If you are a builder, your next council job is more likely to start with a phone call or a framework than
-with a tender notice. Worth knowing which door your local council uses.
+If you are a builder, your next council job is more likely to start with an invitation to quote or a
+framework than with a tender notice. Worth knowing which door your local council uses.
 
 Method: contract details notices (UK7) with a CPV code in division 45 or 50; buyers with "council",
 "borough" or "county" in the name; one notice per procurement. Six weeks of publication: a council that
@@ -480,7 +480,7 @@ Start with a sample: bidfolio.co.uk/sample-check
 Talk to the founder: [booking link]
 ```
 
-**EN — письмо зарегистрированному бюро (общий ящик; 96 слов; подпись — блоки A, B, C, E)**
+**EN — письмо зарегистрированному бюро (общий ящик; 95 слов; подпись — блоки A, B, C, E)**
 
 ```
 Subject: A first-day tool for your bid writers – from Bidfolio
