@@ -1,3 +1,4 @@
+import { features } from "@/env";
 import { json, route } from "@/server/http";
 import { requireOrg } from "@/server/session";
 
@@ -17,6 +18,8 @@ export const GET = route(async (_request, _context, { requestId }) => {
       isPaid: ctx.entitlements.isPaid,
       source: ctx.entitlements.source,
       subscriptionStatus: ctx.subscription?.status ?? null,
+      /** Billing runs against the Paddle sandbox: the UI must show "Test mode — no real payments". */
+      testMode: features.billingTestMode,
     },
     { requestId },
   );
