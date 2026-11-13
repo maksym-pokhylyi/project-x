@@ -1,19 +1,17 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { POST } from "@/app/api/webhooks/paddle/route";
 import { db } from "@/db";
-import { auditLog, errorLog, events, organizations, subscriptions, webhookEvents } from "@/db/schema";
+import { auditLog, errorLog, events, subscriptions, webhookEvents } from "@/db/schema";
 import { getOrgEntitlements } from "@/lib/billing/subscription";
 import { processStoredEvent } from "@/lib/billing/webhooks";
 import { resetDatabase } from "./helpers/db";
-import { paddleEvent, signedWebhookRequest, type FixtureName } from "./helpers/paddle";
+import { createBillingOrg, paddleEvent, signedWebhookRequest, type FixtureName } from "./helpers/paddle";
 
 const ORG = "org_webhook_a";
 const OTHER_ORG = "org_webhook_b";
 
-async function createOrg(id: string) {
-  await db.insert(organizations).values({ id, name: id, slug: id, createdAt: new Date() });
-}
+const createOrg = createBillingOrg;
 
 async function deliver(envelope: unknown, options?: Parameters<typeof signedWebhookRequest>[1]) {
   const response = await POST(signedWebhookRequest(envelope, options));
@@ -132,7 +130,7 @@ describe("POST /api/webhooks/paddle", () => {
 
   describe("subscription state transitions (Paddle example payloads)", () => {
     it("subscription.created: creates the row from the payload and grants the plan", async () => {
-      const envelope = paddleEvent("subscription.created", { organizationId: ORG, userId: "user_1" });
+      const envelope = paddleEvent("subscription.created", { organizationId: ORG });
       await deliver(envelope);
       const subscription = await subscriptionOf(ORG);
       expect(subscription).toMatchObject({
@@ -354,25 +352,22 @@ describe("POST /api/webhooks/paddle", () => {
 
   describe("failures and retries", () => {
     it("records the error, answers 500, and reprocesses when Paddle retries", async () => {
-      // Force a failure inside the handler: another workspace already holds this Paddle
-      // subscription id, so the insert violates the unique index.
-      await db.insert(subscriptions).values({
-        organizationId: OTHER_ORG,
-        paddleSubscriptionId: "sub_01hv8x29kz0t586xy6zn1a62ny",
-        status: "canceled",
-        planKey: "pro",
-      });
+      // Force a failure inside the handler: a temporary constraint rejects the row it writes.
+      await db.execute(sql`alter table subscriptions add constraint test_block_pro check (plan_key <> 'pro') not valid`);
       const envelope = paddleEvent("subscription.created", { organizationId: ORG });
-      const failed = await deliver(envelope);
+      const failed = await deliver(envelope).finally(() => db.execute(sql`alter table subscriptions drop constraint test_block_pro`));
       expect(failed.status).toBe(500);
       let stored = await storedEvent(envelope.event_id);
       expect(stored).toMatchObject({ processedAt: null, outcome: null, attempts: 1 });
-      expect(stored?.error).toBeTruthy();
+      // The stored error names the constraint — and none of the bound Paddle values (F-02).
+      expect(stored?.error).toContain("SQLSTATE 23514");
+      expect(stored?.error).toContain("test_block_pro");
+      expect(stored?.error).not.toContain("ctm_01hv6y1jedq4p1n0yqn5ba3ky4");
+      expect(stored?.error).not.toContain("params");
       expect(await subscriptionOf(ORG)).toBeNull();
       expect((await db.select().from(errorLog)).some((row) => row.route === "webhook:paddle")).toBe(true);
 
       // Cause removed; Paddle redelivers the same event id.
-      await db.delete(subscriptions).where(eq(subscriptions.organizationId, OTHER_ORG));
       const retried = await deliver(envelope);
       expect(retried).toEqual({ status: 200, body: { received: true, duplicate: false, outcome: "processed" } });
       stored = await storedEvent(envelope.event_id);

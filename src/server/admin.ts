@@ -122,7 +122,7 @@ export async function getAdminActivity() {
         receivedAt: webhookEvents.receivedAt,
       })
       .from(webhookEvents)
-      .where(sql`${webhookEvents.processedAt} is null or ${webhookEvents.outcome} in ('ignored_unmapped', 'ignored_conflict')`)
+      .where(sql`${webhookEvents.processedAt} is null or ${webhookEvents.outcome} in ('ignored_unmapped', 'ignored_conflict', 'ignored_unverified')`)
       .orderBy(desc(webhookEvents.receivedAt))
       .limit(20),
     db.select({ status: jobs.status, count: sql<number>`count(*)::int`, oldest: sql<Date | null>`min(${jobs.runAfter})` }).from(jobs).groupBy(jobs.status),

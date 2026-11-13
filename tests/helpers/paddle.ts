@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { db } from "@/db";
+import { members, organizations, users } from "@/db/schema";
+import { signCheckoutData } from "@/lib/billing/checkout-signature";
 import { signPaddlePayload } from "@/lib/billing/webhook-signature";
 
 export const WEBHOOK_SECRET = "pdl_ntfset_test_0123456789abcdef";
@@ -28,11 +31,16 @@ type Envelope = {
 
 let sequence = 0;
 
+/** Id of the owner user that createBillingOrg() gives a workspace. */
+export const ownerIdOf = (organizationId: string) => `owner_of_${organizationId}`;
+
 /**
  * Loads one of Paddle's documented example payloads (tests/fixtures/paddle/*.json, copied
  * verbatim from developer.paddle.com/webhooks) and adapts it to the test:
  *  - a unique event id (unless given),
- *  - `custom_data.organization_id` as set by our checkout,
+ *  - `custom_data` exactly as our checkout sets it: SIGNED for the workspace and one of its
+ *    owners (default `ownerIdOf(organizationId)`, see createBillingOrg), issued a minute
+ *    before the event, with a fresh single-use nonce,
  *  - the first item's price swapped for one of the test catalogue's price ids.
  */
 export function paddleEvent(
@@ -40,6 +48,8 @@ export function paddleEvent(
   options: {
     organizationId?: string | null;
     userId?: string;
+    /** Reuse a nonce (replay) instead of a fresh one. */
+    nonce?: string;
     priceId?: string;
     occurredAt?: string;
     eventId?: string;
@@ -53,13 +63,27 @@ export function paddleEvent(
   if (options.occurredAt) envelope.occurred_at = options.occurredAt;
   if (!name.startsWith("customer.")) {
     if (options.organizationId !== null && options.organizationId !== undefined) {
-      envelope.data.custom_data = { organization_id: options.organizationId, ...(options.userId ? { user_id: options.userId } : {}) };
+      envelope.data.custom_data = signCheckoutData({
+        organizationId: options.organizationId,
+        userId: options.userId ?? ownerIdOf(options.organizationId),
+        issuedAt: new Date(Date.parse(envelope.occurred_at) - 60_000),
+        nonce: options.nonce,
+      });
     }
     const firstItem = envelope.data.items?.[0];
     if (firstItem) firstItem.price.id = options.priceId ?? "pri_test_pro_monthly";
   }
   options.mutate?.(envelope.data);
   return envelope;
+}
+
+/** A workspace with one owner (`ownerIdOf(id)`), which is what a signed checkout needs. */
+export async function createBillingOrg(id: string): Promise<{ organizationId: string; ownerId: string }> {
+  const ownerId = ownerIdOf(id);
+  await db.insert(organizations).values({ id, name: id, slug: id, createdAt: new Date() });
+  await db.insert(users).values({ id: ownerId, name: "Owner", email: `${ownerId}@example.com`.toLowerCase(), emailVerified: true });
+  await db.insert(members).values({ id: `mem_${id}`, organizationId: id, userId: ownerId, role: "owner", createdAt: new Date() });
+  return { organizationId: id, ownerId };
 }
 
 /** A webhook Request exactly as Paddle would send it (signed raw body). */

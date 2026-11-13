@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import { jobs } from "@/db/schema";
@@ -13,8 +13,9 @@ import { requireAdmin } from "../session";
 
 /**
  * Re-runs the handler for a stored Paddle event (founder only). Safe by construction:
- * handlers are idempotent and events older than the subscription's last applied event
- * are ignored. Use it for events that failed or were "ignored_unmapped" after fixing data.
+ * handlers are idempotent, events older than the subscription's last applied event are
+ * ignored, and the audit entry and analytics of an event are written only once however
+ * often it is replayed. Use it for events that failed or were ignored after fixing data.
  */
 export async function replayWebhookAction(input: unknown): Promise<ActionResult<{ outcome: string | null }>> {
   return runAction("admin.replay_webhook", async () => {
@@ -34,9 +35,14 @@ export async function retryJobAction(input: unknown): Promise<ActionResult> {
     const updated = await db
       .update(jobs)
       .set({ status: "pending", attempts: 0, runAfter: new Date(), lockedAt: null, completedAt: null, updatedAt: new Date() })
-      .where(eq(jobs.id, jobId))
+      // Never reset a job a worker is executing right now: it would run twice in parallel.
+      .where(and(eq(jobs.id, jobId), ne(jobs.status, "running")))
       .returning({ id: jobs.id });
-    if (updated.length === 0) throw new NotFoundError("Job not found.");
+    if (updated.length === 0) {
+      const [existing] = await db.select({ status: jobs.status }).from(jobs).where(eq(jobs.id, jobId));
+      if (!existing) throw new NotFoundError("Job not found.");
+      throw new AppError("CONFLICT", "This job is running right now. Try again when it has finished.", 409);
+    }
     await runWorker({ maxJobs: 5, timeBudgetMs: 15_000 });
     return undefined;
   });
