@@ -12,6 +12,7 @@ import { appUrl, env, features, trustedOrigins } from "@/env";
 import { track } from "@/lib/analytics";
 import { recordAudit } from "@/lib/audit";
 import { getOrgEntitlements } from "@/lib/billing/subscription";
+import { announceConfigWarnings } from "@/lib/config-warnings";
 import { emailKey } from "@/lib/crypto";
 import { describeError, scrubText } from "@/lib/describe-error";
 import { sendEmail } from "@/lib/email/send";
@@ -24,8 +25,10 @@ import { createPersonalWorkspace, defaultOrganizationIdForUser } from "@/server/
 /**
  * Better Auth configuration — the only place authentication behaviour is defined.
  *
- * - E-mail + password with verification (see `features.requireEmailVerification`),
- *   password reset, optional Google OAuth.
+ * - E-mail + password with verification, password reset, optional Google OAuth.
+ *   Verification is ALWAYS enforced. A deployment that cannot deliver e-mail does not
+ *   skip it: sign-up, password reset and invitations answer 503 with a clear message
+ *   (`hooks.before`). The only opt-out is ALLOW_UNVERIFIED_SIGNUP=1 (pre-launch testing).
  * - Pre-registration takeover protection: a verification link completes directly only in
  *   the browser that created the account (sign-up binding cookie). Anywhere else the
  *   mailbox owner is asked to choose a password, which replaces the stored one
@@ -54,8 +57,17 @@ async function memberCount(organizationId: string): Promise<number> {
   return row?.value ?? 0;
 }
 
-if (!features.emailConfigured && features.isRealProduction) {
-  log.warn("RESEND_API_KEY is not set in production: e-mails are NOT delivered and e-mail verification is NOT enforced");
+// Unsafe or half-configured deployments are never silent (also listed on /admin).
+announceConfigWarnings();
+
+const SIGN_UP_DISABLED_MESSAGE =
+  "Sign-up is not available right now: this site cannot send the e-mail needed to confirm your address. Please try again later or contact support.";
+const EMAIL_UNAVAILABLE_MESSAGE =
+  "This site cannot send e-mail right now, so this action is unavailable. Please try again later or contact support.";
+
+/** 503 for flows that depend on a deliverable e-mail when there is no way to deliver one. */
+function emailUnavailable(code: string, message: string): APIError {
+  return new APIError("SERVICE_UNAVAILABLE", { code, message });
 }
 
 export const auth = betterAuth({
@@ -208,6 +220,15 @@ export const auth = betterAuth({
   },
 
   hooks: {
+    /** Flows that need a deliverable e-mail fail closed, with a message the user can read. */
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === "/sign-up/email" && !features.signUpEnabled) {
+        throw emailUnavailable("SIGN_UP_DISABLED", SIGN_UP_DISABLED_MESSAGE);
+      }
+      if ((ctx.path === "/request-password-reset" || ctx.path === "/send-verification-email") && !features.passwordResetEnabled) {
+        throw emailUnavailable("EMAIL_DELIVERY_UNAVAILABLE", EMAIL_UNAVAILABLE_MESSAGE);
+      }
+    }),
     /**
      * One audit + analytics hook for every successful workspace mutation, whichever way
      * it was triggered (client SDK, server action, direct API call).
@@ -249,7 +270,13 @@ export const auth = betterAuth({
       disableOrganizationDeletion: true,
       invitationExpiresIn: 60 * 60 * 24 * 7,
       cancelPendingInvitationsOnReInvite: true,
-      requireEmailVerificationOnInvitation: features.requireEmailVerification,
+      // Unconditional: an invitation is only ever accepted by a PROVEN owner of the invited address.
+      requireEmailVerificationOnInvitation: true,
+      organizationHooks: {
+        beforeCreateInvitation: async () => {
+          if (features.mailDelivery === "none") throw emailUnavailable("EMAIL_DELIVERY_UNAVAILABLE", EMAIL_UNAVAILABLE_MESSAGE);
+        },
+      },
       // Seats: accepted members may never exceed the plan...
       membershipLimit: async (_user, org) => seatLimit(org.id),
       // ...and members + pending invitations may not exceed it either.

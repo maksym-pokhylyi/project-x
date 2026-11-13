@@ -5,6 +5,7 @@ import { PLANS, isBillingInterval, isPlanKey } from "@/config/plans";
 import { db } from "@/db";
 import { auditLog, errorLog, events, jobs, members, organizations, subscriptions, usageCounters, users, webhookEvents } from "@/db/schema";
 import { getAiSpendUsd, startOfUtcDay, startOfUtcMonth } from "@/lib/ai";
+import { getConfigWarnings, type ConfigWarning } from "@/lib/config-warnings";
 import { NotFoundError } from "@/lib/errors";
 import { requireAdmin } from "./session";
 
@@ -86,6 +87,12 @@ export async function getAdminMetrics(now: Date = new Date()): Promise<AdminMetr
     },
     aiSpendUsd: { today: aiToday, month: aiMonth },
   };
+}
+
+/** Unsafe or incomplete configuration of this deployment (escape hatches, missing secrets). */
+export async function getAdminConfigWarnings(): Promise<ConfigWarning[]> {
+  await requireAdmin();
+  return getConfigWarnings();
 }
 
 export async function getAdminActivity() {

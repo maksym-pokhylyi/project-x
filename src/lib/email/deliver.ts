@@ -4,13 +4,21 @@ import { Resend } from "resend";
 import { db } from "@/db";
 import { emailOutbox } from "@/db/schema";
 import { site } from "@/config/site";
-import { env } from "@/env";
+import { env, features } from "@/env";
 import { scrubText } from "@/lib/describe-error";
 
 let resend: Resend | null = null;
 
+/**
+ * Sender of every e-mail. A real production deployment must set EMAIL_FROM (an address on
+ * a domain verified in Resend); without it `features.emailConfigured` is false and nothing
+ * is sent. Resend's shared test sender is only a convenience outside production — it
+ * delivers to the Resend account owner and nobody else.
+ */
 export function emailFrom(): string {
-  return env.EMAIL_FROM ?? `${site.emailFromName} <onboarding@resend.dev>`;
+  if (env.EMAIL_FROM) return env.EMAIL_FROM;
+  if (features.isRealProduction) throw new Error("EMAIL_FROM is not set; refusing to send from the shared test sender in production");
+  return `${site.emailFromName} <onboarding@resend.dev>`;
 }
 
 /**

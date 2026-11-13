@@ -8,6 +8,10 @@ import { z } from "zod";
  *   Client code reads the few public values from `src/env.public.ts`.
  * - Every optional integration (email, billing, OAuth, analytics, blob storage, AI)
  *   degrades gracefully when its variables are absent; see `features` below.
+ * - "Gracefully" never means "less secure": a deployment that cannot deliver e-mail does
+ *   not skip verification, it disables sign-up; sandbox billing does not sell real plans.
+ *   The two explicit escape hatches (ALLOW_UNVERIFIED_SIGNUP, ALLOW_SANDBOX_BILLING) are
+ *   reported by src/lib/config-warnings.ts at start-up and on /admin.
  * - Error messages list variable NAMES only, never values.
  */
 
@@ -46,9 +50,21 @@ const serverSchema = z.object({
   // --- Email ---
   RESEND_API_KEY: optional(z.string()),
   EMAIL_FROM: optional(z.string()),
+  /**
+   * "1" lets a deployment WITHOUT e-mail delivery accept sign-ups with no verification at
+   * all. Pre-launch testing only: anyone can register any address. Ignored once e-mail works.
+   */
+  ALLOW_UNVERIFIED_SIGNUP: optional(z.enum(["0", "1"])),
 
   // --- Billing (Paddle Billing) ---
   PADDLE_ENV: z.preprocess(emptyToUndefined, z.enum(["sandbox", "production"]).default("sandbox")),
+  /**
+   * "1" allows Paddle SANDBOX on a real production deployment (test cards grant real plans).
+   * Pre-launch testing only; the billing UI then shows a "Test mode" notice.
+   */
+  ALLOW_SANDBOX_BILLING: optional(z.enum(["0", "1"])),
+  /** Signs checkout custom data. Optional: derived from BETTER_AUTH_SECRET when unset. */
+  BILLING_SIGNING_SECRET: optional(z.string().min(32, "must be at least 32 characters")),
   PADDLE_API_KEY: optional(z.string()),
   PADDLE_WEBHOOK_SECRET: optional(z.string()),
   NEXT_PUBLIC_PADDLE_CLIENT_TOKEN: optional(z.string()),
@@ -60,6 +76,11 @@ const serverSchema = z.object({
   PADDLE_PRICE_BUSINESS_ANNUAL: optional(z.string()),
   /** Days a past_due subscription keeps its paid entitlements. */
   BILLING_PAST_DUE_GRACE_DAYS: z.preprocess(emptyToUndefined, z.coerce.number().int().min(0).max(60).default(7)),
+  /**
+   * Fail-safe: an active/trialing subscription whose paid period ended more than this many
+   * days ago (no renewal or cancellation reached us) stops granting its plan.
+   */
+  BILLING_PERIOD_END_GRACE_DAYS: z.preprocess(emptyToUndefined, z.coerce.number().int().min(0).max(60).default(3)),
   /** Max accepted age (seconds) of a webhook signature timestamp. */
   PADDLE_WEBHOOK_TOLERANCE_SECONDS: z.preprocess(
     emptyToUndefined,
@@ -88,6 +109,15 @@ const serverSchema = z.object({
   // --- Dev tooling ---
   /** "1" exposes /dev/outbox on a production BUILD (used by e2e). Ignored when VERCEL_ENV=production. */
   DEV_TOOLS: optional(z.enum(["0", "1"])),
+  /** On a production build with DEV_TOOLS=1, /dev/outbox requires an admin session or `?key=<this>`. */
+  DEV_TOOLS_SECRET: optional(z.string().min(16, "must be at least 16 characters")),
+  /**
+   * "1" trusts X-Forwarded-For / X-Real-IP when NOT running on Vercel (self-hosting behind a
+   * proxy that overwrites them). On Vercel the platform's own headers are always used.
+   */
+  TRUST_PROXY_HEADERS: optional(z.enum(["0", "1"])),
+  /** Set by Vercel ("1") on every deployment. */
+  VERCEL: optional(z.string()),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
@@ -138,9 +168,23 @@ export const trustedOrigins: string[] = Array.from(
 );
 
 const isRealProduction = env.VERCEL_ENV === "production";
-const emailConfigured = Boolean(env.RESEND_API_KEY);
+/** `next dev` or the test runner on a developer's machine (not a production build). */
+const isLocalDevelopment = env.NODE_ENV !== "production";
+/**
+ * E-mail can be delivered through Resend. A real production deployment needs the key AND
+ * its own sender: Resend's shared test sender only delivers to the account owner.
+ */
+const emailConfigured = Boolean(env.RESEND_API_KEY) && (Boolean(env.EMAIL_FROM) || !isRealProduction);
 /** Dev-only tools (/dev/outbox). Can never be on for a Vercel production deployment. */
-const devTools = !isRealProduction && (env.NODE_ENV !== "production" || env.DEV_TOOLS === "1");
+const devTools = !isRealProduction && (isLocalDevelopment || env.DEV_TOOLS === "1");
+/** How a transactional e-mail reaches its reader: a provider, the dev outbox, or not at all. */
+const mailDelivery: "resend" | "outbox" | "none" = emailConfigured ? "resend" : devTools ? "outbox" : "none";
+/** The explicit escape hatch; it only means something where e-mail cannot be delivered. */
+const unverifiedSignupAllowed = mailDelivery === "none" && env.ALLOW_UNVERIFIED_SIGNUP === "1";
+
+const paddleSandbox = env.PADDLE_ENV !== "production";
+/** Sandbox payments must not grant plans on the real production deployment unless explicitly allowed. */
+const billingAllowed = !(isRealProduction && paddleSandbox) || env.ALLOW_SANDBOX_BILLING === "1";
 
 /**
  * Which optional integrations are live. Everything in the app branches on these
@@ -148,22 +192,37 @@ const devTools = !isRealProduction && (env.NODE_ENV !== "production" || env.DEV_
  */
 export const features = {
   isRealProduction,
+  isLocalDevelopment,
   emailConfigured,
   devTools,
+  /** True on a production BUILD with DEV_TOOLS=1: dev pages then need an admin session or DEV_TOOLS_SECRET. */
+  devToolsProtected: devTools && !isLocalDevelopment,
+  mailDelivery,
   /**
-   * Verification is enforced whenever the user can actually receive the link:
-   * through Resend, or through the dev outbox. A production deployment without
-   * RESEND_API_KEY cannot deliver mail, so it does not block sign-in on it
-   * (a warning is logged at startup).
+   * The security posture never follows the mail configuration: verification is always
+   * enforced. Where e-mail cannot be delivered, sign-up and password reset are DISABLED
+   * instead (see below) — unless ALLOW_UNVERIFIED_SIGNUP=1 explicitly opts out.
    */
-  requireEmailVerification: emailConfigured || devTools,
+  requireEmailVerification: !unverifiedSignupAllowed,
+  /** E-mail sign-up is possible: the verification link can be delivered, or the escape hatch is on. */
+  signUpEnabled: mailDelivery !== "none" || unverifiedSignupAllowed,
+  /** Password reset needs a deliverable link. */
+  passwordResetEnabled: mailDelivery !== "none",
+  /** ALLOW_UNVERIFIED_SIGNUP=1 is in effect: accounts are created without proving the mailbox. */
+  unverifiedSignupAllowed,
   googleOAuth: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
   /** Server can talk to the Paddle API (customer portal, paddle:setup). */
-  paddleApi: Boolean(env.PADDLE_API_KEY),
-  /** Webhooks can be verified. */
-  paddleWebhooks: Boolean(env.PADDLE_WEBHOOK_SECRET),
+  paddleApi: Boolean(env.PADDLE_API_KEY) && billingAllowed,
+  /** Webhooks can be verified (and may grant plans). */
+  paddleWebhooks: Boolean(env.PADDLE_WEBHOOK_SECRET) && billingAllowed,
   /** Overlay checkout can be opened in the browser. */
-  paddleCheckout: Boolean(env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN),
+  paddleCheckout: Boolean(env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN) && billingAllowed,
+  /** Billing runs against the Paddle sandbox: no real money moves. The UI must say so. */
+  billingTestMode: paddleSandbox && billingAllowed && Boolean(env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || env.PADDLE_WEBHOOK_SECRET),
+  /** Sandbox credentials are configured on real production WITHOUT the opt-in: billing stays off. */
+  billingBlockedSandbox: !billingAllowed && Boolean(env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || env.PADDLE_WEBHOOK_SECRET || env.PADDLE_API_KEY),
+  /** Running on Vercel: the platform sets (and overwrites) the client-IP headers. */
+  onVercel: Boolean(env.VERCEL) || Boolean(env.VERCEL_ENV),
   posthog: Boolean(env.NEXT_PUBLIC_POSTHOG_KEY),
   sentry: Boolean(env.SENTRY_DSN),
   blobStorage: Boolean(env.BLOB_READ_WRITE_TOKEN),
