@@ -97,6 +97,12 @@ const serverSchema = z.object({
 
   // --- Background jobs ---
   CRON_SECRET: optional(z.string().min(16, "must be at least 16 characters")),
+  /**
+   * "1" stops every scheduled e-mail (weekly digest, daily alerts, deadline and renewal
+   * reminders): nothing is fanned out and queued sends are dropped. Transactional e-mail
+   * (verification, password reset, invitations) is not affected.
+   */
+  NOTIFICATIONS_PAUSED: optional(z.enum(["0", "1"])),
 
   // --- Analytics / observability ---
   NEXT_PUBLIC_POSTHOG_KEY: optional(z.string()),
@@ -231,6 +237,8 @@ export const features = {
   billingBlockedSandbox: !billingAllowed && Boolean(env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || env.PADDLE_WEBHOOK_SECRET || env.PADDLE_API_KEY),
   /** Running on Vercel: the platform sets (and overwrites) the client-IP headers. */
   onVercel: Boolean(env.VERCEL) || Boolean(env.VERCEL_ENV),
+  /** NOTIFICATIONS_PAUSED=1: no scheduled e-mail leaves (src/features/notifications). */
+  notificationsPaused: env.NOTIFICATIONS_PAUSED === "1",
   posthog: Boolean(env.NEXT_PUBLIC_POSTHOG_KEY),
   sentry: Boolean(env.SENTRY_DSN),
   blobStorage: Boolean(env.BLOB_READ_WRITE_TOKEN),

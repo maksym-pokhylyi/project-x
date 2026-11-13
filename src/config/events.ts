@@ -69,6 +69,15 @@ export type EventMap = {
   question_drafted: { mode: "draft" | "regenerate" | "apply_suggestions"; words: number; gaps: number };
   answer_evaluated: { scale: "pack" | "default"; score: string; max: string };
   export_done: { kind: "answers_docx" | "brief_docx" | "requirements_docx" | "requirements_csv" };
+
+  // Scheduled e-mails (src/features/notifications; names fixed by docs/product/SPEC.md §7).
+  // Counts and ids only: never an e-mail address, never a tender title.
+  digest_sent: { matches: number; ending: number; saved: number; plan: string };
+  alert_sent: { matches: number; plan: string };
+  reminder_sent: { type: "deadline" | "renewal"; items: number };
+  /** A tender link in a scheduled e-mail was opened; counted once per e-mail and tender. */
+  digest_clicked: { kind: string; ocid: string };
+  notification_unsubscribed: { kind: string; scope: "kind" | "all"; via: "one_click" | "page" | "settings" };
 };
 
 export type EventName = keyof EventMap;

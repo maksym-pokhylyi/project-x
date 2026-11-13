@@ -200,6 +200,7 @@ could receive the verification link.)
 | `pnpm billing:purge-sandbox [--yes]` | Remove every billing row that came from the Paddle sandbox (dry run without `--yes`); the step before going live |
 | `pnpm auth:schema` | Regenerate `src/db/schema/auth.ts` after changing Better Auth plugins |
 | `pnpm erase account <id\|e-mail> [--yes]` · `pnpm erase workspace <id> [--yes]` | Erasure on someone's behalf (dry run without `--yes`); see the runbook |
+| `pnpm notifications:preview <workspace-id> [--kind …]` | Render a scheduled e-mail for a workspace to HTML and text files; see *Scheduled e-mails* |
 
 Playwright uses the Chromium in `PLAYWRIGHT_BROWSERS_PATH` (defaults to `/opt/pw-browsers`
 on the build machine). Elsewhere run `pnpm exec playwright install chromium` once.
@@ -245,6 +246,7 @@ real production deployment.
 | `DEV_TOOLS_SECRET` | no | `openssl rand -hex 16` | Opens `/dev/outbox?key=<secret>` on a production build with `DEV_TOOLS=1` |
 | `TRUST_PROXY_HEADERS` | no | — | `1` = trust `X-Forwarded-For` when NOT on Vercel (self-hosting behind a proxy that overwrites it). On Vercel the platform's headers are always used; otherwise all clients share one rate-limit bucket |
 | `SKIP_DB_MIGRATE` | no | — | `1` makes `pnpm db:migrate` a no-op |
+| `NOTIFICATIONS_PAUSED` | no | — | `1` = no scheduled e-mail leaves (digests, alerts, reminders); transactional e-mail is unaffected. See *Scheduled e-mails* |
 | `MIGRATE_PREVIEW_DATABASE` | no | — | `1` lets a Vercel **Preview** build run migrations — only for a Preview environment with its own database (Neon branch). Without it, only production builds migrate |
 
 `src/env.ts` also exports `features` (which integrations are live, incl. `signUpEnabled`,
@@ -642,6 +644,74 @@ It also checks that a price created with `tax_mode: external` is charged as £14
 price must be created with that tax mode. Created without one, the same price came back as
 `tax_mode: location` and the UK invoice was £124.17 + £24.83 VAT = £149.00.
 
+## Scheduled e-mails
+
+Module `src/features/notifications`. Everything starts from the five-minute tick of
+`/api/cron/jobs`. Times are UK time (Europe/London): 07:30 stays 07:30 across the clock
+changes.
+
+| E-mail | When | To | What it says |
+| --- | --- | --- | --- |
+| Weekly digest | Mondays 07:30 | Members of a workspace with a radar | Strong matches that are new since the member's last e-mail (5 shown, the rest counted), rivals' contracts new to the 12-month "ending soon" window (3 shown), saved tenders closing within 14 days. On a capped plan only what the radar shows, plus one line about the rest |
+| Daily alert | Working days 07:30 | The same, on plans with daily alerts (`notificationAccess()`: every paid plan until the catalogue has `radar.alerts`) | New strong matches since the last digest or alert (8 shown). On Mondays the digest stands in for it |
+| Deadline reminder | Daily 08:00 | Members of the workspace | Saved tenders and bids in progress (`listBidDeadlines()`) closing in exactly 7 or 2 calendar days: one e-mail a day for all of them, each (member, tender, offset) once |
+| Annual-renewal reminder | Daily 08:00 | Workspace owners | A yearly subscription renews in 6 to 8 days (active, no cancellation or pause, done or scheduled): date, price and payment method when Paddle told us, how to pause or cancel. Once per paid period |
+
+Nothing new means no e-mail: the week is logged as `skipped_empty` and the next e-mail
+starts from there. Every e-mail goes to verified addresses of current members only.
+
+**How it runs.** Tick → `scheduleFromCron()` → one `notifications.fanout` job per kind and
+period (dedupe key `notifications.fanout:<kind>:<period>`) → one `notifications.send` job
+per member (dedupe key `<kind>:<workspace>:<user>:<period>`, e.g.
+`digest:<org>:<user>:2026-W47`) → the `notification_log` row and the outbox row are written
+in ONE transaction → `email.send`. So a tick that fires twice, a retried job or two workers
+racing send one e-mail. Membership, the preference, the plan and the volume guards (200
+e-mails per tick, two per member and workspace per day) are checked at send time, whatever
+the fan-out believed. A slot missed for longer than its catch-up window (digest 36 h, alert
+10 h, reminder 12 h) is skipped, not sent late.
+
+**Preferences and unsubscribe.** Settings → Notifications (`/app/settings/notifications`):
+per member and workspace; a missing row means everything is on. Every e-mail carries
+`List-Unsubscribe` and `List-Unsubscribe-Post` (RFC 8058, `POST /api/notifications/unsubscribe`);
+digests and alerts also link to `/unsubscribe?t=…`, which asks before changing anything and
+works signed out and without JavaScript. The token is signed with a key derived from
+`BETTER_AUTH_SECRET` and does not expire: **rotating that secret invalidates the links in
+e-mails already sent** (the page then points people to Settings).
+
+**What is measured.** `digest_sent`, `alert_sent`, `reminder_sent`,
+`notification_unsubscribed`, and `digest_clicked`, which the server records when a tender
+page is requested with `?d=<notification_log id>` from an e-mail. No pixel, no redirect
+links; whether an e-mail was opened is never known.
+
+**Preview.**
+
+- `/admin/notifications` → *Send me a preview*: the e-mail a workspace would get, sent to
+  your own address (to `/dev/outbox` when no mail provider is configured). The same page
+  shows the last fan-out per kind and seven days of sent / nothing new / failed counts.
+- `pnpm notifications:preview <workspace-id> [--kind digest|alert|reminder|renewal] [--mode auto|live|sample] [--out <dir>]`
+  writes `<kind>.html` and `<kind>.txt` (default: a new temp directory). `live` is exactly
+  what is new now; `sample` treats everything on the radar as new.
+- Try a moment out (dev tools only: `next dev`, tests, e2e — ignored on a production
+  deployment): `curl -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron/jobs?now=2026-11-16T07:30:00Z"`
+  runs the tick as if it were that Monday morning; the result is in `/dev/outbox`.
+
+**Pause.** Set `NOTIFICATIONS_PAUSED=1` and redeploy: nothing is scheduled, and fan-outs
+and sends already queued do nothing. `/admin` and `/admin/notifications` say so. Sign-in
+links, receipts and other transactional e-mail are not affected. Remove the variable to
+resume; the next e-mail covers everything since the last one that went out.
+
+**For other modules** (`src/features/notifications/index.ts`):
+`setDigestPreference(userId, organizationId, on)` for the sign-up form's tick box;
+`registerDeadlineSource()` to add another source of deadlines to the reminders (saved
+tenders and bids in progress are built in); `wantsNotification(userId, organizationId,
+"product")` and `unsubscribeLinks()` for e-mails another module sends about something the
+member asked for (the bid desk's "your bid check is ready" already uses both);
+`selectDigestMatches()` is the one place e-mails choose matches (strong ones only).
+
+**Tests.** `tests/notifications/*` run with `pnpm test`; the journey (claim → Monday tick →
+digest in the outbox → click → unsubscribe → next Monday) with
+`pnpm exec playwright test -c playwright.notifications.config.ts --trace off`.
+
 ## How to add things
 
 **A plan** — `src/config/plans.ts`: add the key to `PLAN_KEYS` and an entry to `PLANS`
@@ -771,6 +841,12 @@ Users see a request id / digest on error screens; search `error_log.request_id` 
 set, server errors are also in Sentry. Messages are sanitised (`describeError`): a failed
 query shows its SQL text, SQLSTATE and constraint — never the values — so reproduce with the
 request id rather than expecting the data in the log.
+
+**Scheduled e-mails went wrong, or must stop now** — `/admin/notifications` shows the last
+fan-out per kind and seven days of sent / nothing new / failed counts. Set
+`NOTIFICATIONS_PAUSED=1` and redeploy to stop every digest, alert and reminder (queued ones
+included); see *Scheduled e-mails*. By SQL:
+`select kind, period_key, status, detail, count(*) from notification_log where created_at > now() - interval '7 days' group by 1, 2, 3, 4 order by 2 desc;`
 
 **Replay a webhook** — `/admin` → "Webhooks needing attention" → *Replay* (idempotent:
 stale events are ignored and an event's audit entry and analytics are written once). For

@@ -50,6 +50,7 @@ export const config = {
     "/verify-email/:path*",
     "/reset-password",
     "/accept-invitation/:path*",
+    "/unsubscribe",
     "/dev/:path*",
     // Paddle's default payment link: loads Paddle.js, so it gets the strict (nonce) policy.
     "/pay",

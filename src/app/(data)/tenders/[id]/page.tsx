@@ -4,13 +4,14 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { site } from "@/config/site";
 import { DataAttribution } from "@/features/procurement/components/data-attribution";
+import { recordDigestClick } from "@/features/notifications/clicks";
 import { TenderDetailView } from "@/features/procurement/components/tender-detail";
 import { formatDate } from "@/features/procurement/domain/format";
 import { formatMoneyShort } from "@/features/procurement/domain/money";
 import { loadTenderPage } from "@/features/procurement/public-data";
 import { cleanRefCode, recordPageVisit } from "@/features/procurement/visits";
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ r?: string | string[] }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ r?: string | string[]; d?: string | string[] }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -41,6 +42,7 @@ export default async function TenderPage({ params, searchParams }: Props) {
   // The canonical id is the ocid; a Find a Tender notice id redirects to it.
   if (id !== tender.ocid) permanentRedirect(`/tenders/${tender.ocid}`);
   await recordPageVisit({ pageType: "tender", entityId: tender.ocid, refCode: cleanRefCode(query.r) });
+  await recordDigestClick({ ocid: tender.ocid, notification: query.d }); // opened from a scheduled e-mail (?d=…)
   const now = new Date();
   const live = tender.stage === "tender" && tender.deadlineAt !== null && Date.parse(tender.deadlineAt) > now.getTime() && tender.isLive;
 

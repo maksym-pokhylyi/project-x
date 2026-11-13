@@ -219,10 +219,14 @@ describe("operational routes", () => {
 
     const ok = await call("Bearer test-cron-secret-0123456789");
     expect(ok.status).toBe(200);
-    expect(await ok.json()).toMatchObject({ ok: true, claimed: 2, succeeded: 2 });
+    // The two daily jobs, plus whichever scheduled e-mail fan-outs are due at this time of day (tests/notifications).
+    const summary = (await ok.json()) as { ok: boolean; claimed: number; succeeded: number };
+    expect(summary).toMatchObject({ ok: true, succeeded: summary.claimed });
+    expect(summary.claimed).toBeGreaterThanOrEqual(2);
     // The daily maintenance and billing-reconciliation jobs are scheduled once per day, however often cron fires.
     await call("Bearer test-cron-secret-0123456789");
-    expect((await db.select().from(jobs)).map((job) => job.type).sort()).toEqual(["billing.reconcile", "maintenance.cleanup"]);
+    const daily = (await db.select().from(jobs)).map((job) => job.type).filter((type) => !type.startsWith("notifications."));
+    expect(daily.sort()).toEqual(["billing.reconcile", "maintenance.cleanup"]);
   });
 });
 
