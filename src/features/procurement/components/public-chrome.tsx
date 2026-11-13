@@ -30,7 +30,8 @@ import { LeanHeader, type LeanHeaderLink } from "@/components/ui/lean-header";
  *   links      "What is Bidfolio?" and "Sign in" (a form: nothing competes with it)
  */
 export function DataHeader({ action, signedIn = false, phone = "question" }: { action?: ReactNode; signedIn?: boolean; phone?: "question" | "action" | "links" }) {
-  const account = signedIn ? { href: "/app", label: "Open your radar" } : { href: "/sign-in", label: "Sign in" };
+  // On a phone the way back is one word: beside the lockup and a button, "Open your radar" does not fit in 360–390 px.
+  const account: LeanHeaderLink = signedIn ? { href: "/app", label: "Open your radar", phoneLabel: "Radar" } : { href: "/sign-in", label: "Sign in" };
   const links: LeanHeaderLink[] = [
     { href: "/", label: `What is ${site.name}?`, phoneLabel: phone === "question" ? "What is this?" : undefined, wideOnly: phone === "action" },
     { ...account, wideOnly: phone === "question" },
