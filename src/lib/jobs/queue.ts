@@ -17,6 +17,8 @@ export type JobPayloads = {
   "email.send": { outboxId: string };
   /** Housekeeping: expired rate-limit windows, old finished jobs, old outbox bodies. */
   "maintenance.cleanup": Record<string, never>;
+  /** Find a Tender backfill: one slice of one week (src/features/procurement/ingest/run.ts). */
+  "procurement.backfill": { weekStart: string; until: string; part?: number };
 };
 
 export type JobType = keyof JobPayloads;

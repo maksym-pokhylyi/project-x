@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartNoAxesColumn, CreditCard, Home, Settings, ShieldCheck, Users, type LucideIcon } from "lucide-react";
+import { ChartNoAxesColumn, CreditCard, Radar, Settings, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ type Item = { href: string; label: string; icon: LucideIcon; match: (path: strin
 export function AppNav({ canManageBilling, isAdmin }: { canManageBilling: boolean; isAdmin: boolean }) {
   const pathname = usePathname();
   const items: Item[] = [
-    { href: "/app", label: "Home", icon: Home, match: (path) => path === "/app" },
+    { href: "/app", label: "Radar", icon: Radar, match: (path) => path === "/app" || path.startsWith("/app/tenders") || path.startsWith("/app/radar") },
     { href: "/app/usage", label: "Usage", icon: ChartNoAxesColumn, match: (path) => path.startsWith("/app/usage") },
     { href: "/app/settings/members", label: "Members", icon: Users, match: (path) => path.startsWith("/app/settings/members") },
     ...(canManageBilling

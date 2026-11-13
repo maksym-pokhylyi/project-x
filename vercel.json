@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "pnpm db:migrate && pnpm build",
+  "crons": [
+    {
+      "path": "/api/cron/jobs",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/ingest",
+      "schedule": "*/10 * * * *"
+    }
+  ],
+  "functions": {
+    "src/app/api/cron/jobs/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/ingest/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/webhooks/paddle/route.ts": {
+      "maxDuration": 30
+    }
+  }
+}
