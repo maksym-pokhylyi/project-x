@@ -7,7 +7,11 @@ import { requireAdminForPage } from "@/server/session";
 export const metadata: Metadata = { title: { default: "Admin", template: "%s · Admin" }, robots: { index: false } };
 export const dynamic = "force-dynamic";
 
-/** Founder-only area: 403 for everyone whose verified e-mail is not in ADMIN_EMAILS. */
+/**
+ * Founder-only area: 403 for everyone whose verified e-mail is not in ADMIN_EMAILS.
+ * Every page under /admin ALSO calls requireAdminForPage() itself: Next.js renders a
+ * layout and its page in parallel, so a layout check alone does not protect the page.
+ */
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await requireAdminForPage();
   return (

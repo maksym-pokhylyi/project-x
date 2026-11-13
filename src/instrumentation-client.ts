@@ -1,3 +1,5 @@
+import { publicEnv } from "@/env.public";
+
 /**
  * Browser-side instrumentation (runs once, before the app becomes interactive).
  *
@@ -5,12 +7,10 @@
  * NEXT_PUBLIC_POSTHOG_KEY is set. The library is loaded lazily, so without a key nothing
  * is downloaded and no request is made. Server-side events go through track().
  */
-const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-
-if (posthogKey) {
+if (publicEnv.posthogKey) {
   void import("posthog-js").then(({ default: posthog }) => {
-    posthog.init(posthogKey, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
+    posthog.init(publicEnv.posthogKey, {
+      api_host: publicEnv.posthogHost,
       capture_pageview: "history_change",
       capture_pageleave: true,
       person_profiles: "identified_only",
@@ -18,5 +18,3 @@ if (posthogKey) {
     });
   });
 }
-
-export {};

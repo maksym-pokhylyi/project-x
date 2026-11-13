@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { NotFoundError } from "@/lib/errors";
 import { entitlementsFor } from "@/lib/billing/subscription";
 import { getAdminOrganization, monthlyRevenueCents } from "@/server/admin";
+import { requireAdminForPage } from "@/server/session";
 
 export const metadata: Metadata = { title: "Organization" };
 
@@ -12,6 +13,7 @@ const usd = (value: number) => new Intl.NumberFormat("en-US", { style: "currency
 const day = (date: Date | null | undefined) => (date ? date.toISOString().slice(0, 10) : "—");
 
 export default async function AdminOrganizationPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdminForPage();
   const { id } = await params;
   const data = await getAdminOrganization(id).catch((error: unknown) => {
     if (error instanceof NotFoundError) notFound();

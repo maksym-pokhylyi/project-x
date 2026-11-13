@@ -38,6 +38,8 @@ const serverSchema = z.object({
   GOOGLE_CLIENT_ID: optional(z.string()),
   GOOGLE_CLIENT_SECRET: optional(z.string()),
   ADMIN_EMAILS: optional(z.string()),
+  /** Extra origins allowed to call the auth API (comma-separated), e.g. the *.vercel.app alias before the custom domain is live. */
+  AUTH_TRUSTED_ORIGINS: optional(z.string()),
 
   // --- Email ---
   RESEND_API_KEY: optional(z.string()),
@@ -113,6 +115,23 @@ function resolveAppUrl(e: ServerEnv): string {
 
 /** Canonical origin of this deployment, without a trailing slash. */
 export const appUrl = resolveAppUrl(env);
+
+/**
+ * Origins allowed to call the auth API: the canonical origin, any explicitly configured extras, and this
+ * deployment's own Vercel hostnames (so the *.vercel.app alias keeps working next to the custom domain).
+ */
+export const trustedOrigins: string[] = Array.from(
+  new Set(
+    [
+      appUrl,
+      ...(env.AUTH_TRUSTED_ORIGINS ?? "").split(","),
+      env.VERCEL_URL ? `https://${env.VERCEL_URL}` : "",
+      env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${env.VERCEL_PROJECT_PRODUCTION_URL}` : "",
+    ]
+      .map((origin) => origin.trim().replace(/\/+$/, ""))
+      .filter((origin) => /^https?:\/\/[^/]+$/.test(origin)),
+  ),
+);
 
 const isRealProduction = env.VERCEL_ENV === "production";
 const emailConfigured = Boolean(env.RESEND_API_KEY);

@@ -30,6 +30,8 @@ const eslintConfig = defineConfig([
     "test-results/**",
     "docs/**",
     ".data/**",
+    // Agent/tooling worktrees are full copies of the repo; never lint them from here.
+    ".claude/**",
   ]),
 ]);
 
