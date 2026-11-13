@@ -58,8 +58,8 @@ export function UpgradePanel({
   let title: string;
   let body: ReactNode;
   if (moment === "locked") {
-    title = "Drafts and marking are part of a full bid";
-    body = "This cited check is yours to keep: every requirement, the verdict, the list of scored questions and the Word download. First drafts from your documents and marking against the buyer’s scheme come with a full bid.";
+    title = "Take this check on to a full bid";
+    body = "Add the scored-question matrix with weights and word limits, a first draft of each answer from your documents, marking against the buyer’s scheme, and Word export.";
   } else if (onBidPlan && fullBids.trial) {
     title = limit === 1 ? "You have used the full bid in your trial" : `You have used the ${limit} full bids in your trial`;
     body = `Your plan’s monthly bids start when the trial ends on ${renews}.`;
@@ -96,6 +96,18 @@ export function UpgradePanel({
           </span>
         </p>
       ) : null}
+      {moment === "locked" ? (
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link href={OFFERS.bidPass.href} className="bid-btn bid-btn-primary" data-testid="offer-bid-pass">
+            {OFFERS.bidPass.action} · {OFFERS.bidPass.price}
+          </Link>
+          {onBidPlan ? null : (
+            <Link href={OFFERS.trial.href} className="bid-btn" data-testid="offer-trial">
+              Start the 14-day Bid Desk trial
+            </Link>
+          )}
+        </div>
+      ) : (
       <div className="mt-4 flex flex-wrap gap-3">
         <Offer offer={OFFERS.bidPass} primary testId="offer-bid-pass">
           {onBidPlan
@@ -114,6 +126,7 @@ export function UpgradePanel({
           </Offer>
         )}
       </div>
+      )}
       {children ? <div className="mt-4">{children}</div> : null}
       <p className="mt-4 text-[13px] text-(--bid-muted)">
         Prices exclude VAT. VAT is added at checkout where it applies.{" "}
@@ -121,7 +134,7 @@ export function UpgradePanel({
           <>Or wait until {renews}.</>
         ) : (
           <Link href={PLANS_URL} className="bid-link text-(--bid-ink)">
-            Compare the plans in full
+            {moment === "locked" ? "Compare the plans" : "Compare the plans in full"}
           </Link>
         )}
       </p>

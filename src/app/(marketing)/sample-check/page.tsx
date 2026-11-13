@@ -54,7 +54,8 @@ export default async function SampleCheckPage() {
       <div className="bid-scope sticky top-0 z-20 border-b border-(--bid-line) bg-(--bid-surface)" data-testid="sample-cta-bar">
         <div className="bid-toolbar mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2.5 sm:px-8">
           <p className="text-sm">
-            <span className="font-semibold">A sample check.</span> <span className="text-(--bid-muted)">Yours takes a few minutes: upload the pack as the buyer sent it.</span>
+            <span className="font-semibold">A sample check, built from a real public tender pack.</span>{" "}
+            <span className="text-(--bid-muted)">Company details are an example. Nothing here can be edited.</span>
           </p>
           <Link href={CTA_HREF} className="bid-btn bid-btn-primary">
             Get a free cited bid check

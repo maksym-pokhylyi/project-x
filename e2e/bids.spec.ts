@@ -186,7 +186,9 @@ test("upload a pack, get a cited check, draft and mark an answer, export", async
     ["answers", `${bidUrl}/questions`],
   ] as const) {
     await page.goto(url);
-    await expectAlignedControls(page, label);
+    const rows = await expectAlignedControls(page, label);
+    // The documents page has a search field beside "Upload documents": the check must have seen it.
+    if (label === "documents") expect(rows).toBeGreaterThan(0);
   }
   await page.locator('[data-testid="question-card"] a').last().click();
   await expect(page.getByTestId("answer-editor")).toBeVisible();

@@ -235,7 +235,7 @@ describe("pack pipeline", () => {
     expect(names).toEqual(expect.arrayContaining(["bid_created", "pack_uploaded"]));
     const mail = await db.select().from(emailOutbox).where(eq(emailOutbox.template, "brief-ready"));
     expect(mail).toHaveLength(1);
-    expect(mail[0]).toMatchObject({ toEmail: user.email, subject: "Your cited bid check is ready: Grounds Maintenance 2027-2030" });
+    expect(mail[0]).toMatchObject({ toEmail: user.email, subject: "Your bid check is ready: Grounds Maintenance 2027-2030" });
 
     // The status the UI polls says the same thing.
     const status = await getBidStatus(scope, bid);

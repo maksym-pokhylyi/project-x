@@ -60,9 +60,11 @@ describe("upgrade moments", () => {
 
   it("locked check: keeps the check whole and puts the offer under it", () => {
     const copy = text(renderToStaticMarkup(<UpgradePanel access={base} moment="locked" />));
-    expect(copy).toContain("Drafts and marking are part of a full bid");
-    expect(copy).toContain("This cited check is yours to keep");
-    expect(copy).toContain("Compare the plans in full");
+    expect(copy).toContain("Take this check on to a full bid");
+    expect(copy).toContain("Add the scored-question matrix with weights and word limits");
+    expect(copy).toContain("Buy a Bid Pass · £99");
+    expect(copy).toContain("Start the 14-day Bid Desk trial");
+    expect(copy).toContain("Compare the plans");
   });
 });
 

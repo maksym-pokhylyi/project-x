@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export type TabItem = { href: string; label: string; count?: number; exact?: boolean; alsoActive?: string[] };
 
-/** Workspace tabs: Brief / Requirements / Answers / Pack files. Scrolls sideways on small screens. */
+/** Workspace tabs: Brief / Requirements / Answers / Coverage. Scrolls sideways on small screens. */
 export function BidTabs({ tabs }: { tabs: TabItem[] }) {
   const pathname = usePathname();
   return (

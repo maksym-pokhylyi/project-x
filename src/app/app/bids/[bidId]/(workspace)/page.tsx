@@ -42,6 +42,7 @@ export default async function BriefPage({ params }: { params: Promise<{ bidId: s
         <BriefView
           bidId={bid.id}
           brief={bid.brief}
+          locked={done && bid.accessLevel !== "full"}
           verdict={done ? bid.verdict : null}
           evaluationModel={bid.evaluationModel}
           keyDates={bid.keyDates ?? []}

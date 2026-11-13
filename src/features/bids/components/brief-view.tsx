@@ -44,6 +44,8 @@ export type BriefViewProps = {
   coverage: CoverageSummary;
   links: SourceLinks;
   readOnly?: boolean;
+  /** A cited check without a full bid: the scored questions are listed by title only. */
+  locked?: boolean;
   /** Still processing: later sections may be missing. */
   partial?: boolean;
   factsConfirmed?: boolean;
@@ -415,14 +417,25 @@ export function BriefView(props: BriefViewProps) {
                 Scored questions
               </h2>
               <p className="text-sm text-(--bid-muted)">
-                {scored.length === 0
+                {props.locked && scored.length > 0
+                  ? `${count(scored.length)} scored ${plural(scored.length, "question")} found${evaluationModel?.qualityWeight != null ? `, carrying ${evaluationModel.qualityWeight}% of the marks` : ""}. Titles are shown; the matrix, drafts and marking are part of a full bid.`
+                  : scored.length === 0
                   ? partial
                     ? "Questions appear here as they are found."
                     : "No scored written questions were found in the pack."
                   : `${count(scored.length)} written ${plural(scored.length, "answer")}${evaluationModel?.qualityWeight != null ? ` ${plural(scored.length, "carries", "carry")} ${evaluationModel.qualityWeight}% of the marks` : ""}${wordsInAll ? `: ${wordsInAll.toLocaleString("en-GB")} words in all` : ""}.`}
               </p>
             </div>
-            {scored.length > 0 ? (
+            {scored.length > 0 && props.locked ? (
+              <ol className="bid-card" data-testid="scored-questions-locked">
+                {scored.map((question, index) => (
+                  <li key={question.id} className={cn("flex items-baseline gap-4 px-5 py-3 text-[15px] sm:px-6", index > 0 ? "bid-rule" : "")}>
+                    <span className="bid-mono w-14 shrink-0 text-xs text-(--bid-muted)">{question.ref}</span>
+                    <span className="min-w-0">{question.title ?? question.text}</span>
+                  </li>
+                ))}
+              </ol>
+            ) : scored.length > 0 ? (
               <div className="bid-card overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[720px] border-collapse text-sm" data-testid="scored-questions">

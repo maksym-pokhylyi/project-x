@@ -67,7 +67,11 @@ export default async function BidLayout({ children, params }: { children: ReactN
         </div>
         <div className="bid-noprint bid-toolbar flex flex-wrap items-center gap-2.5">
           {done ? <ExportMenu bidId={bid.id} canExportAnswers={capabilities.exportAnswers} answersReady={answersReady} label={bid.accessLevel === "full" ? undefined : "Download the check (Word)"} /> : null}
-          {done && questions.length > 0 ? (
+          {done && bid.accessLevel !== "full" && bid.status === "ready" ? (
+            <Link href={`${base}#upgrade-h`} className="bid-btn bid-btn-primary" data-testid="unlock-full-bid">
+              Unlock the full bid
+            </Link>
+          ) : done && questions.length > 0 ? (
             <Link href={firstScored ? `${base}/questions/${firstScored.id}` : `${base}/questions`} className="bid-btn bid-btn-primary" data-testid="open-answers">
               Open draft answers
               <ArrowRight aria-hidden className="size-4" />
@@ -83,7 +87,7 @@ export default async function BidLayout({ children, params }: { children: ReactN
             { href: base, label: "Brief", exact: true },
             { href: `${base}/requirements`, label: "Requirements", count: requirements.length },
             { href: `${base}/questions`, label: "Answers", count: questions.length },
-            { href: `${base}/files`, label: "Pack files", count: packFiles.length },
+            { href: `${base}/files`, label: "Coverage", count: packFiles.length },
           ]}
         />
       </div>

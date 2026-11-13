@@ -4,7 +4,7 @@ import { loadBidPage } from "@/features/bids/server/page-data";
 import { coverageSummary, toPackFileItems } from "@/features/bids/view";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Pack files" };
+export const metadata: Metadata = { title: "Coverage" };
 export const dynamic = "force-dynamic";
 
 /**
