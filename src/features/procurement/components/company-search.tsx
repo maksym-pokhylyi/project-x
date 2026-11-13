@@ -1,154 +1,133 @@
-"use client";
-
-import { Search } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useId, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Input } from "@/components/ui/input";
-
-export type CompanyHit = {
-  slug: string;
-  name: string;
-  companyNumber: string | null;
-  locality: string | null;
-  awardsCount: number;
-  isPublic: boolean;
-};
-
-type Status = "idle" | "typing" | "loading" | "done" | "error";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { formatMonth, pluralise } from "../domain/format";
+import type { SupplierHit } from "../queries/suppliers";
+import { controlSize } from "./ui/control-size";
+import { ListCard } from "./ui/list-card";
 
 /**
- * "Find your company": search by name or Companies House number.
- * Works without JavaScript as a plain GET form (`?q=`); with it, results update as you type.
- * States (DESIGN.md §6): empty, typing, no result, many results, error.
+ * "Find your company", as the Find artboards draw it. A plain GET form: the question lives
+ * in the address (`?q=`), the results are rendered on the server, and nothing here needs
+ * script — it is the first thing a visitor from a cold e-mail may do.
+ *
+ * COMPANY-LEVEL DATA ONLY: a name, a town, a Companies House number and a count of
+ * published contracts.
  */
-export function CompanySearch({
-  initialQuery,
-  initialResults,
-  resultHref,
-  endpoint,
+
+/** The search row: one field and its button, the same 52 px (control sizes: "search rows"). */
+export function CompanySearchForm({
   action,
-  manualHref,
-  actionLabel = "View page",
+  defaultValue = "",
+  autoFocus = false,
+  id = "company-q",
+  className,
 }: {
-  initialQuery: string;
-  initialResults: CompanyHit[];
-  /** Builds the link of a result. */
-  resultHref: "public" | "claim";
-  /** JSON endpoint for type-ahead. */
-  endpoint: string;
-  /** Path the form submits to without JavaScript. */
+  /** Where the form submits: the page that shows the results. */
   action: string;
-  /** Where "set up a radar manually" leads. */
-  manualHref: string;
-  actionLabel?: string;
+  defaultValue?: string;
+  autoFocus?: boolean;
+  id?: string;
+  className?: string;
 }) {
-  const inputId = useId();
-  const [query, setQuery] = useState(initialQuery);
-  // What the list currently shows, and for which search term it was loaded.
-  const [loaded, setLoaded] = useState<{ term: string; results: CompanyHit[] }>({ term: initialQuery.trim(), results: initialResults });
-  const [failedTerm, setFailedTerm] = useState<string | null>(null);
-  const latest = useRef(0);
-  const term = query.trim();
-
-  useEffect(() => {
-    if (term.length < 2 || term === loaded.term) return;
-    const ticket = ++latest.current;
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      try {
-        const url = new URL(endpoint, window.location.origin);
-        url.searchParams.set("q", term);
-        const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) throw new Error(String(response.status));
-        const body = (await response.json()) as { results: CompanyHit[] };
-        if (ticket !== latest.current) return;
-        setLoaded({ term, results: body.results });
-        setFailedTerm(null);
-      } catch (error) {
-        if ((error as Error).name === "AbortError" || ticket !== latest.current) return;
-        setFailedTerm(term);
-      }
-    }, 250);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [term, endpoint, loaded.term]);
-
-  // Everything the user sees is derived from the term and what has been loaded for it.
-  const status: Status = term.length === 0 ? "idle" : term.length < 2 ? "typing" : failedTerm === term ? "error" : loaded.term === term ? "done" : "loading";
-  const results = status === "done" ? loaded.results : [];
-
-  const hrefOf = (hit: CompanyHit) => (resultHref === "claim" ? `/claim/${hit.slug}` : `/suppliers/${hit.slug}`);
-
+  const height = controlSize.search;
   return (
-    <div className="space-y-4">
-      <form action={action} method="get" role="search" className="flex flex-col gap-2 sm:flex-row">
-        <div className="flex-1">
-          <label htmlFor={inputId} className="mb-1.5 block text-sm font-medium">
-            Company name or Companies House number
-          </label>
-          <div className="relative">
-            <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id={inputId}
-              name="q"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="e.g. Acme Grounds Maintenance or 01234567"
-              autoComplete="organization"
-              className="h-11 pl-9"
-              aria-describedby={`${inputId}-status`}
-              data-testid="company-search-input"
-            />
-          </div>
-        </div>
-        <Button type="submit" size="lg" className="h-11 sm:self-end">
+    <form action={action} method="get" role="search" className={cn("flex max-w-[45rem] flex-col gap-2", className)} data-testid="company-search">
+      <Label htmlFor={id}>Company name or Companies House number</Label>
+      <div className="flex gap-2">
+        <Input
+          id={id}
+          name="q"
+          type="search"
+          defaultValue={defaultValue}
+          autoFocus={autoFocus}
+          autoComplete="organization"
+          spellCheck={false}
+          enterKeyHint="search"
+          maxLength={120}
+          className={cn(height, "min-w-0 flex-1")}
+          data-testid="company-search-input"
+        />
+        <Button type="submit" variant="outline" className={cn(height, "px-[1.125rem] text-base md:px-[1.375rem]")} data-testid="company-search-submit">
+          <svg viewBox="0 0 16 16" aria-hidden className="size-4 fill-none stroke-current stroke-[1.6] [stroke-linecap:round] max-md:hidden">
+            <circle cx="7" cy="7" r="4.5" />
+            <path d="M10.5 10.5L14 14" />
+          </svg>
           Search
         </Button>
-      </form>
-
-      <div id={`${inputId}-status`} aria-live="polite" className="text-sm text-muted-foreground" data-testid="company-search-status" data-status={status}>
-        {status === "idle" ? "Type at least two characters. We list suppliers named in published contract awards." : null}
-        {status === "typing" ? "Keep typing…" : null}
-        {status === "loading" ? "Searching…" : null}
-        {status === "error" ? "Search is not available right now. Press Search to try again." : null}
-        {status === "done" && results.length > 0 ? `${results.length === 20 ? "Top 20 results" : `${results.length} result${results.length === 1 ? "" : "s"}`} for “${query.trim()}”` : null}
       </div>
+    </form>
+  );
+}
 
-      {status === "done" && results.length === 0 ? (
-        <div className="rounded-lg border border-dashed px-5 py-8 text-center" data-testid="company-search-empty">
-          <p className="text-sm font-medium">No company found for “{query.trim()}”</p>
-          <p className="mx-auto mt-1 max-w-prose text-sm text-muted-foreground">
-            We only list suppliers with published awards. Check the spelling or try the company number — or set up a radar manually.
-          </p>
-          <Button asChild variant="outline" className="mt-4">
-            <Link href={manualHref}>Set up a radar manually</Link>
-          </Button>
-        </div>
-      ) : null}
+function contractsLine(hit: SupplierHit): ReactNode {
+  if (hit.awardsCount === 0) return "No public contracts found";
+  const recent = formatMonth(hit.lastAwardAt);
+  return `${pluralise(hit.awardsCount, "public contract")} found${recent && hit.awardsCount > 1 ? `, most recent ${recent}` : ""}`;
+}
 
-      {results.length > 0 ? (
-        <ul className="divide-y rounded-lg border" data-testid="company-search-results">
-          {results.map((hit) => (
-            <li key={hit.slug} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="break-words font-medium">{hit.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {[hit.companyNumber ? `Company no. ${hit.companyNumber}` : null, hit.locality, `${hit.awardsCount} published award${hit.awardsCount === 1 ? "" : "s"}`].filter(Boolean).join(" · ")}
-                </p>
-              </div>
-              {resultHref === "public" && !hit.isPublic ? null : (
-                <Button asChild variant="outline" size="sm" className="shrink-0 self-start sm:self-auto">
-                  <Link href={hrefOf(hit)}>{actionLabel}</Link>
-                </Button>
-              )}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
+/**
+ * The results: one white card, a row per company. The first row — the closest match —
+ * carries the primary button; the others an outline one. A company without a public page
+ * (no contract to its name, or one we do not publish) has no "View page", and says so.
+ */
+export function CompanyResults({ query, hits, manualHref }: { query: string; hits: SupplierHit[]; /** Where "set up a radar by trade and region" leads. */ manualHref: string }) {
+  return (
+    <section aria-labelledby="results-h" className="flex flex-col" data-testid="company-results">
+      <div className="flex flex-col gap-x-6 gap-y-0.5 md:flex-row md:flex-wrap md:items-baseline md:justify-between">
+        <h2 id="results-h" className="font-sans text-base leading-snug font-semibold text-ink md:text-17">
+          {pluralise(hits.length, "company", "companies")} {hits.length === 1 ? "matches" : "match"} “{query}”
+        </h2>
+        <p className="text-13 text-ink-2 md:text-sm">Closest name first, then most public contracts.</p>
+      </div>
+      <ListCard aria-label="Companies" className="mt-3.5 tabular-nums">
+        {hits.map((hit, index) => (
+          <li key={hit.slug} className="flex flex-col gap-x-8 gap-y-3 p-4 lg:flex-row lg:items-center lg:px-6 lg:py-5" data-testid="company-result">
+            <div className="flex min-w-0 flex-col gap-1 lg:flex-[1_1_25rem]">
+              <h3 className="font-sans text-base leading-snug font-semibold text-ink [overflow-wrap:anywhere] md:text-17">{hit.name}</h3>
+              <p className="text-13 text-ink-2 md:text-sm">
+                {[hit.locality, hit.companyNumber ? "Companies House" : null].filter(Boolean).join(" · ")}
+                {hit.companyNumber ? (
+                  <>
+                    {" "}
+                    <span className="font-mono text-xs md:text-13">{hit.companyNumber}</span>
+                  </>
+                ) : null}
+                {!hit.locality && !hit.companyNumber ? "No Companies House number published" : null}
+              </p>
+            </div>
+            <div className="-mt-1.5 flex flex-col text-sm text-ink md:text-15 lg:mt-0 lg:w-[22.5rem] lg:shrink-0">
+              <p>{contractsLine(hit)}</p>
+              {hit.awardsCount === 0 ? (
+                <p className="text-13 text-ink-2">No page yet. You can still set up a radar.</p>
+              ) : !hit.isPublic ? (
+                <p className="text-13 text-ink-2">No public page for this supplier.</p>
+              ) : null}
+            </div>
+            <div className="flex items-center gap-4 lg:w-[18.125rem] lg:shrink-0 lg:flex-row-reverse lg:justify-start lg:gap-5">
+              <ButtonLink href={`/claim/${hit.slug}`} variant={index === 0 ? "default" : "outline"} className="flex-1 lg:flex-none" aria-label={`This is my company: ${hit.name}`} data-testid="company-claim">
+                This is my company
+              </ButtonLink>
+              {hit.isPublic ? (
+                <Link href={`/suppliers/${hit.slug}`} className="link inline-flex min-h-11 items-center rounded-sm text-sm" aria-label={`View page for ${hit.name}`}>
+                  View page
+                </Link>
+              ) : null}
+            </div>
+          </li>
+        ))}
+      </ListCard>
+      <p className="mt-4 text-sm text-ink md:mt-5 md:text-15">
+        Can’t see your company? Try the Companies House number, or{" "}
+        <Link href={manualHref} className="link">
+          set up a radar by trade and region
+        </Link>
+        .
+      </p>
+    </section>
   );
 }
