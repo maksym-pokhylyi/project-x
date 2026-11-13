@@ -5,8 +5,8 @@ import { site } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { DATA_SOURCES_HREF, flagMistakeHref, PRIVACY_HREF } from "../domain/links";
 import { pluralise } from "../domain/format";
-import { FooterBand } from "./ui/footer-band";
-import { LeanHeader, type LeanHeaderLink } from "./ui/lean-header";
+import { FooterBand } from "@/components/ui/footer-band";
+import { LeanHeader, type LeanHeaderLink } from "@/components/ui/lean-header";
 
 /**
  * The frame of the public data pages, as the artboards draw it:

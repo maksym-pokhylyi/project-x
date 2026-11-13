@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { formatMonth, pluralise } from "../domain/format";
 import type { SupplierHit } from "../queries/suppliers";
 import { controlSize } from "./ui/control-size";
-import { ListCard } from "./ui/list-card";
+import { ListCard } from "@/components/ui/list-card";
 
 /**
  * "Find your company", as the Find artboards draw it. A plain GET form: the question lives

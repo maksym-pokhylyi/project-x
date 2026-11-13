@@ -5,7 +5,7 @@ import { site } from "@/config/site";
 import { recordDigestClick } from "@/features/notifications/clicks";
 import { DataHeader, DataMain, SourceFooter } from "@/features/procurement/components/public-chrome";
 import { TenderView } from "@/features/procurement/components/tender-detail";
-import { ActionBand } from "@/features/procurement/components/ui/action-band";
+import { ActionBand } from "@/components/ui/action-band";
 import { formatDate } from "@/features/procurement/domain/format";
 import { formatMoneyShort } from "@/features/procurement/domain/money";
 import { loadTenderPage } from "@/features/procurement/public-data";

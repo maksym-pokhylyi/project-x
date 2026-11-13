@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { submitDataRequestAction, type DataRequestState } from "../actions";
 import { DATA_ISSUES } from "../domain/data-requests";
-import { RadioChoices, RadioRow, TickRow } from "./ui/choice";
+import { RadioChoices, RadioRow, TickRow } from "@/components/ui/choice";
 import { controlSize } from "./ui/control-size";
 
 /**

@@ -14,12 +14,12 @@ import type { SupplierRecord } from "../queries/suppliers";
 import { MatchRow, tenderListClasses, tenderListFrameClasses, tenderListItemClasses } from "./match-row";
 import { SourceLink } from "./notice-bits";
 import { BuyersInTrade, ContractWins, EndingContracts } from "./supplier-lists";
-import { ActionBand } from "./ui/action-band";
-import { AnchorNav } from "./ui/anchor-nav";
-import { CategoryChip, CategoryChipList } from "./ui/category-chip";
-import { EmptyState } from "./ui/empty-state";
-import { MetaLine } from "./ui/meta-line";
-import { SectionHead } from "./ui/section-head";
+import { ActionBand } from "@/components/ui/action-band";
+import { AnchorNav } from "@/components/ui/anchor-nav";
+import { CategoryChip, CategoryChipList } from "@/components/ui/category-chip";
+import { EmptyState } from "@/components/ui/empty-state";
+import { MetaLine } from "@/components/ui/meta-line";
+import { SectionHead } from "@/components/ui/section-head";
 import { StatRow } from "./ui/stat-row";
 
 /**

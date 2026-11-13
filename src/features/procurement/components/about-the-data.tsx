@@ -4,8 +4,8 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { site } from "@/config/site";
 import { INDEPENDENCE_STATEMENT, OGL_ATTRIBUTION, OGL_URL } from "../config";
 import { FLAG_MISTAKE_HREF } from "../domain/links";
-import { ActionBand } from "./ui/action-band";
-import { SectionHead } from "./ui/section-head";
+import { ActionBand } from "@/components/ui/action-band";
+import { SectionHead } from "@/components/ui/section-head";
 
 /**
  * "About the data": where the notices come from, how they are licensed, what the pages show

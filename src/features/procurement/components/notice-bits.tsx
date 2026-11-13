@@ -6,8 +6,8 @@ import { describeClosing } from "../domain/format";
 import { formatMoney, formatMoneyExact } from "../domain/money";
 import { noticeBadgeKind, NOTICE_TYPES, type NoticeStage } from "../domain/notice-types";
 import type { ReasonChip } from "../domain/reasons";
-import { DeadlineBlock } from "./ui/deadline-block";
-import { ScrollRow } from "./ui/scroll-row";
+import { DeadlineBlock } from "@/components/ui/deadline-block";
+import { ScrollRow } from "@/components/ui/scroll-row";
 
 /**
  * The small parts every procurement screen is made of — the kind of notice, its reference,

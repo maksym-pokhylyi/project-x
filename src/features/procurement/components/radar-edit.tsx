@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 import { countRadarMatchesAction, saveRadarChoicesAction, saveRadarProfileAction, type ProfileFormState } from "../actions";
 import { pluralise } from "../domain/format";
 import type { RadarEditData } from "../radar/view";
-import { ChoiceGroup, TickRow } from "./ui/choice";
+import { ChoiceGroup, TickRow } from "@/components/ui/choice";
 import { controlSize } from "./ui/control-size";
-import { SideSheet } from "./ui/side-sheet";
+import { SideSheet } from "@/components/ui/side-sheet";
 
 /**
  * "Trades and regions": what a radar matches on, as the RadarEdit artboards draw it — a

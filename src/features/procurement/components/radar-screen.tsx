@@ -38,16 +38,16 @@ import { RadarFirstRunGuide } from "./radar-first-run";
 import { RadarList } from "./radar-list";
 import { SaveButton } from "./save-button";
 import { BuyersInTrade, EndingContracts } from "./supplier-lists";
-import { ActionBand } from "./ui/action-band";
-import { AppliedFilters, type AppliedFilter } from "./ui/applied-filters";
-import { CategoryChip, CategoryChipList } from "./ui/category-chip";
-import { EmptyState } from "./ui/empty-state";
-import { KeepCurrentInView } from "./ui/keep-current-in-view";
-import { ListCard } from "./ui/list-card";
+import { ActionBand } from "@/components/ui/action-band";
+import { AppliedFilters, type AppliedFilter } from "@/components/ui/applied-filters";
+import { CategoryChip, CategoryChipList } from "@/components/ui/category-chip";
+import { EmptyState } from "@/components/ui/empty-state";
+import { KeepCurrentInView } from "@/components/ui/keep-current-in-view";
+import { ListCard } from "@/components/ui/list-card";
 import { LockedRow } from "./ui/locked-row";
 import { MenuFilter, type MenuFilterOption } from "./ui/menu-filter";
-import { MetaLine } from "./ui/meta-line";
-import { ScrollRow } from "./ui/scroll-row";
+import { MetaLine } from "@/components/ui/meta-line";
+import { ScrollRow } from "@/components/ui/scroll-row";
 
 /**
  * The Radar, as the Radar artboards draw it: what the workspace's company should look at

@@ -7,7 +7,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { setTenderStateAction } from "../actions";
 import { bidCheckHref } from "../domain/links";
 import { MatchRow, tenderListClasses, tenderListItemClasses, type MatchRowItem } from "./match-row";
-import { SaveToggle } from "./ui/save-toggle";
+import { SaveToggle } from "@/components/ui/save-toggle";
 
 /**
  * The rows of the Matches and Early signals tabs, with their actions:

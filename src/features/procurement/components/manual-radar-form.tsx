@@ -8,7 +8,7 @@ import { setUpRadarAction, type ProfileFormState } from "../actions";
 import { UK_REGIONS } from "../domain/regions";
 import { BROAD_TRADES } from "../domain/trades";
 import type { RadarSelection } from "../radar/selection";
-import { ChoiceGroup, TickRow } from "./ui/choice";
+import { ChoiceGroup, TickRow } from "@/components/ui/choice";
 import { controlSize } from "./ui/control-size";
 
 /**

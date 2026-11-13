@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
 import { claimSupplierAction } from "../actions";
 import { formatMoneyShort } from "../domain/money";
 import type { SupplierRecord } from "../queries/suppliers";
-import { TickRow } from "./ui/choice";
+import { TickRow } from "@/components/ui/choice";
 import { controlSize } from "./ui/control-size";
 import { StatRow } from "./ui/stat-row";
-import { TickList } from "./ui/tick-list";
+import { TickList } from "@/components/ui/tick-list";
 
 /**
  * The parts of the Claim page, as the Claim and ClaimSignedIn artboards draw it: the

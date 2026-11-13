@@ -10,12 +10,12 @@ import type { ContractRow } from "../queries/contracts";
 import type { NoticeCard } from "../queries/shared";
 import { MatchRow, plainRow, tenderListClasses, tenderListFrameClasses, tenderListItemClasses } from "./match-row";
 import { Money, NoticeRef, SourceLink } from "./notice-bits";
-import { ActionBand } from "./ui/action-band";
-import { AnchorNav } from "./ui/anchor-nav";
-import { EmptyState } from "./ui/empty-state";
-import { ListCardFoot } from "./ui/list-card";
-import { MetaLine } from "./ui/meta-line";
-import { SectionHead } from "./ui/section-head";
+import { ActionBand } from "@/components/ui/action-band";
+import { AnchorNav } from "@/components/ui/anchor-nav";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ListCardFoot } from "@/components/ui/list-card";
+import { MetaLine } from "@/components/ui/meta-line";
+import { SectionHead } from "@/components/ui/section-head";
 import { StatRow } from "./ui/stat-row";
 
 /**

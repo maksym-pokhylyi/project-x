@@ -3,7 +3,7 @@
 import { useOptimistic, useTransition } from "react";
 import { toast } from "sonner";
 import { setTenderStateAction } from "../actions";
-import { SaveToggle } from "./ui/save-toggle";
+import { SaveToggle } from "@/components/ui/save-toggle";
 
 /**
  * Save / Saved for one procurement, wired to the workspace's saved list. The button turns

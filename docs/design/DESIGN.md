@@ -360,6 +360,14 @@ ControlGroup, CopyField, DeadlineMarker (+ `timeLeft`), DetailList, Dialog, Disc
 MenuButton, MenuSheet, NativeSelect, NavLink, NoticeBand, Pagination, Popover, Progress, RadioGroup, ReferenceChip (+ `ReferenceChipButton`, `ReferenceStateMark`),
 ScoreBars, SegmentedToggle, Select, Separator, Skeleton / SkeletonRows, SourceMark, Spinner, Stat / StatRow, StatusPill, StepTracker,
 Switch, Table, Tabs (+ `TabsCount`), Textarea, Toaster (sonner), ToggleButton, Tooltip (+ `TooltipText`), UpgradeBand, UsageBar.
+Moved in from the Radar and public data pages (generic, data in through props): ActionBand, AnchorNav, AppliedFilters,
+CategoryChip / CategoryChipList, ChoiceGroup / TickRow / RadioRow / RadioChoices, DeadlineBlock / TimeLeft, EmptyState,
+FooterBand, KeepCurrentInView, KeyFacts, LeanHeader, ListCard / ListCardFoot, MetaLine, NumberedCard, QuoteCard,
+SaveToggle / BookmarkIcon, ScrollRow / ScrollableTabStop, SectionHead, SideSheet, TickList. They are not on `/styleguide`
+yet. Still beside their module, to be folded into the parts above: the Radar's own `StatRow` and `LockedRow`
+(`Stat / StatRow` and `LockedList / LockedRow` here are the library's) and `MenuFilter` with its `controlSize` stop-gap
+(`src/features/procurement/components/ui/`); the bid desk's citation mark, fact tick, stacked bar and upgrade panel
+(`src/features/bids/components/ui/`).
 In `src/components/forms/`: Form, FormField, Field, FieldGroup, FieldHint, FieldError, FormError, FormRow, FormRowAction.
 
 Notes on the ones that differ from the shadcn originals:

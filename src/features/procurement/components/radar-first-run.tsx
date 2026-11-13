@@ -10,10 +10,10 @@ import type { RadarFirstRun, RadarView } from "../radar/view";
 import { tenderListFrameClasses } from "./match-row";
 import { RadarEditTrigger } from "./radar-edit";
 import { RadarList } from "./radar-list";
-import { EmptyState } from "./ui/empty-state";
-import { ListCardFoot } from "./ui/list-card";
-import { NumberedCard } from "./ui/numbered-card";
-import { SectionHead } from "./ui/section-head";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ListCardFoot } from "@/components/ui/list-card";
+import { NumberedCard } from "@/components/ui/numbered-card";
+import { SectionHead } from "@/components/ui/section-head";
 
 /**
  * The radar the first time it is opened — right after a claim or a manual set-up — as the

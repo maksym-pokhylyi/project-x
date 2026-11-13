@@ -15,12 +15,12 @@ import type { TenderDetail } from "../queries/notices";
 import { placeOf } from "./match-row";
 import { Closes, Money, NoticeRef, NoticeTypeChip, SourceLink } from "./notice-bits";
 import { SaveButton } from "./save-button";
-import { CategoryChip, CategoryChipList } from "./ui/category-chip";
-import { KeyFacts, type KeyFact } from "./ui/key-facts";
-import { ListCard } from "./ui/list-card";
-import { QuoteCard } from "./ui/quote-card";
-import { BookmarkIcon } from "./ui/save-toggle";
-import { SectionHead } from "./ui/section-head";
+import { CategoryChip, CategoryChipList } from "@/components/ui/category-chip";
+import { KeyFacts, type KeyFact } from "@/components/ui/key-facts";
+import { ListCard } from "@/components/ui/list-card";
+import { QuoteCard } from "@/components/ui/quote-card";
+import { BookmarkIcon } from "@/components/ui/save-toggle";
+import { SectionHead } from "@/components/ui/section-head";
 
 /**
  * One procurement, as the Tender and TenderSignedIn artboards draw it — the same view on

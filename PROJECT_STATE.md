@@ -144,8 +144,9 @@ Bid Desk £149/мес (3 заявки, перенос, пауза), Bid Desk Plu
 1. Когда владелец добавит токен и секрет Paddle и сделает Redeploy: тестовая оплата на боевом сайте (пробный период Bid Desk
    и Bid Pass тестовой картой `4242 4242 4242 4242`, CVC `100`), затем полная заявка (черновики, оценка, экспорт ответов),
    пауза и отмена из Billing. При сбоях — `pnpm paddle:pull-events`, журнал `webhook_events`.
-2. Свести локальные наборы универсальных частей (`src/features/procurement/components/ui`, `src/features/bids/components/ui`)
-   в `src/components/ui`, убрать дубли (`StatRow`, `LockedRow`, `EmptyState`, `controlSize`).
+2. Довести сведение компонентов: 21 часть радара перенесена в `src/components/ui`; осталось заменить локальные `StatRow`,
+   `LockedRow` радара библиотечными, убрать `controlSize` (`MenuFilter`), перенести части заявок
+   (`src/features/bids/components/ui`), показать перенесённое на `/styleguide`.
 3. Цены без пробного периода в каталоге Paddle (`PADDLE_PRICE_PRO_MONTHLY_NOTRIAL`, `PADDLE_PRICE_PRO_ANNUAL_NOTRIAL`);
    в письмах перейти на уровень «сильные» из запроса и убрать временный порог `STRONG_MATCH.minScore`
    (`src/features/notifications/content/matches.ts`); флажок сводки при регистрации (`setDigestPreference`).

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { SignUpForm } from "@/components/auth/sign-up-form";
-import { TickRow } from "./ui/choice";
+import { TickRow } from "@/components/ui/choice";
 import { controlSize } from "./ui/control-size";
 
 /**

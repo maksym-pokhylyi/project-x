@@ -8,7 +8,7 @@ import { regionLabel } from "../domain/regions";
 import type { BuyerInsight } from "../queries/buyers";
 import type { ContractRow, EndingSoonItem } from "../queries/contracts";
 import { Money, NoticeRef } from "./notice-bits";
-import { ListCardFoot } from "./ui/list-card";
+import { ListCardFoot } from "@/components/ui/list-card";
 
 /**
  * The three tables of a supplier's record — its contract wins, rival contracts ending soon
