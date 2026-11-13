@@ -1,0 +1,424 @@
+/*
+ * Bid desk theme — the tokens of the design handoff (docs/design/handoff).
+ *
+ * Every token reads the shared design-system variable (src/app/globals.css: `--ink`,
+ * `--paper`, `--brand`, `--accent` …), so the shared theme governs; the fallback is the
+ * handoff's exact value and only applies where this stylesheet is used without it.
+ */
+:root {
+  --bid-ink: var(--ink, #161a1d);
+  --bid-muted: var(--ink-2, #5a6165);
+  --bid-paper: var(--paper, #faf8f3);
+  --bid-paper-deep: var(--paper-deep, #f2eee4);
+  --bid-surface: var(--surface, #ffffff);
+  --bid-line: var(--line, #e3ded2);
+  --bid-line-strong: var(--line-strong, #857f70);
+  --bid-brand: var(--brand, #0f5a47);
+  --bid-brand-tint: var(--brand-tint, #e6efeb);
+  --bid-amber: var(--accent, #b4690e);
+  --bid-amber-ink: var(--accent-ink, #925207);
+  --bid-amber-tint: var(--accent-tint, #f7ebd7);
+  --bid-danger: var(--danger, #a3271c);
+  --bid-danger-tint: var(--danger-tint, #f6e3e0);
+  --bid-info: var(--info, #1f4f8f);
+  --bid-info-tint: var(--info-tint, #e3eaf4);
+  --bid-serif: var(--font-serif, "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif);
+  --bid-mono: var(--font-mono, "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+}
+
+.bid-scope {
+  color: var(--bid-ink);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.bid-scope :focus-visible {
+  outline: 2px solid var(--bid-brand);
+  outline-offset: 2px;
+}
+
+.bid-serif {
+  font-family: var(--bid-serif);
+}
+.bid-mono {
+  font-family: var(--bid-mono);
+}
+.bid-muted {
+  color: var(--bid-muted);
+}
+
+.bid-h1 {
+  font-family: var(--bid-serif);
+  font-weight: 600;
+  font-size: clamp(26px, 4.4vw, 36px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.bid-h2 {
+  font-family: var(--bid-serif);
+  font-weight: 600;
+  font-size: clamp(22px, 3.4vw, 28px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.bid-h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.bid-quote {
+  font-family: var(--bid-serif);
+  font-size: 17px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+/* Links are ink with a green underline. */
+.bid-link {
+  color: var(--bid-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--bid-brand);
+  text-underline-offset: 3px;
+}
+.bid-link:hover {
+  color: var(--bid-brand);
+}
+.bid-link-quiet {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--bid-line-strong);
+  text-underline-offset: 3px;
+}
+.bid-link-quiet:hover {
+  color: var(--bid-brand);
+}
+
+.bid-card {
+  background: var(--bid-surface);
+  border: 1px solid var(--bid-line);
+  border-radius: 10px;
+}
+.bid-rule {
+  border-top: 1px solid var(--bid-line);
+}
+
+/*
+ * Control sizes (Foundations: "Control sizes") — ONE height scale for fields and buttons:
+ *   44 px  toolbars, tables and filters      .bid-btn-sm, .bid-filter, anything in .bid-toolbar
+ *   48 px  forms                              .bid-btn, .bid-input
+ *   52 px  the same forms on phones
+ * A button beside a field takes the field's height and a form's submit button the height
+ * of its fields: both read the same variable, so a row cannot disagree.
+ */
+.bid-scope {
+  --bid-control: 3rem;
+  --bid-control-compact: 2.75rem;
+}
+@media (width < 48rem) {
+  .bid-scope {
+    --bid-control: 3.25rem;
+  }
+}
+.bid-btn {
+  box-sizing: border-box;
+  height: var(--bid-control, 3rem);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  border-radius: 6px;
+  border: 1px solid var(--bid-line-strong);
+  color: var(--bid-ink);
+  background: var(--bid-surface);
+  cursor: pointer;
+}
+.bid-btn:hover {
+  border-color: var(--bid-ink);
+}
+.bid-btn:disabled,
+.bid-btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.bid-btn-primary {
+  color: #ffffff;
+  background: var(--bid-brand);
+  border-color: var(--bid-brand);
+  padding-inline: 18px;
+}
+.bid-btn-primary:hover {
+  border-color: var(--bid-brand);
+  filter: brightness(0.92);
+}
+.bid-btn-sm,
+.bid-toolbar .bid-btn {
+  height: var(--bid-control-compact, 2.75rem);
+  padding: 0 14px;
+  font-size: 14px;
+}
+.bid-toolbar input.bid-input,
+.bid-toolbar select.bid-input {
+  height: var(--bid-control-compact, 2.75rem);
+}
+.bid-btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  font-weight: 500;
+}
+.bid-btn-quiet:hover {
+  border-color: var(--bid-line);
+}
+
+/* Filter chips (pressed = ink). */
+.bid-filter {
+  height: var(--bid-control-compact, 2.75rem);
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--bid-ink);
+  background: var(--bid-surface);
+  border: 1px solid var(--bid-line-strong);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.bid-filter[aria-pressed="true"] {
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--bid-ink);
+  border-color: var(--bid-ink);
+}
+
+/* Source chip: file · page, in the reference face. */
+.bid-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  font-family: var(--bid-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+  color: var(--bid-ink);
+  background: var(--bid-paper);
+  border: 1px solid var(--bid-line);
+  border-radius: 4px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.bid-chip:hover {
+  border-color: var(--bid-line-strong);
+}
+.bid-chip-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  font-family: inherit;
+  font-weight: 500;
+  padding-left: 6px;
+  border-left: 1px solid var(--bid-line);
+}
+.bid-chip-state[data-kind="verified"] {
+  color: var(--bid-brand);
+}
+.bid-chip-state[data-kind="check"] {
+  color: var(--bid-amber-ink);
+}
+.bid-chip-state[data-kind="unverified"] {
+  color: var(--bid-danger);
+}
+/* The quiet form used in fact cards and side lists. */
+.bid-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  min-width: 0;
+  font-family: var(--bid-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--bid-muted);
+  background: none;
+  border: 0;
+  padding: 2px 0;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: var(--bid-line-strong);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.bid-ref:hover {
+  color: var(--bid-brand);
+}
+
+/* Status pills: always an icon and a word. */
+.bid-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  border-radius: 4px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+.bid-pill-met,
+.bid-pill-brand {
+  color: var(--bid-brand);
+  background: var(--bid-brand-tint);
+}
+.bid-pill-gap,
+.bid-pill-danger {
+  color: var(--bid-danger);
+  background: var(--bid-danger-tint);
+}
+.bid-pill-confirm,
+.bid-pill-info {
+  color: var(--bid-info);
+  background: var(--bid-info-tint);
+}
+.bid-pill-amber {
+  color: var(--bid-amber-ink);
+  background: var(--bid-amber-tint);
+}
+.bid-pill-neutral {
+  color: var(--bid-ink);
+  background: var(--bid-paper-deep);
+}
+.bid-tag {
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--bid-line-strong);
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.bid-tag-strong {
+  border-color: var(--bid-ink);
+}
+
+/* Draft text. */
+.bid-draft {
+  font-size: 16px;
+  line-height: 1.7;
+}
+.bid-marker {
+  font-family: var(--bid-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  color: var(--bid-brand);
+  background: var(--bid-brand-tint);
+  border: 0;
+  border-radius: 3px;
+  padding: 2px 5px;
+  margin-left: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.bid-marker[aria-pressed="true"],
+.bid-marker[data-selected="true"] {
+  color: #ffffff;
+  background: var(--bid-brand);
+}
+.bid-marker[data-unknown="true"] {
+  color: var(--bid-danger);
+  background: var(--bid-danger-tint);
+}
+.bid-gap {
+  display: block;
+  background: var(--bid-danger-tint);
+  border: 1px dashed var(--bid-danger);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 6px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.bid-gap-label {
+  font-weight: 600;
+  color: var(--bid-danger);
+}
+.bid-unsupported {
+  text-decoration: underline dotted var(--bid-danger);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+.bid-nosource {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--bid-danger);
+  background: var(--bid-danger-tint);
+  border-radius: 3px;
+  padding: 2px 6px;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+input.bid-input,
+select.bid-input {
+  height: var(--bid-control, 3rem);
+  padding-block: 0;
+}
+.bid-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--bid-control-compact, 2.75rem);
+  font: inherit;
+  color: var(--bid-ink);
+  background: var(--bid-surface);
+  border: 1px solid var(--bid-line-strong);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+/* Popover / menu surface. */
+.bid-pop {
+  background: var(--bid-surface);
+  color: var(--bid-ink);
+  border: 1px solid var(--bid-line);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgb(22 26 29 / 0.14);
+}
+.bid-menu-item {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  color: var(--bid-ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.bid-menu-item:hover {
+  background: var(--bid-paper);
+}
+.bid-menu-item[aria-disabled="true"] {
+  color: var(--bid-muted);
+  cursor: not-allowed;
+}
+
+@media print {
+  .bid-noprint {
+    display: none !important;
+  }
+}

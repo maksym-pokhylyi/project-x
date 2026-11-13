@@ -31,7 +31,8 @@ describe("navigation guard", () => {
     const offenders = sourceFiles(ROOT)
       .map((path) => relative(ROOT, path).split("\\").join("/"))
       .filter((file) => !ALLOWED.has(file))
-      .filter((file) => /aria-current\s*=/.test(readFileSync(join(ROOT, file), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")));
+      // aria-current="step" belongs to progress trackers, which are not navigation.
+      .filter((file) => /aria-current\s*=(?!\s*"step")(?!\s*\{[^}]*"step")/.test(readFileSync(join(ROOT, file), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")));
     expect(offenders, "use <NavLink> (src/components/ui/nav-link.tsx) instead of setting aria-current by hand").toEqual([]);
   });
 

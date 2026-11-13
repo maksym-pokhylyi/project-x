@@ -20,6 +20,7 @@ import { navLinkVariants } from "./nav-link-variants"
  *   tab     link tabs under a title    same look as the Tabs primitive (settings, a bid's sections)
  *   header  public site header         current: semibold with a 2 px ink underline; others stay ink
  *   menu    stacked lists, phone menu  current: semibold with an ink dot at the end of the row
+ *   plain   rows with their own layout  NavLink marks the current row (aria-current); the caller styles `aria-[current=page]:…`
  *
  * Do not hand-roll `usePathname()` comparisons in a component: add the link with NavLink
  * and, when a section spans several paths, pass `match`.

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { FormError, FormField } from "@/components/forms/form-field";
+import { FormError, FormField, FormRow, FormRowAction } from "@/components/forms/form-field";
 import { NativeSelect } from "@/components/forms/native-select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,7 +58,7 @@ export function InviteForm({ seatsAvailable, canInvite }: { seatsAvailable: bool
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-3" data-testid="invite-form">
       <FormError message={formError} />
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+      <FormRow>
         <div className="flex-1">
           <FormField label="E-mail address" name="email" type="email" placeholder="colleague@company.com" required error={errors.email?.[0]} />
         </div>
@@ -69,10 +69,12 @@ export function InviteForm({ seatsAvailable, canInvite }: { seatsAvailable: bool
             <option value="admin">Admin</option>
           </NativeSelect>
         </div>
-        <Button type="submit" disabled={!seatsAvailable} loading={pending} className="sm:mt-[1.625rem]">
-          {pending ? "Sending…" : "Send invitation"}
-        </Button>
-      </div>
+        <FormRowAction>
+          <Button type="submit" disabled={!seatsAvailable} loading={pending}>
+            {pending ? "Sending…" : "Send invitation"}
+          </Button>
+        </FormRowAction>
+      </FormRow>
       {!seatsAvailable ? (
         <p role="status" className="text-sm text-ink-2">
           All seats of your plan are in use. Upgrade the plan or remove a member to invite someone new.

@@ -282,6 +282,14 @@ test("upload a workspace logo through the storage abstraction", async () => {
 test("the Free plan has a single seat; Radar Pro has two", async () => {
   const page = ownerPage;
   await page.goto("/app/settings/members");
+  // Design-system rule: in a form row the controls line up exactly — field, select and button share
+  // one top and one bottom edge (no margin offsets), at desktop width.
+  const inviteRow = page.getByTestId("invite-form").locator('[data-slot="form-row"]');
+  const edges = await Promise.all([inviteRow.getByLabel("E-mail address"), inviteRow.locator("#invite-role"), inviteRow.getByRole("button")].map(async (control) => (await control.boundingBox())!));
+  for (const box of edges.slice(1)) {
+    expect(Math.abs(box.y - edges[0]!.y), "controls in a form row share a top edge").toBeLessThanOrEqual(0.5);
+    expect(Math.abs(box.y + box.height - (edges[0]!.y + edges[0]!.height)), "controls in a form row share a bottom edge").toBeLessThanOrEqual(0.5);
+  }
   await expect(page.getByTestId("seat-usage")).toContainText("1 of 1 seats in use on the Free plan");
   await expect(page.getByRole("button", { name: "Send invitation" })).toBeDisabled();
 

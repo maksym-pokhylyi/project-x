@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { NativeSelect } from "@/components/forms/native-select";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { removeRadarSourceAction } from "../actions";
@@ -70,9 +71,9 @@ export function RadarOnboarding() {
       <section className="rounded-lg border bg-card p-5">
         <h2 className="text-base font-semibold">We haven&apos;t won public contracts yet</h2>
         <p className="mt-1 text-sm text-muted-foreground">Tell us your trades, regions and a few keywords. You will see matching tenders, contracts ending soon and the buyers in your trade.</p>
-        <Button asChild variant="outline" className="mt-4">
-          <Link href="/app/radar/setup">Set up a radar manually</Link>
-        </Button>
+        <ButtonLink href="/app/radar/setup" variant="outline" className="mt-4">
+          Set up a radar manually
+        </ButtonLink>
       </section>
     </div>
   );

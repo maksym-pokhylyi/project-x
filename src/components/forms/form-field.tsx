@@ -56,6 +56,36 @@ export function FormField({
   );
 }
 
+/**
+ * A row of labelled fields with its action button (invite a teammate, add a row, search by
+ * two criteria…). Stacks on phones, sits in one line from 640 px.
+ *
+ * Every child has the SAME structure — a label line, a gap, then the control — so controls
+ * line up by construction, with or without an error under a field. The action goes in
+ * <FormRowAction>, which reserves the label line with an invisible spacer. Never line a
+ * button up with fields by a margin offset or by `items-end` (that breaks as soon as a field
+ * shows an error under it).
+ */
+export function FormRow({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <div data-slot="form-row" className={cn("flex flex-col gap-3 sm:flex-row sm:items-start", className)}>
+      {children}
+    </div>
+  );
+}
+
+/** The action of a <FormRow>: mirrors a field (label line + gap + control) so the button meets the controls exactly. */
+export function FormRowAction({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <div data-slot="form-row-action" className={cn("flex flex-col gap-2", className)}>
+      <span aria-hidden className="hidden text-sm leading-5 select-none sm:block">
+        &nbsp;
+      </span>
+      {children}
+    </div>
+  );
+}
+
 /** Form-level error banner. */
 export function FormError({ message }: { message?: string | null }) {
   if (!message) return null;
