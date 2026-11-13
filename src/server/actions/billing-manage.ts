@@ -106,12 +106,19 @@ async function manageAction(
   });
 }
 
-/** Pauses the subscription at the end of the paid period (owner only). Refused during a trial and while past due. */
+/**
+ * Pauses the subscription at the end of the paid period — of the trial, for a subscription in
+ * trial (owner only). Refused while past due, already paused, or while a change is scheduled.
+ */
 export async function pauseSubscriptionAction(input?: unknown): Promise<ActionResult<ManageResult>> {
   return manageAction("pause", input, (organizationId) => pauseSubscription(organizationId));
 }
 
-/** Removes a scheduled pause, or resumes a paused subscription immediately — Paddle then charges the card at once (owner only). */
+/**
+ * Removes a scheduled pause, or resumes a paused subscription immediately (owner only): if paid
+ * time is left its period simply continues, otherwise Paddle charges the card at once and
+ * starts a new period (`ManageResult.billing` says which).
+ */
 export async function resumeSubscriptionAction(input?: unknown): Promise<ActionResult<ManageResult>> {
   return manageAction("resume", input, (organizationId) => resumeSubscription(organizationId));
 }

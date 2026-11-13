@@ -1,7 +1,7 @@
 import "server-only";
 import { env, features } from "@/env";
 import { errorReason } from "@/lib/describe-error";
-import { BillingNotConfiguredError } from "@/lib/errors";
+import { AppError, BillingNotConfiguredError } from "@/lib/errors";
 import { HANDLED_EVENT_TYPES, paddleEnvelopeSchema } from "./paddle-events";
 import { ingestPaddleEvent } from "./webhooks";
 
@@ -63,10 +63,9 @@ export type PullOptions = {
 };
 
 /** Thrown when pulling is not allowed where the code is running. */
-export class PullEventsRefusedError extends Error {
+export class PullEventsRefusedError extends AppError {
   constructor(message: string) {
-    super(message);
-    this.name = "PullEventsRefusedError";
+    super("FORBIDDEN", message, 403);
   }
 }
 

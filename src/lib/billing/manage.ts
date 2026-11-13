@@ -44,8 +44,11 @@ import { getSubscription, type SubscriptionRow } from "./subscription";
  * null` removes it; cancel replaces a scheduled pause; pause while a change is scheduled is
  * refused (`subscription_locked_pending_changes`); resume of a subscription that is not
  * paused is refused (`subscription_must_be_paused`); a paused subscription refuses a
- * cancellation at period end; an unknown id answers 404 `invalid_url`. NOT exercised there:
- * a resume that starts a new period (it would have issued a further invoice).
+ * cancellation at period end; an unknown id answers 404 `invalid_url`. NOT exercised there —
+ * these follow Paddle's API reference only: a resume that starts a new period (it would have
+ * issued a further invoice), cancelling a PAUSED subscription immediately ("Paused
+ * subscriptions can only be canceled immediately"), and anything on a PAST-DUE subscription
+ * (the sandbox scenario has no failing payment).
  *
  * PRECONDITIONS — the same as changeSubscriptionPlan(): a subscription that Paddle knows and
  * that was bound to this workspace by its own owner's signed checkout (`verified_at`).
@@ -282,7 +285,7 @@ export function pauseSubscription(organizationId: string, paddle?: PaddleManageC
   return manage("pause", organizationId, paddle);
 }
 
-/** Removes a scheduled pause, or resumes a paused subscription immediately (Paddle charges the card now). */
+/** Removes a scheduled pause, or resumes a paused subscription immediately (charged at once only if no paid time is left). */
 export function resumeSubscription(organizationId: string, paddle?: PaddleManageClient): Promise<ManageResult> {
   return manage("resume", organizationId, paddle);
 }

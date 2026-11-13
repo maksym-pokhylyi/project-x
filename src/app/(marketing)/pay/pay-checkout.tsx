@@ -19,6 +19,8 @@ type State = "nothing" | "unavailable" | "opening" | "open" | "closed" | "comple
 
 /** If Paddle.js has not opened the checkout by itself after this long, ask for it explicitly. */
 const OPEN_EXPLICITLY_AFTER_MS = 4_000;
+/** The checkout frame Paddle.js adds to the page (class `paddle-frame`, name `paddle_frame`). */
+const PADDLE_FRAME = 'iframe.paddle-frame, iframe[name="paddle_frame"]';
 /** An ad blocker stops Paddle.js silently: stop waiting after this long. */
 const GIVE_UP_AFTER_MS = 15_000;
 
@@ -52,8 +54,13 @@ export function PayCheckout({ paddle, transactionId, testMode }: PayCheckoutProp
     };
 
     const openExplicitly = window.setTimeout(() => {
-      // Still nothing on screen: Paddle.js did not pick the transaction up from the address bar.
-      if (!cancelled && latest === "opening") instance?.Checkout.open({ transactionId, settings: { displayMode: "overlay", allowLogout: false } });
+      // Paddle.js opens the checkout by itself when `_ptxn` is in the address bar: its overlay
+      // frame is in the page right after initialisation (seen with Paddle.js 2.12). Ask for it
+      // explicitly only if it has NOT done so — a checkout that is merely slow to load must
+      // not be started over.
+      if (cancelled || latest !== "opening" || !instance) return;
+      if (document.querySelector(PADDLE_FRAME)) return;
+      instance.Checkout.open({ transactionId, settings: { displayMode: "overlay", allowLogout: false } });
     }, OPEN_EXPLICITLY_AFTER_MS);
     const giveUp = window.setTimeout(() => {
       if (latest === "opening") move("unavailable");
