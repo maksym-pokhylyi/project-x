@@ -41,6 +41,12 @@ export const RETENTION_DAYS = {
   auditLog: 730,
   /** Consumed checkout nonces; only meaningful while their signature could be replayed (24 h). */
   checkoutNonces: 90,
+  /**
+   * The Paddle transaction kept on a one-off purchase (`billing_purchases.raw`, for debugging).
+   * The purchase itself and the receipts (`billing_payments`) are business records: they stay
+   * as long as the workspace exists and go with it.
+   */
+  purchasePayload: 90,
 } as const;
 
 export type RetentionKey = keyof typeof RETENTION_DAYS;
