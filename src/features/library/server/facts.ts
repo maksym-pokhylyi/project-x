@@ -8,7 +8,7 @@ import { callJson } from "@/features/bids/server/ai/call";
 import { ValidationError } from "@/lib/errors";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import type { OrgContext } from "@/server/session";
-import { companyFactsSchema, EMPTY_FACTS, normaliseFacts } from "../facts-schema";
+import { companyFactsSchema, EMPTY_FACTS, normaliseFacts, turnoverBandFor } from "../facts-schema";
 import { FetchFailedError, parsePublicUrl, proxyTransport, safeFetchText, UnsafeUrlError, type SafeFetchOptions } from "./safe-fetch";
 
 type Scope = Pick<OrgContext, "organization" | "user">;
@@ -44,12 +44,14 @@ export async function saveCompanyFacts(ctx: Scope, input: unknown): Promise<Comp
     throw new ValidationError("Please check the highlighted fields.", fieldErrors);
   }
   const now = new Date();
+  // An exact figure decides the band, so the two can never disagree.
+  const facts = parsed.data.turnover.latestGbp !== null ? { ...parsed.data, turnoverBand: turnoverBandFor(parsed.data.turnover.latestGbp) } : parsed.data;
   await db
     .insert(companyFacts)
-    .values({ organizationId: ctx.organization.id, facts: parsed.data, draft: null, draftSource: null, confirmedAt: now, confirmedBy: ctx.user.id, updatedAt: now })
+    .values({ organizationId: ctx.organization.id, facts, draft: null, draftSource: null, confirmedAt: now, confirmedBy: ctx.user.id, updatedAt: now })
     .onConflictDoUpdate({
       target: companyFacts.organizationId,
-      set: { facts: parsed.data, draft: null, draftSource: null, confirmedAt: now, confirmedBy: ctx.user.id, updatedAt: now },
+      set: { facts, draft: null, draftSource: null, confirmedAt: now, confirmedBy: ctx.user.id, updatedAt: now },
     });
   return getCompanyFacts(ctx);
 }

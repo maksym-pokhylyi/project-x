@@ -194,13 +194,6 @@
 .bid-chip:hover {
   border-color: var(--bid-line-strong);
 }
-.bid-chip[data-state-kind="check"] {
-  border-color: var(--bid-amber);
-}
-.bid-chip[data-state-kind="unverified"] {
-  border-style: dashed;
-  border-color: var(--bid-danger);
-}
 .bid-chip-state {
   display: inline-flex;
   align-items: center;
@@ -242,13 +235,6 @@
 }
 .bid-ref:hover {
   color: var(--bid-brand);
-}
-.bid-ref[data-state-kind="unverified"] {
-  color: var(--bid-danger);
-  text-decoration-style: dashed;
-}
-.bid-ref[data-state-kind="check"] {
-  color: var(--bid-amber-ink);
 }
 
 /* Status pills: always an icon and a word. */

@@ -131,6 +131,17 @@ function checkTurnover(requirement: CheckRequirement, facts: CompanyFacts): Chec
   const amounts = requiredAmounts(requirement.threshold, requirement.text);
   if (amounts.length !== 1) return null;
   const required = amounts[0]!;
+  // Exact figures from the accounts decide it outright; the band is the fallback.
+  const latest = facts.turnover?.latestGbp ?? null;
+  if (latest !== null) {
+    const previous = facts.turnover?.previousGbp ?? null;
+    const bothYears = /\b(each|both|every)\b[^.]{0,40}\b(two|2|three|3)\b[^.]{0,20}\byears?\b|\blast (two|2) (financial )?years\b/i.test(text);
+    const year = facts.turnover?.yearEnd ? ` in the year to ${facts.turnover.yearEnd}` : " in your latest year";
+    if (latest < required) return { id: requirement.id, status: "gap", note: `Your turnover was ${gbp(latest)}${year}; the tender asks for ${gbp(required)}.` };
+    if (bothYears && previous === null) return { id: requirement.id, status: "unknown", note: `Your turnover was ${gbp(latest)}${year}, above the ${gbp(required)} asked for — but the tender asks about more than one year and your facts give only the latest.` };
+    if (bothYears && previous !== null && previous < required) return { id: requirement.id, status: "gap", note: `Your turnover was ${gbp(latest)}${year} but ${gbp(previous)} the year before; the tender asks for ${gbp(required)} in each year.` };
+    return { id: requirement.id, status: "met", note: `Your turnover was ${gbp(latest)}${year}${bothYears && previous !== null ? ` and ${gbp(previous)} the year before` : ""}; the tender asks for ${gbp(required)}.` };
+  }
   if (!facts.turnoverBand) return { id: requirement.id, status: "unknown", note: `Your company facts do not give your turnover. The tender asks for ${gbp(required)}.` };
   const [min, max] = TURNOVER_BAND_RANGES[facts.turnoverBand];
   const band = TURNOVER_BAND_LABELS[facts.turnoverBand];

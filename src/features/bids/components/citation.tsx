@@ -107,12 +107,30 @@ export function citationLabel(citation: Citation, short = false): string {
   return `${file} · ${where}`;
 }
 
+/** Tick = verified, amber dot = check, hollow dot = unverified (shape and colour both differ). */
 function StateGlyph({ state }: { state: VerificationState }) {
-  if (state === "verified") return <Check aria-hidden className="size-3" strokeWidth={2.6} />;
+  if (state === "verified") return <Check aria-hidden className="size-3 shrink-0 text-(--bid-brand)" strokeWidth={2.6} />;
+  if (state === "check") return <span aria-hidden className="size-[7px] shrink-0 rounded-full bg-(--bid-amber)" />;
+  return <span aria-hidden className="size-[7px] shrink-0 rounded-full border-[1.5px] border-(--bid-muted)" />;
+}
+
+/** The key to the three marks, shown above any list of cited items. */
+export function SourceLegend({ className }: { className?: string }) {
   return (
-    <span aria-hidden className="font-semibold">
-      {state === "check" ? "?" : "!"}
-    </span>
+    <p className={cn("flex flex-wrap gap-x-6 gap-y-1 text-[13px] text-(--bid-muted)", className)} data-testid="source-legend">
+      <span className="inline-flex items-center gap-1.5">
+        <StateGlyph state="verified" />
+        Verified: matches the file word for word
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <StateGlyph state="check" />
+        Check: read it yourself
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <StateGlyph state="unverified" />
+        Unverified: could not be matched
+      </span>
+    </p>
   );
 }
 
@@ -152,17 +170,10 @@ export function CitationMark({
           aria-label={`Source, ${VERIFICATION_LABELS[state].toLowerCase()}: ${citation.fileName}${citation.loc ? `, ${describeLoc(citation.loc)}` : ""}`}
           className={cn(variant === "chip" ? "bid-chip" : "bid-ref", className)}
         >
+          {variant === "chip" ? <StateGlyph state={state} /> : null}
           <span className={variant === "chip" ? "min-w-0 truncate" : "min-w-0 [overflow-wrap:anywhere]"}>{label}</span>
-          {variant === "chip" ? (
-            <span className="bid-chip-state" data-kind={state}>
-              <StateGlyph state={state} />
-              {VERIFICATION_LABELS[state]}
-            </span>
-          ) : state !== "verified" ? (
-            <span className="shrink-0 font-medium">· {VERIFICATION_LABELS[state].toLowerCase()}</span>
-          ) : (
-            <Check aria-hidden className="size-3 shrink-0 text-(--bid-brand)" strokeWidth={2.6} />
-          )}
+          {variant === "chip" ? null : <StateGlyph state={state} />}
+          <span className="sr-only">{VERIFICATION_LABELS[state]}</span>
         </button>
       </Popover.Trigger>
       <Popover.Portal>

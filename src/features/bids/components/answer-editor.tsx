@@ -61,6 +61,8 @@ export type EditorNavItem = {
   status: QuestionStatus;
   gaps: number;
   score: string | null;
+  /** Top of the scale the answer was marked on. */
+  maxScore?: string | null;
   href: string | null;
 };
 
@@ -197,7 +199,7 @@ function navLine(item: EditorNavItem): { text: string; tone: "muted" | "danger" 
   if (item.status === "not_started" || item.wordCount === 0) return { text: "Not started", tone: "info" };
   if (item.gaps > 0) return { text: `${item.gaps} gap${item.gaps === 1 ? "" : "s"} to fill`, tone: "danger" };
   const words = item.limit ? `${item.wordCount.toLocaleString("en-GB")} of ${item.limit.toLocaleString("en-GB")} words` : `${item.wordCount.toLocaleString("en-GB")} words`;
-  return { text: `${words}${item.score ? ` · marked ${item.score}` : ""}${item.status === "final" ? " · final" : ""}`, tone: item.limit && item.wordCount > item.limit ? "danger" : "muted" };
+  return { text: `${words}${item.score ? ` · marked ${item.score}${item.maxScore ? ` of ${item.maxScore}` : ""}` : ""}${item.status === "final" ? " · final" : ""}`, tone: item.limit && item.wordCount > item.limit ? "danger" : "muted" };
 }
 
 const PART_ICON = {
@@ -714,7 +716,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                 </Callout>
               ) : null}
               <div className="mt-4 flex flex-col rounded-lg bg-(--bid-paper) p-4">
-                <span className="text-xs text-(--bid-muted)">Marked against {scaleKind === "pack" ? "the buyer’s scheme" : "a typical 0 to 5 scale"}</span>
+                <span className="text-xs text-(--bid-muted)">Marked{scaleKind === "pack" ? "" : " · on a typical 0 to 5 scale"}</span>
                 <p className="flex items-baseline gap-2.5" data-testid="evaluation-score" aria-label={`Marked ${evaluation.score} of ${evaluation.maxScore}`}>
                   <span className="bid-serif text-[56px] leading-[1.1] font-semibold tracking-[-0.02em]">{evaluation.score}</span>
                   <span className="text-[15px]">
@@ -766,7 +768,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
               {evaluation.improvements.length > 0 ? (
                 <section aria-labelledby="eval-fixes" className="mt-5 border-t border-(--bid-line) pt-[18px]">
                   <h3 id="eval-fixes" className="bid-h3">
-                    {nextRow ? `${countWord(evaluation.improvements.length)} ${evaluation.improvements.length === 1 ? "fix" : "fixes"} to reach ${nextRow.score}` : "What would strengthen it further"}
+                    {nextRow ? `What ${/^[aeiou8]/i.test(nextRow.score) ? "an" : "a"} ${nextRow.score} needs` : "What would strengthen it further"}
                   </h3>
                   <ol className="mt-2.5 flex flex-col gap-3.5">
                     {evaluation.improvements.map((improvement, index) => (

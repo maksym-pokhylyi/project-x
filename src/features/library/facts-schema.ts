@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TURNOVER_BANDS, type CompanyFacts } from "@/features/bids/types";
+import { TURNOVER_BAND_RANGES, TURNOVER_BANDS, type CompanyFacts, type TurnoverBand } from "@/features/bids/types";
 
 /**
  * Validation of company facts — shared by the form (client), the save action (server) and
@@ -87,6 +87,10 @@ export const companyFactsSchema = z.object({
   ),
   website: optionalText(200),
   turnoverBand: z.preprocess((value) => (value === "" || value === undefined ? null : value), z.enum(TURNOVER_BANDS).nullable()),
+  turnover: z.preprocess(
+    (value) => value ?? { latestGbp: null, previousGbp: null, yearEnd: null },
+    z.object({ latestGbp: optionalNumber(0, 100_000_000_000), previousGbp: optionalNumber(0, 100_000_000_000), yearEnd: optionalDate }),
+  ),
   employees: optionalNumber(0, 1_000_000),
   yearsTrading: optionalNumber(0, 500),
   insurance: z.preprocess(
@@ -104,6 +108,14 @@ export const companyFactsSchema = z.object({
 });
 
 export type CompanyFactsInput = z.input<typeof companyFactsSchema>;
+
+/** The band an exact turnover figure falls in. */
+export function turnoverBandFor(amountGbp: number): TurnoverBand {
+  return TURNOVER_BANDS.find((band) => {
+    const [min, max] = TURNOVER_BAND_RANGES[band];
+    return amountGbp >= min && (max === null || amountGbp < max);
+  }) ?? TURNOVER_BANDS[TURNOVER_BANDS.length - 1]!;
+}
 
 /** Normalises anything facts-shaped (stored JSON, model output) into a complete object. */
 export function normaliseFacts(value: unknown): CompanyFacts {
@@ -123,7 +135,8 @@ export const EMPTY_FACTS: CompanyFacts = companyFactsSchema.parse({});
 
 /** True when the facts hold at least one real value. */
 export function factsAreEmpty(facts: CompanyFacts): boolean {
-  const { insurance, accreditations, sectors, regions, policies, ...scalars } = facts;
+  const { insurance, accreditations, sectors, regions, policies, turnover, ...scalars } = facts;
+  if (turnover && (turnover.latestGbp !== null || turnover.previousGbp !== null)) return false;
   if (Object.values(scalars).some((value) => value !== null && value !== undefined && value !== "")) return false;
   if ((accreditations?.length ?? 0) + (sectors?.length ?? 0) + (regions?.length ?? 0) + (policies?.length ?? 0) > 0) return false;
   return !Object.values(insurance ?? {}).some((cover) => cover && cover.amountGbp !== null);

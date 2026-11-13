@@ -121,6 +121,24 @@ describe("resolveCompanyStatuses", () => {
     expect(resolve([requirement("none", { category: "financial", text: "Minimum annual turnover", threshold: "£500,000" })], {}, { facts: {} as CompanyFacts }).none!.status).toBe("unknown");
   });
 
+  it("uses exact turnover figures when the company gives them, year by year", () => {
+    const exact = { ...facts, turnover: { latestGbp: 3_900_000, previousGbp: 1_800_000, yearEnd: "2026-03-31" } } as CompanyFacts;
+    const out = resolve(
+      [
+        requirement("one", { category: "financial", text: "Minimum annual turnover of £2,000,000", threshold: "£2,000,000" }),
+        requirement("each", { category: "financial", text: "Minimum annual turnover of £2,000,000 in each of the last two financial years", threshold: "£2,000,000" }),
+        requirement("high", { category: "financial", text: "Minimum annual turnover", threshold: "£5m" }),
+      ],
+      {},
+      { facts: exact },
+    );
+    expect(out.one).toMatchObject({ status: "met", note: "Your turnover was £3.9m in the year to 2026-03-31; the tender asks for £2m." });
+    expect(out.each).toMatchObject({ status: "gap", note: expect.stringContaining("£1.8m the year before") });
+    expect(out.high).toMatchObject({ status: "gap" });
+    const latestOnly = resolve([requirement("each", { category: "financial", text: "Turnover of £2m in each of the last two years", threshold: "£2m" })], {}, { facts: { ...facts, turnover: { latestGbp: 3_900_000, previousGbp: null, yearEnd: null } } as CompanyFacts });
+    expect(latestOnly.each).toMatchObject({ status: "unknown", note: expect.stringContaining("only the latest") });
+  });
+
   it("accepts 'met' for an accreditation only when it is named, valid and lasts to the deadline", () => {
     const met: ModelProposal = { status: "met", reason: "Held." };
     const out = resolve(

@@ -51,6 +51,14 @@ export default async function BidLayout({ children, params }: { children: ReactN
             Bid check
             {done && bid.readyAt ? ` · built ${builtAt(bid.readyAt)}` : bid.status === "processing" ? " · being built now" : bid.status === "failed" ? " · stopped before it finished" : ""}
             {coverage.read > 0 ? ` · ${coverage.headline}` : ""}
+            {coverage.read > 0 ? (
+              <>
+                {" · "}
+                <Link href={`${base}/files`} className="bid-link text-(--bid-ink)">
+                  Coverage
+                </Link>
+              </>
+            ) : null}
           </p>
           <h1 className="bid-h1" data-testid="bid-title">
             {bid.title}

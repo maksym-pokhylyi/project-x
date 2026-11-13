@@ -349,6 +349,8 @@ export type CompanyFacts = {
   companyNumber?: string | null;
   website?: string | null;
   turnoverBand?: TurnoverBand | null;
+  /** Exact annual turnover from the accounts, when the company gives it (the band is then derived). */
+  turnover?: { latestGbp: number | null; previousGbp: number | null; yearEnd: string | null };
   employees?: number | null;
   yearsTrading?: number | null;
   insurance?: {

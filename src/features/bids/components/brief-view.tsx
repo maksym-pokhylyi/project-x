@@ -17,7 +17,7 @@ import {
 } from "@/features/bids/types";
 import { displayRef, gateGroup, isGatingRequirement, isScoredQuestion, type CoverageSummary, type PackFileItem } from "@/features/bids/view";
 import { cn } from "@/lib/utils";
-import { CitationMark, type SourceLinks } from "./citation";
+import { CitationMark, SourceLegend, type SourceLinks } from "./citation";
 import { GateList } from "./gate-list";
 import type { QuestionItem } from "./questions-view";
 import type { RequirementItem } from "./requirements-view";
@@ -389,6 +389,7 @@ export function BriefView(props: BriefViewProps) {
                 Pass-or-fail requirements
               </h2>
               <p className="text-sm text-(--bid-muted)">Each line is quoted word for word from the pack. Open a reference to read it on the page. Gaps come first.</p>
+              <SourceLegend className="mt-1" />
             </div>
             <GateList bidId={bidId} items={gating} links={links} readOnly={readOnly} libraryHref={libraryHref} factsConfirmed={factsConfirmed} />
             {others > 0 ? (
@@ -431,7 +432,7 @@ export function BriefView(props: BriefViewProps) {
                         <th scope="col" className="border-b border-(--bid-line) p-3 text-right font-semibold">Weight</th>
                         <th scope="col" className="border-b border-(--bid-line) p-3 text-right font-semibold">Word limit</th>
                         <th scope="col" className="border-b border-(--bid-line) py-3 pr-3 pl-6 font-semibold">Draft</th>
-                        <th scope="col" className="border-b border-(--bid-line) py-3 pr-6 pl-3 font-semibold">Marking</th>
+                        <th scope="col" className="border-b border-(--bid-line) py-3 pr-6 pl-3 font-semibold">Marked</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -468,7 +469,7 @@ export function BriefView(props: BriefViewProps) {
                               )}
                             </td>
                             <td className={cn(cell, "pr-6 pl-3 whitespace-nowrap", question.score ? "font-semibold" : "text-(--bid-muted)")}>
-                              {question.score ? `Marked ${question.score} of ${question.maxEvaluated}` : "Not marked"}
+                              {question.score ? `${question.score} of ${question.maxEvaluated}` : "Not marked"}
                             </td>
                           </tr>
                         );
@@ -540,9 +541,9 @@ export function BriefView(props: BriefViewProps) {
         <aside className="flex min-w-0 flex-[1_1_320px] flex-col gap-6">
           <section aria-labelledby="files-h" className="bid-card px-5 pt-[18px] pb-2" data-testid="pack-files-card">
             <h2 id="files-h" className="bid-h3">
-              Pack files{" "}
+              Coverage{" "}
               <span className="font-normal text-(--bid-muted)">
-                · {files.length} {plural(files.length, "file")}
+                · {coverage.read} {plural(coverage.read, "file")} read{files.length - coverage.read > 0 ? `, ${files.length - coverage.read} not read` : ""}
               </span>
             </h2>
             <ul className="mt-2 flex flex-col text-xs">

@@ -1,21 +1,23 @@
 "use client";
 
-import { CircleCheck, FileText, Loader2, TriangleAlert, UploadCloud, X } from "lucide-react";
+import "./bid-theme.css";
+import { Check, Loader2, Upload, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { createBidAction, planUploadAction, registerFileAction, removeFileAction, startProcessingAction } from "@/features/bids/actions";
-import { ACCEPT_ATTRIBUTE, formatBytes, MAX_BID_BYTES, MAX_BID_FILES, MAX_FILE_BYTES, unsupportedFileReason } from "@/features/bids/constants";
+import { createBidAction, planUploadAction, registerFileAction, removeFileAction, startProcessingAction, updateBidAction } from "@/features/bids/actions";
+import { ACCEPT_ATTRIBUTE, fileExtension, formatBytes, MAX_BID_BYTES, MAX_BID_FILES, MAX_FILE_BYTES, unsupportedFileReason } from "@/features/bids/constants";
+import { tenderReferenceFromInput, type TenderSummary } from "@/features/bids/tender-lookup";
 import { cn } from "@/lib/utils";
+import { daysLeftLabel } from "./ui";
 import { uploadFile } from "./upload-client";
 
 type Row = {
   key: string;
   name: string;
   size: number;
-  status: "queued" | "uploading" | "done" | "error";
+  /** skipped = a file we do not read (a drawing or photo): listed, never uploaded, no action needed. */
+  status: "queued" | "uploading" | "done" | "error" | "skipped";
   progress: number;
   error?: string;
   fileId?: string;
@@ -23,34 +25,68 @@ type Row = {
 
 export type ExistingFile = { id: string; name: string; size: number };
 
+/** Files that are normally drawings or photographs: not read, and nothing the bidder needs to fix. */
+const NOT_READ = new Set(["png", "jpg", "jpeg", "gif", "tif", "tiff", "bmp", "heic", "dwg", "dxf", "svg"]);
+
+const NUMBER_WORDS = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+const word = (n: number, lower = false) => {
+  const text = n < NUMBER_WORDS.length ? NUMBER_WORDS[n]! : String(n);
+  return lower ? text.toLowerCase() : text;
+};
+
+/** Why the check cannot start yet, in plain words; null when it can. */
+function notReadyReason(rows: Row[]): string | null {
+  const uploading = rows.filter((row) => row.status === "uploading").length;
+  const waiting = rows.filter((row) => row.status === "queued").length;
+  const failed = rows.filter((row) => row.status === "error").length;
+  const ready = rows.filter((row) => row.status === "done").length;
+  const parts = [
+    uploading > 0 ? `${word(uploading, true)} ${uploading === 1 ? "is" : "are"} uploading` : null,
+    waiting > 0 ? `${word(waiting, true)} ${waiting === 1 ? "is" : "are"} waiting` : null,
+    failed > 0 ? `${word(failed, true)} ${failed === 1 ? "needs" : "need"} replacing or removing` : null,
+  ].filter((part): part is string => Boolean(part));
+  const total = uploading + waiting + failed;
+  if (total > 0) {
+    const list = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : parts[0]!;
+    return `${word(total)} ${total === 1 ? "file is" : "files are"} not ready: ${list}.`;
+  }
+  return ready === 0 ? "Add at least one file from the pack to start." : null;
+}
+
 /**
- * New bid: drop zone + per-file status, then "Check this pack". Files go straight from
- * the browser to storage; the bid is created in `draft` on the first accepted file and
- * costs nothing until the check is started.
+ * New bid check (design handoff: NewCheck). Step 1 says which tender this is — prefilled by
+ * the Radar, pasted as a Find a Tender link, or left for the pack to tell us. Step 2 takes
+ * the pack: files go straight from the browser to storage, each with its own state, and
+ * the draft survives a refresh. Nothing is spent until "Start the check".
  */
 export function NewBidForm({
   initialBidId,
   initialFiles,
   noticeId,
-  allowance,
+  tender,
   disabled,
 }: {
   initialBidId: string | null;
   initialFiles: ExistingFile[];
+  /** Notice id or slug this check is linked to, if any. */
   noticeId: string | null;
-  /** One sentence saying what starting the check will use. */
-  allowance: string;
+  /** The notice as the Radar knows it; null when it is not known (then only the reference is shown). */
+  tender: (Omit<TenderSummary, "closesAt"> & { closesAt: string | null }) | null;
+  /** True when the workspace has no check left: the form is shown but cannot be used. */
   disabled: boolean;
 }) {
   const router = useRouter();
   const [rows, setRows] = useState<Row[]>(initialFiles.map((file) => ({ key: file.id, name: file.name, size: file.size, status: "done", progress: 100, fileId: file.id })));
-  const [title, setTitle] = useState("");
   const [dragging, setDragging] = useState(false);
   const [starting, setStarting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [link, setLink] = useState("");
+  const [linkError, setLinkError] = useState<string | null>(null);
   const bidId = useRef<string | null>(initialBidId);
   const creating = useRef<Promise<string | null> | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const replaceInput = useRef<HTMLInputElement>(null);
+  const replacing = useRef<Row | null>(null);
 
   const patch = useCallback((key: string, change: Partial<Row>) => setRows((current) => current.map((row) => (row.key === key ? { ...row, ...change } : row))), []);
 
@@ -77,20 +113,25 @@ export function NewBidForm({
     async (files: File[]) => {
       if (disabled || files.length === 0) return;
       setFormError(null);
-      let total = rows.filter((row) => row.status !== "error").reduce((sum, row) => sum + row.size, 0);
-      let count = rows.filter((row) => row.status !== "error").length;
+      const live = (row: Row) => row.status !== "error" && row.status !== "skipped";
+      let total = rows.filter(live).reduce((sum, row) => sum + row.size, 0);
+      let count = rows.filter(live).length;
       const accepted: Array<{ row: Row; file: File }> = [];
       const added: Row[] = [];
       for (const file of files) {
         const key = `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 8)}`;
         const base: Row = { key, name: file.name, size: file.size, status: "queued", progress: 0 };
+        if (NOT_READ.has(fileExtension(file.name))) {
+          added.push({ ...base, status: "skipped", error: "drawings and photographs are not read" });
+          continue;
+        }
         const reason =
           unsupportedFileReason(file.name) ??
           (file.size === 0 ? "This file is empty." : null) ??
           (file.size > MAX_FILE_BYTES ? `Larger than 50 MB (${formatBytes(file.size)}). Split it, or leave out drawings and photos.` : null) ??
           (count >= MAX_BID_FILES ? `A bid holds at most ${MAX_BID_FILES} files.` : null) ??
           (total + file.size > MAX_BID_BYTES ? "The pack would exceed 200 MB in total." : null) ??
-          (rows.some((row) => row.name === file.name && row.size === file.size && row.status !== "error") ? "Already added." : null);
+          (rows.some((row) => row.name === file.name && row.size === file.size && live(row)) ? "Already added." : null);
         if (reason) {
           added.push({ ...base, status: "error", error: reason });
           continue;
@@ -104,7 +145,7 @@ export function NewBidForm({
       if (accepted.length === 0) return;
       const id = await ensureBid();
       if (!id) {
-        for (const { row } of accepted) patch(row.key, { status: "error", error: "Could not start the bid. Try again." });
+        for (const { row } of accepted) patch(row.key, { status: "error", error: "Could not start the bid check. Try again." });
         return;
       }
       // Three at a time keeps slow connections responsive.
@@ -147,17 +188,13 @@ export function NewBidForm({
     setRows((current) => current.filter((entry) => entry.key !== row.key));
   };
 
-  const uploaded = rows.filter((row) => row.status === "done");
-  const uploading = rows.some((row) => row.status === "uploading" || row.status === "queued");
+  const reason = notReadyReason(rows);
+  const uploadedCount = rows.filter((row) => row.status === "done").length;
 
   const start = async () => {
-    if (!bidId.current || uploaded.length === 0) return;
+    if (!bidId.current || reason) return;
     setStarting(true);
     setFormError(null);
-    if (title.trim()) {
-      const { updateBidAction } = await import("@/features/bids/actions");
-      await updateBidAction(bidId.current, { title: title.trim() });
-    }
     const result = await startProcessingAction(bidId.current);
     if (!result.ok) {
       setStarting(false);
@@ -168,103 +205,261 @@ export function NewBidForm({
     router.push(`/app/bids/${result.data.bidId}`);
   };
 
+  /** Links (or unlinks) the tender; the page reloads so the server can look the notice up. */
+  const setTender = async (reference: string | null) => {
+    setLinkError(null);
+    if (bidId.current) {
+      const result = await updateBidAction(bidId.current, { noticeId: reference });
+      if (!result.ok) return setLinkError(result.error.message);
+    }
+    const url = new URL(window.location.href);
+    if (reference) url.searchParams.set("tender", reference);
+    else url.searchParams.delete("tender");
+    url.searchParams.delete("notice");
+    router.replace(`${url.pathname}${url.search}`);
+    router.refresh();
+  };
+  const submitLink = () => {
+    if (!link.trim()) return;
+    const reference = tenderReferenceFromInput(link);
+    if (!reference) return setLinkError("That is not a Find a Tender notice link. It looks like https://www.find-tender.service.gov.uk/Notice/012345-2026");
+    setLink("");
+    void setTender(reference);
+  };
+
+  const closes = tender?.closesAt ? new Date(tender.closesAt) : null;
+  const left = closes ? daysLeftLabel(closes) : null;
+
   return (
-    <div className="space-y-5" data-testid="new-bid-form">
-      <div
-        data-testid="dropzone"
-        onDragOver={(event) => {
-          event.preventDefault();
-          if (!disabled) setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(event) => {
-          event.preventDefault();
-          setDragging(false);
-          void addFiles(Array.from(event.dataTransfer.files));
-        }}
-        className={cn(
-          "flex flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors",
-          disabled ? "bg-muted/40 opacity-60" : dragging ? "border-primary bg-primary/5" : "bg-card",
-        )}
-      >
-        <UploadCloud aria-hidden className="size-8 text-muted-foreground" />
-        <p className="mt-3 text-sm font-medium">Drop the whole tender pack here</p>
-        <p className="mt-1 max-w-md text-sm text-muted-foreground">
-          The ITT, specification, questionnaires, response forms, pricing schedule and every clarification. PDF, Word (.docx), Excel (.xlsx), CSV, text or a ZIP of them — up to 50 MB per file, 200 MB in all.
-        </p>
-        <input
-          ref={input}
-          id="pack-files"
-          data-testid="file-input"
-          type="file"
-          multiple
-          accept={ACCEPT_ATTRIBUTE}
-          className="sr-only"
-          disabled={disabled}
-          onChange={(event) => {
-            void addFiles(Array.from(event.target.files ?? []));
-            event.target.value = "";
-          }}
-        />
-        <Button type="button" variant="outline" className="mt-4" disabled={disabled} onClick={() => input.current?.click()}>
-          Choose files
-        </Button>
-      </div>
-
-      {rows.length > 0 ? (
-        <ul className="divide-y rounded-lg border bg-card" aria-label="Files" data-testid="file-list">
-          {rows.map((row) => (
-            <li key={row.key} className="flex items-center gap-3 px-3 py-2.5" data-file-status={row.status}>
-              <FileText aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm">{row.name}</p>
-                {row.status === "error" ? (
-                  <p role="alert" className="flex items-start gap-1 text-xs text-destructive">
-                    <TriangleAlert aria-hidden className="mt-0.5 size-3 shrink-0" />
-                    {row.error}
-                  </p>
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    {formatBytes(row.size)}
-                    {row.status === "uploading" ? ` · uploading ${row.progress}%` : row.status === "queued" ? " · waiting" : " · uploaded"}
-                  </p>
-                )}
-                {row.status === "uploading" ? (
-                  <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={row.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Uploading ${row.name}`}>
-                    <div className="h-full bg-primary transition-[width]" style={{ width: `${row.progress}%` }} />
-                  </div>
-                ) : null}
+    <div className="flex flex-col gap-10" data-testid="new-bid-form">
+      {/* --- 1 · Which tender? ------------------------------------------------------------------ */}
+      <section aria-labelledby="tender-h" className="flex flex-col gap-4">
+        <h2 id="tender-h" className="bid-h2">
+          1 · Which tender?
+        </h2>
+        {noticeId ? (
+          <div className="bid-card flex flex-wrap items-start gap-x-8 gap-y-4 px-5 py-5 sm:px-6" data-testid="tender-card">
+            <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-2">
+              <p className="text-[17px] leading-[1.35] font-semibold">{tender?.title ?? "Linked to a tender notice"}</p>
+              <p className="text-[15px]">{tender?.buyerName ?? "The title, buyer and deadline will be read from the pack you upload."}</p>
+              <p className="flex flex-wrap items-center gap-2">
+                <span className="bid-pill bid-pill-info text-xs">Tender notice</span>
+                <span className="bid-mono text-xs text-(--bid-muted)">{tender?.reference ?? noticeId}</span>
+              </p>
+            </div>
+            {closes && left ? (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-(--bid-muted)">Closes</span>
+                <span className="flex items-center gap-2 text-[17px] font-semibold tabular-nums">
+                  <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-(--bid-line-strong)" : left.urgent ? "bg-(--bid-danger)" : "bg-(--bid-amber)")} />
+                  {new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" }).format(closes)}
+                </span>
+                <span className="flex items-center gap-2 text-[13px] text-(--bid-muted)">
+                  {new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit" }).format(closes)}
+                  <span className="rounded bg-(--bid-amber-tint) px-1.5 py-px text-xs font-semibold text-(--bid-ink)">{left.label}</span>
+                </span>
               </div>
-              {row.status === "done" ? <CircleCheck aria-label="Uploaded" className="size-4 shrink-0 text-success" /> : row.status === "uploading" ? <Loader2 aria-hidden className="size-4 shrink-0 animate-spin text-muted-foreground" /> : null}
-              {row.status !== "uploading" ? (
-                <Button type="button" variant="ghost" size="icon-sm" aria-label={`Remove ${row.name}`} onClick={() => void remove(row)}>
-                  <X aria-hidden className="size-3.5" />
-                </Button>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      ) : null}
+            ) : null}
+            <button type="button" className="bid-btn" onClick={() => void setTender(null)} disabled={disabled}>
+              Change
+            </button>
+          </div>
+        ) : null}
+        <div className="flex max-w-[560px] flex-col gap-1.5">
+          <label htmlFor="tender-link" className="text-[15px] font-medium">
+            {noticeId ? "Or paste a Find a Tender link" : "Paste a Find a Tender link (optional)"}
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <input
+              id="tender-link"
+              className="bid-input min-w-0 flex-[1_1_260px]"
+              type="url"
+              inputMode="url"
+              placeholder="https://www.find-tender.service.gov.uk/Notice/…"
+              value={link}
+              disabled={disabled}
+              onChange={(event) => setLink(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  submitLink();
+                }
+              }}
+              aria-describedby="tender-link-hint"
+              aria-invalid={linkError ? true : undefined}
+            />
+            {link.trim() ? (
+              <button type="button" className="bid-btn" onClick={submitLink}>
+                Link this tender
+              </button>
+            ) : null}
+          </div>
+          {linkError ? (
+            <p role="alert" className="text-[13px] text-(--bid-danger)">
+              {linkError}
+            </p>
+          ) : (
+            <p id="tender-link-hint" className="text-[13px] text-(--bid-muted)">
+              {noticeId ? "Replaces the tender above." : "You can skip this: the title, buyer and deadline are read from the pack."}
+            </p>
+          )}
+        </div>
+      </section>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="bid-title">Name this bid (optional)</Label>
-        <Input id="bid-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="We will use the tender's own title if you leave this blank" maxLength={200} disabled={disabled} />
-      </div>
+      {/* --- 2 · Upload the tender pack --------------------------------------------------------- */}
+      <section aria-labelledby="upload-h" className="flex flex-col gap-4">
+        <h2 id="upload-h" className="bid-h2">
+          2 · Upload the tender pack
+        </h2>
+        <div
+          data-testid="dropzone"
+          onDragOver={(event) => {
+            event.preventDefault();
+            if (!disabled) setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(event) => {
+            event.preventDefault();
+            setDragging(false);
+            void addFiles(Array.from(event.dataTransfer.files));
+          }}
+          className={cn(
+            "flex flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed px-6 py-8 text-center",
+            disabled ? "border-(--bid-line) bg-(--bid-paper-deep) opacity-70" : dragging ? "border-(--bid-brand) bg-(--bid-brand-tint)" : "border-(--bid-line-strong) bg-(--bid-surface)",
+          )}
+        >
+          <Upload aria-hidden className="size-6" strokeWidth={1.6} />
+          <p className="text-[17px] font-semibold">Drop the files here</p>
+          <input
+            ref={input}
+            id="pack-files"
+            data-testid="file-input"
+            type="file"
+            multiple
+            accept={ACCEPT_ATTRIBUTE}
+            className="sr-only"
+            disabled={disabled}
+            onChange={(event) => {
+              void addFiles(Array.from(event.target.files ?? []));
+              event.target.value = "";
+            }}
+          />
+          <input
+            ref={replaceInput}
+            type="file"
+            accept={ACCEPT_ATTRIBUTE}
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              const old = replacing.current;
+              event.target.value = "";
+              replacing.current = null;
+              if (!file || !old) return;
+              setRows((current) => current.filter((entry) => entry.key !== old.key));
+              void addFiles([file]);
+            }}
+          />
+          <button type="button" className="bid-btn" disabled={disabled} onClick={() => input.current?.click()}>
+            Choose files
+          </button>
+          <p className="max-w-[560px] text-sm text-(--bid-muted)">PDF, Word, Excel, CSV, text or ZIP, up to 50 MB a file. Send everything the buyer sent, including appendices and clarifications.</p>
+        </div>
 
-      {formError ? (
-        <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-          {formError}
+        {rows.length > 0 ? (
+          <div className="bid-card" data-testid="file-list">
+            <h3 className="px-5 py-4 text-[15px] font-semibold sm:px-6">
+              Files <span className="font-normal text-(--bid-muted)">· {rows.length} added</span>
+            </h3>
+            <ul aria-label="Files">
+              {rows.map((row) => (
+                <li key={row.key} className="bid-rule flex flex-wrap items-center gap-x-6 gap-y-1.5 px-5 py-3 sm:px-6" data-file-status={row.status}>
+                  <span className={cn("bid-mono min-w-0 flex-[1_1_240px] text-[13px] [overflow-wrap:anywhere]", row.status === "skipped" ? "text-(--bid-muted)" : "")}>{row.name}</span>
+                  <span className="w-20 shrink-0 text-[13px] text-(--bid-muted) tabular-nums">{formatBytes(row.size)}</span>
+                  <span className="flex min-w-0 flex-[2_1_260px] flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px]">
+                    {row.status === "done" ? (
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-(--bid-brand)">
+                        <Check aria-hidden className="size-3.5" strokeWidth={2.6} />
+                        Uploaded
+                      </span>
+                    ) : row.status === "uploading" ? (
+                      <>
+                        <span className="font-semibold tabular-nums">Uploading {row.progress}%</span>
+                        <span className="flex h-1 w-40 max-w-full rounded-full bg-(--bid-line)" role="progressbar" aria-valuenow={row.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Uploading ${row.name}`}>
+                          <span className="rounded-full bg-(--bid-ink) transition-[width]" style={{ width: `${row.progress}%` }} />
+                        </span>
+                      </>
+                    ) : row.status === "queued" ? (
+                      <span className="text-(--bid-muted)">Waiting</span>
+                    ) : row.status === "skipped" ? (
+                      <>
+                        <span className="bid-pill bid-pill-info text-xs">No action needed</span>
+                        <span>Will be skipped: {row.error}.</span>
+                      </>
+                    ) : (
+                      <>
+                        <span role="alert" className="flex min-w-0 flex-[1_1_200px] items-start gap-2 text-(--bid-danger)">
+                          <span aria-hidden className="font-bold">
+                            !
+                          </span>
+                          {row.error}
+                        </span>
+                        <button
+                          type="button"
+                          className="bid-btn bid-btn-sm"
+                          onClick={() => {
+                            replacing.current = row;
+                            replaceInput.current?.click();
+                          }}
+                        >
+                          Replace
+                        </button>
+                      </>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    className="-mr-2 flex size-11 shrink-0 items-center justify-center rounded text-(--bid-ink) hover:bg-(--bid-paper) disabled:opacity-40"
+                    aria-label={`Remove ${row.name}`}
+                    disabled={row.status === "uploading"}
+                    onClick={() => void remove(row)}
+                  >
+                    <X aria-hidden className="size-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </section>
+
+      <div className="flex flex-col gap-3 border-t border-(--bid-line) pt-7">
+        {formError ? (
+          <p role="alert" className="rounded-lg bg-(--bid-danger-tint) px-4 py-3 text-sm text-(--bid-danger)">
+            {formError}
+          </p>
+        ) : null}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <button
+            type="button"
+            className={cn("bid-btn px-6 text-[17px]", disabled || reason ? "border-(--bid-paper-deep) bg-(--bid-paper-deep) text-(--bid-muted)" : "bid-btn-primary")}
+            style={{ minHeight: 48 }}
+            onClick={() => void start()}
+            disabled={disabled || starting || Boolean(reason)}
+            data-testid="start-check"
+            aria-describedby="start-reason"
+          >
+            {starting ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
+            {starting ? "Starting…" : "Start the check"}
+          </button>
+          <Link href="/app/bids" className="bid-link text-[15px] font-medium" data-testid="save-later">
+            Save and finish later
+          </Link>
+        </div>
+        <p id="start-reason" className="text-[15px]" data-testid="start-reason" aria-live="polite">
+          {disabled ? "You have no bid checks left on your plan." : (reason ?? `${word(uploadedCount)} ${uploadedCount === 1 ? "file is" : "files are"} ready. Starting takes two to four minutes; you can leave the page.`)}
         </p>
-      ) : null}
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground" data-testid="allowance-note">
-          {allowance}
-        </p>
-        <Button onClick={() => void start()} disabled={disabled || starting || uploading || uploaded.length === 0} data-testid="start-check">
-          {starting ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
-          {starting ? "Starting…" : uploading ? "Uploading…" : `Check this pack${uploaded.length > 0 ? ` (${uploaded.length} file${uploaded.length === 1 ? "" : "s"})` : ""}`}
-        </Button>
       </div>
     </div>
   );

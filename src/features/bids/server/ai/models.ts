@@ -86,6 +86,11 @@ function settingsFor(id: string): Parameters<typeof defaultSettingsMiddleware>[0
   // Gemini 2.5 Flash thinks dynamically by default; extraction does not need long reasoning
   // and thinking tokens are billed as output (they tripled the cost of a small pack).
   if (id === "google/gemini-2.5-flash") return { providerOptions: { google: { thinkingConfig: { thinkingBudget: Number(env("AI_GEMINI_THINKING_BUDGET") ?? 1024) } } } };
+  // Claude 5.5 models think adaptively by default and thinking counts against the output
+  // limit: at the default effort a long extraction can spend its whole allowance thinking
+  // and return no text. Extraction and drafting from supplied evidence need little
+  // deliberation, so effort is set low (configurable).
+  if (id.startsWith("anthropic/")) return { providerOptions: { anthropic: { effort: env("AI_ANTHROPIC_EFFORT") ?? "low" } } };
   return null;
 }
 

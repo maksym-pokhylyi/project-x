@@ -59,6 +59,7 @@ export default async function AnswerPage({ params }: { params: Promise<{ bidId: 
     status: item.status as QuestionStatus,
     gaps: item.draftMeta?.evidenceGaps.length ?? 0,
     score: item.evaluation?.score ?? null,
+    maxScore: item.evaluation?.maxScore ?? null,
     href: `${base}/questions/${item.id}`,
   }));
   const index = listed.findIndex((item) => item.id === question.id);

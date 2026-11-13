@@ -261,6 +261,9 @@ describe("company facts", () => {
     });
     expect(saved.facts).toMatchObject({ legalName: "Example Facilities Ltd", companyNumber: "SC123456", employees: null, sectors: ["Councils", "Housing", "Schools"] });
     expect(saved.facts.insurance).toMatchObject({ publicLiability: { amountGbp: 5_000_000, expiresAt: "2027-03-31" }, employersLiability: { amountGbp: 10_000_000, expiresAt: null } });
+    // An exact turnover figure decides the band.
+    const withTurnover = await saveCompanyFacts(scope, { legalName: "Example Facilities Ltd", turnoverBand: "under_100k", turnover: { latestGbp: "£3.9m", previousGbp: "3,400,000", yearEnd: "2026-03-31" } });
+    expect(withTurnover.facts).toMatchObject({ turnoverBand: "2m_5m", turnover: { latestGbp: 3_900_000, previousGbp: 3_400_000, yearEnd: "2026-03-31" } });
     expect(expiryWarnings(saved.facts, new Date("2027-02-15T00:00:00Z"))).toEqual([
       { label: "ISO 9001", date: "2026-01-31", state: "expired" },
       { label: "Public liability insurance", date: "2027-03-31", state: "soon" },

@@ -1,9 +1,9 @@
 "use client";
 
-import { Check, CircleDashed, Loader2, RotateCw, TriangleAlert } from "lucide-react";
+import "./bid-theme.css";
+import { RotateCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
 import { retryProcessingAction } from "@/features/bids/actions";
 import { PROCESSING_STAGE_LABELS, type ProcessingStage } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
@@ -29,12 +29,48 @@ function elapsedLabel(startedAt: string | null, now: number): string {
   return minutes > 0 ? `${minutes} min ${String(seconds % 60).padStart(2, "0")} s` : `${seconds} s`;
 }
 
-const DETAIL: Record<ProcessingStage, (counts: StatusPayload["counts"]) => string> = {
-  reading: (counts) => (counts.files > 0 ? `${counts.filesRead} of ${counts.files} files read` : ""),
-  requirements: (counts) => (counts.requirements > 0 ? `${counts.requirements} found so far${counts.passFail ? `, ${counts.passFail} pass/fail` : ""}` : "Two independent readings of the whole pack"),
-  questions: (counts) => (counts.questions > 0 ? `${counts.questions} found so far` : "Including questionnaires and clarification files"),
-  company: () => "Comparing requirements with your confirmed company facts",
-};
+/** The line under each stage: real counts only, never an estimate. */
+function detail(stage: ProcessingStage, status: StageStatus, counts: StatusPayload["counts"]): string {
+  const done = status === "done";
+  switch (stage) {
+    case "reading":
+      return status === "pending" ? "Starts in a moment" : `${counts.filesRead} of ${counts.files} file${counts.files === 1 ? "" : "s"} read`;
+    case "requirements":
+      return status === "pending" ? "Starts when the files are read" : counts.requirements > 0 ? `${counts.requirements} found${done ? "" : " so far"}` : "Two independent readings of the whole pack";
+    case "questions":
+      return status === "pending" ? "Starts when the files are read" : counts.questions > 0 ? `${counts.questions} found${done ? "" : " so far"}` : "Including questionnaires and response forms";
+    case "company":
+      return status === "pending" ? "Starts when the questions are listed" : done ? "Checked" : "Comparing each requirement with your company facts";
+  }
+}
+
+function StageIcon({ status }: { status: StageStatus }) {
+  if (status === "done") {
+    return (
+      <svg viewBox="0 0 20 20" width="20" height="20" role="img" aria-label="Done" className="mt-px shrink-0">
+        <circle cx="10" cy="10" r="8" fill="none" stroke="var(--bid-brand)" strokeWidth="1.8" />
+        <path d="M6.3 10.3l2.6 2.6 4.8-5" fill="none" stroke="var(--bid-brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (status === "failed") {
+    return (
+      <svg viewBox="0 0 20 20" width="20" height="20" role="img" aria-label="Stopped" className="mt-px shrink-0">
+        <circle cx="10" cy="10" r="8" fill="none" stroke="var(--bid-danger)" strokeWidth="1.8" />
+        <path d="M10 5.8v5M10 13.8v.4" fill="none" stroke="var(--bid-danger)" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  return status === "running" ? (
+    <svg viewBox="0 0 20 20" width="20" height="20" role="img" aria-label="In progress" className="mt-px shrink-0">
+      <circle cx="10" cy="10" r="7.2" fill="none" stroke="var(--bid-ink)" strokeWidth="3.4" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 20 20" width="20" height="20" role="img" aria-label="Waiting" className="mt-px shrink-0">
+      <circle cx="10" cy="10" r="8" fill="none" stroke="var(--bid-muted)" strokeWidth="1.5" />
+    </svg>
+  );
+}
 
 /**
  * ProcessingState: the real stages of the pack pipeline with elapsed time. The state lives
@@ -99,73 +135,73 @@ export function ProcessingState({ bidId, initial }: { bidId: string; initial: St
       router.refresh();
     });
 
+  const stages = state.stages.map((entry) => {
+    const failed = entry.status === "failed" || (state.status === "failed" && state.failure?.stage === entry.stage);
+    const status: StageStatus = failed ? "failed" : state.status === "failed" && entry.status === "running" ? "pending" : entry.status;
+    return { ...entry, status };
+  });
+  const current = stages.findIndex((entry) => entry.status === "running" || entry.status === "failed");
+  const stageNumber = current >= 0 ? current + 1 : Math.min(stages.length, stages.filter((entry) => entry.status === "done").length + 1);
+
   return (
-    <section
-      aria-label="Analysis progress"
-      data-testid="processing-state"
-      data-status={state.status}
-      className={cn("rounded-lg border bg-card p-4 sm:p-5", state.status === "failed" ? "border-destructive/40" : "")}
-    >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-base font-semibold">{state.status === "failed" ? "The analysis stopped" : "Reading your tender pack"}</h2>
+    <section aria-labelledby="progress-h" data-testid="processing-state" data-status={state.status} className={cn("bid-card bid-scope px-5 py-6 sm:px-7", state.status === "failed" ? "border-(--bid-danger)" : "")}>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id="progress-h" className="bid-h3">
+          {state.status === "failed" ? "The check stopped" : "Building the check"}{" "}
+          <span className="font-normal text-(--bid-muted)">
+            · stage {stageNumber} of {stages.length}
+          </span>
+        </h2>
         {active ? (
-          <p className="font-mono text-xs text-muted-foreground tabular-nums" aria-hidden>
+          <p className="bid-mono text-xs text-(--bid-muted) tabular-nums" aria-hidden>
             {elapsedLabel(state.startedAt, now)}
           </p>
         ) : null}
       </div>
-      {active ? <p className="mt-1 text-sm text-muted-foreground">Usually two to four minutes. You can leave this page — we will e-mail you when it is ready, and results appear here as they are found.</p> : null}
 
-      <ol className="mt-4 space-y-2.5" aria-live="polite">
-        {state.stages.map((entry) => {
-          const failed = entry.status === "failed" || (state.status === "failed" && state.failure?.stage === entry.stage);
-          const status: StageStatus = failed ? "failed" : state.status === "failed" && entry.status === "running" ? "pending" : entry.status;
-          return (
-            <li key={entry.stage} data-stage={entry.stage} data-stage-status={status} className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center">
-                {status === "done" ? (
-                  <Check aria-hidden className="size-4 text-success" />
-                ) : status === "running" ? (
-                  <Loader2 aria-hidden className="size-4 animate-spin text-primary motion-reduce:animate-none" />
-                ) : status === "failed" ? (
-                  <TriangleAlert aria-hidden className="size-4 text-destructive" />
-                ) : (
-                  <CircleDashed aria-hidden className="size-4 text-muted-foreground" />
-                )}
-              </span>
-              <div className="min-w-0">
-                <p className={cn("text-sm font-medium", status === "pending" ? "text-muted-foreground" : "")}>
-                  {PROCESSING_STAGE_LABELS[entry.stage]}
-                  <span className="sr-only"> — {status === "done" ? "done" : status === "running" ? "in progress" : status === "failed" ? "failed" : "waiting"}</span>
-                </p>
-                {status === "running" || status === "done" ? <p className="text-xs text-muted-foreground">{DETAIL[entry.stage](state.counts)}</p> : null}
-                {status !== "done" && entry.note && state.status !== "failed" ? <p className="text-xs text-warning">{entry.note}</p> : null}
+      <ol className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-x-6 gap-y-5" aria-live="polite">
+        {stages.map((entry) => (
+          <li key={entry.stage} data-stage={entry.stage} data-stage-status={entry.status} aria-current={entry.status === "running" ? "step" : undefined} className="flex flex-col gap-3.5">
+            <span
+              aria-hidden
+              className={cn("h-1.5 rounded-[3px]", entry.status === "done" ? "bg-(--bid-brand)" : entry.status === "running" ? "bg-(--bid-ink) motion-safe:animate-pulse" : entry.status === "failed" ? "bg-(--bid-danger)" : "bg-(--bid-line)")}
+            />
+            <div className="flex gap-2.5">
+              <StageIcon status={entry.status} />
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <span className={cn("text-[15px]", entry.status === "running" ? "font-semibold" : "font-medium", entry.status === "pending" ? "text-(--bid-muted)" : "")}>{PROCESSING_STAGE_LABELS[entry.stage]}</span>
+                <span className={cn("text-[13px] tabular-nums", entry.status === "running" ? "" : "text-(--bid-muted)")}>{detail(entry.stage, entry.status, state.counts)}</span>
+                {entry.status !== "done" && entry.note && state.status !== "failed" ? <span className="text-[13px] text-(--bid-amber-ink)">{entry.note}</span> : null}
               </div>
-            </li>
-          );
-        })}
+            </div>
+          </li>
+        ))}
       </ol>
 
+      {active ? (
+        <p className="mt-5 border-t border-(--bid-line) pt-4 text-[15px]">
+          You can leave this page. The check carries on, and it will be here when you come back. It usually takes two to four minutes; we e-mail you when it is ready.
+        </p>
+      ) : null}
+
       {state.status === "failed" && state.failure ? (
-        <div role="alert" className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm">
-          <p className="font-medium text-destructive">
-            Stopped at “{PROCESSING_STAGE_LABELS[state.failure.stage]}”
-          </p>
-          <p className="mt-1 text-foreground">{state.failure.message}</p>
-          <p className="mt-1 text-muted-foreground">Nothing found so far has been lost. Retrying continues from this step and does not use another check from your plan.</p>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <Button size="sm" onClick={retry} disabled={retrying}>
-              <RotateCw aria-hidden className={cn("size-3.5", retrying ? "animate-spin" : "")} />
-              {retrying ? "Retrying…" : "Retry"}
-            </Button>
-            <a href="/contact" className="text-sm text-muted-foreground underline underline-offset-4">
+        <div role="alert" className="mt-5 rounded-lg bg-(--bid-danger-tint) px-4 py-3.5 text-sm">
+          <p className="font-semibold text-(--bid-danger)">Stopped at “{PROCESSING_STAGE_LABELS[state.failure.stage]}”</p>
+          <p className="mt-1">{state.failure.message}</p>
+          <p className="mt-1">Nothing found so far has been lost. Trying again continues from this stage and does not use another check from your plan.</p>
+          <div className="mt-3 flex flex-wrap items-center gap-4">
+            <button type="button" className="bid-btn bid-btn-primary bid-btn-sm" onClick={retry} disabled={retrying} data-testid="retry-check">
+              <RotateCw aria-hidden className={cn("size-4", retrying ? "animate-spin" : "")} />
+              {retrying ? "Trying again…" : "Try again"}
+            </button>
+            <a href="/contact" className="bid-link text-sm font-medium">
               Contact support
             </a>
           </div>
-          {retryError ? <p className="mt-2 text-sm text-destructive">{retryError}</p> : null}
+          {retryError ? <p className="mt-2 text-sm text-(--bid-danger)">{retryError}</p> : null}
         </div>
       ) : null}
-      {pollError && active ? <p className="mt-3 text-xs text-muted-foreground">Connection lost — still trying. The analysis continues on our side.</p> : null}
+      {pollError && active ? <p className="mt-3 text-[13px] text-(--bid-muted)">Connection lost — still trying. The check carries on at our end.</p> : null}
     </section>
   );
 }

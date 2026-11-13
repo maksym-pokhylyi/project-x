@@ -1,4 +1,5 @@
 import { BriefView } from "@/features/bids/components/brief-view";
+import { PartialResults } from "@/features/bids/components/partial-results";
 import { ProcessingState } from "@/features/bids/components/processing-state";
 import { factsConfirmed, loadBidPage } from "@/features/bids/server/page-data";
 import { getBidStatus } from "@/features/bids/server/status";
@@ -20,7 +21,18 @@ export default async function BriefPage({ params }: { params: Promise<{ bidId: s
   return (
     <div className="flex flex-col gap-6">
       {processing ? <ProcessingState bidId={bid.id} initial={status} /> : null}
-      {processing && !bid.brief && requirements.length === 0 ? null : (
+      {processing ? (
+        <PartialResults
+          bidId={bid.id}
+          basePath={`/app/bids/${bid.id}`}
+          requirements={requirements.map(toRequirementItem)}
+          questions={questions.map(toQuestionItem)}
+          files={toPackFileItems(files, null)}
+          coverage={coverageSummary(files, null)}
+          companyChecked={status.stages.find((stage) => stage.stage === "company")?.status === "done"}
+          questionsListed={status.stages.find((stage) => stage.stage === "questions")?.status === "done"}
+        />
+      ) : (
         <BriefView
           bidId={bid.id}
           brief={bid.brief}
@@ -35,7 +47,6 @@ export default async function BriefPage({ params }: { params: Promise<{ bidId: s
           coverage={coverageSummary(files, done ? bid.packStats : null)}
           links={{ kind: "app", bidId: bid.id }}
           readOnly={bid.status !== "ready"}
-          partial={processing}
           factsConfirmed={confirmed}
           basePath={`/app/bids/${bid.id}`}
         />

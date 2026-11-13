@@ -138,11 +138,20 @@ const updateBidSchema = z.object({
   title: z.string().trim().min(1, "Give the bid a title.").max(200).optional(),
   buyerName: z.string().trim().max(200).nullable().optional(),
   reference: z.string().trim().max(120).nullable().optional(),
+  /** Tender notice this check is linked to (only while the bid is still a draft). */
+  noticeId: z
+    .string()
+    .trim()
+    .max(200)
+    .regex(/^[A-Za-z0-9._:\-/]+$/, "Invalid notice reference.")
+    .nullable()
+    .optional(),
 });
 
 export async function updateBid(ctx: Scope, bidId: string, input: unknown): Promise<BidRow> {
   const bid = await getBid(ctx, bidId);
   const data = parse(updateBidSchema, input);
+  if (data.noticeId !== undefined && bid.status !== "draft") throw new ConflictError("The tender can only be changed before the pack is analysed.");
   const [row] = await db
     .update(bids)
     .set({ ...data, updatedAt: new Date() })

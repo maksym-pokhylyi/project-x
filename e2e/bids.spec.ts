@@ -55,13 +55,20 @@ test("upload a pack, get a cited check, draft and mark an answer, export", async
   await expect(page.getByTestId("bids-empty")).toBeVisible();
   await page.getByTestId("new-bid").click();
   await expect(page.getByTestId("dropzone")).toBeVisible();
-  await expect(page.getByTestId("allowance-note")).toContainText("full bids");
+  await expect(page.getByTestId("allowance-note")).toContainText("Uses 1 of your 3 full bids this month");
+  await expect(page.getByTestId("start-check")).toBeDisabled();
+  await expect(page.getByTestId("start-reason")).toContainText("Add at least one file");
 
   // An unsupported file is refused with a reason, without blocking the others.
   await page.getByTestId("file-input").setInputFiles([{ name: "old-format.doc", mimeType: "application/msword", buffer: Buffer.from("x") }]);
   await page.getByTestId("file-input").setInputFiles(files);
   await expect(page.locator('[data-file-status="error"]')).toContainText("Old Word format");
   await expect(page.locator('[data-file-status="done"]')).toHaveCount(files.length, { timeout: 60_000 });
+  // A file that needs replacing blocks the start, and the page says so in plain words.
+  await expect(page.getByTestId("start-check")).toBeDisabled();
+  await expect(page.getByTestId("start-reason")).toContainText("One file is not ready: one needs replacing or removing.");
+  await page.locator('[data-file-status="error"]').getByRole("button", { name: /^Remove/ }).click();
+  await expect(page.getByTestId("start-reason")).toContainText("files are ready");
 
   // A refresh keeps the uploaded files (the draft bid is in the URL and the database).
   await page.reload();
@@ -85,7 +92,8 @@ test("upload a pack, get a cited check, draft and mark an answer, export", async
   // --- the brief: pass-or-fail requirements quoted from the pack, each with a source chip ----
   const gates = page.getByTestId("gate-row");
   await expect(gates.first()).toBeVisible();
-  await expect(gates.first().getByTestId("citation-mark")).toContainText(/Verified|Check|Unverified/);
+  await expect(gates.first().getByTestId("citation-mark")).toHaveAttribute("data-state-kind", /^(verified|check|unverified)$/);
+  await expect(page.getByTestId("source-legend")).toContainText("Verified: matches the file word for word");
   await page.getByTestId("gate-filter-confirm").click();
   await expect(page.getByTestId("gate-filter-confirm")).toHaveAttribute("aria-pressed", "true");
   await page.getByTestId("gate-filter-all").click();

@@ -87,7 +87,9 @@ export function renderCompanyFacts(facts: CompanyFacts): string {
   add("Trading name", facts.tradingName);
   add("Companies House number", facts.companyNumber);
   add("Website", facts.website);
-  add("Annual turnover band", facts.turnoverBand ? TURNOVER_BAND_LABELS[facts.turnoverBand] : null);
+  if (facts.turnover?.latestGbp) {
+    lines.push(`Annual turnover: ${gbp(facts.turnover.latestGbp)}${facts.turnover.yearEnd ? ` (year to ${facts.turnover.yearEnd})` : ""}${facts.turnover.previousGbp ? `; ${gbp(facts.turnover.previousGbp)} the year before` : ""}`);
+  } else add("Annual turnover band", facts.turnoverBand ? TURNOVER_BAND_LABELS[facts.turnoverBand] : null);
   add("Employees", facts.employees);
   add("Years trading", facts.yearsTrading);
   const cover = (label: string, value: { amountGbp: number | null; expiresAt: string | null } | null | undefined) => {
@@ -306,7 +308,7 @@ function currentSource(question: QuestionRow): AnswerVersion["source"] {
   return question.draftMeta.origin;
 }
 
-type GenerationResult = { text: string; usage: AiUsage; model: string; trimmed: boolean };
+type GenerationResult = { text: string; usage: AiUsage; model: string; trimmed: boolean; /** Words in the model's first attempt, before any shortening. */ firstWordCount: number };
 
 /** Calls the drafting model and enforces the word limit in code (shorten once, then cut). */
 async function generateWithinLimit(options: { ctx: Scope; feature: string; messages: ModelMessage[]; limit: number | null }): Promise<GenerationResult> {
@@ -323,6 +325,7 @@ async function generateWithinLimit(options: { ctx: Scope; feature: string; messa
     });
   const first = await call(options.messages, options.feature);
   let text = cleanModelAnswer(first.text);
+  const firstWordCount = countWords(text);
   let usage = first.usage;
   let trimmed = false;
   if (!text) throw new AppError("INTERNAL", "The model returned an empty answer. Try again.", 502);
@@ -347,7 +350,7 @@ async function generateWithinLimit(options: { ctx: Scope; feature: string; messa
       trimmed = true;
     }
   }
-  return { text, usage, model: first.model, trimmed };
+  return { text, usage, model: first.model, trimmed, firstWordCount };
 }
 
 /** Deterministic part of the claims check: figures in the draft that appear in none of the inputs. */
@@ -660,4 +663,71 @@ export async function applySuggestions(ctx: Scope, bidId: string, questionId: st
     .returning();
   await track("question_drafted", { organizationId: ctx.organization.id, userId: ctx.user.id }, { mode: "apply_suggestions", words: meta.wordCount, gaps: meta.evidenceGaps.length });
   return { question: row!, usage, libraryEmpty: !factsConfirmed && documentCount === 0 };
+}
+
+// --- Model evaluation harness ---------------------------------------------------------------
+// The production prompts, limit enforcement and checks on SUPPLIED evidence (no bid rows), so
+// drafting and marking models can be compared on fixed material (scripts/bids/draft-eval.ts).
+
+export type ProbeSource = { marker: string; title: string; text: string };
+export type ProbeQuestion = { ref: string; title: string | null; text: string; guidance: string | null; weighting: number | null; limitText: string | null; wordLimit: number | null };
+
+const probeSources = (sources: ProbeSource[]): EvidenceSource[] =>
+  sources.map((source) => ({ ...source, source: "library_doc" as const, docId: null, supports: "", tokens: estimateTokens(source.text), full: true }));
+const probeRow = (question: ProbeQuestion) => ({ ...question, pageLimit: null }) as unknown as QuestionRow;
+const probeTender = (tender: string) => `TENDER CONTEXT\n\n${tender}\n\n=== END OF TENDER CONTEXT ===\n\n`;
+
+export async function probeDraft(ctx: Scope, input: { sources: ProbeSource[]; tender: string; question: ProbeQuestion; scale: ScoringDescriptor[] }) {
+  const limit = effectiveWordLimit({ wordLimit: input.question.wordLimit, pageLimit: null });
+  const evidence = renderEvidence(probeSources(input.sources));
+  const block = questionBlock(probeRow(input.question), input.scale, limit);
+  const generation = await generateWithinLimit({ ctx, feature: "eval.draft", messages: contextMessages(evidence, probeTender(input.tender), `${block}\n\nWrite the answer now.`), limit: limit.limit });
+  const known = new Set(input.sources.map((source) => source.marker));
+  return {
+    ...generation,
+    wordCount: countWords(generation.text),
+    gaps: findEvidenceGaps(generation.text),
+    unknownMarkers: findEvidenceMarkers(generation.text).filter((marker) => !known.has(marker)),
+    ungroundedFigures: ungroundedFigures(generation.text, `${evidence}\n${block}\n${input.tender}`).map((item) => item.claim),
+  };
+}
+
+export async function probeClaims(ctx: Scope, input: { sources: ProbeSource[]; question: ProbeQuestion; draft: string }) {
+  const limit = effectiveWordLimit({ wordLimit: input.question.wordLimit, pageLimit: null });
+  const result = await callJson({
+    organizationId: ctx.organization.id,
+    userId: ctx.user.id,
+    feature: "eval.claims",
+    step: "claims",
+    system: CLAIMS_SYSTEM,
+    messages: `${renderEvidence(probeSources(input.sources))}QUESTION\n${questionBlock(probeRow(input.question), [], limit)}\n\nDRAFT\n${input.draft}\n\n=== END OF DRAFT ===\n\n${CLAIMS_TASK}`,
+    schema: claimsSchema,
+    maxOutputTokens: 6_000,
+    timeoutMs: 150_000,
+  });
+  return { unsupported: result.value.unsupported, unanswered: result.value.unanswered_parts, usage: result.usage, model: result.model };
+}
+
+export async function probeEvaluate(ctx: Scope, input: { sources: ProbeSource[]; tender: string; question: ProbeQuestion; scale: ScoringDescriptor[]; answer: string }) {
+  const limit = effectiveWordLimit({ wordLimit: input.question.wordLimit, pageLimit: null });
+  const words = countWords(input.answer);
+  const tail = [
+    questionBlock(probeRow(input.question), [], limit),
+    "\nSCORING SCALE (from the tender documents):",
+    input.scale.map((row) => `${row.score}${row.label ? ` — ${row.label}` : ""}${row.descriptor ? `: ${row.descriptor}` : ""}`).join("\n"),
+    `\nANSWER (${words} words${limit.limit ? `; the limit is ${limit.limit}` : ""}):\n${input.answer}\n\n=== END OF ANSWER ===\n`,
+    EVALUATE_TASK,
+  ].join("\n");
+  const result = await callJson({
+    organizationId: ctx.organization.id,
+    userId: ctx.user.id,
+    feature: "eval.evaluate",
+    step: "evaluate",
+    system: EVALUATE_SYSTEM,
+    messages: contextMessages(renderEvidence(probeSources(input.sources)), probeTender(input.tender), tail),
+    schema: evaluationSchema,
+    maxOutputTokens: 8_000,
+    timeoutMs: 150_000,
+  });
+  return { value: result.value, usage: result.usage, model: result.model };
 }

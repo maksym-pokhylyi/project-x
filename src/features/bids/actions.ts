@@ -78,7 +78,7 @@ export async function retryProcessingAction(bidId: string): Promise<ActionResult
   });
 }
 
-export async function updateBidAction(bidId: string, input: { title?: string; buyerName?: string | null; reference?: string | null }): Promise<ActionResult> {
+export async function updateBidAction(bidId: string, input: { title?: string; buyerName?: string | null; reference?: string | null; noticeId?: string | null }): Promise<ActionResult> {
   return runAction("bids.update", async () => {
     const ctx = await requireOrg();
     await bids.updateBid(ctx, bidId, input);
