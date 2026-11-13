@@ -40,6 +40,8 @@ export type ConfirmPanelProps = {
   startBidPassCheckout?: () => Promise<ActionResult<CheckoutParams>>;
   /** What a downgrade costs or returns, from the billing backend. */
   downgradeNote?: string;
+  /** Why the plan cannot be changed right now (during a trial, or while a pause or cancellation is scheduled). */
+  changeBlocked?: string | null;
 };
 
 const INTERVALS = [
@@ -59,7 +61,7 @@ const BILLING_PATH = "/app/settings/billing";
  *  - live subscription -> "Confirm change": the plan changes through the Paddle API, prorated
  * Paid access is granted only by the webhook; nothing here marks anything as paid.
  */
-export function ConfirmPanel({ intent, config, subscribed, paused, trialEligible, startBidPassCheckout, downgradeNote }: ConfirmPanelProps) {
+export function ConfirmPanel({ intent, config, subscribed, paused, trialEligible, startBidPassCheckout, downgradeNote, changeBlocked }: ConfirmPanelProps) {
   const router = useRouter();
   const paddleRef = useRef<Paddle | null>(null);
   const [open, setOpen] = useState(true);
@@ -154,7 +156,8 @@ export function ConfirmPanel({ intent, config, subscribed, paused, trialEligible
       const down = planRank(intent.plan) < planRank(subscribed.plan) || (samePlan && interval === "month");
       title = samePlan ? `Switch ${plan.name} to ${interval === "year" ? "annual" : "monthly"} billing` : `Change to ${plan.name}`;
       sentence = down ? (downgradeNote ?? "Your plan changes now. Paddle credits what is left of your current billing period.") : billingCopy.upgrade;
-      if (!configured) blocked = "Payments are not open yet.";
+      if (changeBlocked) blocked = changeBlocked;
+      else if (!configured) blocked = "Payments are not open yet.";
       else primary = { label: "Confirm change", run: () => void changePlan(intent.plan, plan.name) };
     } else {
       title = `Start ${plan.name}`;

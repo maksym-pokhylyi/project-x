@@ -17,7 +17,15 @@ import { ANNUAL_SAVING, planDisplay } from "@/config/plan-display";
 import { PAID_PLAN_KEYS, PLANS, isBillingInterval, isPlanKey, type BillingInterval, type PaidPlanKey } from "@/config/plans";
 import { env, features } from "@/env";
 import { billingHandoff } from "@/lib/billing/handoff";
+import { getBillingOverview } from "@/lib/billing/overview";
 import { getPriceCatalogue } from "@/lib/billing/prices";
+import {
+  cancelSubscriptionAction,
+  pauseSubscriptionAction,
+  resumeSubscriptionAction,
+  startBidPassCheckoutAction,
+  undoScheduledChangeAction,
+} from "@/server/actions/billing-manage";
 import { getBidAllowance } from "@/server/bid-allowance";
 import { listMembers } from "@/server/members";
 import { requireOrgForPage, type OrgContext } from "@/server/session";
@@ -50,6 +58,7 @@ function currentPlan(ctx: OrgContext): CurrentPlanCardProps {
   const renewal = date(subscription.currentPeriodEnd);
   const trialEnd = date(subscription.trialEnd);
   const cancelAt = date(subscription.cancelAt);
+  const pauseAt = date(subscription.pauseAt);
 
   if (subscription.status === "paused") {
     return { ...base, status: { label: "Paused", tone: "neutral" }, note: "Your subscription is paused. This workspace is on Free until it resumes." };
@@ -70,6 +79,9 @@ function currentPlan(ctx: OrgContext): CurrentPlanCardProps {
   }
   if (cancelAt) {
     return { ...base, status: { label: "Ending", tone: "warning" }, note: "A cancellation is scheduled. Nothing more is charged.", dateLine: { label: "Access until", value: cancelAt } };
+  }
+  if (pauseAt) {
+    return { ...base, status: { label: "Pausing", tone: "warning" }, note: "A pause is scheduled. Nothing is charged while the subscription is paused.", dateLine: { label: "Plan until", value: pauseAt } };
   }
   /* Monthly, renewing: the one case where "Switch to annual" is offered, as on the artboard. */
   const switchInterval =
@@ -94,12 +106,17 @@ function currentPlan(ctx: OrgContext): CurrentPlanCardProps {
  * receipts. Plans are compared and chosen in ONE place, /pricing; this page only confirms a
  * choice, in the panel that opens when the address carries the hand-off
  * (?plan=…&interval=… or ?buy=bid_pass — see src/lib/billing/handoff.ts).
+ *
+ * What can be done right now — pause, resume, cancel, undo a scheduled change, change plan —
+ * is decided by the billing backend (getBillingOverview: read from our own database, no
+ * Paddle call, so the page loads when Paddle is down). A step that is not possible is not
+ * offered; each button is the server action for that step.
  */
 export default async function BillingPage({ searchParams }: { searchParams: Promise<{ plan?: string; interval?: string; buy?: string }> }) {
   // Owner only: admins and members get the 403 page.
   const ctx = await requireOrgForPage({ role: "owner" });
   const params = await searchParams;
-  const [people, allowance] = await Promise.all([listMembers(ctx), getBidAllowance(ctx)]);
+  const [people, allowance, overview] = await Promise.all([listMembers(ctx), getBidAllowance(ctx), getBillingOverview(ctx)]);
 
   const subscription = ctx.subscription;
   const isLive = subscription ? ["active", "trialing", "past_due"].includes(subscription.status) : false;
@@ -109,8 +126,22 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   const portalAvailable = features.paddleApi && Boolean(subscription?.paddleCustomerId);
   const planFullBids = ctx.entitlements.limits["bids.monthly"] ?? 0;
 
+  const { manage } = overview;
   const pauseState: PauseCancelCardProps["state"] =
-    !subscription || subscription.status === "canceled" ? "none" : subscription.status === "paused" ? "paused" : subscription.cancelAt ? "cancelling" : isLive ? "active" : "none";
+    !subscription || subscription.status === "canceled"
+      ? "none"
+      : subscription.status === "paused"
+        ? "paused"
+        : overview.cancelAt
+          ? "cancelling"
+          : overview.pauseAt
+            ? "pausing"
+            : isLive
+              ? "active"
+              : "none";
+  const scheduledFor = overview.cancelAt ?? overview.pauseAt;
+  const method = overview.paymentMethod;
+  const expires = method?.expiryMonth && method.expiryYear ? `${String(method.expiryMonth).padStart(2, "0")}/${String(method.expiryYear).slice(-2)}` : null;
 
   const intent: BillingIntent | null =
     params.buy === "bid_pass" ? { kind: "bid_pass" } : isPaidPlan(params.plan) ? { kind: "plan", plan: params.plan, interval: isBillingInterval(params.interval) ? params.interval : "month" } : null;
@@ -144,14 +175,36 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
           />
         </BillingRow>
         <BillingRow>
-          {/* No pause, cancel or resume actions are passed yet: the card falls back to the Paddle portal. */}
-          <PauseCancelCard state={pauseState} endsOn={subscription?.cancelAt ? formatBillingDate(subscription.cancelAt) : null} portalAvailable={portalAvailable} />
+          <PauseCancelCard
+            state={pauseState}
+            endsOn={scheduledFor ? formatBillingDate(scheduledFor) : null}
+            cancelNow={manage.cancel.step === "cancel_now"}
+            resumeConfirm={manage.resume.billing === "new_period" ? "The time you had paid for has run out, so resuming starts a new billing period: your card is charged today." : null}
+            onPause={manage.pause.allowed ? pauseSubscriptionAction : undefined}
+            onCancel={manage.cancel.allowed ? cancelSubscriptionAction : undefined}
+            onResume={pauseState === "paused" ? (manage.resume.allowed ? resumeSubscriptionAction : undefined) : manage.undo.allowed ? undoScheduledChangeAction : undefined}
+            portalAvailable={portalAvailable}
+          />
           <BidPassCard passes={allowance?.bidPasses ?? null} buyHref={billingHandoff({ buy: "bid_pass" })} hasMonthlyBids={planFullBids > 0} />
         </BillingRow>
         <BillingRow>
-          {/* The card on file and the receipts are not read from Paddle yet: both cards say where they are. */}
-          <PaymentMethodCard method={null} hasSubscription={Boolean(subscription?.paddleCustomerId) && subscription?.status !== "canceled"} portalAvailable={portalAvailable} />
-          <ReceiptsCard receipts={null} email={subscription?.customerEmail ?? null} portalAvailable={portalAvailable} />
+          {/* The method and the receipts are what the webhooks stored; a receipt link asks Paddle for the invoice PDF on demand. */}
+          <PaymentMethodCard
+            method={method ? { label: method.label, expires } : null}
+            hasSubscription={Boolean(subscription?.paddleCustomerId) && subscription?.status !== "canceled"}
+            portalAvailable={portalAvailable}
+          />
+          <ReceiptsCard
+            receipts={overview.receipts.map((receipt) => ({
+              id: receipt.transactionId,
+              date: receipt.paidAt,
+              description: receipt.description,
+              amount: receipt.amountExcludingTax,
+              url: receipt.invoicePath,
+            }))}
+            email={overview.billingEmail}
+            portalAvailable={portalAvailable}
+          />
         </BillingRow>
       </div>
 
@@ -162,7 +215,10 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
           config={config}
           subscribed={isLive && subscribedPlan ? { plan: subscribedPlan, interval: subscribedInterval } : null}
           paused={subscription?.status === "paused" && Boolean(subscription.paddleSubscriptionId)}
-          trialEligible={!subscription}
+          trialEligible={overview.trialEligible}
+          startBidPassCheckout={startBidPassCheckoutAction}
+          downgradeNote="Your plan changes straight away. The unused part of what you have already paid is kept as credit and taken off your next payments."
+          changeBlocked={subscription && isLive && !overview.planChange.allowed ? overview.planChange.message : null}
         />
       ) : null}
     </div>

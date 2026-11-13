@@ -225,12 +225,17 @@ export type PauseCancelCardProps = {
   /**
    * active      a subscription that renews: pause and cancel are offered
    * cancelling  a cancellation is scheduled: access runs until `endsOn`
+   * pausing     a pause is scheduled: the plan stays until `endsOn`
    * paused      paused: it can be resumed
    * none        no subscription: nothing to pause or cancel
    */
-  state: "active" | "cancelling" | "paused" | "none";
-  /** "1 Dec 2026": when access ends after a scheduled cancellation. */
+  state: "active" | "cancelling" | "pausing" | "paused" | "none";
+  /** "1 Dec 2026": when access ends after a scheduled cancellation, or when a scheduled pause begins. */
   endsOn?: string | null;
+  /** Cancelling ends the subscription at once (it is paused, or its last payment failed) instead of at the end of the paid period. */
+  cancelNow?: boolean;
+  /** Said before a paused subscription is resumed, when resuming charges the card (its paid time has run out). */
+  resumeConfirm?: string | null;
   /** Server actions for each step, from the billing backend. A missing one falls back to the Paddle portal (cancel) or is not offered (pause, resume). */
   onPause?: BillingStep;
   onCancel?: BillingStep;
@@ -239,8 +244,18 @@ export type PauseCancelCardProps = {
   portalAvailable: boolean;
 };
 
-export function PauseCancelCard({ state, endsOn, onPause, onCancel, onResume, portalAvailable }: PauseCancelCardProps) {
-  const title = state === "none" ? "No subscription to pause or cancel" : state === "paused" ? "Your subscription is paused" : state === "cancelling" ? "Your subscription is set to end" : "Pause or cancel in two clicks";
+export function PauseCancelCard({ state, endsOn, cancelNow, resumeConfirm, onPause, onCancel, onResume, portalAvailable }: PauseCancelCardProps) {
+  const title =
+    state === "none"
+      ? "No subscription to pause or cancel"
+      : state === "paused"
+        ? "Your subscription is paused"
+        : state === "cancelling"
+          ? "Your subscription is set to end"
+          : state === "pausing"
+            ? "Your subscription is set to pause"
+            : "Pause or cancel in two clicks";
+  const canCancel = state === "active" || state === "paused";
   return (
     <section aria-labelledby="billing-pause" className={card}>
       <h2 id="billing-pause" className={serifTitle}>
@@ -253,7 +268,9 @@ export function PauseCancelCard({ state, endsOn, onPause, onCancel, onResume, po
             ? "Nothing is charged while it is paused, and this workspace is on Free until it resumes. Your documents and saved tenders stay where they are."
             : state === "cancelling"
               ? `You keep access until ${endsOn ?? "the end of the period you have paid for"}. After that this workspace is on Free; nothing more is charged.`
-              : `${billingCopy.keepAccess} ${billingCopy.refund}`}
+              : state === "pausing"
+                ? `Your plan stays until ${endsOn ?? "the end of the period you have paid for"}. After that nothing is charged, and this workspace is on Free until you resume.`
+                : `${billingCopy.keepAccess} ${billingCopy.refund}`}
       </p>
       {state === "none" ? null : (
         <div className={cn(actions, "max-md:controls-md")}>
@@ -270,7 +287,17 @@ export function PauseCancelCard({ state, endsOn, onPause, onCancel, onResume, po
               Pause subscription
             </BillingStepButton>
           ) : null}
-          {state === "active" ? (
+          {state !== "active" && onResume ? (
+            <BillingStepButton
+              action={onResume}
+              variant={state === "paused" ? "default" : "outline"}
+              confirm={state === "paused" && resumeConfirm ? { title: "Resume your subscription?", description: resumeConfirm, confirmLabel: "Resume subscription" } : undefined}
+              done={state === "paused" ? "Subscription resumed." : "Your subscription continues."}
+            >
+              {state === "paused" ? "Resume subscription" : "Keep my subscription"}
+            </BillingStepButton>
+          ) : null}
+          {canCancel && (state === "active" || onCancel) ? (
             <BillingStepButton
               action={onCancel}
               portal={onCancel ? undefined : portalAvailable ? "cancel" : undefined}
@@ -278,7 +305,9 @@ export function PauseCancelCard({ state, endsOn, onPause, onCancel, onResume, po
                 onCancel
                   ? {
                       title: "Cancel your subscription?",
-                      description: `${billingCopy.keepAccess} After that this workspace is on Free and nothing more is charged.`,
+                      description: cancelNow
+                        ? "Your subscription ends now and this workspace is on Free. Nothing more is charged; your documents and saved tenders stay."
+                        : `${billingCopy.keepAccess} After that this workspace is on Free and nothing more is charged.`,
                       confirmLabel: "Cancel subscription",
                     }
                   : undefined
@@ -286,11 +315,6 @@ export function PauseCancelCard({ state, endsOn, onPause, onCancel, onResume, po
               done="Subscription cancelled."
             >
               Cancel subscription
-            </BillingStepButton>
-          ) : null}
-          {state !== "active" && onResume ? (
-            <BillingStepButton action={onResume} done="Subscription resumed.">
-              {state === "paused" ? "Resume subscription" : "Keep my subscription"}
             </BillingStepButton>
           ) : null}
           {state !== "active" && !onResume && portalAvailable ? <BillingStepButton portal="overview">Manage in Paddle</BillingStepButton> : null}
@@ -339,8 +363,8 @@ export function BidPassCard({ passes, buyHref, hasMonthlyBids }: BidPassCardProp
 /* ---------------------------------------------------------------------------------------- */
 
 export type PaymentMethodCardProps = {
-  /** The card on file, from the billing backend. Null when it is not known here: Paddle holds it. */
-  method: { brand: string | null; last4: string; expires: string | null } | null;
+  /** The payment method on file, from the billing backend ("Visa ending 4242", "PayPal"). Null when it is not known here: Paddle holds it. */
+  method: { label: string; expires: string | null } | null;
   /** A subscription exists, so there is a payment method somewhere to update. */
   hasSubscription: boolean;
   /** Server action that returns a place to update the card (`{ url }`). Without it the Paddle portal opens. */
@@ -360,7 +384,7 @@ export function PaymentMethodCard({ method, hasSubscription, onUpdate, portalAva
           <CardIcon className={method ? "text-ink" : "text-ink-2"} />
           {method ? (
             <span>
-              {method.brand ? `${method.brand} ending ${method.last4}` : `Card ending ${method.last4}`}
+              {method.label}
               {method.expires ? <span className="font-normal text-ink-2"> · expires {method.expires}</span> : null}
             </span>
           ) : hasSubscription ? (
