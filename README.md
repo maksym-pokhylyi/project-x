@@ -197,6 +197,7 @@ could receive the verification link.)
 | `pnpm paddle:simulate <orgId> [plan] [interval] [status]` | Send a signed fake subscription webhook to the local app |
 | `pnpm paddle:pull-events [--since 2h \| --after evt_…] [--watch]` | Local billing without webhooks: feed the sandbox's recent events through the webhook pipeline (refuses on production) |
 | `pnpm paddle:verify-sandbox [--write]` | Check against the real sandbox API what the billing code assumes about Paddle (read-only without `--write`) |
+| `pnpm contacts:backfill` | Fill `supplier_contacts.email_fingerprint` on rows stored before the column existed (run once after the `contact_retention` migration; safe to repeat) |
 | `pnpm billing:purge-sandbox [--yes]` | Remove every billing row that came from the Paddle sandbox (dry run without `--yes`); the step before going live |
 | `pnpm auth:schema` | Regenerate `src/db/schema/auth.ts` after changing Better Auth plugins |
 | `pnpm erase account <id\|e-mail> [--yes]` · `pnpm erase workspace <id> [--yes]` | Erasure on someone's behalf (dry run without `--yes`); see the runbook |
@@ -814,6 +815,7 @@ legal record of first contact. Procedures: `docs/gtm/07-compliance-pack.md`.
 | `outreach_campaigns` | segment, letter template, build summary (counts only) | kept |
 | `outreach_prospects` | company, address, link code, status, dates, the letter's merge fields | A named address: erased 90 days after its letter, or when its one-month window ends if it was never written to. Every address, its fingerprint and the merge fields: erased 12 months after the campaign. The rows, statuses, dates and codes stay, so the counts do |
 | `suppressions` | address or domain, reason, source | never purged: it is what keeps the promise |
+| `supplier_contacts` | contact addresses published in notices (the pool lists are built from) | An address that identifies a person (named, webmail, or a role mailbox published with a contact name): erased in place 30 days after it was first stored — the row keeps a SHA-256 fingerprint so that re-reading the notice does not bring it back. Generic role mailboxes of companies: kept |
 | `outreach_audit` | who, when, what, how many (never whom) | 2 years |
 
 **For other code**: `getOutreachResults(campaignId \| null)` and `getFounderKpis()` (admin

@@ -37,6 +37,15 @@ describe("analytics never receives URLs that are credentials (F-18)", () => {
     expect(sanitizeAnalyticsUrl("")).toBe("");
   });
 
+  it("drops the outreach link code from public data pages and the opt-out page", () => {
+    expect(sanitizeAnalyticsUrl("https://bidfolio.co.uk/suppliers/acme-grounds-ltd-01111111?r=k7Qm2xZp")).toBe("https://bidfolio.co.uk/suppliers/acme-grounds-ltd-01111111");
+    expect(sanitizeAnalyticsUrl("/buyers/leeds-city-council?r=k7Qm2xZp&tab=awards")).toBe("/buyers/leeds-city-council?tab=awards");
+    expect(sanitizeAnalyticsUrl("/tenders/ocds-h6vhtk-0123ab?r=k7Qm2xZp")).toBe("/tenders/ocds-h6vhtk-0123ab");
+    expect(sanitizeAnalyticsUrl("https://bidfolio.co.uk/optout?c=k7Qm2xZp")).toBe("https://bidfolio.co.uk/optout");
+    // Elsewhere r and c are ordinary parameters.
+    expect(sanitizeAnalyticsUrl("/find?r=north-west&c=2")).toBe("/find?r=north-west&c=2");
+  });
+
   it("sanitises every URL property of an event (what posthog.before_send receives)", () => {
     const event = sanitizeAnalyticsEvent({
       event: "$pageview",

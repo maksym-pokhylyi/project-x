@@ -19,11 +19,19 @@ const OPAQUE_SEGMENTS: Array<[RegExp, string]> = [
 /** Parameters removed wherever they appear. */
 const SENSITIVE_PARAMS = /^(token|key|code|state|sig|signature|expires|password|email|invitation(_?id)?)$/i;
 /**
- * `/tenders/<id>?d=<notification id>` marks the scheduled e-mail a tender was opened from.
- * The server counts it once (src/features/notifications/clicks.ts); a page view must not
- * carry it, or a browser could be tied to the person the e-mail was sent to.
+ * Marks that tie a visit to the message it came from. The server records each of them
+ * first-party; a page view must not carry them, or a browser could be tied to the person
+ * (or the sole trader) the message was sent to.
+ *  - `/tenders/<id>?d=<notification id>`: the scheduled e-mail a tender was opened from
+ *    (counted once in src/features/notifications/clicks.ts);
+ *  - `?r=<code>` on a public data page: the outreach link code (stored in `page_visits`);
+ *  - `/optout?c=<code>`: the same code on the opt-out page.
  */
-const EMAIL_MARK = { route: /^\/tenders\//, param: "d" };
+const MESSAGE_MARKS: Array<{ route: RegExp; param: string }> = [
+  { route: /^\/tenders\//, param: "d" },
+  { route: /^\/(suppliers|buyers|tenders)\//, param: "r" },
+  { route: /^\/optout(\/|$)/, param: "c" },
+];
 
 export function sanitizeAnalyticsPath(pathname: string): string {
   for (const [pattern, replacement] of OPAQUE_SEGMENTS) {
@@ -52,7 +60,9 @@ export function sanitizeAnalyticsUrl(input: string): string {
     for (const name of [...url.searchParams.keys()]) {
       if (SENSITIVE_PARAMS.test(name)) url.searchParams.delete(name);
     }
-    if (EMAIL_MARK.route.test(url.pathname)) url.searchParams.delete(EMAIL_MARK.param);
+    for (const mark of MESSAGE_MARKS) {
+      if (mark.route.test(url.pathname)) url.searchParams.delete(mark.param);
+    }
   }
   url.pathname = sanitizeAnalyticsPath(url.pathname);
   return absolute ? url.toString() : `${url.pathname}${url.search}${url.hash}`;

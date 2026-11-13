@@ -1,6 +1,7 @@
 import "server-only";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
+import { errorReason } from "@/lib/describe-error";
 import { enqueueJob } from "@/lib/jobs/queue";
 import { log } from "@/lib/logger";
 import { procurementConfig } from "../config";
@@ -227,7 +228,7 @@ async function runWithLease(source: string, mode: IngestSummary["mode"], plan: (
   try {
     summary = await readWindow(plan(lease), options, started);
   } catch (error) {
-    summary = { ...skipped(source, mode), status: "error", error: error instanceof Error ? error.message.slice(0, 500) : "unknown error", durationMs: Date.now() - started };
+    summary = { ...skipped(source, mode), status: "error", error: errorReason(error).slice(0, 500), durationMs: Date.now() - started };
   }
   await releaseLease(source, summary);
   // Quiet ticks (nothing new) are not worth a row each; everything else is.
