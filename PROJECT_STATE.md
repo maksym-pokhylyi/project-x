@@ -86,7 +86,7 @@ Bid Desk £149/мес (3 заявки, перенос, пауза), Bid Desk Plu
 
 Полный список со стоимостью и статусами — `docs/OWNER_ACTIONS.md`. Срочное на 13.11 14:45 UTC:
 1. `ALLOW_SANDBOX_BILLING=1` в Vercel (Production) — для проверки тестовых платежей на развёрнутой версии; удалить перед запуском.
-2. Входящая почта для `hello@bidfolio.co.uk` (ImprovMX или Google Workspace).
+2. Проверить, что тестовое письмо на `hello@bidfolio.co.uk` пришло в личный ящик (ImprovMX настроен, записи добавлены).
 Сделано владельцем 13.11: Resend (ключ в Vercel, защищённая форма), реквизиты продавца (написание латиницей подтверждено:
 Maksym Pokhylyi; 14 Stoliarnyi Lane, Kremenchuk, Poltava Oblast, Ukraine).
 
