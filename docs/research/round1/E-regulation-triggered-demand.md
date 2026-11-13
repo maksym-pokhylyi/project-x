@@ -1,14 +1,295 @@
 # E — Regulation- and deadline-triggered demand (round 1)
 
-Status: WORK IN PROGRESS (saved progressively). Research date: 2026-11-13.
+Research date: 2026-11-13. Analyst scope: rules that FORCE many small/mid-size organisations to adopt software or produce recurring filings between November 2026 and December 2027 (EU, UK, US, Canada, Australia, other large markets). Decision context: one SaaS for a solo founder in Ukraine, v1 built in about a day, target USD 10,000 MRR by month 12 (about November 2027).
+
+---
 
 ## 0. Method and limits (read first)
 
-- WebSearch was NOT available in this session (shared search budget exhausted before this analyst started) and the WebFetch tool could not resolve hosts. All live evidence below was therefore obtained by fetching KNOWN primary-source URLs directly (regulator pages, official legal texts via the EU Publications Office / eCFR / govinfo, vendor pricing pages, official open data). No search engine, third-party reader, proxy or web archive was used.
-- Consequence: discovery of unknown competitors, forum threads and keyword volumes is weaker than in a normal run. Everything not fetched live in this session is labelled `BACKGROUND (not re-verified)` and comes from the analyst model's prior knowledge (cut-off mid-2026).
-- Labels used: FACT (fetched primary source, URL + date), INFERENCE, ASSUMPTION, UNKNOWN, BACKGROUND (not re-verified).
+- **WebSearch was not available** in this session: the shared search budget was already exhausted when this analyst started, and the WebFetch tool could not resolve hosts. All live evidence was therefore gathered by **directly fetching known primary-source URLs** (regulator pages, official legal texts from the EU Publications Office, the US eCFR and govinfo, legislation.gov.uk, gesetze-im-internet.de, vendor pricing pages, official open data). No web search engine, third-party reader, proxy or web archive was used. About 170 direct requests were made; a minority failed or were blocked.
+- Directory/official APIs used for demand evidence: WordPress.org plugin directory API (install counts), Wikimedia pageviews API (interest proxy), HMRC's public software-vendor data file, GOV.UK content API. GOV.UK's own site search was used three times to locate GOV.UK pages.
+- Consequences: (1) discovery of unknown competitors, forum sentiment and Google keyword volumes is much weaker than in a normal run — **no keyword volumes were obtainable**; (2) several regulator sites blocked the session (Spain hacienda.gob.es, Germany BMF, Australia ATO and AUSTRAC, US HHS and DoD, EUR-Lex, Federal Register, GitHub web); where possible an equivalent official source was used (e.g. eCFR instead of HHS).
+- EU legal texts were read from the Publications Office in their **original Official Journal version**, not consolidated versions; later amendments are only reflected where a Commission page or amending act was also fetched.
+- Evidence labels: **FACT** = fetched in this session from the cited source (URL + date in Appendix A); **BACKGROUND** = analyst's prior knowledge (cut-off mid-2026), *not re-verified today*; **INFERENCE**; **ASSUMPTION**; **UNKNOWN**. Probability statements are analyst judgement, not data.
+- Currency conversions use round ASSUMPTIONS (GBP 1 = USD 1.27, EUR 1 = USD 1.10); not fetched. MRR targets are gross of merchant-of-record fees.
 
-## Evidence log (raw, in order of collection)
+---
+
+## 1. Bottom line
+
+1. **Most of the "obvious" 2027 windows moved or were diluted during 2026.** Verified today: Spain Veri*factu (third postponement announced 5 Oct 2026, now October 2028), US ADA Title II (+1 year, with DOJ asking whether to soften it further), HHS Section 504 web rule (+1 year), EU AI Act high-risk rules (now 2 Dec 2027 / 2 Aug 2028), Colorado AI Act (repealed and re-enacted, effective 1 Jan 2027), FDA food traceability (2028), EU Pay Transparency (only 5 of 27 Member States had transposed by September 2026), UK zero-hours reforms (no date), UK Martyn's Law (not commenced). Postponement is the base case, not the exception.
+2. **Where a deadline held, supply flooded.** HMRC lists 184 recognised MTD-for-Income-Tax products (40 with a free version) and has closed the "market window" for new 2026–27 products; Defra lists 267 self-certified products for about 12,000 waste sites; the WordPress directory has 296 "withdrawal button" plugins, the leaders free. A one-day build has no scarcity value; distribution and trust decide.
+3. **Regulators increasingly ship free tools or tell people not to buy anything** (Poland KSeF apps, Spain AEAT invoicing app and public e-invoicing solution, ENISA reporting platform, EUDR information system, Martyn's Law guidance "needing neither particular expertise nor the use of third-party services").
+4. **Best structural fit found: UK Digital Waste Tracking** (not on the original candidate list). It is API-first by government design, software is self-certified (no accreditation), listed on GOV.UK fortnightly, liability sits with the operator, the filing recurs for every load, and phase 2 brings about 300,000 registered carriers/brokers/dealers into scope in October 2027. Against it: 267 products already listed, a free spreadsheet route, and phase-2 revenue arriving in months 10–13.
+5. **Second: EU Cyber Resilience Act tooling** (dates held; reporting live since 11 Sep 2026; full application 11 Dec 2027), but the buying peak is at or after month 12 and free/open tooling is funded by the EU.
+6. **Honest verdict:** no regulation window examined gives this founder a better than low probability of USD 10k MRR by month 12. My judgement: UK waste tracking roughly 10%, CRA roughly 5–10%, EUDAMED niche roughly 5%, everything else below 5%. Regulation-triggered demand is better used as a *timing tailwind* for a product chosen on other grounds than as the sole thesis.
+
+---
+
+## 2. Part 1 — Candidate regulatory windows (44 rows)
+
+Legend in cells: **[F]** fetched and verified today, **[B]** background not re-verified, **[U]** unknown / not sourced. Sources for every [F] are in Appendix A.
+
+### 2.1 Invoicing and tax digitalisation
+
+| # | Rule (jurisdiction) | Exact obligation | Affected | Dates and status at 13 Nov 2026 | Recurring? | Existing software and price levels | Free official tool? | Fit for solo self-serve SaaS |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Germany — B2B e-invoicing (UStG s.14, s.27(38)) | Issue structured e-invoices (EN 16931: XRechnung / ZUGFeRD) for domestic B2B supplies; receiving already mandatory [B] | [U] not sourced | Enacted, no change visible in statute: issuing from 1 Jan 2027 if prior-year turnover > EUR 800,000; 1 Jan 2028 for all [F] | Yes, every invoice | sevdesk free plan (3 invoices/month), paid EUR 11.90–34.90/month list; free generator; easybill free validator [F]; Lexware, DATEV [B] | ELSTER free viewer [F]; vendor free tiers | Poor: saturated, free tiers, German-language trust (GoBD), cold e-mail banned |
+| 2 | France — e-invoicing and e-reporting | Receive and issue through a state-registered platform; report transaction/payment data | [U] | Rolling out from 1 Sep 2026 [F]; SMEs/micro issue from 1 Sep 2027 [B] | Yes | 100+ platforms, bank/fintech bundles [B] | No state invoicing platform [B] | Poor: only a DGFiP-registered "plateforme agreee" (3-year immatriculation, interoperability tests) may transmit [F] — **registration barrier** |
+| 3 | Belgium — structured B2B e-invoices (Peppol) | Issue/receive structured invoices between Belgian VAT businesses | about 1.1–1.2M VAT businesses [B] | Since 1 Jan 2026 [B] | Yes | Billit, Accountable, Dexxter, Odoo, EUR 0–15/month [B]; 41 "peppol" WordPress plugins, largest 100+ installs [F] | None [B] | Window passed, crowded |
+| 4 | Poland — KSeF | Issue invoices in the national system | [U] | 1 Feb 2026 (2024 sales > PLN 200M); 1 Apr 2026 others; sellers with <= PLN 10,000/month on invoices may stay outside until 31 Dec 2026, so fully in from 1 Jan 2027 [F] | Yes | Local suites (Fakturownia, wFirma, inFakt, Comarch) [B]; WooCommerce KSeF add-on 700+ installs [F] | **Yes** — free web app and mobile app from the Ministry [F] | Poor: free official tools, strong locals. Diaspora niche (Ukrainian-speaking sole proprietors in Poland) is an untested ASSUMPTION |
+| 5 | Spain — Veri*factu (RD 1007/2023) | Billing software must create chained, hashed invoice records with QR; optional real-time send to AEAT | [U] | Law in force says 1 Jan 2027 (corporate-tax payers) / 1 Jul 2027 (others) [F]; **5 Oct 2026 Ministry announced postponement to October 2028, pending formal legal act** [F, secondary] | Yes | Holded EUR 34/month list, all plans include Verifactu; TS Facturas from EUR 80/year; Verifacti API; 30 WordPress plugins, largest 900+ installs [F] | **Yes** — AEAT free invoicing app [F] | **Dead for this window** (third postponement); producers carry statutory liability [B] |
+| 6 | Spain — mandatory B2B e-invoicing (RD 238/2026) | Issue, send, receive e-invoices; report invoice status and payment | [U] | Clock started 6 Oct 2026: 6 Oct 2027 for turnover > EUR 8M; 6 Oct 2028 all others; 6 Oct 2029 status reporting for natural persons [F] | Yes | ERP / e-invoicing platforms [B] | **Yes** — public solution SPFE [F] | Poor in-window: only > EUR 8M firms by Oct 2027 |
+| 7 | Croatia, Slovakia, Latvia, Greece — national B2B e-invoicing | Structured e-invoices / fiscalisation | [U] | Croatia 1 Jan 2026, non-VAT issuers 1 Jan 2027; Slovakia 1 Jan 2027; Latvia 2028; Greece Feb / Oct 2026 — all [B], **not re-verified** | Yes | Local vendors [B] | Croatia and Greece have free official apps [B] | Poor: small markets, local language |
+| 8 | UK — Making Tax Digital for Income Tax | Digital records, quarterly updates, final declaration through HMRC-recognised software | 780,000 from Apr 2026 + 970,000 from Apr 2027 [F] | In force; > GBP 30k cohort from 6 Apr 2027; > GBP 20k from 6 Apr 2028 [F] | Yes, quarterly | 184 recognised products, 40 with a free version (Monzo, Starling, Lloyds, Tide, Sage, FreeAgent via NatWest), 92 bridging [F]; VitalTax GBP 30 + VAT/year [F] | No HMRC tool, but HMRC "strongly encourages" free products [F] | Weak: HMRC production approval, **closed market window for 2026–27 products** [F] |
+| 9 | EU — VAT in the Digital Age | Digital reporting / e-invoicing for intra-EU B2B | — | 2028–2030 phases [B] | Yes | — | — | Outside window |
+
+### 2.2 EU product, supply-chain and consumer rules
+
+| # | Rule | Exact obligation | Affected | Dates and status | Recurring? | Existing software and prices | Free official tool? | Fit |
+|---|---|---|---|---|---|---|---|---|
+| 10 | EU Cyber Resilience Act (EU) 2024/2847 | Manufacturers of products with digital elements: report actively exploited vulnerabilities / severe incidents (24h / 72h / 14 days); from full application: risk assessment, SBOM, vulnerability handling, technical documentation, EU declaration of conformity, >= 5-year support | [U] | Reporting since 11 Sep 2026; full application 11 Dec 2027; Commission guidance 27 Jul 2026; no postponement seen [F] | Yes (per release, continuous monitoring) | CRA Evidence (custom price + paid fast-track); DevGuard open source, SaaS from EUR 449.10/month [F] | ENISA Single Reporting Platform (free); EU-funded tools OSCRAT, OCCTET, CRACY; simplified documentation form for micro/small firms foreseen [F] | **Medium**: no accreditation needed to sell tooling; engineers buy self-serve; peak at or after month 12 |
+| 11 | EUDAMED mandatory use (MDR/IVDR) | Register actors and every device (UDI-DI data) before placing on market | [U] | Mandatory since 28 May 2026; legacy / already-marketed devices by **28 Nov 2026** [F] | Partly (new devices, changes; more modules later) | Specialist provider: EUR 600–3,950/year packages, from EUR 1.50 per UDI [F]; enterprise RIM vendors [B] | Free manual entry and bulk XML upload in EUDAMED [B] | Medium-low: proven price points, low data sensitivity, but the peak is this month and N is small |
+| 12 | EU Packaging Regulation (EU) 2025/40 | Conformity declaration and technical documentation for packaging; EPR registration per Member State | [U] | Applied 12 Aug 2026; omnibus proposal to suspend authorised-representative duty still pending [F] | Annual/quarterly EPR declarations | Compliance schemes and service firms [B] | National registers [B] | Low: authorised representative must be established in the Member State [B] → service business |
+| 13 | EU Deforestation Regulation | Due-diligence statements with geolocation before placing/exporting seven commodities | [U] | 30 Dec 2026 large and medium; 30 Jun 2027 micro and small; twice amended; simplification review May 2026 [F] | Yes, per shipment | Enterprise traceability vendors [B] | **Yes** — official Information System (TRACES) [F] | Low: free official system, satellite/consulting heavy, delay history |
+| 14 | CBAM definitive period | Authorised declarant status; annual declaration; certificates | "vast majority" of importers exempt under 50-tonne threshold [F] | First annual declaration by 30 Sep 2027 for 2026 [F] | Annual | Carbon-accounting vendors, consultants [B] | CBAM registry [F] | Low: de minimis removed the SME base; verification needs accredited verifiers [F] |
+| 15 | Battery passport (EU) 2023/1542 Art. 77 | Electronic passport via QR for each LMT battery, industrial battery > 2 kWh, EV battery | [U] | 18 Feb 2027 in the original text [F]; any 2026 amendment [U] | Per battery placed on market | Enterprise passport vendors [B] | No | Low: long-lived hosting duty, standards in flux, possible certification of passport service providers [B] |
+| 16 | EU e-commerce consumer rules: withdrawal function (Dir. 2023/2673), guarantee notice/label (Dir. 2024/825), GPSR | Online B2C traders must show a "withdraw from contract here" function; harmonised guarantee notice; product-safety contact data | All EU online B2C sellers [U count] | Apply from 19 Jun 2026 [F]; 27 Sep 2026 [B]; GPSR since 13 Dec 2024 [B] | No (set-and-forget) | 296 WordPress "withdrawal button" plugins, leaders free with 6,000+, 5,000+, 2,000+ installs; 36 GPSR plugins, largest 300+ [F] | Platform-native features [B] | Low: one-off, commoditised by free plugins within 5 months |
+| 17 | European Accessibility Act | Accessible e-commerce, banking, e-books, transport services | [U] | Applies since 28 Jun 2025; micro service providers exempt [B] | Ongoing | Scanners, overlays, agencies [B] | Free checkers [B] | Low: crowded; interest faded after the deadline (Wikipedia views fell from 5,204 in Jun 2025 to about 1,100/month in 2026 [F]) |
+| 18 | EU short-term rental Regulation (EU) 2024/1028 | Registration numbers for hosts; platforms share data | Hosts in Member States with registration schemes [U] | Applies from 20 May 2026 [F]; Spain's national registry with annual filing [B] | Annual in Spain [B] | Property-management systems, gestorias [B] | National portals [B] | Low: small ticket, seasonal, local language |
+
+### 2.3 EU horizontal: employment, AI, security
+
+| # | Rule | Exact obligation | Affected | Dates and status | Recurring? | Existing software and prices | Free official tool? | Fit |
+|---|---|---|---|---|---|---|---|---|
+| 19 | EU Pay Transparency Directive (EU) 2023/970 | All employers: pay range before interview, no pay-history questions, annual reminder of right to pay information; employers 150+: gender pay gap report; joint pay assessment if unexplained gap >= 5% | Employers with 150+ workers: [U] not sourced | Transposition due 7 Jun 2026; **only Slovakia, Italy, Lithuania, Malta on time, Greece in July**; DE, FR, NL, ES, PL, IE, BE, SE and others not yet (Sept 2026 tracker); Directive dates: first reports 7 Jun 2027 (250+ yearly; 150–249 every 3 years), 100–149 in 2031 [F] | Annual (250+) or every 3 years | Sysarb, Figures, PayAnalytics: no public prices, headcount-based, onboarding fees [F] | Slovakia ministry tool, Luxembourg tool [F, secondary]; Art. 11 state support for < 250 [F] | Low-medium: payroll data trust barrier; national slippage |
+| 20 | EU AI Act | High-risk system obligations; transparency duties | [U] | AI Omnibus in force 27 Jul 2026: Annex III high-risk from **2 Dec 2027**, Annex I products 2 Aug 2028; transparency rules from Aug 2026 [F] | Ongoing | GRC platforms, law firms [B] | Commission guidelines, codes of practice [F] | Low: delayed past the window, legal-advice heavy |
+| 21 | NIS2 in Germany | Registration with BSI; risk management; incident reporting | [U] | Registration deadline "already expired" [F] | Ongoing | ISMS tools, consultants [B] | Free BSI applicability check and portal [F] | Low: window passed, consulting-led |
+
+### 2.4 United Kingdom
+
+| # | Rule | Exact obligation | Affected | Dates and status | Recurring? | Existing software and prices | Free official tool? | Fit |
+|---|---|---|---|---|---|---|---|---|
+| 22 | **UK Digital Waste Tracking** (S.I. 2026/729) | Permitted/licensed waste receiving sites report every load received within 2 working days via API-connected software or Defra's spreadsheet; phase 2 extends to carriers, brokers, dealers | about 12,000 waste site operators; about 300,000 registered carriers, brokers, dealers [F] | England and Wales since 1 Oct 2026; NI and Scotland 1 Jan 2027; phase 2 public beta spring 2027, **mandatory October 2027**; earlier targets Apr 2025 / Apr 2026 slipped [F] | Yes, per load, perpetual | 267 self-certified products on GOV.UK; WTNcloud GBP 0 / 195 / 349 / 649 / 1,800 per year; Dsposal GBP 0 / 300 / 600 per month [F] | Spreadsheet upload only, "temporary", until at least Oct 2027; GBP 26/year system fee [F] | **Best structural fit**: self-certification, GOV.UK listing, operator liable; but crowded |
+| 23 | UK Terrorism (Protection of Premises) Act 2025 ("Martyn's Law") | Public protection procedures for premises with 200+ people; more for 800+ | about 155,000 standard and 24,000 enhanced premises [B] | Royal Assent 3 Apr 2025; **not commenced**; "at least 24 months"; guidance 15 Apr 2026 [F] | Light (reviews, training) | Template/training vendors [B] | Guidance designed to need no "third-party services offered by the private sector" [F] | Low: government discourages purchases; no date |
+| 24 | UK Employment Rights Act 2025 | Staged duties: harassment prevention (30 Oct 2026), unfair dismissal at 6 months and uncapped awards (1 Jan 2027), action plans (Apr 2027), flexible working (Oct 2027) | All UK employers | Dates as listed [F]; zero-hours / guaranteed-hours timing "will be updated following the consultation" [F] | Policies, not filings | HR suites, employment lawyers, HR consultancies [B] | Acas guidance [B] | Low: document/policy work bundled by HR suites; the one software-shaped piece (guaranteed hours) has no date |
+| 25 | UK Companies House identity verification | Directors and PSCs verify identity | Millions of individuals [B] | Mandatory since 18 Nov 2025 [F] | No | Authorised agents must be AML-supervised [F] | **Yes** — free via GOV.UK One Login [F] | None: one-off, free, licensed route |
+| 26 | UK sanctions reporting for letting agents | Screen and report designated persons to OFSI | [U] | Since 14 May 2025 [B], not re-verified | Per new client | AML/screening vendors, per-check pricing [B] | Free official sanctions list search [B] | Low |
+
+### 2.5 United States
+
+| # | Rule | Exact obligation | Affected | Dates and status | Recurring? | Existing software and prices | Free official tool? | Fit |
+|---|---|---|---|---|---|---|---|---|
+| 27 | ADA Title II web and mobile accessibility rule | Web content, documents and apps of state/local government meet WCAG 2.1 AA | 91,489 entities, 109,893 websites [F] | **Extended 20 Apr 2026**: population >= 50,000 by 26 Apr 2027; < 50,000 and special districts by 26 Apr 2028; DOJ asks whether to make the rule "less costly for small governments" [F] | Yes (new content continuously) | DocAccess (page credits, sales-led, part of a vendor with 13K local-government customers); PDFix from EUR 350/year; Equidox, Allyant, GrackleDocs (quote) [F] | Open-source ASU/AWS remediation stack; free checkers; Word/Acrobat built-ins [F/B] | Low for this founder: public procurement, gov-tech incumbents |
+| 28 | HHS Section 504 web rule (45 CFR 84.84) | Recipients of HHS funds meet WCAG 2.1 AA | [U] | Amended 11 May 2026: >= 15 employees from 11 May 2027; < 15 from 10 May 2028 [F] | Yes | Web accessibility vendors [B] | Free checkers [B] | Low: crowded |
+| 29 | Colorado ADMT Act (SB 26-189) and Chatbot Safety Act (HB 26-1263) | Developer/deployer duties for automated decisions; chatbot annual report | [U] | SB 24-205 repealed and re-enacted; effective 1 Jan 2027; AG rulemaking in progress [F] | Ongoing | GRC tools, law firms [B] | — | Low: rules not final; legal-advice heavy |
+| 30 | California CCPA regulations (risk assessments, cybersecurity audits, ADMT) | Risk assessments, audits, ADMT notices/opt-outs | Larger businesses [U] | Regulations effective 1 Jan 2026; later phased compliance dates [F/B] | Annual | Privacy platforms, auditors [B] | — | Low |
+| 31 | California Delete Act (DROP) | Data brokers fetch and process deletion requests every 45 days | "over 600 registered data brokers" [F] | From 1 Aug 2026 [F] | Yes | In-house / privacy vendors [B] | DROP itself [F] | Low: N about 600 |
+| 32 | Illinois HB 3773; Texas TRAIGA | AI-in-employment notice; prohibited AI practices | [U] | Both effective 1 Jan 2026 [B], not re-verified | Notices | Templates, counsel [B] | — | Low |
+| 33 | IRS Form W-2 changes (OBBBA) | Report cash tips (code TP), qualified overtime (code TT), tipped-occupation code (box 14b) | All employers with tipped/overtime staff | 2026 forms, filed early 2027 [F] | Annual | Payroll providers bundle [B] | — | None: incumbents bundle |
+| 34 | Nacha fraud-monitoring rule | "Risk-based processes and procedures" to identify fraudulent ACH entries; annual review | All non-consumer originators (phase 2) [U count] | Phase 1 20 Mar 2026; phase 2 **19 Jun 2026** [F] | Annual review | Banks' guidance, policy templates [B] | — | Low: a policy document, one-off |
+| 35 | FMCSA changes (registration system, English-proficiency enforcement) | Various | [U] | [B/U] not verified today | — | — | — | Not assessed |
+| 36 | FDA Food Traceability Rule (FSMA 204) | Traceability records | — | FDA proposed 20 Jul 2028; Congress barred earlier enforcement [F] | — | — | — | Outside window |
+| 37 | CMMC (32 CFR 170) | Level 1/2 self-assessment and affirmation; Level 2 third-party certification in phase 2 | [U] | Phase 2 starts one year after phase 1 [F]; phase 1 began 10 Nov 2025 [B] | Annual affirmation | GRC tools, consultants; free DoD resources [B] | SPRS [B] | Low: US defence buyers will not trust a foreign solo vendor |
+| 38 | PCI DSS 4.0.1; bulk e-mail sender rules | Payment-page script controls; SPF/DKIM/DMARC | Very large [U] | Mandatory since 31 Mar 2025; Feb 2024 / May 2025 [B] | Ongoing | Crowded, free tiers [B] | — | Low: windows passed |
+| 39 | FinCEN residential real-estate reporting (31 CFR 1031) | Report non-financed transfers to entities/trusts | Settlement and title agents [U] | Codified in current eCFR [F]; 2026 enforcement status [U] | Per transaction | Title-software vendors [B] | FinCEN e-filing [B] | Low: sensitive PII, incumbent integrations |
+
+### 2.6 Australia and Canada
+
+| # | Rule | Exact obligation | Affected | Dates and status | Recurring? | Existing software | Free official tool? | Fit |
+|---|---|---|---|---|---|---|---|---|
+| 40 | Australia — Payday Super | Pay super within 7 business days of payday | All employers [U] | 1 Jul 2026 [B]; ATO site blocked, **not verified** | Every pay run | Payroll software, clearing houses [B] | — | None: needs payments/gateway certification |
+| 41 | Australia — AML/CTF "tranche 2" | AML programmes, customer due diligence, reporting for lawyers, accountants, real-estate agents | tens of thousands of firms [B] | 1 Jul 2026 [B]; AUSTRAC site blocked, **not verified** | Yes | ID-verification and AML platforms [B] | AUSTRAC starter kits [B] | Low: identity data, trust, gateway access |
+| 42 | Canada — Ontario job-posting rules; federal supply-chain (S-211) reports | Pay ranges and AI disclosure in postings; annual report | [U] | 1 Jan 2026; annually 31 May [B] | Annual | ATS vendors, consultants [B] | — | Low |
+| 43 | UK — packaging EPR data reporting | Six-monthly / annual packaging data submissions | [U] | In force [B]; GOV.UK collection updated 29 Oct 2026 [F] | Yes | Compliance schemes bundle portals [B] | Official data portal [B] | Not assessed in depth |
+| 44 | US — state privacy laws generally | Notices, assessments | [U] | Rolling [B] | — | Templates, platforms [B] | — | Low |
+
+**Slippage tally (INFERENCE from the rows above):** of 16 major windows examined, 11 slipped, were diluted, or still have no firm date (Veri*factu x3, ADA II, HHS 504, AI Act, Colorado, FSMA 204, EUDR x2, CBAM scope cut, Pay Transparency transposition, UK waste tracking x2 before it went live, Martyn's Law still uncommenced). Dates that held so far: German e-invoicing, CRA, MTD April 2026/2027, KSeF 2026, EUDAMED May 2026.
+
+---
+
+## 3. Part 2 — Seven windows analysed in depth
+
+Selection logic: windows with a statutory date inside Nov 2026 – Dec 2027 that held (or mostly held), with a recurring software-shaped job, where no licence is legally required to sell the tool. Spain Veri*factu, which would have qualified a month ago, is covered in section 4 as a cautionary case.
+
+### 3.1 UK Digital Waste Tracking (phase 1 live, phase 2 October 2027)
+
+- **Who has the problem / pays / decides.** Operators of permitted or licensed waste receiving sites (transfer stations, scrap and metal yards, vehicle dismantlers, skip-hire yards, recyclers, composting/AD, landfill). About 12,000 operators [F]. Buyer and decider is usually the owner-manager or the office/compliance manager. Phase 2 adds waste carriers, brokers and dealers ("waste collectors"), about 300,000 registered, an unknown share active [F].
+- **Recurring job and trigger.** For every load received: waste classification code, quantity, containers, hazardous properties and POPs, carrier and origin details, submitted within 2 working days; rejected submissions corrected within the same 2 working days; errors corrected within a month [F]. Triggers: mandatory date (1 Oct 2026; 1 Jan 2027 NI/Scotland), first GBP 26 fee due 31 Jan 2027, withdrawal of the spreadsheet route (not before Oct 2027), phase 2 in October 2027 [F].
+- **How it is solved now.** (a) Existing weighbridge/yard/ERP software connected to the API — 267 products on the GOV.UK list incl. AMCS, ISB Global, Waste Logics, Access Weighsoft, Dsposal, plus many micro-vendors and operators' own in-house integrations [F]; (b) Defra's fixed-format spreadsheet, typed by hand [F]; (c) paper-only and non-compliance [U share]. No full free government UI: user research found manual entry on a GOV.UK-style form "time-consuming and burdensome", so the design is deliberately API-first [F].
+- **Cost of status quo / non-compliance.** Time per load for manual spreadsheet entry: UNKNOWN (not measured in any source found). Non-compliance is a criminal offence (fine on conviction) and exposes the operator to fixed and variable monetary penalties [F].
+- **Willingness to pay and budget.** WTNcloud publishes GBP 195 / 349 / 649 / 1,800 per year with DWT filing on every plan; Dsposal GBP 300 and 600 per month tiers [F]. Budget line: operations/compliance software paid by the owner. The 267 listed vendors are evidence that vendors expect payment; evidence of how many operators actually pay newcomers is UNKNOWN.
+- **Why trust an unknown solo vendor (wedge).** (1) Inclusion in the GOV.UK provider list, updated fortnightly, is open to self-certified providers and already contains micro-vendors and a non-UK entity form [F]; (2) Defra's API validates every submission, so errors surface immediately; (3) the data is operational, not financial or HR; (4) lowest-switching-cost positioning: keep the operator's existing Excel log, submit it through the API and explain rejections in plain English; (5) transparent monthly price, no onboarding call. None of these is unique — WTNcloud already markets plain-English rejection explanations [F].
+- **Onboarding and time-to-first-value.** Operator registers with Defra, receives an organisation API code, pastes it into the app, submits the first load. Same day in principle [F for the mechanism; ASSUMPTION for the timing].
+- **Where buyers are and how to reach them.** Named public lists exist: Environment Agency public registers of waste-operation permits, registered carriers/brokers/dealers, scrap metal dealers and vehicle treatment facilities [F] — this is unusually good for a solo founder. Channels: GOV.UK list (inbound), direct mail and phone to listed operators, trade bodies and Facebook/WhatsApp groups of skip-hire and scrap operators [ASSUMPTION], weighbridge hardware dealers, environmental consultants and waste brokers as intermediaries [ASSUMPTION]. Search demand: no keyword data obtainable [U].
+- **Cold-outreach law.** PECR: e-mail marketing rule does not apply to corporate subscribers (limited companies, LLPs) but sole traders and ordinary partnerships are treated as individuals and need consent [F]. Many small carriers are sole traders → e-mail is off-limits for them; post and phone (screen against TPS/CTPS [B]) remain.
+- **Retention after the deadline.** Structurally strong: the duty is perpetual and per load; history lives in the tool. Main churn risks: the customer's weighbridge vendor adds the feature; government later ships a free app.
+- **Language/localisation.** English only. Phone support expectations in this trade are a real burden for a non-native solo founder [ASSUMPTION].
+- **Liability if output is wrong.** Defra's terms put compliance liability on the operator "regardless of any limitation, gap or defect in the software", and require the provider to disclose gaps [F]. But regulation 19(4) lets the Agency sanction "some other person" whose act or default caused a contravention [F] — non-zero exposure. UK data-protection law applies [F]; a Ukraine-based processor will need a UK representative and transfer safeguards [INFERENCE, not verified].
+- **Accreditation.** None. Register, build, run 14 Production Approval Test scenarios, self-certify ("Defra does not review, mark or approve your results"), request production credentials [F].
+- **Price and customers for USD 10k MRR.** GBP 29/month → about 270 customers; GBP 49/month → about 160 [ASSUMPTION on FX].
+- **Timing versus our window.** Phase 1 is already mandatory, so 2027 revenue comes from late adopters leaving the spreadsheet; phase 2's public beta is spring 2027 and its mandate October 2027 = months 10–12. The big wave lands at the very end of, or just after, the window. Phase dates slipped twice before [F].
+- **Most dangerous assumption.** That phase 2 will require third-party software for hundreds of thousands of small carriers. Phase-2 design is in private beta and not public [U]; for a population of sole traders the government may well provide a free app or form, and the 267 existing vendors will all extend to carriers.
+
+### 3.2 EU Cyber Resilience Act tooling
+
+- **Who / pays / decides.** Manufacturers of hardware and software "products with digital elements" sold in the EU, including non-EU makers; importers and distributors must verify suppliers. Number affected: UNKNOWN (no sourced count obtained). Buyer: CTO, head of engineering, product-security or quality/compliance lead in SME manufacturers.
+- **Recurring job and trigger.** Since 11 Sep 2026: report actively exploited vulnerabilities and severe incidents (early warning 24h, notification 72h, final report 14 days) via ENISA's platform [F]. By 11 Dec 2027: cybersecurity risk assessment, SBOM, vulnerability-handling process, technical documentation, EU declaration of conformity, user information, support period of at least five years [F]. Recurs with every release and continuously for vulnerability monitoring.
+- **How solved now.** Consultants and test houses [B]; SBOM/vulnerability tools — DevGuard is open source with free self-hosting and SaaS from EUR 449.10/month; CRA Evidence offers a dedicated platform with a 14-day trial but "custom" pricing and a paid 2–4 week fast-track [F]; EU-funded free tooling projects (OSCRAT, OCCTET, CRACY and others) and Commission guidance of 27 Jul 2026 [F]; a simplified technical-documentation form for micro and small firms is foreseen [F]. Inaction is common while harmonised standards are unfinished [B].
+- **Cost of non-compliance.** Fines up to EUR 15M or 2.5% of worldwide turnover; EUR 10M / 2%; EUR 5M / 1% [F]. Loss of EU market access (CE marking) from Dec 2027 [F].
+- **Willingness to pay.** Indirect only: DevGuard's public price, CRA Evidence's sales-led model. No direct evidence of self-serve purchases by SMEs [U]. Budget: CE-marking/compliance or security tooling.
+- **Wedge for an unknown vendor.** Inputs are SBOMs and questionnaires, not personal data; a local CLI or in-browser mode avoids data-upload objections; outputs are draft documents the manufacturer signs; transparent pricing against "contact us" incumbents; a narrow vertical (for example small embedded/IoT makers, or importers checking non-EU suppliers).
+- **Onboarding / time-to-first-value.** Upload a CycloneDX/SPDX file or answer a scope questionnaire → gap list and draft documents within an hour [ASSUMPTION].
+- **Reaching buyers.** No public list of obligated manufacturers [U]. Proxies: trade-fair exhibitor lists, certification listings, developer communities [ASSUMPTION]. Intermediaries: CE-marking consultants, test labs, importers who push requirements to suppliers. Interest proxy: the English Wikipedia CRA article has had a flat 4,300–6,500 views a month for two years — steady awareness, no surge yet [F].
+- **Cold outreach.** Country-specific: Germany bans unsolicited advertising e-mail without prior express consent [F]; other Member States vary [B]. Non-EU manufacturers (US, UK companies) are legally easier targets.
+- **Retention.** Good if anchored on continuous monitoring and per-release SBOM; poor if the product is only a one-off document generator.
+- **Language.** English works for engineers; conformity documents may be needed in national languages (a competitor already generates them) [F].
+- **Liability.** Manufacturer remains responsible; lower than tax or payroll tools.
+- **Accreditation.** None to sell tooling; notified bodies only matter for higher-criticality product classes [B].
+- **Price and customers.** EUR 99–299/month → roughly 90 to 30 customers.
+- **Timing.** Full application is 11 Dec 2027, one month after month 12. Buying usually concentrates in the last two or three quarters, so 2027 H2 should be the ramp — but the peak is probably *after* our measurement date.
+- **Most dangerous assumption.** That SME manufacturers will buy self-serve tooling during 2027 instead of waiting for standards, hiring a consultant, or using free EU-funded and open-source tools.
+
+### 3.3 UK Making Tax Digital for Income Tax (April 2027 cohort)
+
+- **Who / pays / decides.** Sole traders and landlords with qualifying income over GBP 30,000: about 970,000 joining from 6 Apr 2027, after 780,000 in 2026 [F]. The individual pays; many delegate the choice to their accountant.
+- **Recurring job.** Digital records, four quarterly updates, year-end final declaration, through software that passed HMRC's process [F].
+- **How solved now.** 184 recognised products; 40 with a free version including the user's own bank (Monzo, Starling, Lloyds, Tide) and Sage/FreeAgent free tiers; 92 bridging products for spreadsheet users; verticals already covered (childminders, pet sitters, therapists, trades, landlords) [F]. Accountants file for many. HMRC "strongly encourages" free products [F].
+- **Cost of status quo / non-compliance.** HMRC's own estimate: average transitional cost GBP 350 and ongoing GBP 110 per year for the 30–50k cohort [F]. Penalty points for late quarterly updates [B].
+- **Willingness to pay.** Capped by HMRC's GBP 110/year estimate and by free options; a bridging licence sells at GBP 30 + VAT per year [F].
+- **Wedge.** HMRC's software finder is a regulator-run discovery channel [F]. The only gap visible in HMRC's data is language: the list tracks English and Welsh only (4 products offer Welsh) [F] — a tool in Polish, Romanian, Ukrainian or Russian for migrant self-employed workers is conceivable [ASSUMPTION, untested].
+- **Onboarding.** Depends on HMRC sign-up and Government Gateway authorisation; first value only at the first quarterly update.
+- **Reaching buyers.** No public list of mandated taxpayers. Sole traders are "individual subscribers" under PECR → no cold e-mail [F]. Accountants (companies/LLPs) can be e-mailed but standardise on established suites [ASSUMPTION].
+- **Retention.** Strong once in (quarterly legal duty), but price pressure is permanent.
+- **Language.** English; diaspora-language variant is the only differentiation idea.
+- **Liability.** Wrong or late filings create penalties for users; reputational and support load is high.
+- **Accreditation / gating — flag.** HMRC production approval: fraud-prevention headers (a legal requirement), sandbox testing of every endpoint, Production Approvals Checklist [F]. HMRC states it "is no longer accepting production credential access requests for new 2026–27 quarterly update products, as the market window for these products has now closed" [F]. When the 2027–28 window opens and closes is UNKNOWN.
+- **Price and customers.** GBP 5–10/month → roughly 1,600 to 800 paying users.
+- **Timing.** Demand for the April 2027 cohort runs January–August 2027 — inside the window, if HMRC admits the product in time.
+- **Most dangerous assumption.** That a new entrant can get through HMRC's window for 2027–28 and then win about a thousand paying users against 40 free products without cold e-mail.
+
+### 3.4 US government and healthcare document accessibility (ADA Title II, HHS 504)
+
+- **Who / pays / decides.** 91,489 state and local government entities [F] plus recipients of HHS funding. Buyers: ADA coordinators, web/communications and IT staff; purchases go through public procurement.
+- **Recurring job.** Every new public document (agendas, minutes, forms, reports) and web page must meet WCAG 2.1 AA; legacy content partly exempt as archived.
+- **Trigger.** 26 Apr 2027 for entities serving 50,000+ people; 26 Apr 2028 for smaller entities and special districts; HHS: 11 May 2027 (15+ employees), 10 May 2028 (smaller) [F]. Private lawsuits remain possible regardless of dates (vendor statement) [F].
+- **How solved now.** Gov-tech-bundled services (DocAccess: "more than one thousand" public bodies, sold by a vendor claiming 13K local-government customers, page-credit pricing, invoicing/ACH/cheques) [F]; desktop tools (PDFix Pro from EUR 350/year; Equidox, Allyant, GrackleDocs on quote) [F]; open-source ASU/AWS stack deployable in one click [F]; built-in checkers in Word and Acrobat [B]; manual remediation services [B].
+- **Cost.** DOJ's estimate: USD 24.7bn over ten years, 53% borne by small entities [F] — budgets are real.
+- **Willingness to pay.** High in aggregate; evidence that small entities buy self-serve from unknown vendors: none found [U].
+- **Wedge.** Hard to see one. A per-document, card-paid tool for individual staff is conceivable, but the incumbents already offer free reports and the technique (auto-tagging plus AI alt text) is public and open source.
+- **Reaching buyers.** Public lists exist (Census of Governments, school-district lists) [B]. US CAN-SPAM permits B2B cold e-mail with opt-out [B]. But vendor onboarding (tax forms, purchase orders, accessibility conformance reports, security questionnaires) is poorly matched to a Ukrainian sole proprietor selling through a merchant of record [INFERENCE].
+- **Retention.** Good in principle (continuous content).
+- **Language.** English.
+- **Liability.** The public entity stays liable; a tool that claims compliance and fails invites reputational damage. DOJ's own extension notice cites correspondence stating that generative AI "cannot reliably automate the remediation of STEM materials at scale" and that human oversight is required [F].
+- **Accreditation.** None legally; procurement paperwork in practice.
+- **Price and customers.** USD 49–199/month → about 205 to 50 customers.
+- **Timing.** Large-entity deadline in April 2027 is inside the window, but large entities are the least likely to buy from an unknown solo vendor; the small-entity wave is April 2028, and DOJ is openly considering softening it [F].
+- **Most dangerous assumption.** That US public bodies will buy compliance tooling from an unknown foreign micro-vendor.
+
+### 3.5 EU Pay Transparency Directive
+
+- **Who / pays / decides.** HR, compensation and finance leads. Reporting duty: employers with 150+ workers (count not sourced [U]). Recruitment-stage and information duties: all employers [F].
+- **Recurring job.** Annual (250+) or three-yearly (150–249) gender pay gap report by category of workers; joint pay assessment when an unexplained gap of 5% or more persists; annual reminder to staff; answering individual pay-information requests; pay ranges for every vacancy [F].
+- **Trigger.** Directive date 7 June 2027 for first reports on 2026 data [F] — but applicable only where national law exists.
+- **Status (the problem).** By September 2026 only Slovakia, Italy, Lithuania, Malta and Greece had transposed; Germany, France, Netherlands, Spain, Poland, Ireland, Belgium, Sweden and others had not; Netherlands, Denmark and Finland aim at 1 Jan 2027; France may slip into early 2027; Lithuania's first report is expected in 2028; Sweden wants the Directive reopened. The Commission says no stop-the-clock is planned [F, secondary source].
+- **How solved now.** Sysarb, Figures, PayAnalytics and consultancies — no public prices, headcount-based, onboarding fees and customer-success managers [F]; HR suites and payroll bureaus [B]; free state tools (Slovakia, Luxembourg; Art. 11 obliges Member States to support employers under 250) [F]; spreadsheets; waiting.
+- **Cost of non-compliance.** National penalties, burden of proof shifts to the employer [B]; amounts depend on unfinished national laws [U].
+- **Willingness to pay.** Mid-market HR budgets exist, but purchases are sales-led [F].
+- **Wedge.** "No data upload": calculate the gap in the browser from a payroll export and produce the national report format, at a published price. Real, but each country needs its own format, and most formats do not exist yet.
+- **Reaching buyers.** Employers that publish vacancies without pay ranges are a visible signal [ASSUMPTION]; intermediaries are payroll bureaus and HR consultancies. Cold e-mail is banned without consent in Germany [F].
+- **Retention.** Annual at best; three-yearly for 150–249 — weak for a subscription.
+- **Language.** One localisation per country (law, format, UI) — heavy for a solo founder.
+- **Liability.** Wrong statistics in a statutory report and in pay disputes — material.
+- **Accreditation.** None.
+- **Price and customers.** EUR 990–1,990/year → roughly 110 to 55 customers.
+- **Timing.** In the five transposed countries, January–June 2027 is the peak and inside the window; in the large markets the reporting date is unsettled.
+- **Most dangerous assumption.** That the big markets will have national reporting formats and enforceable dates before mid-2027.
+
+### 3.6 Germany B2B e-invoicing (with Poland, Spain and France as context)
+
+- **Who / pays / decides.** Every German business issuing domestic B2B invoices; first those with prior-year turnover above EUR 800,000 (count not sourced [U]). Decider: owner or bookkeeper, strongly influenced by the tax adviser.
+- **Recurring job and trigger.** Every domestic B2B invoice as structured e-invoice from 1 Jan 2027 (> EUR 800k) and 1 Jan 2028 (all) [F].
+- **How solved now.** Invoicing/accounting suites with free tiers — sevdesk's permanently free plan covers 3 e-invoices a month, paid list prices EUR 11.90–34.90/month, plus a free generator; easybill has a free validator; ELSTER has a free viewer [F]; DATEV via tax advisers [B].
+- **Cost of non-compliance.** Invalid invoice → input-VAT deduction risk for the customer [B].
+- **Willingness to pay.** Proven but at EUR 5–35/month and with free alternatives [F].
+- **Wedge.** None identified. WordPress shows two ZUGFeRD-named plugins with zero installs [F] — the e-commerce niche is not pulling.
+- **Reaching buyers.** Tax advisers as intermediaries; cold e-mail prohibited without prior express consent [F].
+- **Retention.** High in general, but for incumbents.
+- **Language.** German UI, support, legal wording.
+- **Liability.** Archiving and tax-compliance expectations (GoBD) [B].
+- **Accreditation.** None in Germany. France is different: only a state-registered platform may transmit [F].
+- **Price and customers.** EUR 9/month → about 1,000 customers.
+- **Timing.** 1 Jan 2027 is inside the window.
+- **Context.** Poland gives away official apps [F]; Spain's public solution SPFE is free and only > EUR 8M firms fall inside the window [F]; France requires registration [F].
+- **Most dangerous assumption.** That any segment is left unserved by free tiers.
+
+### 3.7 EUDAMED device registration (EU medical devices)
+
+- **Who / pays / decides.** Regulatory-affairs staff at medical-device and IVD manufacturers selling in the EU, including non-EU makers. Count not sourced [U].
+- **Recurring job and trigger.** Register each device's UDI data before placing it on the market; register already-marketed devices by 28 Nov 2026; keep records updated; further modules will become mandatory without a voluntary phase [F].
+- **How solved now.** Manual entry or bulk upload in EUDAMED [B]; a specialist publishes packages at EUR 600 / 995 / 1,750 / 2,750 / 3,950 per year, per-record services from EUR 1.50, free templates and paid training [F]; enterprise regulatory-information vendors [B].
+- **Cost of non-compliance.** Device may not lawfully be placed on the market [B].
+- **Willingness to pay.** Best-documented of all windows: published prices of EUR 600–3,950/year [F].
+- **Wedge.** Device registration data is destined for a public database, so data-sensitivity objections are low; a spreadsheet-to-valid-XML converter with rule checking is a contained self-serve job.
+- **Reaching buyers.** Trade directories and the public EUDAMED actor data [B, not verified]; consultants and EU authorised representatives as intermediaries.
+- **Retention.** Moderate: initial bulk load then occasional changes; improves if later modules are added.
+- **Language.** English.
+- **Liability.** EUDAMED validates uploads; errors are visible; moderate.
+- **Accreditation.** None for a file-preparation tool; machine-to-machine access involves technical onboarding [B].
+- **Price and customers.** EUR 1,200/year average → about 90 customers.
+- **Timing.** The legacy-device deadline is 28 Nov 2026 — two weeks after this report. A product launched now misses the peak and sells to late-comers and steady-state needs.
+- **Most dangerous assumption.** That enough manufacturers remain unregistered or under-served after November 2026 to yield about 90 subscriptions.
+
+---
+
+## 4. Cautionary cases checked and rejected
+
+- **Spain Veri*factu.** Until October this was the best-timed mass window on the list (1 Jan and 1 Jul 2027). On 5 Oct 2026 the Ministry of Finance announced alignment with SME e-invoicing in October 2028; the formal act is still pending, so the statute and AEAT FAQ still show 2027 [F]. Three postponements in 18 months. Anyone who built for 2027 is now selling into confusion. The free AEAT app and a free public e-invoicing solution also exist [F].
+- **UK Martyn's Law.** Roughly 180,000 premises [B], but no commencement date and official guidance explicitly designed so that no third-party services are needed [F].
+- **EU e-commerce consumer rules.** The withdrawal-button duty produced thousands of installs within five months — and 296 plugins, the leaders free [F]. Real demand, no price.
+- **US W-2 tips/overtime reporting, Nacha, Companies House ID verification.** Absorbed by payroll providers, by a policy document, and by a free government login respectively [F].
+- **EU AI Act, Colorado, California ADMT.** Dates moved or rules unfinished; work is legal interpretation rather than a repeatable filing [F].
+
+---
+
+## 5. Part 3 — Ranking and verdicts
+
+| Rank | Window | Demand peaks before Nov 2027? | Verdict on USD 10k MRR in 12 months (analyst judgement) |
+|---|---|---|---|
+| 1 | UK Digital Waste Tracking | Partly: phase 1 now; phase 2 mandate Oct 2027 | **Possible but unlikely (about 10%).** Best structure (no accreditation, GOV.UK listing, perpetual per-load filing, named target lists, proven GBP 16–54/month price points). Killed by 267 competitors, a possible free route for carriers, or another slip of phase 2. More plausible on an 18–24 month horizon |
+| 2 | EU Cyber Resilience Act tooling | No: peak at or after Dec 2027 | **Unlikely (5–10%).** Dates held, large fines, engineers buy self-serve, non-sensitive inputs. Killed by free EU-funded/open-source tools and "wait for standards" behaviour |
+| 3 | EUDAMED registration tooling | Peak is now (28 Nov 2026) | **Unlikely (about 5%).** Best documented willingness to pay; small N; we arrive late |
+| 4 | UK MTD for Income Tax | Yes (Jan–Aug 2027) | **Very unlikely (under 5%).** 184 products, 40 free, HMRC market-window gating, no cold e-mail to sole traders. Only a diaspora-language niche is even arguable |
+| 5 | EU Pay Transparency | Only in 5 small/medium markets | **Very unlikely (under 5%).** Transposition slippage, payroll-data trust, per-country formats, weak recurrence |
+| 6 | US ADA Title II / HHS 504 documents | Large entities yes; small entities 2028 | **Very unlikely (under 5%) for this founder.** Budgets are real, but procurement and gov-tech incumbents exclude an unknown foreign micro-vendor |
+| 7 | Germany e-invoicing | Yes (1 Jan 2027) | **Implausible (under 3%).** Free tiers, German trust requirements, outreach ban |
+| — | Spain Veri*factu | No — moved to Oct 2028 | **Out for this window** |
+
+Cross-cutting lessons:
+1. Treat every statutory date as a distribution, not a point. Build nothing whose only buyer motive is one date.
+2. Prefer regimes where the regulator is **API-first and lists vendors** (UK waste tracking, HMRC) — the listing is the only trust shortcut found for an unknown vendor. Check the listing's entry conditions first: HMRC's is gated by a time window; Defra's is self-certified.
+3. Prefer **perpetual per-transaction filings** over annual reports and one-off documents: retention survives the deadline.
+4. Check for a free official route before anything else; where one exists (KSeF, AEAT, EUDR, ENISA) paid demand is confined to integration and volume users.
+5. Cold e-mail is not available for sole-trader populations in the UK or for any business in Germany [F]; plan for post, phone, partners or inbound.
+
+---
+
+## 6. What could not be verified, and how to close the gaps
+
+1. **Spain:** the Ministry's 5 Oct 2026 note itself (host unreachable); relied on the AEAT headline plus a professional publisher's summary. Check BOE for the formal amending act.
+2. **UK waste tracking:** share of the about 12,000 operators still on the spreadsheet; phase-2 design (API-only or free government app); whether October 2027 will hold; real churn and pricing of the 267 vendors; UK representative/data-transfer duties for a Ukrainian processor. Next step: pull the Environment Agency register, call 20 small sites, register as a provider to read the phase-2 beta material.
+3. **HMRC:** dates of the 2027–28 "market window"; whether an overseas sole proprietor is accepted under the terms of use.
+4. **CRA:** number of affected manufacturers; status of harmonised standards; the Commission's simplified documentation form; any postponement proposal after July 2026.
+5. **EUDAMED:** how many manufacturers and devices remain unregistered after 28 Nov 2026; dates for the remaining modules.
+6. **Counts** marked [U] throughout (German businesses above EUR 800k, EU employers with 150+ staff, Spanish and Polish invoice issuers, HHS recipients).
+7. **Not re-verified at all (background only):** France SME date, Belgium, Croatia, Slovakia, Latvia, Greece, EAA, GPSR, Illinois, Texas, PCI DSS, e-mail sender rules, FMCSA, UK letting-agent sanctions, Australia Payday Super and AML tranche 2 (regulator sites blocked), Canada.
+8. **Demand signals:** no Google keyword volumes or Trends, no forum/community reading (Reddit, AccountingWEB and similar), no Shopify App Store data (page did not render), no G2/Capterra reviews.
+9. **Battery passport:** whether the 18 Feb 2027 date was amended in 2026.
+10. **FinCEN real-estate rule:** enforcement status in 2026.
+
+---
+
+## Appendix A — Evidence log (sources, fetch date 2026-11-13 unless stated)
 
 ### UK Making Tax Digital for Income Tax (MTD ITSA)
 - FACT. Thresholds/dates: qualifying income > GBP 50,000 (2024-25) -> from 6 Apr 2026; > GBP 30,000 (2025-26) -> from 6 Apr 2027; > GBP 20,000 (2026-27) -> from 6 Apr 2028. Source: https://www.gov.uk/guidance/find-out-if-and-when-you-need-to-use-making-tax-digital-for-income-tax (last updated 26 Mar 2026; fetched 2026-11-13).
@@ -30,11 +311,9 @@ Status: WORK IN PROGRESS (saved progressively). Research date: 2026-11-13.
 ### EU Cyber Resilience Act (EU) 2024/2847
 - FACT. Applies from 11 Dec 2027; reporting obligations (actively exploited vulnerabilities, severe incidents) from 11 Sep 2026; notified-body provisions from 11 Jun 2026. Commission to establish a simplified technical documentation form for micro and small enterprises (recital 93). Source: Publications Office, CELEX 32024R2847 (fetched 2026-11-13).
 
-(More sections are appended below as research proceeds.)
-
 ### Spain Veri*factu (billing-software regulation, RD 1007/2023)
 - FACT. AEAT note (page updated 13 Oct 2026): under Real Decreto-ley 15/2025 of 2 Dec 2025, corporate-income-tax payers must have adapted billing systems before 1 Jan 2027; all other taxpayers before 1 Jul 2027. Source: https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu/nota-informativa-ampliacion-plazo-adaptacion-facturacion.html (fetched 2026-11-13).
-- FACT (critical). The AEAT Veri*factu landing page (updated 3 Nov 2026) now leads with: "Comunicacion del Ministerio de Hacienda de 05/10/2026: Prevision de ampliacion del plazo de adaptacion de los sistemas informaticos de facturacion (SIF)" linking to https://www.hacienda.gob.es/sgt/gabsehacienda/nota-informativa-verifactu.pdf. I.e. on 5 Oct 2026 the Ministry announced that ANOTHER extension is planned. The PDF itself could not be downloaded (connection reset from this environment), so the new target dates are UNKNOWN to this report. Source: https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu.html (fetched 2026-11-13).
+- FACT (critical). The AEAT Veri*factu landing page (updated 3 Nov 2026) now leads with: "Comunicacion del Ministerio de Hacienda de 05/10/2026: Prevision de ampliacion del plazo de adaptacion de los sistemas informaticos de facturacion (SIF)" linking to https://www.hacienda.gob.es/sgt/gabsehacienda/nota-informativa-verifactu.pdf. I.e. on 5 Oct 2026 the Ministry announced that ANOTHER extension is planned. The PDF itself could not be downloaded (connection reset from this environment); the new target date (October 2028) was later obtained from a secondary source — see the entry "Spain: THIRD Veri*factu postponement" below. Source: https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu.html (fetched 2026-11-13).
 - FACT. AEAT offers a free invoicing application (guide "aplicacion gratuita de facturacion" linked on the same page) and FAQs updated 21 Oct 2026.
 
 ### Germany B2B e-invoicing
@@ -93,3 +372,30 @@ Status: WORK IN PROGRESS (saved progressively). Research date: 2026-11-13.
 ### EU CRA tooling
 - FACT. Reporting via ENISA's free Single Reporting Platform, operational 11 Sep 2026; early warning 24h, notification 72h, final report 14 days. Commission guidance published 27 Jul 2026. EU-funded MSME support projects include OSCRAT ("Open-Source Cyber Resilience Act Tools"), OCCTET, CRACY ("CRA made Easy"), CONFIRMATE, CYBERFORT, CRA-AI, SECURE. Sources: https://digital-strategy.ec.europa.eu/en/policies/cra-reporting , https://digital-strategy.ec.europa.eu/en/policies/cra-msmes , https://digital-strategy.ec.europa.eu/en/policies/cyber-resilience-act (fetched 2026-11-13).
 - FACT. Dedicated vendor CRA Evidence: SBOM/VEX/HBOM management, Annex I scoring, EU Declaration of Conformity and technical documentation generation, ENISA reporting workflow, 14-day trial, but prices are "Custom / Get personalized pricing" plus a paid 2-4 week "Compliance Fast-Track" (https://craevidence.com/pricing). DevGuard (open source): free self-hosting, SaaS "Starting at EUR 449.10 / month" (https://devguard.org/). Both fetched 2026-11-13.
+
+### UK Digital Waste Tracking (found during this research; not in the original candidate list)
+- FACT. Digital Waste Tracking (England) Regulations 2026, S.I. 2026/729: in force 1 Oct 2026; system fee GBP 26; failure by an operator of a permitted facility to comply is an offence (fine on conviction) and the Agency may impose fixed or variable monetary penalties; reg. 19(4): where a contravention "is due to the act or default of some other person" the Agency may also sanction that other person. Source: https://www.legislation.gov.uk/uksi/2026/729/made (fetched 2026-11-13).
+- FACT. Policy paper "Developing the digital waste tracking service" (updated 1 Oct 2026): approx. "12,000 waste site operators" and "300,000 registered waste carriers, brokers and dealers"; Phase 1 mandatory for receiving-site operators in England and Wales from October 2026, Northern Ireland and Scotland January 2027; Phase 2 (carriers, brokers, dealers): private beta from autumn 2026, public beta spring 2027, "from October 2027 - digital waste tracking service mandatory for waste collectors". User research: manual entry on a GOV.UK-style service was "time-consuming and burdensome", so the design is API-first; the spreadsheet route is "a temporary solution ... while they acquire software", expected "to remain in place until at least October 2027". Change log shows earlier target dates of April 2025 and April 2026. Source: https://www.gov.uk/government/publications/digital-waste-tracking-service/digital-waste-tracking-service (fetched 2026-11-13).
+- FACT. Operator duties: receivers in England or Wales "must use the service from 1 October 2026" and "must submit records within 2 working days"; errors notified must be corrected within the same 2 working days; paper waste transfer notes and consignment notes continue in parallel. Source: https://www.gov.uk/guidance/digital-waste-tracking-check-if-you-need-to-report-the-waste-you-receive (updated 19 Oct 2026; fetched 2026-11-13).
+- FACT. Two submission routes: API via waste-specific software (the organisation receives an API code and gives it to its software provider) or Defra's fixed-format spreadsheet. "The service costs GBP 26 per year for each organisation"; first payment due by 31 Jan 2027. Source: https://www.gov.uk/guidance/report-receipt-of-waste (fetched 2026-11-13).
+- FACT. GOV.UK list "Report receipt of waste: choose a software provider" (updated 10 Nov 2026): 267 provider/product rows; providers "have self-certified that their software complies"; requirements = integrate with the Receipt of Waste API and pass the 14 Production Approval Test (PAT) scenarios; list includes large vendors (AMCS, ISB Global, Waste Logics, The Access Group/Weighsoft, Bartec, Dsposal), many micro-vendors, operators' in-house systems (e.g. Wessex Water, Breedon Group) and at least one non-UK entity form (Aetherion FZC LLC). Source: https://www.gov.uk/government/publications/report-receipt-of-waste-choose-a-software-provider/report-receipt-of-waste-choose-a-software-provider (fetched 2026-11-13).
+- FACT. Software-provider onboarding: register via form and accept API terms -> test credentials -> build -> run PAT scenarios -> self-certify ("Defra does not review, mark or approve your results at this stage") -> email Defra -> production credentials -> Defra onboards the provider's receivers. Terms: liability for compliance "rests with the waste receiver as the regulated operator, regardless of any limitation, gap or defect in the software"; provider must disclose known gaps; UK data-protection law applies; Defra publishes the provider list on GOV.UK, "reviewed and updated fortnightly". Sources: https://defra.github.io/waste-tracking-service/production/api-register-as-a-software-provider/ (updated 14 Oct 2026) and .../api-terms-of-service/ (fetched 2026-11-13).
+- FACT. Competitor prices: WTNcloud (digital waste transfer notes for carriers + DWT filing) Free (20 notes) / GBP 195 / 349 / 649 / 1,800 per year, "DEFRA Digital Waste Tracking" on every plan, and markets "Carriers, brokers and dealers join from October 2027" (https://wtncloud.co.uk/). Dsposal: GBP 0 / 300 / 600 per month (https://dsposal.uk/pricing). Both fetched 2026-11-13.
+- FACT. Named public lists of the regulated population exist: Environment Agency public registers for waste operations permits, registered waste carriers/brokers/dealers, scrap metal dealers and ELV treatment facilities. Source: https://www.gov.uk/guidance/access-the-public-register-for-environmental-information (fetched 2026-11-13).
+
+### EUDAMED (EU medical devices database; found during this research)
+- FACT. Since 28 May 2026 four EUDAMED modules are mandatory (actor registration, UDI/device registration, notified bodies and certificates, market surveillance) following Commission Decision (EU) 2025/2371 (OJ 27 Nov 2025) and the 6-month transition under Regulation (EU) 2024/1860. Source: https://health.ec.europa.eu/medical-devices-eudamed/overview_en (fetched 2026-11-13).
+- FACT. Commission timeline PDF: for legacy and Regulation devices placed on the market before mandatory use (with further units still being placed), the "Deadline to register the device in the UDI/Dev module" is 28 November 2026; new Regulation devices must be registered before being placed on the market. Sources: md_eudamed_tp-leg-reg-devices_en.pdf and md_eudamed_6mtp-reg-devices_en.pdf linked from the overview page (fetched 2026-11-13).
+- FACT. A specialist third-party provider publishes prices: UDI-DI submission packages EUR 600 / 995 / 1,750 / 2,750 / 3,950 per year (billed annually); Swissdamed sync EUR 495 - 2,350 per year; per-record services "From EUR 1.50/UDI"; free bulk-upload templates; training EUR 195 - 695. Source: https://eudamed.com/index.php/pricing/ (fetched 2026-11-13).
+
+### Other verification done late in the session
+- FACT. CRA Art. 64: fines up to EUR 15,000,000 or 2.5% of worldwide turnover (essential requirements, Arts. 13-14), EUR 10,000,000 / 2%, EUR 5,000,000 / 1%; support period at least five years. Source: CELEX 32024R2847.
+- FACT. Pay Transparency Directive Art. 5 (right to initial pay or range before employment; ban on pay-history questions; gender-neutral vacancy notices) and Art. 7 (annual reminder of the right to pay information). Source: CELEX 32023L0970.
+- FACT. Short-term-rental Regulation (EU) 2024/1028 "shall apply from 20 May 2026"; Directive (EU) 2023/2673 measures apply "from 19 June 2026". Source: Publications Office.
+- FACT. PECR (UK): the e-mail marketing rule does not apply to corporate subscribers (companies, LLPs), but "sole traders and other types of partnerships are classed as individual subscribers" and are treated like individuals. Source: https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/business-to-business-marketing/ (fetched 2026-11-13).
+- FACT. Germany, Section 7(2) UWG: advertising by electronic mail without the addressee's prior express consent is always an unreasonable nuisance (narrow existing-customer exception in 7(3)); cold calls to businesses need at least presumed consent. Source: https://www.gesetze-im-internet.de/uwg_2004/__7.html (fetched 2026-11-13).
+- FACT. Germany pricing: sevdesk has a permanently free plan (3 invoices / e-invoices per month), paid list prices EUR 11.90 / 25.90 / 34.90 per month, and a free e-invoice generator; easybill offers a free e-invoice validator. Sources: https://sevdesk.de/preise/ , https://www.easybill.de/preise/ (fetched 2026-11-13).
+- FACT. UK bridging-software price point: VitalTax MTD for Income Tax licence GBP 30 + VAT per year for one National Insurance number (https://vitaltax.uk/pricing, fetched 2026-11-13).
+- FACT. PDF accessibility: PDFix Desktop Lite checker is free, Desktop Pro "from EUR 350/year / USD 599/year" (https://pdfix.net/pricing/); Arizona State University's AI Cloud Innovation Center publishes an open-source "PDF Accessibility Solutions" stack (PDF-to-PDF via Adobe PDF Services API, and PDF-to-HTML) with one-click AWS deployment (https://raw.githubusercontent.com/ASUCICREPO/PDF_Accessibility/main/README.md). Both fetched 2026-11-13.
+- FACT (weak proxy). Wikimedia pageviews API, monthly user views Jan 2025 - Oct 2026: "Cyber_Resilience_Act" flat at roughly 4,300 - 6,500 per month; "European_Accessibility_Act" peaked at 5,204 in June 2025 (deadline month) and fell to about 1,000 - 1,400 per month in 2026; "Making_Tax_Digital" peaked at 1,159 (Apr 2025) and was 360 in Oct 2026. Source: https://wikimedia.org/api/rest_v1/metrics/pageviews/ (queried 2026-11-13).
+- FACT. FinCEN residential real-estate reporting rule is codified at 31 CFR part 1031 in the current eCFR (source 89 FR 70290). Enforcement/effective-date status in 2026 was NOT verified.

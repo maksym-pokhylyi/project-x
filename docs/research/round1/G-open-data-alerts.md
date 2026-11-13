@@ -8,23 +8,23 @@ Only one candidate in this scope has all of the following verified today: a free
 
 It is also a crowded, cheap market. AI-assisted tender alerts already sell for £25 to £99 per month, and the official service sends free email notifications. So the recommendation is narrow:
 
-1. **Pick 1 — UK public-contract radar for one trade, sold by cold email generated from award notices.** In one week of award notices I counted about 1,000 distinct small and medium suppliers with an email address in the open data, 594 of them with a Companies House number (incorporated, so the UK cold-email exemption applies). No other candidate hands the founder a channel like this.
-2. **Pick 2 — the same pipeline pointed at one buyer type: an "education buyers" radar for companies that sell to schools.** It adds the daily open schools register (new head teachers, trust changes, new schools) to tenders, awards and contract end dates. Data is verified; willingness to pay for this exact product is not.
-3. **Pick 3 — the same pipeline sold as "contract-win and contract-expiry signals"** to firms that sell to public-sector suppliers (recruiters, subcontractors, finance brokers). Data is verified; demand is an assumption.
+1. **Pick 1 — UK public-contract radar for small suppliers, launched trade by trade and sold by cold email generated from award notices.** In five weeks of award notices I counted 4,906 distinct small and medium suppliers with an email address in the open data, 3,155 of them with a Companies House number (incorporated, so the UK cold-email exemption applies). No other candidate hands the founder a channel like this.
+2. **Pick 2 — the same pipeline sold as "contract-win and contract-expiry signals"** to firms that sell to public-sector suppliers rather than bid themselves (recruiters, finance brokers, insurers). Data is verified; demand is an assumption.
+3. **Pick 3 — a schools and colleges change radar for companies that sell to education.** It adds the daily open schools register (new head teachers, trust changes, new schools) to education tenders, awards and contract end dates. Data is verified; willingness to pay is not, and school purchasing barely appears in the tender data.
 
-All three share one codebase and one data source, so they are better treated as three wedges to test in the first weeks than as three businesses.
+All three share one codebase and one main data source, so they are better treated as three wedges to test in the first weeks than as three businesses. There is no strong second candidate: Picks 2 and 3 are the least weak of the rest, and their order is a judgement call.
 
-**Honest odds.** I found no evidence that makes $10k MRR in 12 months likely for any candidate here. For Pick 1 it needs roughly 100 to 190 paying firms at £39 to £79 per month, in a market where the measured flow of new tenders per trade is small (for example 86 construction and 18 IT tender notices per week across the whole UK). The most dangerous assumption is that cold email converts and that subscribers stay when most weeks bring them few relevant notices.
+**Honest odds.** I found no evidence that makes $10k MRR in 12 months likely for any candidate here. For Pick 1 it needs roughly 100 to 190 paying firms at £39 to £79 per month, in a market where the measured flow of new tenders per trade is small (about 62 construction and about 20 IT and software tender notices a week across the whole UK). The most dangerous assumption is that cold email converts and that subscribers stay when most weeks bring them few relevant notices.
 
 **Everything else loses** for one of four reasons: the data is commoditised (company and insolvency events at £25 to £39 per user per month), the data needs heavy scraping or a paid licence (planning and permits), official free alerts already do the job (clinical trials, recalls, grants), or cold email to the buyers is unlawful or needs a language the founder lacks (Germany, Netherlands, France).
 
 ## 1. Method, limits and labels
 
-- **How the research was done.** Live on 2026-11-13. The session's shared web-search budget ran out after four queries, and the page-fetch tool could not resolve hosts. I therefore fetched primary sources directly (official API documentation, licence pages, vendor pricing pages, sitemaps) and called the public APIs myself.
+- **How the research was done.** Live on 2026-11-13. The session's shared web-search budget ran out after four queries, and the page-fetch tool could not resolve hosts. I therefore fetched primary sources directly (official API documentation, licence pages, vendor pricing pages, sitemaps) and called the public APIs myself. A follow-up run with search available would be the way to close the gaps listed in section 10.
 - **What this means for the evidence.**
   - Strong: API existence, licence, rate limits, data fields, daily volumes, list prices. These were read or measured today.
   - Weak: anything only a search engine finds. That covers forum complaints, churn stories, review-site ratings and new entrants I did not already know. Review sites that I tried (Trustpilot) refused the request.
-  - About 100 direct lookups and API calls were made in place of the planned 60 to 90 search-led lookups.
+  - About 125 pages were fetched directly, plus live API calls (mostly paging through the Find a Tender API), in place of the planned 60 to 90 search-led lookups.
 - **Labels.** FACT means seen in a primary source or measured in a live API call today. INFERENCE means reasoned from facts. ASSUMPTION means not checked. UNKNOWN means I could not find out. "Background knowledge" means I recall it from before this session and did not re-verify it today.
 - **Own measurements.** Section 12 lists the API calls and counts so they can be repeated.
 - **Currency.** ECB reference rates of 2026-11-12: 1 EUR = 1.1081 USD = 0.83595 GBP, so $10,000 is about £7,540 or €9,020.
@@ -44,7 +44,7 @@ All three share one codebase and one data source, so they are better treated as 
 | France BOAMP | Reachable, unstable today | Not verified today | Not checked |
 | Australia AusTender (OCDS API) | No key | CC BY 3.0 AU | The email in supplier records is the agency's, not the supplier's |
 
-- **FACT:** every source above can be ingested by a one-day v1 without scraping and without a paid licence.
+- **FACT:** none of these sources needs scraping or a paid licence. SAM.gov's limit of 10 requests per day is the only real constraint on a one-day v1.
 - **INFERENCE:** because the data is this easy, it is equally easy for every competitor. Data access is not a moat for any candidate in this report.
 
 ### 2.2 Proven willingness to pay sits where competition is densest
@@ -75,9 +75,9 @@ All three share one codebase and one data source, so they are better treated as 
 
 ## 3. Candidate 1 — Public tenders and contract opportunities
 
-### 3.1 UK: Find a Tender based radar for one trade (Pick 1)
+### 3.1 UK: Find a Tender based radar for small suppliers, trade by trade (Pick 1)
 
-**What the open data now contains.** The Procurement Act 2023 regime moved UK notices onto one platform with a public API. My measurements:
+**What the open data now contains.** Most UK notices are now published under the Procurement Act 2023 (2,101 of 2,427 releases in the week measured), on one platform with a public API. My measurements:
 
 | Measure (Find a Tender API) | One weekday, 2026-11-11 | One week, 2026-11-02 to 11-08 |
 |---|---|---|
@@ -96,13 +96,20 @@ All three share one codebase and one data source, so they are better treated as 
 - **FACT:** in the week sample, about 490 of the 1,007 SME addresses were generic mailboxes (info@, sales@, tenders@ and similar), about 470 looked like a named person, and about 47 were free-mail addresses.
 - **FACT:** supplier telephone numbers are rare (158 of about 2,000), so the data supports email outreach, not calling.
 - **FACT:** 71% of contracts in the week carried an end date (924 of 1,296) and 92% a value (median £102k). That is enough to build a "contracts ending soon" view.
-- **FACT:** of the 1,516 award or contract releases in the week, 509 were below-threshold awards made without open competition ("without competition" 336, "limited competition" 173) and a further 289 were direct awards above threshold. Only 409 followed an openly advertised competition; the rest were framework call-offs or unclassified.
+- **FACT:** of the 1,516 award or contract releases in the week, 509 were below-threshold awards made without open competition ("without competition" 336, "limited competition" 173) and a further 289 were direct awards above threshold. Only 409 followed an openly advertised competition; the rest were framework call-offs or of unknown procedure.
 - **INFERENCE:** more than half of published awards never appeared as a tender notice. Small contracts mostly go to suppliers the buyer already knows, so a tender alert shows a small firm the minority of the work it could win.
-- **FACT, five-week view (2026-10-05 to 2026-11-08):** FIVEWEEK_PLACEHOLDER
+- **FACT, five-week view (2026-10-05 to 2026-11-08, 11,841 releases):**
+  - New tender-stage releases ran at 346 to 385 a week (1,824 in total; 692 below threshold; 338 valued at £100k or less).
+  - Award or contract releases ran at 1,388 to 1,556 a week.
+  - 4,906 distinct SME suppliers with an email address appeared. Of these, 3,155 had a Companies House number, and 1,594 had both a Companies House number and a generic mailbox.
+  - The pool keeps refilling: in each of the four later weeks, 782 to 984 of that week's SME suppliers had not appeared earlier in the window.
+  - By trade (CPV division of the contract), the largest groups of SME suppliers with email were construction 1,038, health and social work 498, business services 433, education and training 264, medical equipment 261, architecture and engineering 249, cleaning and environmental 211, and IT services 188.
+  - By buyer type (matched on buyer name), local government accounted for 2,100 of the 4,906 and 791 of the 1,824 tender notices.
 
 **Who has the problem, who pays, who decides.**
-- UK small and medium firms that sell to public bodies or want to. The owner or managing director decides in firms under about 50 staff; a bid or business-development manager in larger ones. The budget is sales and marketing software.
-- **FACT:** the pool is visible in the data: about 1,000 distinct SME suppliers with email appear in award notices each week.
+- UK small and medium firms that sell to public bodies or want to.
+- **ASSUMPTION:** the owner or managing director decides in small firms and a bid or business-development manager in larger ones; the budget is sales and marketing software.
+- **FACT:** the pool is visible in the data: 1,000 to 1,200 distinct SME suppliers with email appear in award notices each week.
 
 **The recurring job and the trigger.**
 - Job: see every relevant new opportunity, decide quickly whether to bid, and know when a competitor's contract ends.
@@ -114,12 +121,12 @@ All three share one codebase and one data source, so they are better treated as 
 | Option | Price seen today | Notes |
 |---|---|---|
 | Find a Tender account | Free | "save search criteria" and "sign up for notifications via email"; a "Summarised Search" over opportunities, contracts and 16,728 frameworks and dynamic markets, with CSV export |
-| Supply2Gov (BiP Solutions) | One local area free; £25, £80, £95 per month | Keyword alerts |
+| Supply2Gov | One local area free; £25, £80, £95 per month | Keyword alerts by region |
 | Tenderbase | £25, £33, £42, £55 per month | "Advanced AI Tender Search"; document retrieval at £10 per five requests |
 | Hudson / Together sector portals | £60 or £95 per month plus VAT; £500 per month with bid support | Six sector portals: construction, transport, healthcare, creative, facilities, technology |
 | Stotles | Basic from £99 per month; Growth from £475; Bid Studio from £495 | Basic includes relevancy scoring and expiring contracts |
 | Tenderlake | £249 to £325 per month UK and Ireland; £396 to £546 Europe | AI search without keywords |
-| Tenders Direct (Proactis) | From £1,359 per year | Human-curated alerts, training, bid services |
+| Tenders Direct (Proactis) | From £1,359 per year | Alerts with a coverage guarantee, competitor tracker, training and bid services |
 | Contracts Advance | £1,399, £2,099, £2,999 per year | Bid review at £750 per day |
 | Tussell, Tracker | Demo only | Tussell states "over 300 companies" as customers |
 
@@ -135,8 +142,14 @@ All three share one codebase and one data source, so they are better treated as 
 
 **The wedge for an unknown solo vendor.** Price is not available as a wedge; AI search already sells at £25. What is available:
 - **Distribution.** A cold email that says "you won contract X from buyer Y in October; here are the live notices that resemble it and the competitor contracts in your trade ending in the next nine months", with a link to a page already built for that company.
-- **Trade depth.** One trade only, with qualification written for it (typical accreditations, contract size the firm can carry, travel radius).
+- **Trade depth.** Pages and digests written per trade (typical accreditations, contract size the firm can carry, travel radius), starting with the largest trades.
 - **The below-threshold view.** "Which buyers place small contracts in your trade without a tender, with whom, and when those end." **INFERENCE:** this is closer to how small suppliers actually win work than tender alerts are.
+
+**Is any segment underserved?**
+- **Small suppliers and below-threshold work:** not by price. The same feed, with 156 below-threshold tender notices and 509 below-threshold direct awards a week, reaches every vendor, and four of them charge £99 or less.
+- **Specific trades:** Hudson covers six sectors at £60 to £95. Trades outside those six with visible flow are architecture and engineering (22 tender notices a week), repair and maintenance (16), education and training (15), medical equipment (13) and research (11). **INFERENCE:** these are gaps in packaging, not in data.
+- **Buyer-relationship intelligence for micro firms:** this is the least-served job at a low price. Stotles sells buyer intent and decision-maker contacts from £475 per month; nothing I saw offers a "who buys small contracts in my trade without tendering" view for under £100.
+- **Cross-border:** served at £396 to £546 (Tenderlake) and €160 per user (Hermix); demand from small firms is unverified.
 
 **Onboarding and time to first value.**
 - **INFERENCE:** a prospect can see relevant matches within a minute and without signup. Supplier pages can be pre-generated from award data, keyed by Companies House number, showing past awards, similar live notices and expiring competitor contracts.
@@ -149,11 +162,18 @@ All three share one codebase and one data source, so they are better treated as 
 - Licence: Open Government Licence v3.0, which allows commercial use with attribution and **does not cover personal data in the information**.
 - Rate limit: undocumented. Observed HTTP 429 with `retry-after: 120` after about nine requests in quick succession; no 429 across 25 requests at one per nine seconds.
 - Update frequency: continuous; the API filters on last-updated time.
-- Historical depth: UNKNOWN from documentation. The documentation example uses dates from December 2020.
-- Contracts Finder: `GET https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search?publishedFrom=...&publishedTo=...`, no key, same licence, no supplier emails.
+- Historical depth: at least January 2021 (a call for 2021-01-11 returned notices). Supplier emails and SME flags were seen in notices under the Procurement Act 2023; I did not check whether older notices carry them.
+- Contracts Finder: `GET https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search?publishedFrom=...&publishedTo=...`, no key, same licence, no supplier emails. It carried only 111 releases on 2026-11-11, nine of them tender notices, so Find a Tender is now the main source.
 - Scotland: Public Contracts Scotland has its own API; my call failed on a certificate error, so it is unverified.
 - **What a one-day v1 could ingest:** five weeks of Find a Tender (about 125 requests, roughly 20 minutes at polite pacing) plus a daily increment of about five requests.
 - **What a one-day v1 would show:** a public page per supplier (past awards, similar live notices, competitor contracts ending), a weekly email digest for one trade, and a Paddle checkout. Bid drafting and document handling come later.
+
+**Data quality, from the week sample.**
+- 2,427 releases covered 2,205 procurement processes; 184 processes had more than one release in the week, so updates must be merged.
+- About 12% of supplier records had no identifier (243 of about 2,000), and 104 releases carried the procedure label "Below threshold - unknown".
+- 13 contracts had a value under £100 and 16 a value of £100 million or more. These look like placeholders and framework ceilings and need filtering.
+- Every tender notice had a CPV code; 309 of 385 had a delivery region; 12 had no value.
+- **UNKNOWN:** how the SME flag is set and how reliable it is.
 
 **Reaching the first buyers.**
 - **FACT:** award data provides company name, address, Companies House number (in about half of supplier records), SME flag and an email address.
@@ -163,11 +183,12 @@ All three share one codebase and one data source, so they are better treated as 
 
 **SEO potential and incumbents' strength.**
 - **FACT:** Stotles publishes sitemaps for notices (50,000 URLs), topics (6,984), searches (2,344), buyers (2,175) and suppliers (2,127). Tenderlake's main sitemap lists 35,787 URLs.
-- **INFERENCE:** notice, topic and buyer pages are contested. Supplier profile pages are thinly covered by Stotles relative to the roughly 1,000 new SME suppliers appearing each week.
+- **FACT:** Stotles' supplier pages are public without login and already carry an AI-written summary and the supplier's recent awards.
+- **INFERENCE:** notice, topic and buyer pages are contested. Supplier profile pages exist at Stotles but cover about 2,000 firms, against roughly 1,000 SME suppliers appearing in award notices each week. The pre-built supplier page is therefore not novel as a page; what is unused is sending it to the supplier with matched live notices.
 - **UNKNOWN:** bidstats.uk, which I recall as a free site with supplier pages, refused my request, so I could not check it.
 
 **Retention and churn risk.**
-- **FACT:** new tender notices per week by CPV division were: construction 86, health and social work 39, business services 29, cleaning and environmental 23, architecture and engineering 21, education and training 17, repair and maintenance 14, medical equipment 12, software 10, research 10, IT services 8.
+- **FACT:** average new tender notices per week by CPV division over the five weeks: construction 62, health and social work 39, business services 31, architecture and engineering 22, cleaning and environmental 18, repair and maintenance 16, education and training 15, medical equipment 13, research 11, IT services 10, software 10.
 - **INFERENCE:** after region and size filters, a typical subscriber sees a handful of relevant tenders a month. That is a volume the free official alert handles, and it is the main reason subscribers would leave.
 - Mitigations inside the data: awards and end dates (1,516 a week), pipeline notices (214 a week, 145 with a future notice date), and below-threshold direct awards.
 
@@ -193,16 +214,34 @@ All three share one codebase and one data source, so they are better treated as 
 - Paddle takes 5% plus 50 cents, so add 6% to 7% to each count.
 - **INFERENCE:** a realistic price is £39 to £79. Above £99 the product competes with Stotles Basic on a weaker brand.
 
-**The single most dangerous assumption.** That award-data cold email turns unknown small firms into paying subscribers at a workable rate, and that they stay for most of a year despite few relevant notices and a free official alternative. Illustration only: at 0.3% of contacted firms paying, 150 customers needs 50,000 emails, which is about the whole yearly pool.
+**The single most dangerous assumption.** That award-data cold email turns unknown small firms into paying subscribers at a workable rate, and that they stay for most of a year despite few relevant notices and a free official alternative.
 
-### 3.2 UK: "education buyers" radar for companies that sell to schools (Pick 2)
+- **INFERENCE, pool arithmetic.** Five weeks produced 3,155 incorporated SME suppliers with email. If that pace holds with some saturation, a year yields very roughly 20,000 to 30,000. Getting 150 customers from that pool alone needs 0.5% to 0.75% of every firm emailed to become a paying subscriber.
+- **INFERENCE, one trade is not enough.** Construction, the largest trade, produced 1,038 SME suppliers with email in five weeks, so perhaps 6,000 to 10,000 a year. One hundred customers from that pool needs 1% to 1.7% paid conversion. The product should be templated per trade and sold across several trades from the start.
+- **UNKNOWN:** the real conversion rate. No source I could reach reports one.
 
-**Idea.** The same pipeline, filtered to one buyer type, plus the open schools register. The customer is the supplier's sales team, not a bid team.
+### 3.2 UK: contract-win and contract-expiry signals for firms that do not bid (Pick 2)
+
+- **Idea.** Each award names a supplier, a buyer, a value, dates and a contact email. Sell a filtered daily feed to firms that sell to contract winners rather than to the public body: recruiters (a win means hiring), plant hire, finance brokers, insurers.
+- **FACT:** 1,516 award or contract releases, 631 distinct buyers and about 2,000 distinct suppliers in one week; median contract value £102k.
+- **Overlap with Pick 1.** For subcontracting trades the same feed is a feature of the trade radar: "a large contractor just won work near you". That part needs no separate product.
+- **ASSUMPTION:** firms outside the bidding world pay for such signals. I could not reach the one comparable tool I know (Talent Ticker, a signals product for recruiters) and found no price evidence.
+- **Reaching buyers.** Recruiters, brokers and insurers are not in the award data. A prospect list would come from Companies House industry codes, which carry no email addresses (background knowledge), so each prospect's website would have to be read for a generic address.
+- **INFERENCE:** the customer's use of supplier contact emails for their own marketing raises the same personal-data questions as the founder's, and Paddle's wording on lead products is a risk.
+- **Price and count.** **ASSUMPTION:** £99 to £199 per month, so 38 to 77 customers.
+- **Most dangerous assumption.** That anyone outside the bidding world wants this feed enough to pay monthly.
+- **Why it ranks second.** It needs no data beyond Pick 1 and its buyers are used to paying for sales tools. Demand is still unverified.
+
+### 3.3 UK: schools and colleges change radar for education suppliers (Pick 3)
+
+**Idea.** A feed for sales teams that sell to education: changes in the open schools register, plus tenders, awards and contract end dates from education buyers.
 
 **Data verified today.**
-- **FACT:** in the week sample, buyers that are schools, academy trusts, colleges or universities published 52 tender-stage releases and 172 award or contract releases.
 - **FACT:** "Get Information About Schools" publishes a full extract daily (files available from 11 September 2020). The extract has 135 columns, including head teacher name, telephone, website, trust and open date. There is no email column.
 - **FACT, own comparison of the 13 October and 13 November 2026 extracts:** 27,192 open establishments; 280 changes of head teacher name; 31 newly open establishments; 55 changes of trust; 38 closures. October to November is outside the main September and January turnover points.
+- **FACT:** in the week sample, buyers whose names mark them as education bodies published about 52 tender-stage releases and 169 award or contract releases (matched by name, so approximate). Over five weeks the figures were 195 and 854, from 226 distinct buyers.
+- **FACT:** 147 of those 169 awards came from universities and colleges and only 22 from schools, trusts and other education bodies.
+- **INFERENCE:** school purchasing barely shows up in Find a Tender. For suppliers to schools the product would rest on the schools register alone; the tender data mainly serves suppliers to universities and colleges.
 - Licence: GOV.UK open data; I did not capture a licence line on the download page today, so treat OGL as background knowledge.
 
 **Who pays and why.** Education suppliers (software, catering, cleaning, staffing, training, equipment). A new head teacher, a school joining a trust, a contract nearing its end and a new tender are standard reasons to make contact.
@@ -212,22 +251,15 @@ All three share one codebase and one data source, so they are better treated as 
 - Generalists: Stotles and Tussell cover education buyers inside all-sector products. **FACT:** Tussell advertises contact details for over 80,000 public-sector decision-makers.
 - **UNKNOWN:** prices of education data vendors, and whether any already sells change alerts.
 
-**Reaching buyers.** The supplier list comes from the same award data (suppliers who won from education buyers), and they are companies, so the UK exemption applies. The customer's own outreach to schools is their responsibility; school and trust addresses are corporate, not individual.
-
-**Why it ranks second.** It has a second data source that general tender tools do not lead with, the buyers have sales teams and budgets, and nothing needs scraping. Its weakness is that willingness to pay for triggers, as opposed to contact lists, is unverified.
+**Reaching buyers.**
+- **FACT:** the award-data list is thin. In the week sample 190 distinct suppliers won from education buyers, 159 with an email and 69 with an email and a Companies House number; 123 of the 190 were large firms. Over five weeks, 357 SME suppliers with email won from education buyers.
+- The customer's own outreach to schools is their responsibility; school and trust addresses are corporate, not individual.
 
 **Price and count.** **ASSUMPTION:** £79 to £149 per month, so 51 to 96 customers. **UNKNOWN:** the number of UK education suppliers with a sales function; I would not assume more than a few thousand.
 
 **Most dangerous assumption.** That education suppliers will pay monthly for change alerts when they already buy contact databases.
 
-### 3.3 UK: contract-win and contract-expiry signals for firms that sell to winners (Pick 3)
-
-- **Idea.** Each award names a supplier, a buyer, a value, dates and a contact email. Sell a filtered daily feed to firms that sell to contract winners: recruiters (a win means hiring), subcontractors, plant hire, finance brokers, insurers.
-- **FACT:** 1,516 award or contract releases and 631 distinct buyers in one week; median contract value £102k.
-- **ASSUMPTION:** these buyers pay for such signals. I could not reach the one comparable tool I know (Talent Ticker, a signals product for recruiters), and found no price evidence.
-- **INFERENCE:** the customer's use of supplier contact emails for their own marketing raises the same personal-data questions as the founder's, and Paddle's wording on lead products is a risk.
-- **Price and count.** **ASSUMPTION:** £99 to £199 per month, so 38 to 77 customers.
-- **Most dangerous assumption.** That anyone outside the bidding world wants this feed enough to pay monthly.
+**Why it ranks third.** The schools register is a clean daily source that general tender tools do not lead with, and the buyers have sales teams. Against that, willingness to pay is unverified, the two datasets cover different halves of the education market, and the prospect list is small.
 
 ### 3.4 EU-wide: TED
 
@@ -239,7 +271,8 @@ All three share one codebase and one data source, so they are better treated as 
 - **Free official alternative.** TED offers saved-search alerts to registered users (background knowledge).
 - **Price and count.** **ASSUMPTION:** €79 per month, so about 115 customers.
 - **Most dangerous assumption.** That firms will buy an English-language cross-border product from an unknown vendor instead of their national service.
-- **Verdict.** Good data, wrong founder. It becomes interesting only as a later extension to Ireland, where business email is lawful on an opt-out basis, or as a France-only product with a French-speaking partner.
+- **FACT, Ireland:** in the week of 2 to 8 November 2026 TED carried 86 Irish contract notices and 125 Irish award notices; 74 of the award notices had winner emails, 160 distinct addresses in total.
+- **Verdict.** Good data, wrong founder. It becomes interesting only as a later extension of Pick 1 to Ireland, where business email is lawful on an opt-out basis, or as a France-only product with a French-speaking partner.
 
 ### 3.5 Germany
 
@@ -267,7 +300,7 @@ All three share one codebase and one data source, so they are better treated as 
 
 | Country | Data check today | Competitor price seen | Why it loses |
 |---|---|---|---|
-| France | BOAMP API reachable but unstable; 334 records dated 2026-11-12 | Nukema €39 to €199 per month | Cheap local AI incumbents; French-language sales |
+| France | BOAMP API reachable but unstable; 334 records dated 2026-11-12 | Nukema €39 to €199 per month | Cheap local incumbents; French-language sales |
 | Netherlands | Not tested | Not found | Consent needed for business email |
 | Poland | Not tested | Pricing page did not render | Background knowledge: consent rule since 2024; cheap local incumbents |
 | Nordics | Not tested | Tendium is sales-led | Sweden has no central national database (background knowledge) |
@@ -336,7 +369,7 @@ All three share one codebase and one data source, so they are better treated as 
 | Care Quality Commission | API with free authentication; Open Government Licence; updated daily | Buyer list not in the data |
 | DVSA operator licences | Dataset on data.gov.uk, Open Government Licence, modified 2026-11-10 | Small market; competitors unknown |
 | Register of licensed sponsors (Home Office) | CSV on GOV.UK, updated 2026-11-12, about 3,000 revisions since 2013 | No contacts; demand from immigration advisers is an assumption |
-| Schools register | See section 3.2 | — |
+| Schools register | See section 3.3 | — |
 | Local authority spend, liquor licences | Not tested | Hundreds of separate publishers |
 
 - **INFERENCE:** each register supports a small "changes as sales triggers" product. Every one lacks either contact data or verified demand, and each needs its own buyer persona.
@@ -365,15 +398,15 @@ All three share one codebase and one data source, so they are better treated as 
 
 | Rank | Candidate | Proof that buyers pay | Data access | Prospect list and lawful email | Competition and free substitutes | Fit for this founder |
 |---|---|---|---|---|---|---|
-| 1 | UK public-contract radar for one trade | Strong | Strong | Strong | Heavy | Good |
-| 2 | UK education-buyers radar for suppliers | Unverified | Strong | Strong | Medium | Good |
-| 3 | UK contract-win and expiry signals | Unverified | Strong | Medium | Low to medium | Good |
+| 1 | UK public-contract radar for small suppliers, trade by trade | Strong | Strong | Strong: 4,906 SME suppliers with email in five weeks | Heavy | Good |
+| 2 | UK contract-win and expiry signals for non-bidders | Unverified | Strong | Weak: prospects are not in the data | Low to medium | Good |
+| 3 | UK schools and colleges change radar | Unverified | Strong | Thin: about 190 suppliers a week | Medium | Good |
 | 4 | EU TED cross-border radar | Medium | Strong | Patchy | Heavy | Weak |
 | 5 | US federal vertical alerts | Strong | Medium | Lawful but no emails | Very heavy | Weak |
 | 6 | Germany tender alerts | Strong (background) | Strong | Unlawful | Heavy | Poor |
-| 7 | Company and insolvency alerts | Strong | Strong | Medium | Commoditised | Poor |
+| 7 | Company and insolvency alerts | Strong | Strong | Weak: no emails in the data | Commoditised | Poor |
 | 8 | Grants alerts | Medium | Strong | Weak | Heavy, free tiers | Poor |
-| 9 | Planning and permit leads | Strong | Poor | Medium | Cheap incumbents | Poor |
+| 9 | Planning and permit leads | Strong | Poor | Weak | Cheap incumbents | Poor |
 | 10 | Trademark watch | Medium | Strong | Trust problem | Heavy | Poor |
 | 11 | Register-change niches | Unverified | Strong | Weak | Unknown | Uncertain |
 | 12 | Recalls and safety alerts | Weak | Strong | Weak | Free official alerts | Poor |
@@ -389,7 +422,9 @@ All three share one codebase and one data source, so they are better treated as 
   - Relevant notices per subscriber are few, by measurement.
   - Tender documents sit behind portals, which limits what the AI can qualify.
   - The whole plan rests on cold-email conversion that nobody has measured.
-- **Which wedge first.** The trade radar (Pick 1), because willingness to pay is proven. Construction and building maintenance has the largest flow (86 tender notices a week, and 298 SME winners with email in one week). The education variant and the signals variant reuse the data and can be tested with a few hundred emails each.
+  - It depends on one government API. Supplier emails are public today; if they attract abuse, the Cabinet Office could remove them from the feed.
+  - Spam complaints could reach the ICO or Paddle.
+- **Which wedge first.** The trade radar (Pick 1), because willingness to pay is proven. Construction has the largest flow (about 62 tender notices a week and 1,038 SME winners with email in five weeks), followed by health and social care and business services. Suppliers to local government are over 40% of the pool (2,100 of 4,906). The signals variant and the education variant reuse the data and can be tested with a few hundred emails each.
 - **What would falsify it quickly.** Send 300 to 500 award-based emails per wedge with a pre-built page. If almost nobody opens their page, or page visitors do not start a trial, the channel assumption is wrong and no amount of product work fixes it.
 
 **Why the remaining candidates lose.**
@@ -406,11 +441,12 @@ All three share one codebase and one data source, so they are better treated as 
 - Hours per week and missed-contract cost for small suppliers.
 - Whether Stotles still has a free plan. Its pricing page shows none; an earlier search snippet mentioned one.
 - bidstats.uk coverage and pricing (request refused).
-- Historical depth and documented rate limits of the Find a Tender API.
+- Documented rate limits of the Find a Tender API (only observed behaviour).
 - Public Contracts Scotland API (certificate error).
 - TED's own legal notice (page would not load); the licence comes from data.europa.eu metadata.
 - German, Polish and most French competitor prices; licence of BOAMP and Prozorro data.
 - US, Polish, Canadian and Australian email rules (background knowledge only today).
+- Free saved-search alerts on TED, SAM.gov, grants.gov and the EU funding portal (background knowledge; only the UK one was read today).
 - Any demand evidence for the education radar, the signals feed, register-change niches, tariff alerts or the Ukraine reconstruction idea.
 - New AI entrants from 2024 to 2026 beyond those whose sites I could open (Stotles, Tenderlake, Tenderbase, Tracker's AI summaries, CLEATUS, GovDash, Hermix, Tendium, Nukema, Grantable, Granter).
 
@@ -465,8 +501,8 @@ All pages fetched and all API calls made on 2026-11-13.
 
 - **Find a Tender, one day.** `updatedFrom=2026-11-11T00:00:00&updatedTo=2026-11-11T23:59:59&limit=100`, five pages, 445 releases.
 - **Find a Tender, one week.** Same call for 2026-11-02 to 2026-11-08, 25 pages, 2,427 releases. Supplier counts use the `parties` entries with role `supplier`; SME means `details.scale = sme`; email means `contactPoint.email`.
-- **Find a Tender, five weeks.** FIVEWEEK_METHOD_PLACEHOLDER
-- **Contracts Finder.** `Published/Notices/OCDS/Search?publishedFrom=2026-11-11T00:00:00&publishedTo=2026-11-11T23:59:59&limit=100`, first page only: 83 awards, 9 tenders, 94 supplier parties, none with email.
+- **Find a Tender, five weeks.** The same call for 2026-10-05 to 2026-11-01 (95 pages, 9,414 releases) added to the week above, 11,841 releases in all. Weeks are assigned by release date (ISO weeks 41 to 45). Suppliers are de-duplicated by identifier, or by name where no identifier exists, so week counts differ slightly from the single-week table.
+- **Contracts Finder.** `Published/Notices/OCDS/Search?publishedFrom=2026-11-11T00:00:00&publishedTo=2026-11-11T23:59:59&limit=100`, two pages, 111 releases: 94 awards and 9 tender notices. In the first 100 releases there were 94 supplier parties, none with email.
 - **TED.** Query `publication-date=20261111 AND notice-type=can-standard`, first 250 of 1,381 results, with fields `winner-name`, `winner-email`, `winner-size`.
 - **Germany.** `notice-exports?pubDay=2026-11-11&format=csv.zip`; counts from `notice.csv` and `organisation.csv`.
 - **Schools.** Daily extracts `edubasealldata20261013.csv` and `edubasealldata20261113.csv`, compared by URN.
