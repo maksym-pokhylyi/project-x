@@ -6,6 +6,7 @@ import { companyFacts, jobs } from "@/db/schema";
 import { setBidModelResolverForTests, type ModelStep } from "@/features/bids/server/ai/models";
 import * as bidsApi from "@/features/bids/server/bids";
 import type { CompanyFacts } from "@/features/bids/types";
+import { getLibraryDoc, planLibraryUpload, registerLibraryDoc, type LibraryDocRow } from "@/features/library/server/docs";
 import { runWorker } from "@/lib/jobs/worker";
 import { storage } from "@/lib/storage";
 import { applyBidsSchema } from "../../scripts/bids/apply-schema";
@@ -194,4 +195,16 @@ export function buildPdf(pages: Array<string | null>): Uint8Array {
 
 export function buildZip(entries: Record<string, Uint8Array | string>): Uint8Array {
   return zipSync(Object.fromEntries(Object.entries(entries).map(([name, value]) => [name, typeof value === "string" ? new TextEncoder().encode(value) : value])));
+}
+
+// --- Library ---------------------------------------------------------------------------------
+
+/** Uploads a library document the way the app does and runs its processing job (the mock model must answer the "summary" task). */
+export async function addLibraryDoc(scope: Scope, name: string, content: string | Uint8Array): Promise<LibraryDocRow> {
+  const bytes = typeof content === "string" ? new TextEncoder().encode(content) : content;
+  const plan = await planLibraryUpload(scope, { name, size: bytes.byteLength });
+  await storage.put(plan.storageKey, bytes, { contentType: plan.contentType });
+  const doc = await registerLibraryDoc(scope, { docId: plan.docId, name });
+  await runWorker({ maxJobs: 5, timeBudgetMs: 30_000 });
+  return getLibraryDoc(scope, doc.id);
 }
