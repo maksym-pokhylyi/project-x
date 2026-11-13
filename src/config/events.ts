@@ -54,7 +54,11 @@ export type EventMap = {
   "ai.budget_exceeded": { scope: "organization" | "global"; feature: string };
 
   // Procurement data pages and Radar (names fixed by docs/product/SPEC.md §7)
-  supplier_page_viewed: { supplier: string; ref: string | null };
+  /**
+   * `via`: the visit came through an outreach link (`?r=`) or not. Never the code itself: it
+   * identifies one prospect and stays in `page_visits` (src/features/procurement/visits.ts).
+   */
+  supplier_page_viewed: { supplier: string; via: "outreach" | "direct" };
   claim_started: { supplier: string };
   supplier_claimed: { supplier: string; method: string };
   radar_viewed: { tab: string; source: "supplier" | "manual" | "none" };
