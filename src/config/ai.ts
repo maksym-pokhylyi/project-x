@@ -22,6 +22,12 @@ export type ModelPrice = { inputPerMTok: number; outputPerMTok: number };
 export const MODEL_PRICES: Record<string, ModelPrice> = {
   "anthropic/claude-haiku-5.5": { inputPerMTok: 0.1, outputPerMTok: 0.5 },
   "anthropic/claude-sonnet-5.5": { inputPerMTok: 2, outputPerMTok: 10 },
+  // Used by the bid desk while Claude models are not enabled on the gateway account
+  // (list prices from the gateway's /v1/models on 2026-11-13).
+  "openai/gpt-5-mini": { inputPerMTok: 0.25, outputPerMTok: 2 },
+  "openai/gpt-5-nano": { inputPerMTok: 0.05, outputPerMTok: 0.4 },
+  "google/gemini-2.5-flash": { inputPerMTok: 0.3, outputPerMTok: 2.5 },
+  "google/gemini-2.5-flash-lite": { inputPerMTok: 0.1, outputPerMTok: 0.4 },
 };
 
 export const FALLBACK_PRICE: ModelPrice = { inputPerMTok: 10, outputPerMTok: 50 };

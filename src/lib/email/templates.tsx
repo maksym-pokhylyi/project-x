@@ -1,4 +1,5 @@
 import { render } from "@react-email/render";
+import { BriefReady, briefReadySubject, type BriefReadyProps } from "@/emails/brief-ready";
 import { Invitation, invitationSubject, type InvitationProps } from "@/emails/invitation";
 import { ResetPassword, resetPasswordSubject, type ResetPasswordProps } from "@/emails/reset-password";
 import { VerifyEmail, verifyEmailSubject, type VerifyEmailProps } from "@/emails/verify-email";
@@ -10,7 +11,8 @@ import { VerifyEmail, verifyEmailSubject, type VerifyEmailProps } from "@/emails
 export type EmailTemplate =
   | { name: "verify-email"; props: VerifyEmailProps }
   | { name: "reset-password"; props: ResetPasswordProps }
-  | { name: "invitation"; props: InvitationProps };
+  | { name: "invitation"; props: InvitationProps }
+  | { name: "brief-ready"; props: BriefReadyProps };
 
 export type RenderedEmail = { subject: string; html: string; text: string };
 
@@ -23,6 +25,8 @@ export async function renderEmail(template: EmailTemplate): Promise<RenderedEmai
         return { subject: resetPasswordSubject, element: <ResetPassword {...template.props} /> };
       case "invitation":
         return { subject: invitationSubject(template.props), element: <Invitation {...template.props} /> };
+      case "brief-ready":
+        return { subject: briefReadySubject(template.props), element: <BriefReady {...template.props} /> };
     }
   })();
   const [html, text] = await Promise.all([render(element), render(element, { plainText: true })]);

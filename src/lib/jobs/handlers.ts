@@ -4,6 +4,8 @@ import { db } from "@/db";
 import { deliverOutboxEmail } from "@/lib/email/deliver";
 import { log } from "@/lib/logger";
 import { purgeExpiredRateLimits } from "@/lib/rate-limit";
+import { processBidJob } from "@/features/bids/server/pipeline/runner";
+import { processLibraryDocJob } from "@/features/library/server/process";
 import { purgeFinishedJobs, type JobPayloads, type JobType } from "./queue";
 
 export type JobContext = { jobId: string; attempt: number };
@@ -20,6 +22,10 @@ export const jobHandlers: { [T in JobType]: JobHandler<T> } = {
   "email.send": async ({ outboxId }) => {
     await deliverOutboxEmail(outboxId);
   },
+
+  "bids.process": processBidJob,
+
+  "library.process": processLibraryDocJob,
 
   "maintenance.cleanup": async () => {
     const rateLimits = await purgeExpiredRateLimits();

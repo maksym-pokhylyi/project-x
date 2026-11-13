@@ -17,6 +17,10 @@ export type JobPayloads = {
   "email.send": { outboxId: string };
   /** Housekeeping: expired rate-limit windows, old finished jobs, old outbox bodies. */
   "maintenance.cleanup": Record<string, never>;
+  /** Run the next step of a bid's pack pipeline (src/features/bids/server/pipeline). */
+  "bids.process": { bidId: string; runId: string };
+  /** Extract and summarise an evidence-library document (src/features/library/server). */
+  "library.process": { docId: string };
 };
 
 export type JobType = keyof JobPayloads;

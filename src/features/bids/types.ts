@@ -31,6 +31,8 @@ export type Citation = {
   /** True only when a programmatic check found the quote in the extracted text. */
   verified: boolean;
   match: CitationMatch;
+  /** Set when the quote was found but a stated figure is not in the source text. */
+  issue?: "figure_not_in_source";
 };
 
 // --- Brief ------------------------------------------------------------------------------
@@ -76,7 +78,20 @@ export type BriefFact = {
   status: FactStatus;
   note: string | null;
   citation: Citation | null;
+  /** Other readings of the same fact when two extraction passes disagree. */
+  alternatives?: Array<{ value: string | null; normalized: string | null; citation: Citation | null }>;
 };
+
+/** Which extraction passes found an item, and where they differed. */
+export type Provenance = {
+  /** "primary", "second", "document", "recheck". Two or more = found independently. */
+  passes: string[];
+  /** Readings that differed between passes (e.g. "weighting 20 vs 25"). */
+  notes?: string[];
+};
+
+/** Key facts a person has confirmed against the documents: field -> ISO time. */
+export type BidReview = { facts?: Partial<Record<SummaryField, string>> };
 
 export type RedFlagType =
   | "tupe"
@@ -156,7 +171,9 @@ export type BidVerdict = {
   verdict: VerdictKey;
   /** Short, specific reasons (each names the requirement it is about). */
   reasons: string[];
-  counts: { requirements: number; passFail: number; met: number; gap: number; unknown: number; verify: number };
+  counts: { requirements: number; passFail: number; gating: number; met: number; gap: number; unknown: number; verify: number };
+  /** What this check cannot judge — always shown next to the verdict. */
+  notAssessed: string[];
   /** False when the company facts had not been confirmed by a person at check time. */
   factsConfirmed: boolean;
   generatedAt: string;
@@ -376,7 +393,7 @@ export const PROCESSING_STAGE_LABELS: Record<ProcessingStage, string> = {
 };
 
 /** Resumable units of work behind the stages. */
-export const PIPELINE_STEPS = ["extract", "overview", "requirements", "questions", "recheck", "company", "finalise"] as const;
+export const PIPELINE_STEPS = ["extract", "overview", "requirements", "questions", "documents", "recheck", "company", "finalise"] as const;
 export type PipelineStep = (typeof PIPELINE_STEPS)[number];
 
 export const STEP_STAGE: Record<PipelineStep, ProcessingStage> = {
@@ -384,6 +401,7 @@ export const STEP_STAGE: Record<PipelineStep, ProcessingStage> = {
   overview: "requirements",
   requirements: "requirements",
   questions: "questions",
+  documents: "questions",
   recheck: "questions",
   company: "company",
   finalise: "company",
@@ -394,7 +412,13 @@ export type StepState = {
   startedAt?: string;
   finishedAt?: string;
   attempts?: number;
-  /** User-facing message for a failed step. */
+  /** Model that ran the step and what it used. */
+  model?: string;
+  usage?: { calls: number; inputTokens: number; outputTokens: number; costUsd: number };
+  /** Extraction passes of this step that completed / did not complete. */
+  passes?: string[];
+  failedPasses?: string[];
+  /** User-facing message for a failed step (or a warning on a finished one). */
   error?: string;
 };
 
@@ -421,8 +445,21 @@ export type PackStats = {
   failedFiles: string[];
   warnings: string[];
   usage: { calls: number; inputTokens: number; outputTokens: number; costUsd: number };
+  /** Model that ran each pipeline step (gateway ids), for later comparison. */
+  models: Record<string, string>;
   /** Seconds from start of processing to "ready". */
   durationSeconds: number | null;
   /** Citation check: how many cited items carried a quote found in the pack. */
   citations: { total: number; verified: number };
+  /** Honest coverage: what was read, by which passes, and what nothing was extracted from. */
+  coverage?: {
+    /** Extraction passes that completed ("primary", "second", "document: <file>", "recheck"). */
+    passes: string[];
+    /** Passes that did not complete. */
+    failedPasses: string[];
+    /** Readable files from which no requirement, question or brief item was extracted. */
+    silentFiles: string[];
+    /** Per file: pages/sections read and items citing it. */
+    files: Array<{ name: string; pages: number; tokens: number; items: number; status: string; note: string | null }>;
+  };
 };

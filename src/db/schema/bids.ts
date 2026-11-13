@@ -2,6 +2,8 @@ import { sql } from "drizzle-orm";
 import { bigint, boolean, date, index, integer, jsonb, numeric, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import type {
   BidBrief,
+  BidReview,
+  Provenance,
   BidKeyDate,
   BidVerdict,
   Citation,
@@ -65,10 +67,14 @@ export const bids = pgTable(
     verdict: jsonb("verdict").$type<BidVerdict>(),
     evaluationModel: jsonb("evaluation_model").$type<EvaluationModel>(),
     packStats: jsonb("pack_stats").$type<PackStats>(),
+    /** Key facts a person has confirmed against the documents (field -> ISO time). */
+    review: jsonb("review").$type<BidReview>(),
     createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
     processingStartedAt: tz("processing_started_at"),
+    /** Held by the worker running a pipeline step; a stale lock means the worker died. */
+    processingLockAt: tz("processing_lock_at"),
     readyAt: tz("ready_at"),
     archivedAt: tz("archived_at"),
   },
@@ -135,6 +141,8 @@ export const bidRequirements = pgTable(
       .notNull()
       .references(() => bids.id, { onDelete: "cascade" }),
     /** insurance | financial | accreditation | experience | policy | legal | other */
+    /** Short reference shown in the matrix and exports ("R1", "R2", …). */
+    ref: text("ref").notNull().default(""),
     category: text("category").notNull().default("other"),
     text: text("text").notNull(),
     /** Level or number, e.g. "£5,000,000". */
@@ -148,6 +156,13 @@ export const bidRequirements = pgTable(
     companyStatus: text("company_status").notNull().default("unknown"),
     /** Why the company check reached that status (AI, cautious). */
     companyNote: text("company_note"),
+    /** Set when a person ticked "checked against the documents" for this requirement. */
+    checkedAt: tz("checked_at"),
+    checkedBy: text("checked_by").references(() => users.id, { onDelete: "set null" }),
+    /** Which extraction passes found it (see Provenance). */
+    provenance: jsonb("provenance").$type<Provenance>(),
+    /** ai = set by the company check; user = set by hand (the check leaves it alone). */
+    companyStatusSource: text("company_status_source").notNull().default("ai"),
     /** The user's own note. */
     note: text("note"),
     userEdited: boolean("user_edited").notNull().default(false),
@@ -196,6 +211,8 @@ export const bidQuestions = pgTable(
     draftText: text("draft_text"),
     draftMeta: jsonb("draft_meta").$type<DraftMeta>(),
     evaluation: jsonb("evaluation").$type<AnswerEvaluation>(),
+    /** Which extraction passes found it (see Provenance). */
+    provenance: jsonb("provenance").$type<Provenance>(),
     /** Minimal history: the last few versions of the answer, newest first. */
     versions: jsonb("versions").$type<AnswerVersion[]>().notNull().default([]),
     userEdited: boolean("user_edited").notNull().default(false),
