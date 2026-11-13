@@ -7,14 +7,29 @@ Published canvas (private to the owner): https://claude.ai/artifact/3SN2Sc8h3qP7
 |---|---|
 | `Main.dc.html` | Logo and wordmark sheet (mark path, sizes, reversed versions, favicon cut) |
 | `Social-1200x630.dc.html` | Social / Open Graph image |
-| `Foundations.dc.html` | Recommended changes to the foundations (all five accepted — see `../DESIGN.md`) |
-| `Landing-1440.dc.html`, `Landing-390.dc.html` | Landing page |
-| `Supplier-1440.dc.html`, `Supplier-390.dc.html` | Public supplier page |
-| `Brief-1440.dc.html`, `Brief-390.dc.html` | Bid brief ("cited bid check") |
-| `Editor-1440.dc.html`, `Editor-390.dc.html` | Answer editor with evaluator panel |
+| `Foundations.dc.html` | Foundations as adopted (all five recommendations accepted — see `../DESIGN.md`) |
+| `Landing-1440/390` | Landing page (final plans, FAQ and footer copy) |
+| `Pricing-1440/390` | Pricing page: Monthly / Annual toggle, four plans, Bid Pass band, comparison table, billing questions |
+| `Supplier-1440/390` | Public supplier page |
+| `Find-1440/390` | Find your company — search results |
+| `FindNoResult-1440/390` | No result → set up a radar manually (trades and regions) |
+| `Claim-1440/390` | Claim confirmation step |
+| `SignUp-1440/390`, `SignIn-1440/390` | Sign up / sign in |
+| `Radar-1440/390` | Radar (signed in): deadlines strip, tabs, filters, match rows, free-plan cap |
+| `RadarFirstRun-1440/390` | Radar right after claiming: "Three things to do first" + first matches |
+| `NewCheck-1440/390` | New bid check: upload with per-file status |
+| `Processing-1440/390` | Bid check in progress: stages and partial results |
+| `Brief-1440/390` | Bid brief ("cited bid check") |
+| `Editor-1440/390` | Answer editor with evaluator panel |
+| `Documents-1440/390` | Documents: company facts and document library |
+| `Billing-1440/390` | Billing: plan, usage, pause / cancel, Bid Pass, payment method, receipts, test-mode notice |
+| `Digest-640/390` | Weekly digest e-mail |
+
+Second batch (Pricing … Digest, plus revised Landing / Supplier / Brief / Editor / Foundations) received 2026-11-13 ~13:45 UTC
+after the reply in `REPLY-to-designer.md`.
 
 `*.dc.html` are the artboard sources: plain HTML with inline styles inside `<x-dc>` — exact colours, sizes and spacing can be read
-from them. `render/*.html` are the same artboards as standalone pages and `render/*.png` their full-page screenshots.
+from them. `render/*.html` are the same artboards as standalone static pages (template bindings resolved to the default state) and `render/*.png` their full-page screenshots.
 
 All suppliers, buyers, notices and figures in the artboards are fictional sample data.
 
