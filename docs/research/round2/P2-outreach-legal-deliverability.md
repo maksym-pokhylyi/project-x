@@ -26,7 +26,7 @@ Source IDs in square brackets (e.g. [S3]) refer to the source list in section 11
 | Same, but address identifies a person (jane.smith@company.co.uk) | part of the ~60% | **Yes, with UK GDPR duties** | PECR allows it; the address is personal data, so legitimate-interests assessment, Art. 14 notice in the first email, absolute right to object [S3][S7][S9] |
 | No Companies House number (sole traders, ordinary partnerships, unverified) | ~40% | **No** — do not email | Individual subscribers under PECR: consent or soft opt-in required; neither exists. ICO: if unsure, treat as individual [S1][S3] |
 | Any supplier, address at Gmail / Hotmail / Outlook.com / Yahoo / BT Internet / iCloud etc. | unknown | **No** — do not email | The subscriber for a personal webmail account is the individual; ICO treats a personal address used for work as an individual subscriber [S3] |
-| English/Welsh/NI limited partnerships ("LP" numbers) | small | **No** unless a lawyer clears it | They have a Companies House number but are not legal persons — a trap for the "has a CH number" test (ASSUMPTION, see 1.3) |
+| English/Welsh/NI limited partnerships (`LP` / `NL` numbers) | small | **No** unless a lawyer clears it | They have a Companies House number but are not legal persons — a trap for the "has a CH number" test (INFERENCE, see 1.3) |
 
 **Conditions that make the lawful subset safe to run**
 
@@ -92,7 +92,8 @@ Recommended gate — all four must pass, otherwise suppress (**INFERENCE** from 
 
 Caveats:
 
-- **ASSUMPTION (from memory, verify against Companies House documentation):** number prefixes indicate type — 8 digits (England & Wales company), `SC` (Scotland), `NI` (Northern Ireland), `OC`/`SO`/`NC` (LLPs), `IP`/`SP`/`NP`/`RS` (registered societies), `RC`/`SR` (royal charter), `CE`/`CS` (charitable incorporated organisations), `FC`/`BR` (overseas company / UK establishment), `LP`/`NL` (English/Welsh and NI limited partnerships), `SL` (Scottish limited partnership). English, Welsh and NI limited partnerships are not legal persons separate from their partners, so `LP`/`NL` entities should be treated as individual subscribers. Scottish partnerships are expressly corporate subscribers (reg. 2(c)).
+- **FACT** — Companies House number prefixes indicate the entity type. From the Companies House URI customer guide: `LP` *"Limited Partnership for England & Wales"*, `OC` *"Limited Liability Partnership for England & Wales"*, `SL` *"Limited Partnership for Scotland"*, `SO` *"Limited Liability Partnership for Scotland"*, `SC` *"Scottish Company"*, `NL` *"Limited Partnership for Northern Ireland"*, `NC` *"Limited Liability Partnership for Northern Ireland"*, `NI` *"Northern Ireland Company (post partition)"*, `FC` *"Overseas Company"*, `IP`/`SP`/`NP` industrial & provident societies, `RC`/`SR`/`NR` royal charter companies. [S37] The guide is dated (2012); newer prefixes such as `CE`/`CS` (charitable incorporated organisations) and `RS` (registered societies) are **ASSUMPTION** from memory.
+- **INFERENCE** — English, Welsh and Northern Irish limited partnerships (`LP`, `NL`) are not legal persons separate from their partners, so treat them as individual subscribers even though they have a Companies House number. Scottish partnerships and Scottish LPs (`SL`) are expressly corporate subscribers (reg. 2(c)). A lawyer should confirm the LP point.
 - Bodies with legal personality but no Companies House number exist (universities, NHS trusts, some charities and co-operatives, overseas companies). They are corporate subscribers under limb (e), but need manual verification. Leave them out at launch.
 - **ASSUMPTION (from the brief; I did not call the API):** FTS OCDS award data carries supplier identifiers (e.g. scheme `GB-COH`) and a contact email. Under the Procurement Act 2023 regime suppliers also have a platform identifier (PPON); only a Companies House identifier answers the PECR question.
 
@@ -105,7 +106,7 @@ All of the following were checked on legislation.gov.uk on 2026-11-13.
 | Change | Status in Nov 2026 | Source |
 |---|---|---|
 | PECR enforcement moved onto the Data Protection Act 2018 machinery (information, assessment, interview, enforcement and penalty notices). New reg. 31 and Schedule 1 | **In force 5 Feb 2026** — *"S. 115 in force at 5.2.2026 in so far as not already in force by S.I. 2026/82, reg. 2(y)"*; *"Sch. 13 in force at 5.2.2026 by S.I. 2026/82, reg. 2(z14)"* | **FACT** [S11][S12][S13] |
-| Maximum fine for breaching regs 22 or 23 raised from £500,000 to the UK GDPR **higher maximum**: s. 157 applied as if it listed *"regulation 5, 6, 7, 8, 14, 19, 20, 21, 21A, 21B, 22, 23 or 24"*; higher maximum is *"£17,500,000 or 4% of the undertaking's total annual worldwide turnover in the preceding financial year, whichever is higher"* | **In force 5 Feb 2026**, for breaches on or after that date: *"Where any act or omission constituting a breach of the PEC Regulations occurred on or after 5th February 2026, any enforcement action … must be taken under those Regulations as amended"* | **FACT** [S12][S13][S14] |
+| Maximum fine for breaching regs 22 or 23 raised to the UK GDPR **higher maximum** (previous cap £500,000 — ASSUMPTION from memory): s. 157 applied as if it listed *"regulation 5, 6, 7, 8, 14, 19, 20, 21, 21A, 21B, 22, 23 or 24"*; higher maximum is *"£17,500,000 or 4% of the undertaking's total annual worldwide turnover in the preceding financial year, whichever is higher"* | **In force 5 Feb 2026**, for breaches on or after that date: *"Where any act or omission constituting a breach of the PEC Regulations occurred on or after 5th February 2026, any enforcement action … must be taken under those Regulations as amended"* | **FACT** [S12][S13][S14] |
 | Personal penalty notices for officers of a body for breaches of regs 19–24 (consent, connivance or neglect) | In force 5 Feb 2026 (Sch. 13 para. 15). For a sole proprietor liability is personal anyway | **FACT** [S12] |
 | Charity soft opt-in (new reg. 22(3A)) | In force 5 Feb 2026. Not relevant to this business | **FACT** [S1] |
 | Statutory definition of "direct marketing" added to PECR | ICO notes it took effect 20 Aug 2025 | **FACT** [S6] |
@@ -228,7 +229,7 @@ Suggested rule (**INFERENCE**):
 
 **FACT** — What a representative is: *"just a point of contact"*; *"any enforcement action is still directed to the controller (or processor) itself, rather than to the representative."* [S24]
 
-**FACT** — Penalty exposure for not appointing one: Art. 27 sits in the standard-maximum tier — *"£8,700,000 or 2% of the undertaking's total annual worldwide turnover"*. [S14] **INFERENCE:** enforcement against a micro-business abroad is unlikely, but the missing representative would be the first thing a UK customer's procurement team, Paddle, or a complainant notices.
+**FACT** — Penalty exposure for not appointing one: Art. 83(4)(a) puts *"the obligations of the controller and the processor pursuant to Articles 8, 11, 25 to 39 and 42 and 43"* in the tier of *"up to £8,700,000, or in the case of an undertaking, up to 2 % of the total worldwide annual turnover"*. [S14b] **INFERENCE:** enforcement against a micro-business abroad is unlikely, but the missing representative would be the first thing a UK customer's procurement team, Paddle, or a complainant notices.
 
 ### 3.3 Cost of a UK representative (provider pages read 2026-11-13)
 
@@ -265,4 +266,165 @@ Suggested rule (**INFERENCE**):
 - Cost: the same providers sell EU representation at the same price points (GDPR Local £99/month; Prighter from €35/month) [S27][S29].
 - No fee is payable to the Irish regulator (**ASSUMPTION**).
 - The e-privacy rule differs by country — see section 9.
+
+---
+
+## 4. Public supplier pages
+
+### 4.1 OGL attribution — exact wording
+
+**FACT** — OGL v3.0: you must *"acknowledge the source of the Information in your product or application by including or linking to any attribution statement specified by the Information Provider(s) and, where possible, provide a link to this licence; If the Information Provider does not provide a specific attribution statement, you must use the following: **Contains public sector information licensed under the Open Government Licence v3.0.**"* Failure has a consequence: *"if you fail to comply with them the rights granted to you under this licence … will end automatically."* [S20]
+
+**FACT** — Find a Tender states: *"Notice data is available under the Open Government Licence"* and *"Most content on Find a Tender is subject to Crown copyright protection and is published under the Open Government Licence (OGL)."* [S38][S39] I found no bespoke attribution statement on its terms or developer pages (**UNKNOWN** whether one exists elsewhere), so the default wording applies. The FTS footer also notes *"Notices are based on TED XML schema. © European Union, https://ted.europa.eu, 1998–2020"*.
+
+Suggested footer for every page, and for the email (**INFERENCE**):
+
+> Contract data: Find a Tender service (Cabinet Office), © Crown copyright. Contains public sector information licensed under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/). [Brand] is an independent commercial service. It is not part of, affiliated with, or endorsed by the UK Government, the Cabinet Office or Find a Tender.
+
+### 4.2 No implication of official status
+
+**FACT** — OGL: *"This licence does not grant you any right to use the Information in a way that suggests any official status or that the Information Provider and/or Licensor endorse you or your use of the Information."* The licence also excludes *"departmental or public sector organisation logos, crests and the Royal Arms"*. [S20]
+
+**FACT** — FTS terms: *"You must contact us for permission if you want to either: charge your website's users to click on a link to any page on Find a Tender; say your website is associated with or endorsed by Find a Tender or another government department or agency."* [S39]
+
+**INFERENCE** — Practical rules:
+
+- No crown, crest, GOV.UK-style header, or wording such as "official", "register", "notice" or "notification" in the page title, the domain name, or the email subject.
+- **Keep the source link to each FTS notice outside the paywall.** A paid product that hides FTS links behind a subscription arguably "charges users to click on a link". Free public pages with visible source links avoid the point; if links must sit inside the paid app, ask the FTS team for permission first.
+- This matters twice: Paddle prohibits *"Government Services"* as a category (section 5), so anything that looks like a paid gateway to a government service is also a payments risk.
+
+### 4.3 Company data versus personal data on the page
+
+| Item | Show? | Reason |
+|---|---|---|
+| Registered company name, Companies House number, awards (buyer, title, value, dates), CPV codes, link to the source notice | Yes | Information about a legal person is not personal data (**INFERENCE** from the definition quoted in [S32b]) |
+| Matching live tenders; other suppliers' contracts with stated end dates | Yes, as stated in the notices | Public notice data; keep it factual (4.4) |
+| Named contact, email address, phone number | **No** | It is personal data; republishing is new processing by you needing its own lawful basis and Art. 14 notice; it turns your site into an address list for other senders; and it is the item most likely to draw a complaint. The brief's "recommend not" is right |
+| Directors, persons with significant control, officer addresses from Companies House | **No** | Personal data; not needed for the purpose |
+| Any page for a sole trader or ordinary partnership | **No page at launch** | The award record of a sole trader relates to an identifiable person, so the whole page is personal data; you cannot email them anyway |
+
+### 4.4 Defamation and accuracy
+
+**FACT** — Defamation Act 2013 s. 1: *"(1) A statement is not defamatory unless its publication has caused or is likely to cause serious harm to the reputation of the claimant. (2) … harm to the reputation of a body that trades for profit is not 'serious harm' unless it has caused or is likely to cause the body serious financial loss."* s. 2(1): *"It is a defence … to show that the imputation conveyed by the statement complained of is substantially true."* [S40]
+
+**FACT** — FTS gives no accuracy warranty: *"we do not provide any guarantees, conditions or warranties that the information will be: current, secure, accurate, complete"*. [S39]
+
+**FACT** — Misleading business-to-business advertising is prohibited: *"Advertising is misleading which in any way, including its presentation, deceives or is likely to deceive the traders to whom it is addressed … and by reason of its deceptive nature, is likely to affect their economic behaviour; or … injures or is likely to injure a competitor."* [S41]
+
+**INFERENCE** — Reproducing what a contracting authority published is low risk. The risk sits in three places:
+
+1. **Entity mismatch** — attaching another company's award to the wrong page. Show only awards matched on Companies House number, not on name.
+2. **Derived statements** — "lost the contract", "at risk", "underperforming", "competitor weakness". Use neutral, sourced wording: "End date stated in the notice: 31 March 2027".
+3. **Presentation** — a "claim your profile" prompt that makes the page look like the company's own, or like an official record.
+
+Mitigations: source link and publication date beside every figure; a line saying "as published by [buyer] on [date]; not verified by [Brand]"; a visible "Report an error" link.
+
+### 4.5 Removal requests
+
+- Put a "Report an error / remove this page" link on every page, routed to a monitored mailbox (**INFERENCE**).
+- Companies have no data-protection right to removal, but remove within five working days anyway: it costs nothing and removes the commonest complaint route.
+- Individuals (a sole trader, or a named person who slipped through): erasure and objection rights apply; respond within one month — earlier in practice (**ASSUMPTION** — statutory time limit not re-read this session).
+- On removal: return HTTP 410, add the company to a "do not regenerate" list, and add its domain to the email suppression list.
+- **FACT** — FTS itself removes content *"in order to comply with data protection legislation"* on request. [S39] If a notice is withdrawn or corrected upstream, your copy must follow; re-sync regularly.
+
+### 4.6 `noindex` considerations
+
+**INFERENCE** — Launch with `noindex` on all auto-generated supplier pages, and lift it selectively.
+
+| For `noindex` at launch | For indexing later |
+|---|---|
+| The page's job is to be the landing page for one email; search traffic is not needed for that | Pages claimed or edited by the company, or with enough awards to be useful, have real search value |
+| A third-party page ranking for a company's own name is the kind of thing owners complain about — to you, to your host, to Paddle | A claimed page is evidence the company welcomes it |
+| Thousands of near-identical generated pages on a new domain look like scaled low-value content to search engines (**ASSUMPTION**) | Indexed pages should carry analysis that the raw notice does not |
+| Reduces exposure if entity matching has errors | — |
+
+Use a `noindex` robots meta tag rather than blocking the pages in `robots.txt`, so crawlers can see the instruction (**ASSUMPTION**, standard practice). Keep per-recipient tokens out of any URL that may be indexed or shared.
+
+### 4.7 Companies House data, if profiles are enriched
+
+**FACT** — *"We impose no rules or requirements on how the information on the public register is used, and we're not responsible for your use of the company data. You are responsible for complying with any applicable data protection, copyright and other legislation and regulations. You should check that you've met all the necessary legal requirements before you publish any information."* [S42]
+
+**FACT** — API limit: *"You can make up to 600 requests within a 5 minute period… We reserve the right to ban without notice applications that regularly exceed or attempt to bypass the rate limits."* [S43] A free monthly bulk snapshot of live companies also exists. [S42]
+
+**INFERENCE** — Use Companies House for the PECR gate (status, type, registered name) and for company-level enrichment (SIC codes, incorporation date, registered office). Do not copy officer or PSC records onto pages. No attribution wording is mandated; "Company information from Companies House" is courteous and accurate.
+
+---
+
+## 5. Paddle
+
+Documents read on 2026-11-13: Acceptable Use Policy, *"Last Updated 13 April 2026"* [S44]; Paddle Checkout seller terms (Master Services Agreement), *"Last updated: 6 October 2026"* [S45]; Retain and Metrics AUP, *"Last Updated: 1 February 2023"* [S46]; supported-countries page [S47].
+
+### 5.1 Relevant clauses, quoted
+
+| Topic | Clause (verbatim) | Source |
+|---|---|---|
+| Who Paddle is for | *"Paddle is built to serve software companies (including B2B SaaS, Consumer Software, and Games). If your company's primary offering is human services (such as consultation, support, or design services) … Paddle is not a good fit"* | [S44] |
+| General restrictions | Paddle may not be used for any offering that *"Violates any law or government regulation"*; *"Involves fraudulent, deceptive, unfair, abusive, or predatory practices"*; *"Is marketed through the use of outbound telemarketing"*; *"Threatens reputational damage to Paddle or any Card Brand Network"*; *"Contravenes the requirements for the provision of consent under the EU General Data Protection Regulation (GDPR)"* | [S44] |
+| Paddle's discretion | *"Some of the above may not be obvious or evident at the time of application, but Paddle reserves the right to exercise judgment in ascertaining whether any of these factors are likely to be present."* | [S44] |
+| Telemarketing — definition | *"'Outbound Telemarketing' means any plan, program, or campaign that is conducted to induce the purchase of products or services by use of one or more telephones, and which involves a telephone call initiated by a person other than the consumer"* | [S45] |
+| Telemarketing — warranty | *"(xv) you do not and will not engage or instruct/engage others on your behalf to engage in Outbound Telemarketing of any kind, regardless of whether the relevant products or services are or will be resold through Paddle"* | [S45] cl. 11.1 |
+| Human services | Prohibited: *"Human services that are not related to a software offering (e.g., pure consulting or advisory services, including but not limited to legal advice, coaching, IT services, and access to a community of experts)"* | [S44] cat. 2 |
+| No bona fide software | Prohibited: *"donations, crowdfunding, community access, advertising, and sponsorship"* | [S44] cat. 3 |
+| Infringing others' terms | Prohibited: *"Any product or service that infringes upon, or enables the infringement upon copyrights, trademarks, terms and conditions, or trade secrets of another party"* | [S44] cat. 4 |
+| Advertising and marketing | Prohibited: *"Advertising Services, including but not limited to job boards and open houses"*; *"Marketing Services and Schemes…"*; *"Telemarketing"*; *"Automated Social Media Marketing…"*; *"Mass Marketing Products, including but not limited to SMS marketing and Message App marketing"* | [S44] cat. 7 |
+| Business opportunities | Prohibited, under "Trading and financial services/advice": *"Business or investment opportunities"* | [S44] cat. 10 |
+| Government services | Prohibited: *"Government Services, including but not limited to embassies and foreign consulates"* | [S44] cat. 11 |
+| AI content generation | Prohibited: *"Content generation, including but not limited to: Human-like faces … (Restricted Category); Face Swaps; Deep Fakes Images or Videos; Voice Impersonations; Any content generation using a person's likeness without that person's explicit consent; Automated decision-making or categorization of people; Any content generation that falls into other prohibited categories"* | [S44] cat. 16 |
+| Law compliance warranty | *"(xi) you have complied and will continue to comply with all applicable laws, statutes, ordinances, and regulations (including, without limitation, any relevant data protection or privacy laws)"* | [S45] cl. 11.1 |
+| "Data Protection Law" defined to include marketing law | *"all applicable data protection, privacy, electronic communications and marketing laws and regulations … including the EU Regulation 2016/679 …, Privacy and Electronic Communications (EC Directive) Regulations 2003 (SI 2003/2426) and Directive 2002/58/EC (ePrivacy), and the UK Data Protection Act 2018"*; cl. 14.2: each party shall *"comply with the Data Protection Laws"* | [S45] |
+| Termination triggers | Paddle may terminate immediately where it *"has reasonable suspicion, or knows, that any of the representations or warrants given in clause 11 was or has become incorrect or false"*; *"there is any suspected fraudulent/ criminal activity or non-compliance by the Supplier of applicable laws or Payment Scheme Rules"*; or *"in Paddle's sole discretion, any of your Products fall outside of the Acceptable Use Policy"* | [S45] cl. 16.3 |
+| Money held on termination | *"Paddle may retain any Supplier Fees as it reasonably determines necessary … to cover future Chargebacks and refunds"* | [S45] cl. 17.2 |
+| Paddle's own email tools | Retain/Metrics AUP forbids using those services to send *"an email to an address obtained via internet harvesting methods or otherwise without the consent of the contactee (e.g. scraping or harvesting)"* | [S46] |
+| Ukraine | Ukraine is supported; only *"Crimea"*, *"Donetsk"*, *"Kherson"*, *"Luhansk"* and *"Zaporizhzhia"* regions are listed as unsupported | [S47] |
+
+**Not found (FACT of absence):** neither document mentions "lead generation", "data products", "cold email" or email marketing by the seller. The only express marketing-channel ban on sellers is telephone.
+
+### 5.2 Does lawful B2B cold email conflict with any Paddle term?
+
+**INFERENCE** — No express term prohibits it, because "Outbound Telemarketing" is defined by reference to telephone calls. Email is outside that definition.
+
+The conflict is indirect, and real:
+
+1. **Unlawful sending is a contract breach.** PECR and ePrivacy are named inside Paddle's definition of "Data Protection Law". An email to a sole trader without consent would breach the cl. 11.1(xi) warranty and cl. 14.2, and gives Paddle a termination right on "reasonable suspicion". The corporate-only gate in section 1.3 is therefore also a Paddle control.
+2. **The "GDPR consent" bullet is loosely drafted.** Legitimate-interests marketing does not contravene GDPR consent requirements, but a risk reviewer could read "cold email to scraped addresses" as doing so. Paddle's attitude to harvested addresses in its Retain AUP points the same way. Get Paddle's position in writing.
+3. **Reputation and complaints.** "Threatens reputational damage" and "unfair, abusive" are judgement calls. Recipients who complain to Paddle (its name appears at checkout and on receipts) are the practical trigger.
+4. **Never send outreach through Paddle Retain or ProfitWell tools** — the harvested-address ban applies there expressly.
+5. **Any phone call is a breach**, including a contractor or an appointment-setting agency, and including follow-up calls to people who did not ask to be called.
+
+Product-category risks to design around (**INFERENCE**):
+
+| Risk | Why it could be raised | How to stay clear |
+|---|---|---|
+| "Government Services" | Product is built on government data and sits next to an official service | Independent branding, the non-endorsement line, no charge for access to the official notices themselves |
+| "Business or investment opportunities" | Tender alerts could be mislabelled as selling "opportunities" | Describe it as procurement analytics software; make no income claims ("win £X of contracts") |
+| "Advertising Services, including … job boards" | A listings site where parties pay to be shown resembles a job board | Never charge suppliers to be listed, featured or promoted; revenue is software subscriptions only |
+| "Human services" | Bid-writing help, consultancy, "done for you" tender responses | Do not sell these through Paddle |
+| AI content generation | AI bid-drafting or supplier scoring; *"Automated decision-making or categorization of people"* | Scoring applies to companies and tenders, never to individuals; disclose AI features to Paddle |
+| "Infringes … terms and conditions … of another party" | Data acquisition | Use the official OCDS API and OGL terms; no scraping against a site's terms |
+
+### 5.3 Draft question to Paddle (send before launch, keep the reply)
+
+> **Subject: Pre-launch AUP confirmation — B2B SaaS for UK public-sector suppliers, email outreach**
+>
+> Hello,
+>
+> I am a sole proprietor registered in Ukraine [name, registration number, Paddle seller ID if any]. Before launch I would like written confirmation that my product and my marketing method are within the Acceptable Use Policy (last updated 13 April 2026) and the seller terms (last updated 6 October 2026).
+>
+> **Product.** [Brand] is subscription software for UK companies that sell to the public sector. It reads contract notices published by the UK Government's Find a Tender service under the Open Government Licence v3.0 (via the official open-data API) and gives each customer search, alerts and analytics on tenders and contract awards. [If applicable: it includes AI-assisted summaries of tender documents; it does not generate content using any person's likeness and does not categorise or score individuals.] It is independent software; it is not a government service and does not sell access to any government process. There are no human services, no paid listings and no advertising.
+>
+> **Marketing.** I intend to send a single short introductory email, with at most two follow-ups, to incorporated UK companies only (limited companies and LLPs verified against Companies House), using the business contact address those companies published in their own contract award notices. Each email identifies me, links to my privacy notice and offers a one-click opt-out. Volume is about 400–500 companies a week. Sole traders, partnerships and personal email addresses are excluded. I will make **no telephone calls** of any kind. I have taken advice that this is lawful under UK PECR (regulation 22 applies only to individual subscribers) and UK GDPR (legitimate interests, with an Article 14 notice), and I have appointed a UK representative.
+>
+> **Questions.**
+> 1. Does this product fall within any prohibited or restricted category — in particular "Government Services", "Business or investment opportunities", "Advertising Services", or "Content generation"?
+> 2. Is lawful business-to-business email outreach of this kind compatible with the AUP and with clause 11.1 of the seller terms? I understand "Outbound Telemarketing" to mean telephone calls only — please confirm.
+> 3. Does the AUP line about "the requirements for the provision of consent under the EU GDPR" apply to marketing that relies on legitimate interests rather than consent?
+> 4. Is there any complaint rate, or other marketing-related signal, at which Paddle would review or suspend an account, and how would I be notified?
+> 5. Is there anything in my domain approval or website review that you would want changed before I start?
+>
+> I am happy to share my privacy notice, legitimate-interests assessment and a sample email.
+>
+> Thank you,
+> [Name]
+
+**UNKNOWN** — how Paddle will answer. Until it does, treat Paddle approval as a launch dependency, and have a fallback processor identified.
 

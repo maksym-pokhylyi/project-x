@@ -1,7 +1,7 @@
 import "server-only";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
-import { auditLog, organizations, subscriptions, webhookEvents } from "@/db/schema";
+import { auditLog, organizations, subscriptions, users, webhookEvents } from "@/db/schema";
 import { env } from "@/env";
 import { track } from "@/lib/analytics";
 import { log } from "@/lib/logger";
@@ -170,6 +170,18 @@ async function organizationExists(tx: Tx, organizationId: string): Promise<boole
 }
 
 /**
+ * The user who started the checkout, if `custom_data.user_id` still names an existing
+ * user. Analytics rows reference users by foreign key, and the account may be gone by
+ * the time a renewal or cancellation event arrives.
+ */
+async function resolveUserId(tx: Tx, customData: Record<string, unknown> | null | undefined): Promise<string | null> {
+  const userId = readCheckoutCustomData(customData).userId;
+  if (!userId) return null;
+  const [row] = await tx.select({ id: users.id }).from(users).where(eq(users.id, userId));
+  return row?.id ?? null;
+}
+
+/**
  * Which workspace does a Paddle object belong to?
  * 1. `custom_data.organization_id` set by our checkout (must be an existing organization)
  * 2. the subscription we already track under that Paddle subscription id
@@ -326,7 +338,7 @@ async function handleSubscriptionEvent(tx: Tx, envelope: PaddleEnvelope): Promis
     });
   }
 
-  const context = { organizationId, userId: readCheckoutCustomData(data.custom_data).userId };
+  const context = { organizationId, userId: await resolveUserId(tx, data.custom_data) };
   const effects: PostCommitEffect[] = [];
   const before = carriedPrevious;
   if (!before) {
@@ -381,7 +393,7 @@ async function handleTransactionEvent(tx: Tx, envelope: PaddleEnvelope): Promise
     },
   });
 
-  const context = { organizationId, userId: readCheckoutCustomData(data.custom_data).userId };
+  const context = { organizationId, userId: await resolveUserId(tx, data.custom_data) };
   return {
     outcome: "processed",
     effects: [
