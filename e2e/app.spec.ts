@@ -24,8 +24,19 @@ let ownerPage: Page;
 let memberContext: BrowserContext;
 let memberPage: Page;
 
+/** CSP violations reported by any page of a context created through newContext(). */
+const cspViolations: string[] = [];
+
 async function newContext(browser: Browser): Promise<BrowserContext> {
-  return browser.newContext();
+  const context = await browser.newContext();
+  await context.exposeFunction("__reportCspViolation", (violation: string) => void cspViolations.push(violation));
+  await context.addInitScript(() => {
+    document.addEventListener("securitypolicyviolation", (event) => {
+      const report = (window as unknown as { __reportCspViolation: (violation: string) => void }).__reportCspViolation;
+      report(`${location.pathname}: ${event.violatedDirective} blocked ${event.blockedURI}`);
+    });
+  });
+  return context;
 }
 
 /** Opens the dev outbox and follows the first link of the newest e-mail for `to`. */
@@ -86,6 +97,51 @@ test("public pages render with security headers and a healthy backend", async ({
   expect((await request.get("/robots.txt")).status()).toBe(200);
   expect(await (await request.get("/sitemap.xml")).text()).toContain("/pricing");
   expect((await request.get("/opengraph-image")).headers()["content-type"]).toContain("image/png");
+});
+
+test("dynamic pages get a per-request nonce policy, hydrate under it, and do not run injected inline script", async ({ browser }) => {
+  const context = await newContext(browser);
+  const page = await context.newPage();
+  const scriptSrc = (csp: string) => csp.split(";").map((directive) => directive.trim()).find((directive) => directive.startsWith("script-src")) ?? "";
+
+  // Static pages are prerendered: they keep the static policy.
+  const home = await page.goto("/");
+  expect(scriptSrc(home!.headers()["content-security-policy"]!)).toContain("'unsafe-inline'");
+
+  const first = await page.goto("/sign-in");
+  const policy = first!.headers()["content-security-policy"]!;
+  expect(scriptSrc(policy)).toMatch(/'nonce-[A-Za-z0-9+/=]{20,}'/);
+  expect(scriptSrc(policy)).toContain("'strict-dynamic'");
+  expect(scriptSrc(policy)).not.toContain("'unsafe-inline'");
+  expect(scriptSrc(policy)).not.toContain("'unsafe-eval'");
+  expect(policy).toContain("frame-ancestors 'none'");
+  expect(policy).toContain("https://sandbox-buy.paddle.com");
+  // Every script the server rendered carries the nonce…
+  const scripts = await page.evaluate(() => [...document.scripts].map((script) => Boolean(script.nonce)));
+  expect(scripts.length).toBeGreaterThan(5);
+  expect(scripts.every(Boolean)).toBe(true);
+  // …the page is interactive (client-side validation runs)…
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page.getByText("Enter a valid e-mail address.")).toBeVisible();
+  expect(cspViolations).toEqual([]);
+
+  // …and markup injected into the page cannot execute.
+  const executed = await page.evaluate(async () => {
+    const holder = document.createElement("div");
+    holder.innerHTML = '<img src="/icon.svg" onload="window.__xss = true">';
+    document.body.appendChild(holder);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return Boolean((window as unknown as { __xss?: boolean }).__xss);
+  });
+  expect(executed).toBe(false);
+  await expect.poll(() => cspViolations.some((violation) => violation.startsWith("/sign-in: script-src"))).toBe(true);
+  cspViolations.length = 0;
+
+  // A fresh nonce for every response.
+  const nonceOf = (csp: string) => /'nonce-([^']+)'/.exec(csp)?.[1];
+  const second = await page.goto("/sign-in");
+  expect(nonceOf(second!.headers()["content-security-policy"]!)).not.toBe(nonceOf(policy));
+  await context.close();
 });
 
 test("pricing page renders the plan catalogue with a monthly/annual toggle", async ({ page }) => {
@@ -448,6 +504,15 @@ test("owner can export the workspace, delete it, and delete the account", async 
   await signIn(page, user);
   await expect(page.getByText("Wrong e-mail or password.")).toBeVisible();
   await context.close();
+});
+
+test("the whole journey ran without a single Content-Security-Policy violation", async () => {
+  // Owner, member, password-reset, founder, takeover and deletion contexts all report here.
+  expect(cspViolations).toEqual([]);
+  const response = await ownerPage.goto("/app/settings/billing");
+  expect(response!.headers()["content-security-policy"]).toMatch(/script-src 'self' 'nonce-[^']+' 'strict-dynamic'/);
+  await expect(ownerPage.getByTestId("current-plan")).toBeVisible();
+  expect(cspViolations).toEqual([]);
 });
 
 test("layout holds at 360px without horizontal scrolling", async ({ browser }) => {

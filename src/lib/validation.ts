@@ -6,6 +6,11 @@ import { ValidationError } from "./errors";
  * Zod schemas shared by client forms and the server (Server Actions re-validate
  * everything; client-side validation is only for fast feedback).
  */
+
+// In the browser our CSP forbids eval. Zod would only find that out by trying
+// (`new Function("")`), which the browser reports as a CSP violation: tell it up front.
+if (typeof window !== "undefined") z.config({ jitless: true });
+
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email("Enter a valid e-mail address.").max(254));
 export const passwordSchema = z
   .string()

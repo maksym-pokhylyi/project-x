@@ -93,7 +93,7 @@ tests/                   Vitest suites (real Postgres) + Paddle payload fixtures
 src/
   env.ts                 server env validation (zod) + `features` flags
   env.public.ts          the few NEXT_PUBLIC_* values the browser may read
-  proxy.ts               optimistic signed-out redirect for /app and /admin
+  proxy.ts               optimistic signed-out redirect for /app and /admin; CSP nonce for dynamic pages
   instrumentation.ts     onRequestError -> error_log (+ Sentry)
   instrumentation-client.ts   optional PostHog page views
   config/
@@ -781,9 +781,16 @@ actor, and whatever Paddle must keep as merchant of record. Routine retention pe
 
 - Headers (`next.config.ts`): CSP (allows only this site, Paddle and — when configured —
   PostHog; `frame-ancestors 'none'`), HSTS, `X-Content-Type-Options`, `Referrer-Policy`,
-  `Permissions-Policy`. The CSP still uses `'unsafe-inline'` for scripts so marketing pages
-  stay static; see the comment in `next.config.ts` for the nonce alternative. No injection
-  sink exists today (no `dangerouslySetInnerHTML`, no user HTML).
+  `Permissions-Policy`.
+- CSP for scripts (`src/lib/csp.ts`): every **dynamic** page — everything under `/app` and
+  `/admin`, and the auth pages — gets a per-request **nonce** with `'strict-dynamic'` from
+  `src/proxy.ts`: no `'unsafe-inline'`, so injected inline script does not run (verified in
+  Chromium, including the Paddle overlay checkout). **Static** pages (marketing, legal,
+  `/forgot-password`) are prerendered and cannot carry a nonce; they keep
+  `'unsafe-inline'` with script origins restricted to this site and Paddle. A document that
+  was loaded as a static page keeps that policy while the visitor navigates client-side, so
+  the nonce is defence in depth, not a licence to render untrusted HTML. When you add a
+  dynamic page outside `/app` and `/admin`, add it to the proxy's `matcher`.
 - `pnpm db:migrate` runs only for production deployments on Vercel; Preview must have its
   own database or none.
 - `/dev/outbox` (verification, reset and invitation links) is open only under `pnpm dev`;
@@ -807,6 +814,7 @@ actor, and whatever Paddle must keep as merchant of record. Routine retention pe
 | Checkout custom data is HMAC-signed rather than replaced by server-created Paddle transactions/customers | Verifiable here without Paddle credentials and independent of Paddle's customer matching; the portal is additionally bound to the caller's verified e-mail |
 | Reconciliation calls the Paddle REST API with `fetch` | The webhook pipeline consumes Paddle's wire format; the SDK returns camel-cased entities |
 | Export and deletion read the database catalogue (`organization_id` columns) | Feature tables are covered without a registry that someone forgets to update |
+| Nonce-based CSP on dynamic pages only; static policy elsewhere | Marketing and legal pages stay prerendered and cacheable; everything behind a session gets the strict policy |
 | Column is `organization_id` everywhere (the brief also says `org_id`) | One name for the tenant key across all tables |
 | `/contact` is a static page, forms use shared zod schemas without react-hook-form | Less surface (no spam endpoint), fewer dependencies |
 | Workspace and account deletion go through our own Server Actions; Better Auth's `organization/delete` and `delete-user` endpoints stay disabled | One code path that also removes files, non-cascading rows and stored Paddle events, and refuses while a subscription is live |
@@ -817,6 +825,7 @@ the build machine) — those paths are covered by typed SDK calls and, where pos
 mocked tests. In particular the reconciliation job's HTTP call, the customer-portal rules and
 the "refund approved" flag were tested against fakes shaped after Paddle's documented
 payloads. Dark mode, i18n, 2FA and SSO are not included. Still open from the security
-review: a nonce-based CSP (F-17), a unique index on `members (organization_id, user_id)`
-and adapter-level transactions for sign-up (F-21), alerting, and scheduled off-platform
-backups (see `docs/quality/foundation-review.md`, "Operational gaps").
+review: a unique index on `members (organization_id, user_id)` and adapter-level
+transactions for sign-up (F-21, both need the generated auth schema to change), a nonce for
+the static pages (would make them dynamic), alerting, and scheduled off-platform backups
+(see `docs/quality/foundation-review.md`, "Operational gaps").

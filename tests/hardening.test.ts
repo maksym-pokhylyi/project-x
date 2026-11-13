@@ -6,6 +6,7 @@ import { POST as uploadLogo } from "@/app/api/workspace/logo/route";
 import { db } from "@/db";
 import { events, members, organizations, users } from "@/db/schema";
 import { sanitizeAnalyticsEvent, sanitizeAnalyticsUrl } from "@/lib/analytics-url";
+import { analyticsOriginsFromEnv, buildContentSecurityPolicy, createNonce } from "@/lib/csp";
 import { isTrustedRequestOrigin, json, route } from "@/server/http";
 import { createPersonalWorkspace } from "@/server/workspaces";
 import { actAs, createTestUser, type TestUser } from "./helpers/auth";
@@ -233,5 +234,44 @@ describe("personal workspace creation is idempotent (F-21)", () => {
     expect(await db.select().from(organizations)).toHaveLength(1);
     expect(await db.select().from(members)).toHaveLength(1);
     expect(await db.select().from(events).then((rows) => rows.filter((row) => row.name === "workspace.created"))).toHaveLength(1);
+  });
+});
+
+describe("Content-Security-Policy (F-17)", () => {
+  const directive = (policy: string, name: string) => policy.split("; ").find((entry) => entry.startsWith(`${name} `)) ?? "";
+
+  it("dynamic pages: a nonce with 'strict-dynamic' and no 'unsafe-inline' or 'unsafe-eval' for scripts", () => {
+    const policy = buildContentSecurityPolicy({ nonce: "abc123==", isDevelopment: false, upgradeInsecureRequests: true });
+    const scripts = directive(policy, "script-src");
+    expect(scripts).toBe("script-src 'self' 'nonce-abc123==' 'strict-dynamic' https://cdn.paddle.com https://public.profitwell.com");
+    expect(scripts).not.toContain("unsafe");
+    expect(policy).toContain("frame-ancestors 'none'");
+    expect(policy).toContain("object-src 'none'");
+    expect(policy).toContain("base-uri 'self'");
+    expect(policy).toContain("form-action 'self'");
+    expect(directive(policy, "frame-src")).toBe("frame-src https://buy.paddle.com https://sandbox-buy.paddle.com");
+    expect(policy.endsWith("upgrade-insecure-requests")).toBe(true);
+  });
+
+  it("static pages keep the inline allowance they need; development adds eval for React", () => {
+    const statik = buildContentSecurityPolicy({ isDevelopment: false, upgradeInsecureRequests: false });
+    expect(directive(statik, "script-src")).toBe("script-src 'self' 'unsafe-inline' https://cdn.paddle.com https://public.profitwell.com");
+    expect(statik).not.toContain("upgrade-insecure-requests");
+    expect(directive(buildContentSecurityPolicy({ nonce: "n", isDevelopment: true, upgradeInsecureRequests: false }), "script-src")).toContain("'unsafe-eval'");
+  });
+
+  it("allows PostHog only when it is configured", () => {
+    expect(analyticsOriginsFromEnv(undefined, "https://eu.i.posthog.com")).toEqual([]);
+    const origins = analyticsOriginsFromEnv("phc_key", "https://eu.i.posthog.com/ingest");
+    expect(origins).toEqual(["https://*.posthog.com", "https://eu.i.posthog.com"]);
+    const policy = buildContentSecurityPolicy({ nonce: "n", isDevelopment: false, upgradeInsecureRequests: false, analyticsOrigins: origins });
+    expect(directive(policy, "connect-src")).toContain("https://eu.i.posthog.com");
+    expect(directive(policy, "script-src")).toContain("https://*.posthog.com");
+  });
+
+  it("nonces are unpredictable and unique", () => {
+    const nonces = new Set(Array.from({ length: 200 }, createNonce));
+    expect(nonces.size).toBe(200);
+    for (const nonce of nonces) expect(nonce).toMatch(/^[A-Za-z0-9+/]{22}==$/);
   });
 });

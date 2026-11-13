@@ -240,6 +240,9 @@ describe("AI budgets (F-03)", () => {
     });
 
     it("rate limits calls per workspace", async () => {
+      // The limiter's windows are aligned to the minute: do not straddle a boundary.
+      const intoMinute = (Date.now() / 1000) % 60;
+      if (intoMinute > 52) await new Promise((resolve) => setTimeout(resolve, (60 - intoMinute) * 1000 + 50));
       const { instance } = model({ fail: () => new APICallError({ message: "no", url: "https://gateway.example", requestBodyValues: {}, statusCode: 400 }) });
       const outcomes = await Promise.allSettled(
         Array.from({ length: AI_RATE_LIMIT.limit + 5 }, () => generateAiText({ organizationId: PAID, feature: "loop", model: instance, prompt: "hi" })),

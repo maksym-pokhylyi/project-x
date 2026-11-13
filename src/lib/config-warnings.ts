@@ -84,7 +84,7 @@ let announced = false;
 
 /** Logs every warning once per server instance. Called when the auth module loads. */
 export function announceConfigWarnings(): void {
-  if (announced || env.NODE_ENV === "test") return;
+  if (announced || env.NODE_ENV === "test" || process.env.NEXT_PHASE === "phase-production-build") return;
   announced = true;
   for (const warning of getConfigWarnings()) {
     const line = `[config] ${warning.code}: ${warning.message}`;

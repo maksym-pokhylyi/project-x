@@ -11,6 +11,15 @@ import { resetDatabase } from "./helpers/db";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * Windows are aligned to the clock (every full minute, quarter of an hour…). A test that
+ * counts requests inside one window must not straddle a boundary: wait it out if one is near.
+ */
+async function clearOfWindowBoundary(windowSeconds = 60, marginSeconds = 8): Promise<void> {
+  const intoWindow = (Date.now() / 1000) % windowSeconds;
+  if (intoWindow > windowSeconds - marginSeconds) await sleep((windowSeconds - intoWindow) * 1000 + 50);
+}
+
 function signInRequest(ip: string, email = "nobody@example.com", password = "wrong-password", cookie?: string) {
   return new Request("http://localhost:3000/api/auth/sign-in/email", {
     method: "POST",
@@ -131,6 +140,7 @@ describe("client IP comes only from headers the client cannot set (F-24)", () =>
     vi.resetModules();
     vi.stubEnv("TRUST_PROXY_HEADERS", "");
     const { POST } = await import("@/app/api/auth/[...all]/route");
+    await clearOfWindowBoundary();
     const statuses: number[] = [];
     for (let i = 0; i < 12; i += 1) statuses.push((await POST(signInRequest(`198.51.100.${i + 1}`, `rotating${i}@example.com`))).status);
     expect(statuses.slice(10)).toEqual([429, 429]);
@@ -141,6 +151,7 @@ describe("auth endpoints are rate limited", () => {
   beforeEach(resetDatabase);
 
   it("blocks repeated sign-in attempts from one IP with 429", async () => {
+    await clearOfWindowBoundary();
     const statuses: number[] = [];
     for (let i = 0; i < 12; i += 1) {
       const response = await authPost(signInRequest("198.51.100.20", `victim${i}@example.com`));
@@ -156,6 +167,7 @@ describe("auth endpoints are rate limited", () => {
   describe("sign-in is limited per e-mail + IP pair, so nobody can lock someone else out (F-08)", () => {
     it("an attacker failing against a victim's address only locks out themselves", async () => {
       const victim = await createTestUser({ email: "victim@example.com" });
+      await clearOfWindowBoundary(900, 10);
       // Ten hostile attempts used to be enough to block the address for everyone.
       for (let i = 0; i < 10; i += 1) expect((await authPost(signInRequest("203.0.113.66", victim.email))).status).toBe(401);
       await db.execute(sql`delete from rate_limits where key like 'auth:sign-in:ip:%'`); // look past the separate per-IP limit
@@ -216,6 +228,7 @@ describe("auth endpoints are rate limited", () => {
   });
 
   it("returns standard rate-limit headers", async () => {
+    await clearOfWindowBoundary();
     let response = await authPost(signInRequest("198.51.100.30"));
     for (let i = 0; i < 10; i += 1) response = await authPost(signInRequest("198.51.100.30", `x${i}@example.com`));
     expect(response.status).toBe(429);
