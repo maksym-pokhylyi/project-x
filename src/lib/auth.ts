@@ -17,7 +17,7 @@ import { emailKey } from "@/lib/crypto";
 import { describeError, scrubText } from "@/lib/describe-error";
 import { sendEmail } from "@/lib/email/send";
 import { log } from "@/lib/logger";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit, trustedIpHeaders } from "@/lib/rate-limit";
 import { reportError } from "@/lib/report-error";
 import { SIGNUP_BINDING_COOKIE, issueSignupBinding, signupBindingCookieOptions, signupBindingMatches } from "@/lib/signup-binding";
 import { createPersonalWorkspace, defaultOrganizationIdForUser } from "@/server/workspaces";
@@ -190,7 +190,8 @@ export const auth = betterAuth({
     // Explicit instead of NODE_ENV-derived, so a production build served over plain
     // http://localhost (e2e, local `next start`) still gets working cookies.
     useSecureCookies: appUrl.startsWith("https://"),
-    ipAddress: { ipAddressHeaders: ["x-forwarded-for"] },
+    // Session rows record an IP only from a header the client cannot forge (F-24).
+    ipAddress: trustedIpHeaders.length > 0 ? { ipAddressHeaders: [...trustedIpHeaders] } : { disableIpTracking: true },
   },
 
   databaseHooks: {
