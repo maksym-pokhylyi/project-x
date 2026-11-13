@@ -66,21 +66,28 @@ button{font-family:inherit;cursor:pointer}
           <div style="max-width: 480px; display: flex; flex-direction: column; gap: 6px">
             <label for="claim-email" style="font-size: 14px; font-weight: 600">Work email</label>
             <input id="claim-email" type="text" inputmode="email" autocomplete="email" value="joanne@aldermoor-pike.example" aria-describedby="claim-email-note" style="box-sizing: border-box; width: 100%; height: 48px; padding: 0 14px; font-family: inherit; font-size: 16px; color: #161A1D; background: #FFFFFF; border: 1px solid #857F70; border-radius: 6px">
-            <p id="claim-email-note" style="font-size: 14px; line-height: 1.5; color: #5A6165">We send a confirmation link to this address. The page is yours once you open it.</p>
+            <p id="claim-email-note" style="font-size: 14px; line-height: 1.5; color: #5A6165">We send a confirmation link to this address. Your radar opens once you confirm it.</p>
+          </div>
+
+          <div style="max-width: 480px; display: flex; flex-direction: column; gap: 6px">
+            <label for="claim-password" style="font-size: 14px; font-weight: 600">Password</label>
+            <input id="claim-password" type="password" autocomplete="new-password" value="••••••••••••" style="box-sizing: border-box; width: 100%; height: 48px; padding: 0 14px; font-family: inherit; font-size: 16px; color: #161A1D; background: #FFFFFF; border: 1px solid #857F70; border-radius: 6px">
           </div>
 
           <label for="claim-authorised" style="align-self: flex-start; display: flex; align-items: center; gap: 10px; box-sizing: border-box; min-height: 44px; padding: 4px 0; font-size: 15px; line-height: 1.35; cursor: pointer"><span style="position: relative; flex-shrink: 0; display: flex; width: 20px; height: 20px"><input id="claim-authorised" type="checkbox" checked style="appearance: none; -webkit-appearance: none; box-sizing: border-box; width: 20px; height: 20px; margin: 0; background: #0F5A47; border: 1px solid #0F5A47; border-radius: 4px; cursor: pointer"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" style="position: absolute; left: 3px; top: 3px; pointer-events: none"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span>I am authorised to act for this company</span></label>
 
           <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px">
-            <a href="RadarFirstRun-1440.dc.html" style="box-sizing: border-box; min-height: 48px; display: inline-flex; align-items: center; padding: 12px 22px; font-size: 16px; font-weight: 600; text-decoration: none; color: #FFFFFF; background: #0F5A47; border-radius: 6px">Send confirmation link</a>
+            <a href="RadarFirstRun-1440.dc.html" style="box-sizing: border-box; min-height: 48px; display: inline-flex; align-items: center; padding: 12px 22px; font-size: 16px; font-weight: 600; text-decoration: none; color: #FFFFFF; background: #0F5A47; border-radius: 6px">Create account and claim</a>
             <a href="Find-1440.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; text-decoration: underline; text-decoration-color: #0F5A47; text-underline-offset: 3px">This is not my company</a>
           </div>
+
+          <p style="margin: -8px 0 -12px; display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; min-height: 44px; font-size: 14px; color: #5A6165"><span>Already have an account?</span><a href="SignIn-1440.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; color: #161A1D; text-decoration: underline; text-decoration-color: #0F5A47; text-underline-offset: 3px">Sign in</a></p>
         </section>
 
         <section aria-labelledby="claim-free-h" style="flex: 1 1 360px; min-width: 0; box-sizing: border-box; background: #E6EFEB; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 16px">
           <h2 id="claim-free-h" style="font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; font-size: 22px; line-height: 1.25">What claiming gives you, free</h2>
           <ul style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.45">
-            <li style="display: flex; gap: 10px"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Correct the details on your page</span></li>
+            <li style="display: flex; gap: 10px"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Ask us to correct or hide details on your page</span></li>
             <li style="display: flex; gap: 10px"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Your radar, with your top 10 matches</span></li>
             <li style="display: flex; gap: 10px"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>A weekly digest by email</span></li>
             <li style="display: flex; gap: 10px"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>1 cited bid check</span></li>
