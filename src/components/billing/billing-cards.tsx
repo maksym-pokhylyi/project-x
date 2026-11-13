@@ -162,7 +162,7 @@ export function AllowanceCard({ allowance, planFullBids, planName, renewsAt, sea
             {passes > 0 ? (
               <p className="text-13 leading-[1.5] text-ink">
                 Plus {passes} {BID_PASS_DISPLAY.name}
-                {passes === 1 ? "" : "es"}: one full bid each, with no expiry.
+                {passes === 1 ? ": one full bid, with no expiry." : "es: one full bid each, with no expiry."}
               </p>
             ) : null}
           </UsageBar>

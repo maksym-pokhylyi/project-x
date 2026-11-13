@@ -1178,7 +1178,7 @@ export default function StyleguidePage() {
           <GuideSection id="navigation" title="Navigation">
             <Group
               title="Tabs"
-              note="The underline style of the supplier page and the bid brief: ink labels on a hairline, a 2 px ink rule under the current one, counts in mono. For sections that are separate pages, use links styled with tabListClasses and tabTriggerClasses (see SettingsNav)."
+              note="The underline style of the supplier page and the bid brief: ink labels on a hairline, a 2 px ink rule under the current one, counts in mono. The current tab is ink and semibold with a 2 px ink rule; the others are muted. For sections that are separate pages use NavLink variant “tab” inside a nav with tabListClasses from ui/tab-classes (see SettingsNav and Where you are)."
             >
               <TabsDemo />
             </Group>

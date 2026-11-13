@@ -31,8 +31,8 @@ export default async function MembersPage() {
             {ctx.role === "owner" && !seatsAvailable ? (
               <>
                 {" "}
-                <Link href="/app/settings/billing" className="link font-medium">
-                  Upgrade for more seats
+                <Link href="/pricing" className="link font-medium">
+                  See plans with more seats
                 </Link>
               </>
             ) : null}

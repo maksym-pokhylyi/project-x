@@ -36,8 +36,8 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     id: "choose-plan",
     title: "Pick a plan",
     description: "Your radar and one cited bid check are free. See what the paid plans add.",
-    href: "/app/settings/billing",
-    cta: "View plans",
+    href: "/pricing",
+    cta: "See plans",
     completedBy: ["billing.checkout_started", "billing.subscription_started"],
   },
 ];

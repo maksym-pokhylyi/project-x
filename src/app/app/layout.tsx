@@ -34,7 +34,7 @@ function SeatBanner({ ctx }: { ctx: OrgContext }) {
             remove members
           </Link>{" "}
           or{" "}
-          <Link href="/app/settings/billing" className="link font-medium">
+          <Link href="/pricing" className="link font-medium">
             upgrade
           </Link>
           .

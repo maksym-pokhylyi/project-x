@@ -111,7 +111,11 @@ test("public pages render with security headers and a healthy backend", async ({
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["x-powered-by"]).toBeUndefined();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Terms of Service" })).toBeVisible();
+  const footer = page.getByRole("contentinfo");
+  await expect(footer.getByRole("link", { name: "Terms", exact: true })).toBeVisible();
+  // The seller identity comes from one place (src/config/site.ts) and is under every public page.
+  await expect(page.getByTestId("site-identity")).toContainText("Bidfolio is operated by Maksym Pokhylyi, an independent sole trader registered in Ukraine");
+  await expect(page.getByTestId("site-identity")).toContainText("UK representative: being appointed");
 
   for (const path of ["/legal/terms", "/legal/privacy", "/legal/refunds", "/legal/dpa", "/contact"]) {
     const legal = await page.goto(path);
@@ -174,31 +178,51 @@ test("dynamic pages get a per-request nonce policy, hydrate under it, and do not
 
 test("pricing page renders the plan catalogue with a monthly/annual toggle", async ({ page }) => {
   await page.goto("/pricing");
-  await expect(page.getByRole("heading", { level: 1, name: "Pricing" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Free to look. Pay when you bid." })).toBeVisible();
   for (const plan of ["free", "starter", "pro", "business"]) await expect(page.getByTestId(`plan-${plan}`)).toBeVisible();
 
   // Radar Pro (plan key "starter"): £29 a month, £290 a year (two months free).
   await expect(page.getByTestId("plan-starter")).toContainText("Radar Pro");
+  await expect(page.getByTestId("interval-month")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("price-starter")).toHaveText("£29");
-  await expect(page.getByTestId("plan-starter")).toContainText("Billed monthly");
+  await expect(page.getByTestId("plan-starter")).toContainText("or £290 a year");
+  // The comparison table is one table and its heads follow the toggle.
+  await expect(page.getByTestId("plan-comparison")).toHaveCount(1);
+  await expect(page.getByTestId("compare-price-starter")).toContainText("£29");
   await page.getByTestId("interval-year").click();
-  await expect(page.getByTestId("interval-year")).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByTestId("interval-year")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByTestId("interval-month")).toHaveAttribute("aria-pressed", "false");
   await expect(page.getByTestId("price-starter")).toHaveText("£290");
-  await expect(page.getByTestId("plan-starter")).toContainText("Two months free. Works out at £24.17 a month.");
+  await expect(page.getByTestId("plan-starter")).toContainText("two months free");
+  await expect(page.getByTestId("compare-price-starter")).toContainText("£290");
   await expect(page.getByTestId("price-free")).toHaveText("£0");
+  // Annual plans are chosen as annual.
+  await expect(page.getByTestId("plan-pro").getByRole("link")).toHaveAttribute("href", `/sign-up?redirect=${encodeURIComponent("/app/settings/billing?plan=pro&interval=year")}`);
   await page.getByTestId("interval-month").click();
   await expect(page.getByTestId("price-pro")).toHaveText("£149");
+  // The trial includes one full bid, and the card says so.
+  await expect(page.getByTestId("plan-pro")).toContainText("14-day trial, one full bid included");
   // The one-off Bid Pass sits next to the plans.
   await expect(page.getByTestId("price-bid-pass")).toHaveText("£99");
+  await expect(page.getByText("Prices exclude VAT. VAT is added at checkout where it applies.").first()).toBeVisible();
 
-  // Paid plans lead to sign-up with the plan carried along.
-  await expect(page.getByTestId("plan-pro").getByRole("link")).toHaveAttribute("href", "/sign-up?plan=pro&interval=month");
+  // Signed out: Free goes to the company search; a paid plan or the Bid Pass goes to sign-up
+  // and from there to the one hand-off into Billing.
+  await expect(page.getByTestId("plan-free").getByRole("link")).toHaveAttribute("href", "/find");
+  await expect(page.getByTestId("plan-pro").getByRole("link")).toHaveAttribute("href", `/sign-up?redirect=${encodeURIComponent("/app/settings/billing?plan=pro&interval=month")}`);
+  await expect(page.getByTestId("bid-pass").getByRole("link")).toHaveAttribute("href", `/sign-up?redirect=${encodeURIComponent("/app/settings/billing?buy=bid_pass")}`);
+
+  // Sign-up reads the hand-off it will continue to and says what was chosen.
+  await page.getByTestId("plan-pro").getByRole("link").click();
+  await expect(page).toHaveURL(/\/sign-up\?redirect=/);
+  await expect(page.getByRole("heading", { level: 2, name: /^Bid Desk: £149 a month/ })).toBeVisible();
+  await expect(page.getByText("You confirm Bid Desk and pay on the next step.")).toBeVisible();
 });
 
 test("signed-out visitors are redirected to sign-in from /app and /admin", async ({ page }) => {
   await page.goto("/app");
   await expect(page).toHaveURL(/\/sign-in\?redirect=%2Fapp$/);
-  await expect(page.getByRole("heading", { name: /Sign in to/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Sign in" })).toBeVisible();
   await page.goto("/app/settings/billing");
   await expect(page).toHaveURL(/\/sign-in\?redirect=%2Fapp%2Fsettings%2Fbilling$/);
   await page.goto("/admin");
@@ -235,6 +259,10 @@ test("sign up, verify email through the dev outbox, land in an auto-created work
   await expect(page.getByTestId("radar-onboarding")).toBeVisible();
   await expect(page.getByTestId("current-workspace-name").first()).toHaveText("Olivia's workspace");
   await expectPlanBadge(page, "Free");
+  // On Free the bar says so and offers the one place where plans are compared.
+  await expect(page.getByTestId("plan-chip").first()).toHaveText("Free plan");
+  await expect(page.getByRole("link", { name: "See plans" }).first()).toHaveAttribute("href", "/pricing");
+  await expect(page.getByTestId("trial-strip")).toHaveCount(0);
   // A field and the button beside it always share one height (design-system rule).
   const searchRow = page.getByTestId("radar-onboarding").getByRole("search");
   const fieldHeight = (await searchRow.getByRole("searchbox").boundingBox())!.height;
@@ -285,7 +313,9 @@ test("the Free plan has a single seat; Radar Pro has two", async () => {
   // Design-system rule: in a form row the controls line up exactly — field, select and button share
   // one top and one bottom edge (no margin offsets), at desktop width.
   const inviteRow = page.getByTestId("invite-form").locator('[data-slot="form-row"]');
-  const edges = await Promise.all([inviteRow.getByLabel("E-mail address"), inviteRow.locator("#invite-role"), inviteRow.getByRole("button")].map(async (control) => (await control.boundingBox())!));
+  // boundingBox() does not wait: make sure the row is on the page before measuring it.
+  await expect(inviteRow.getByRole("button")).toBeVisible();
+  const edges = await Promise.all([inviteRow.getByLabel("Email address"), inviteRow.locator("#invite-role"), inviteRow.getByRole("button")].map(async (control) => (await control.boundingBox())!));
   for (const box of edges.slice(1)) {
     expect(Math.abs(box.y - edges[0]!.y), "controls in a form row share a top edge").toBeLessThanOrEqual(0.5);
     expect(Math.abs(box.y + box.height - (edges[0]!.y + edges[0]!.height)), "controls in a form row share a bottom edge").toBeLessThanOrEqual(0.5);
@@ -297,6 +327,8 @@ test("the Free plan has a single seat; Radar Pro has two", async () => {
   await page.reload();
   await expectPlanBadge(page, "Radar Pro");
   await expect(page.getByTestId("seat-usage")).toContainText("1 of 2 seats in use on the Radar Pro plan");
+  // A paid workspace no longer carries the Free chip.
+  await expect(page.getByTestId("plan-chip")).toHaveCount(0);
 });
 
 test("invite a member by email", async () => {
@@ -379,6 +411,12 @@ test("a member cannot reach billing or other owner/admin-only actions", async ()
   // Members can see usage.
   await page.goto("/app/usage");
   await expect(page.getByTestId("usage-panel")).toContainText("Seats");
+
+  // Pricing knows who is looking: the workspace's plan is marked, and a member reads who can change it.
+  await page.goto("/pricing");
+  await expect(page.getByTestId("plan-starter").getByRole("button", { name: "Current plan" })).toBeDisabled();
+  await expect(page.getByTestId("plan-pro").getByTestId("plan-owner-only")).toHaveText("A workspace owner can change the plan.");
+  await expect(page.getByTestId("plan-pro").getByRole("link")).toHaveCount(0);
 });
 
 test("the owner sees the new member and the billing page without Paddle configured", async () => {
@@ -390,11 +428,44 @@ test("the owner sees the new member and the billing page without Paddle configur
 
   const billing = await page.goto("/app/settings/billing");
   expect(billing?.status()).toBe(200);
-  await expect(page.getByTestId("current-plan")).toContainText("Radar Pro plan");
+  await expect(page.getByRole("heading", { level: 1, name: "Billing" })).toBeVisible();
+  await expect(page.getByTestId("current-plan-name")).toHaveText("Radar Pro");
+  await expect(page.getByTestId("current-plan")).toContainText("£29");
   await expect(page.getByTestId("usage-panel")).toContainText("2 of 2");
-  // No Paddle env in e2e: checkout is clearly disabled instead of crashing.
-  await expect(page.getByTestId("billing-not-configured")).toHaveCount(3);
-  await expect(page.getByTestId("billing-not-configured").first()).toContainText("Billing not configured");
+  // There is one place to compare and pick plans: Billing has no plan grid, it links to Pricing.
+  for (const plan of ["free", "starter", "pro", "business"]) await expect(page.getByTestId(`plan-${plan}`)).toHaveCount(0);
+  await expect(page.getByTestId("current-plan").getByRole("link", { name: "Change plan" })).toHaveAttribute("href", "/pricing");
+  // Billing is a page of its own, not a Settings tab.
+  await expect(page.getByRole("navigation", { name: "Settings" })).toHaveCount(0);
+  // Nothing is invented where the data is not connected: the cards say where things are.
+  await expect(page.getByTestId("receipts-empty")).toBeVisible();
+  await expect(page.getByTestId("billing-confirm")).toHaveCount(0);
+
+  // Pricing, signed in as the owner: the current plan is marked; the others lead to the hand-off.
+  await page.goto("/pricing");
+  await expect(page.getByTestId("plan-starter").getByRole("button", { name: "Current plan" })).toBeDisabled();
+  const upgrade = page.getByTestId("plan-pro").getByRole("link", { name: "Change to Bid Desk" });
+  await expect(upgrade).toHaveAttribute("href", "/app/settings/billing?plan=pro&interval=month");
+  await expect(page.getByTestId("bid-pass").getByRole("link")).toHaveAttribute("href", "/app/settings/billing?buy=bid_pass");
+
+  // The hand-off opens the confirm panel on Billing. No Paddle env in e2e: it says so plainly
+  // instead of offering a button that cannot work.
+  await upgrade.click();
+  await expect(page).toHaveURL(/\/app\/settings\/billing\?plan=pro&interval=month$/);
+  const confirm = page.getByTestId("billing-confirm");
+  await expect(confirm).toBeVisible();
+  await expect(confirm).toContainText("Bid Desk");
+  await expect(confirm.getByTestId("billing-confirm-price")).toContainText("£149");
+  await expect(confirm.getByTestId("billing-not-configured")).toContainText("Payments are not open yet.");
+  await expect(confirm.getByRole("button", { name: /Continue to payment|Confirm change/ })).toHaveCount(0);
+  // Closing the panel returns to the plain Billing page.
+  await page.keyboard.press("Escape");
+  await expect(page).toHaveURL(/\/app\/settings\/billing$/);
+  await expect(confirm).toHaveCount(0);
+
+  await page.goto("/app/settings/billing?buy=bid_pass");
+  await expect(page.getByTestId("billing-confirm")).toContainText("It does not expire while your account is open.");
+  await page.keyboard.press("Escape");
 
   const status = await page.request.get("/api/billing/status");
   expect(await status.json()).toMatchObject({ planKey: "starter", isPaid: true });

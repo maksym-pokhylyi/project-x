@@ -32,7 +32,8 @@ async function expectNoHorizontalScroll(page: Page) {
 
 /** Opens the dev outbox and follows the first link of the newest e-mail for `to`. */
 async function followOutboxLink(page: Page, to: string, template: string) {
-  await page.goto("/dev/outbox");
+  // Same key as in playwright.procurement.config.ts (the config cannot be imported from a spec).
+  await page.goto("/dev/outbox?key=e2e-dev-tools-secret-0123456789");
   const email = page.locator(`[data-testid="outbox-email"][data-to="${to}"][data-template="${template}"]`).first();
   await expect(email).toBeVisible();
   await email.getByTestId("outbox-link").first().click();
@@ -84,8 +85,10 @@ test("public supplier page: company-level data, three items per block, attributi
   await expect(attribution).toContainText(INDEPENDENCE);
   await expect(attribution.getByTestId("correction-link")).toHaveAttribute("href", /\/about-the-data\?page=.*#request$/);
 
-  // No personal data anywhere in the HTML: no e-mail address, no telephone number.
-  const html = await page.content();
+  // No personal data anywhere in the HTML: no e-mail address, no telephone number. The one
+  // address a public page carries is the service's own, in the identity line of the footer.
+  await expect(page.getByTestId("site-identity")).toContainText("Contact: hello@bidfolio.co.uk");
+  const html = (await page.content()).replaceAll("hello@bidfolio.co.uk", "");
   expect(html).not.toMatch(/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(example|com|co\.uk)/);
   expect(html).not.toContain("acmegrounds.example");
   expect(html).not.toMatch(/tel:/);

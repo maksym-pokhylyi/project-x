@@ -46,8 +46,10 @@ export default defineConfig({
       NEXT_PUBLIC_APP_URL: BASE_URL,
       ADMIN_EMAILS: "founder@e2e.test",
       CRON_SECRET: "e2e-cron-secret-0123456789",
-      // Production build, but the dev outbox must be reachable to read verification links.
+      // Production build, but the dev outbox must be reachable to read verification links:
+      // on such a build it answers only with this key (src/server/dev-tools.ts).
       DEV_TOOLS: "1",
+      DEV_TOOLS_SECRET: "e2e-dev-tools-secret-0123456789",
       LOG_LEVEL: "warn",
       // Force every optional integration OFF, whatever a developer has in .env.local.
       RESEND_API_KEY: "",

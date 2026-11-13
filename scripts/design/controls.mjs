@@ -73,14 +73,21 @@ const report = (where, rule, message) => {
   console.log(`  FAIL [${rule}] ${message}`);
 };
 
-async function signIn(context) {
-  const page = await context.newPage();
-  await page.goto(`${BASE_URL}/sign-in`);
-  await page.getByLabel(/email/i).first().fill(DEMO.email);
-  await page.getByLabel("Password").fill(DEMO.password);
-  await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await page.waitForURL(/\/app/);
-  await page.close();
+/** Signs in once for the whole run and hands the session to each width's context (sign-in is rate-limited). */
+let session = null;
+async function demoSession() {
+  if (!session) {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto(`${BASE_URL}/sign-in`);
+    await page.getByLabel(/email/i).first().fill(DEMO.email);
+    await page.getByLabel("Password").fill(DEMO.password);
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await page.waitForURL(/\/app/);
+    session = await context.storageState();
+    await context.close();
+  }
+  return session;
 }
 
 /** Runs in the page: the three checks on what is visible right now. */
@@ -245,10 +252,7 @@ for (const width of WIDTHS) {
   for (const target of targets) {
     const where = `${target.auth ? "auth:" : ""}${target.path} @${width}`;
     console.log(`\n${where}`);
-    if (target.auth && !signedIn) {
-      signedIn = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-      await signIn(signedIn);
-    }
+    if (target.auth && !signedIn) signedIn = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce", storageState: await demoSession() });
     const page = await (target.auth ? signedIn : anonymous).newPage();
     try {
       await page.goto(`${BASE_URL}${target.path}`, { waitUntil: "load" });

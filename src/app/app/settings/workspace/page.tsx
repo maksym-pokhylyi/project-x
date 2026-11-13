@@ -43,8 +43,8 @@ export default async function WorkspaceSettingsPage() {
               <p className="text-sm text-ink-2">
                 The activity log is part of the {PLANS.pro.name} plan and above.{" "}
                 {ctx.role === "owner" ? (
-                  <Link href="/app/settings/billing" className="link font-medium">
-                    Upgrade
+                  <Link href="/pricing" className="link font-medium">
+                    See plans
                   </Link>
                 ) : null}
               </p>

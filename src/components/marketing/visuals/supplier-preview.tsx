@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  */
 
 const stats = [
-  { value: "14", label: "public contracts won since 2021", short: "contracts won" },
+  { value: "14", label: "contracts won since 2021", short: "contracts won" },
   { value: "£6.4m", label: "total awarded value", short: "awarded" },
   { value: "9", label: "public buyers", short: "public buyers" },
 ] as const;
