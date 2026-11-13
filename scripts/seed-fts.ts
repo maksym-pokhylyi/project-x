@@ -7,7 +7,8 @@
  *
  * Options
  *   --driver postgres|neon-http   default postgres. neon-http uses @neondatabase/serverless
- *                                 (HTTPS only), for machines without raw TCP access.
+ *                                 (HTTPS only), for machines without raw TCP access. About
+ *                                 25 HTTP requests per batch of 500 releases.
  *   --batch <n>                   releases per upsert batch (default 500)
  *   --limit <n>                   stop after n releases (smoke tests)
  *   --no-profiles                 skip rebuilding supplier profiles at the end
@@ -50,9 +51,12 @@ async function connect(driver: Args["driver"]): Promise<{ db: SqlExecutor; close
   const parsed = new URL(url);
   const target = `${parsed.hostname}${parsed.pathname}`; // never log credentials
   if (driver === "neon-http") {
-    const { neon } = await import("@neondatabase/serverless");
+    const { neon, neonConfig } = await import("@neondatabase/serverless");
     const { drizzle } = await import("drizzle-orm/neon-http");
-    return { db: drizzle(neon(url)), close: async () => undefined, target };
+    // Optional: a local Neon HTTP proxy (development and tests). Not needed for Neon itself.
+    const endpoint = process.env.NEON_HTTP_ENDPOINT?.trim();
+    if (endpoint) neonConfig.fetchEndpoint = () => endpoint;
+    return { db: drizzle(neon(url)), close: async () => undefined, target: endpoint ? `${target} via ${new URL(endpoint).host}` : target };
   }
   const { default: postgres } = await import("postgres");
   const { drizzle } = await import("drizzle-orm/postgres-js");

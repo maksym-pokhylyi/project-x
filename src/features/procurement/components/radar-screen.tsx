@@ -115,13 +115,13 @@ function Filters({ view }: { view: RadarView }) {
   const divisions = view.spec.cpvDivisions;
   const showMatchFilters = view.tab === "matches" || view.tab === "signals";
   return (
-    <form action="/app" method="get" className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end" aria-label="Filters" data-testid="radar-filters">
+    <form action="/app" method="get" className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end" aria-label="Filters" data-testid="radar-filters">
       {view.active && view.sources.length > 1 ? <input type="hidden" name="profile" value={view.active.key} /> : null}
       {view.tab !== "matches" ? <input type="hidden" name="tab" value={view.tab} /> : null}
       {showMatchFilters && divisions.length > 1 ? (
-        <label className="space-y-1 text-xs font-medium text-muted-foreground">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-muted-foreground">
           Trade
-          <NativeSelect name="division" defaultValue={view.filters.division ?? ""} className="min-w-44">
+          <NativeSelect name="division" defaultValue={view.filters.division ?? ""} className="w-full sm:min-w-44">
             <option value="">All your trades</option>
             {divisions.map((division) => (
               <option key={division} value={division}>
@@ -131,9 +131,9 @@ function Filters({ view }: { view: RadarView }) {
           </NativeSelect>
         </label>
       ) : null}
-      <label className="space-y-1 text-xs font-medium text-muted-foreground">
+      <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-muted-foreground">
         Region
-        <NativeSelect name="region" defaultValue={view.filters.region ?? ""} className="min-w-40">
+        <NativeSelect name="region" defaultValue={view.filters.region ?? ""} className="w-full sm:min-w-40">
           <option value="">Anywhere</option>
           {Object.entries(UK_REGIONS).map(([code, label]) => (
             <option key={code} value={code}>
@@ -144,9 +144,9 @@ function Filters({ view }: { view: RadarView }) {
       </label>
       {showMatchFilters ? (
         <>
-          <label className="space-y-1 text-xs font-medium text-muted-foreground">
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-muted-foreground">
             Value
-            <NativeSelect name="value" defaultValue={view.filters.value ?? ""} className="min-w-36">
+            <NativeSelect name="value" defaultValue={view.filters.value ?? ""} className="w-full sm:min-w-36">
               <option value="">Any value</option>
               {Object.entries(VALUE_BANDS).map(([key, band]) => (
                 <option key={key} value={key}>
@@ -156,9 +156,9 @@ function Filters({ view }: { view: RadarView }) {
             </NativeSelect>
           </label>
           {view.tab === "matches" ? (
-            <label className="space-y-1 text-xs font-medium text-muted-foreground">
+            <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-muted-foreground">
               Notice type
-              <NativeSelect name="kind" defaultValue={view.filters.kind ?? ""} className="min-w-40">
+              <NativeSelect name="kind" defaultValue={view.filters.kind ?? ""} className="w-full sm:min-w-40">
                 <option value="">Any type</option>
                 <option value="tender">Tender (above threshold)</option>
                 <option value="below_threshold">Below-threshold</option>
@@ -168,7 +168,7 @@ function Filters({ view }: { view: RadarView }) {
           ) : null}
         </>
       ) : null}
-      <div className="flex gap-2">
+      <div className="col-span-2 flex gap-2">
         <Button type="submit" variant="outline" size="sm" className="min-h-10 sm:min-h-9">
           Apply
         </Button>
