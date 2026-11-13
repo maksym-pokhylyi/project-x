@@ -207,7 +207,7 @@ cited list in a few minutes. No card. If anything looks wrong or missing, tell m
 по подписи заказчика (`procurementMethodDetails`). МСП — флаг `details.scale`. «Совет» — заказчик с council / borough /
 county / cyngor / combined authority в названии, без школ, NHS, полиции и жилищных ассоциаций. Шесть недель — срез,
 не тренд; публикация отстаёт от подписания контракта (медиана 18 дней по `docs/domain/fts-data-profile.md`).
-Перед публикацией пересчитай на свежих данных и поправь даты.
+Перед публикацией пересчитай на свежих данных (`python3 -I docs/gtm/tools/gtm_stats.py <файлы>`) и поправь даты.
 
 ### Пост 1 (полный текст)
 
