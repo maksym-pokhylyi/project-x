@@ -42,6 +42,19 @@ export const RETENTION_DAYS = {
   /** Consumed checkout nonces; only meaningful while their signature could be replayed (24 h). */
   checkoutNonces: 90,
   /**
+   * Working files of a finished bid check: the models' intermediate readings of the pack,
+   * kept so that a retry does not pay for a reading twice. Removed this long after the
+   * check is ready. The check itself, the uploaded documents and the answers are customer
+   * content and are NOT touched: they stay until the customer deletes them or the workspace.
+   */
+  bidWorkFiles: 14,
+  /**
+   * The Paddle transaction kept on a one-off purchase (`billing_purchases.raw`, for debugging).
+   * The purchase itself and the receipts (`billing_payments`) are business records: they stay
+   * as long as the workspace exists and go with it.
+   */
+  purchasePayload: 90,
+  /**
    * Scheduled e-mails: who was sent which kind, when, and which items it listed
    * (notification_log). 13 months covers an annual renewal reminder and year-over-year counts.
    */

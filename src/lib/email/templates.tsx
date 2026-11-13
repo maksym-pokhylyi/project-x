@@ -1,6 +1,7 @@
 import { render } from "@react-email/render";
 import type { ReactElement } from "react";
 import { AccountExists, accountExistsSubject, type AccountExistsProps } from "@/emails/account-exists";
+import { BriefReady, briefReadySubject, type BriefReadyProps } from "@/emails/brief-ready";
 import { Invitation, invitationSubject, type InvitationProps } from "@/emails/invitation";
 import { ResetPassword, resetPasswordSubject, type ResetPasswordProps } from "@/emails/reset-password";
 import { VerifyEmail, verifyEmailSubject, type VerifyEmailProps } from "@/emails/verify-email";
@@ -21,6 +22,7 @@ export type EmailTemplate =
   | { name: "reset-password"; props: ResetPasswordProps }
   | { name: "invitation"; props: InvitationProps }
   | { name: "account-exists"; props: AccountExistsProps }
+  | { name: "brief-ready"; props: BriefReadyProps }
   | { name: "radar-digest"; props: RadarEmailProps }
   | { name: "radar-alert"; props: RadarEmailProps }
   | { name: "deadline-reminder"; props: ReminderEmailProps }
@@ -39,6 +41,8 @@ export async function renderEmail(template: EmailTemplate): Promise<RenderedEmai
         return { subject: invitationSubject(template.props), element: <Invitation {...template.props} /> };
       case "account-exists":
         return { subject: accountExistsSubject, element: <AccountExists {...template.props} /> };
+      case "brief-ready":
+        return { subject: briefReadySubject(template.props), element: <BriefReady {...template.props} /> };
       case "radar-digest":
       case "radar-alert":
         return radarEmail(template.props);

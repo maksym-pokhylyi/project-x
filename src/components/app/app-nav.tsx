@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useState, type ReactNode } from "react";
 import { Wordmark } from "@/components/logo";
+import { NavLink } from "@/components/ui/nav-link";
 import { cn } from "@/lib/utils";
 
 type Item = { href: string; label: string; match: (path: string) => boolean };
@@ -26,30 +25,18 @@ const settings: Item = {
 };
 
 /**
- * Primary navigation in the top bar (768 px and up), as in the artboards: three plain links,
- * 15 px medium; the current one carries a 2 px ink rule on the bar's bottom edge and
- * aria-current="page". Settings is reached from the account menu.
+ * Primary navigation in the top bar (768 px and up): three links, 15 px. The current one is
+ * marked by <NavLink> (ink, semibold, 2 px ink rule on the bar's bottom edge,
+ * aria-current="page"); the others are muted. Settings is reached from the account menu.
  */
 export function AppNav() {
-  const pathname = usePathname();
   return (
     <nav aria-label="App" className="hidden items-stretch gap-7 md:flex">
-      {sections.map((item) => {
-        const active = item.match(pathname);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "inline-flex min-h-[3.75rem] items-center border-b-2 pt-0.5 text-15 font-medium text-ink -outline-offset-2 transition-colors duration-150",
-              active ? "border-ink" : "border-transparent hover:text-brand",
-            )}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
+      {sections.map((item) => (
+        <NavLink key={item.href} href={item.href} match={item.match}>
+          {item.label}
+        </NavLink>
+      ))}
     </nav>
   );
 }
@@ -72,7 +59,6 @@ function MenuIcon({ open = false }: { open?: boolean }) {
  */
 export function AppMenu({ workspace }: { workspace: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
   const close = () => setOpen(false);
 
   return (
@@ -104,22 +90,13 @@ export function AppMenu({ workspace }: { workspace: ReactNode }) {
           </div>
           <nav aria-label="App" className="px-5 pt-1">
             <ul className="divide-y divide-line border-b border-line">
-              {[...sections, settings].map((item) => {
-                const active = item.match(pathname);
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      onClick={close}
-                      aria-current={active ? "page" : undefined}
-                      className={cn("flex min-h-[3.25rem] items-center justify-between text-17 text-ink -outline-offset-2", active ? "font-semibold" : "font-medium")}
-                    >
-                      {item.label}
-                      {active ? <span aria-hidden className="size-2 rounded-full bg-ink" /> : null}
-                    </Link>
-                  </li>
-                );
-              })}
+              {[...sections, settings].map((item) => (
+                <li key={item.href}>
+                  <NavLink href={item.href} match={item.match} variant="menu" onClick={close}>
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
             </ul>
           </nav>
           <div className="px-5 pt-4 pb-6">

@@ -99,7 +99,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     name: "Free",
     description: "Your supplier page, kept up to date.",
     prices: null,
-    limits: { seats: 1, units: 50, aiMonthlyBudgetUsd: 0.5 },
+    limits: { seats: 1, units: 50, aiMonthlyBudgetUsd: 6 },
     features: { apiAccess: false, advancedExports: false, auditLog: false, prioritySupport: false },
     highlights: [
       "Your public contract wins on one page",
@@ -114,7 +114,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     name: "Radar Pro",
     description: "Hear about the right tenders the day they are published.",
     prices: { month: 2900, year: 29000 },
-    limits: { seats: 2, units: 1000, aiMonthlyBudgetUsd: 5 },
+    limits: { seats: 2, units: 1000, aiMonthlyBudgetUsd: 6 },
     features: { apiAccess: false, advancedExports: true, auditLog: false, prioritySupport: false },
     highlights: [
       "Everything in Free",
@@ -131,7 +131,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     name: "Bid Desk",
     description: "From tender pack to marked first draft.",
     prices: { month: 14900, year: 149000 },
-    limits: { seats: 3, units: 10000, aiMonthlyBudgetUsd: 25 },
+    limits: { seats: 3, units: 10000, aiMonthlyBudgetUsd: 30 },
     features: { apiAccess: true, advancedExports: true, auditLog: true, prioritySupport: false },
     highlights: [
       "Everything in Radar Pro",

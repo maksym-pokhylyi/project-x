@@ -5,7 +5,7 @@ import { env, features } from "@/env";
 import { BillingNotConfiguredError, ConflictError } from "@/lib/errors";
 import { reportError } from "@/lib/report-error";
 import { getPriceId } from "./prices";
-import { getSubscription } from "./subscription";
+import { getSubscription, type SubscriptionRow } from "./subscription";
 
 let client: Paddle | null = null;
 
@@ -106,31 +106,53 @@ export async function createBillingLinks(
 }
 
 /**
- * Moves an existing live subscription to another plan/interval (upgrade or downgrade).
+ * Why the plan of this subscription cannot be changed right now — a sentence for the user —
+ * or null when it can. PURE: changeSubscriptionPlan() enforces it, the Billing overview shows it.
  *
- * Paddle prorates immediately: an upgrade charges the difference now, a downgrade creates
- * a credit. `prorated_immediately` is also the only prorated mode Paddle allows when the
- * billing interval changes. Our database is NOT touched here — the resulting
- * `subscription.updated` webhook is the single writer of subscription state.
+ * Two of the rules are Paddle's, checked against the sandbox API (scripts/paddle-verify-sandbox.ts):
+ *  - a subscription IN TRIAL cannot have its price swapped (`subscription_trialing_items_update_invalid_options`:
+ *    "You can't add or remove items for a subscription in trial…");
+ *  - nothing can be updated while a pause or cancellation is scheduled (`subscription_locked_pending_changes`).
  */
-export async function changeSubscriptionPlan(organizationId: string, plan: PaidPlanKey, interval: BillingInterval): Promise<void> {
-  const subscription = await getSubscription(organizationId);
+export function planChangeBlocker(
+  subscription: Pick<SubscriptionRow, "status" | "paddleSubscriptionId" | "verifiedAt" | "cancelAt" | "pauseAt"> | null | undefined,
+): string | null {
   if (!subscription?.paddleSubscriptionId || !["active", "trialing"].includes(subscription.status)) {
-    throw new ConflictError("There is no active subscription to change. Start a new one from the plans below.");
+    return "There is no active subscription to change. Start a new one from the plans below.";
   }
   // Changing the plan charges the card behind the subscription: only for a subscription
   // that was bound to this workspace by its own owner's signed checkout.
-  if (!subscription.verifiedAt) {
-    throw new ConflictError("This subscription cannot be changed here. Please contact support.");
-  }
-  if (subscription.cancelAt) {
-    throw new ConflictError("This subscription is scheduled to cancel. Remove the cancellation in the billing portal first.");
-  }
+  if (!subscription.verifiedAt) return "This subscription cannot be changed here. Please contact support.";
+  if (subscription.status === "trialing") return "Your plan can be changed once your trial has ended. Until then you can keep the trial or cancel it.";
+  if (subscription.cancelAt) return "This subscription is scheduled to cancel. Undo the cancellation first.";
+  if (subscription.pauseAt) return "This subscription is scheduled to pause. Undo the pause first.";
+  return null;
+}
+
+/**
+ * Moves an existing live subscription to another plan/interval (upgrade or downgrade).
+ *
+ * Paddle prorates immediately: an upgrade charges the difference now, a downgrade creates
+ * a credit on the customer's balance that is taken off the next payments. `prorated_immediately`
+ * is also the only prorated mode Paddle allows when the billing interval changes. Our database
+ * is NOT touched here — the resulting `subscription.updated` webhook is the single writer of
+ * subscription state.
+ */
+export async function changeSubscriptionPlan(
+  organizationId: string,
+  plan: PaidPlanKey,
+  interval: BillingInterval,
+  /** The part of the Paddle SDK used here (injectable in tests). */
+  paddle?: { subscriptions: { update(subscriptionId: string, body: { items: Array<{ priceId: string; quantity: number }>; prorationBillingMode: "prorated_immediately" }): Promise<unknown> } },
+): Promise<void> {
+  const subscription = await getSubscription(organizationId);
+  const blocker = planChangeBlocker(subscription);
+  if (blocker || !subscription?.paddleSubscriptionId) throw new ConflictError(blocker ?? "There is no active subscription to change.");
   const priceId = getPriceId(plan, interval);
   if (!priceId) throw new BillingNotConfiguredError();
   if (priceId === subscription.priceId) throw new ConflictError("The workspace is already on this plan.");
 
-  await getPaddle().subscriptions.update(subscription.paddleSubscriptionId, {
+  await (paddle ?? getPaddle()).subscriptions.update(subscription.paddleSubscriptionId, {
     items: [{ priceId, quantity: subscription.quantity || 1 }],
     prorationBillingMode: "prorated_immediately",
   });

@@ -29,6 +29,20 @@ const tz = (name: string) => timestamp(name, { withTimezone: true });
 // Billing
 // ---------------------------------------------------------------------------
 
+/**
+ * What we keep about a payment method: enough to show "Visa ending 4242, expires 01/27" and
+ * nothing that identifies a person (built by summarizePaymentMethod in src/lib/billing/payments.ts).
+ */
+export type PaymentMethodSummary = {
+  /** Paddle payment type: card | paypal | apple_pay | google_pay | … */
+  type: string;
+  /** visa | mastercard | american_express | … — null when the method is not a card. */
+  cardBrand: string | null;
+  last4: string | null;
+  expiryMonth: number | null;
+  expiryYear: number | null;
+};
+
 /** One row per organization: the local cache of its Paddle subscription. */
 export const subscriptions = pgTable(
   "subscriptions",
@@ -51,6 +65,11 @@ export const subscriptions = pgTable(
     currentPeriodEnd: tz("current_period_end"),
     /** When a scheduled cancellation takes effect (scheduled_change.action = cancel). */
     cancelAt: tz("cancel_at"),
+    /**
+     * When a scheduled pause takes effect (scheduled_change.action = pause). Like `cancel_at`
+     * it is null again once the change has been removed or applied.
+     */
+    pauseAt: tz("pause_at"),
     canceledAt: tz("canceled_at"),
     pausedAt: tz("paused_at"),
     trialEnd: tz("trial_end"),
@@ -73,6 +92,20 @@ export const subscriptions = pgTable(
     verifiedAt: tz("verified_at"),
     /** Last time the daily reconciliation job compared this row with the Paddle API. */
     reconciledAt: tz("reconciled_at"),
+    /**
+     * Paddle environment the subscription lives in: sandbox | production (PADDLE_ENV when it
+     * was attached). Null for rows that predate the column or were granted by hand. Lets
+     * test-mode rows be recognised and removed before going live (README, billing runbook).
+     */
+    paddleEnvironment: text("paddle_environment"),
+    /**
+     * NON-sensitive summary of the payment method of the newest completed transaction of
+     * this subscription ("Card ending 4242"). Exactly the fields of PaymentMethodSummary:
+     * never the cardholder name, a PayPal address or anything else from the payment.
+     */
+    paymentMethod: jsonb("payment_method").$type<PaymentMethodSummary>(),
+    /** Paid-at time of the transaction the summary was taken from; an older transaction never overwrites it. */
+    paymentMethodAt: tz("payment_method_at"),
     /** Last subscription entity received from Paddle, for debugging/audit. */
     raw: jsonb("raw"),
     createdAt: createdAt(),
@@ -104,6 +137,12 @@ export const webhookEvents = pgTable(
     /** Last processing error; cleared on success. */
     error: text("error"),
     attempts: integer("attempts").notNull().default(0),
+    /**
+     * Paddle environment the event was RECEIVED from: sandbox | production (PADDLE_ENV at
+     * that moment; null = before this column existed, i.e. sandbox). An event is only ever
+     * processed or replayed while the deployment runs that same environment.
+     */
+    environment: text("environment"),
   },
   (t) => [
     uniqueIndex("webhook_events_event_id_key").on(t.eventId),
@@ -111,6 +150,10 @@ export const webhookEvents = pgTable(
     index("webhook_events_unprocessed_idx").on(t.receivedAt).where(sql`${t.processedAt} is null`),
     // Lookups by the Paddle entity an event is about (customer e-mail, newer events of a subscription).
     index("webhook_events_data_id_idx").on(sql`((${t.payload} -> 'data' ->> 'id'))`, t.occurredAt),
+    // Refunds/chargebacks of one transaction (a purchase is never fulfilled after its refund was received).
+    index("webhook_events_adjustment_transaction_idx")
+      .on(sql`((${t.payload} -> 'data' ->> 'transaction_id'))`)
+      .where(sql`${t.eventType} like 'adjustment.%'`),
   ],
 );
 
@@ -131,6 +174,101 @@ export const billingCheckoutNonces = pgTable(
     consumedAt: tz("consumed_at").notNull().defaultNow(),
   },
   (t) => [index("billing_checkout_nonces_organization_id_idx").on(t.organizationId)],
+);
+
+/**
+ * One row per COMPLETED Paddle transaction recorded for a workspace — subscription payments
+ * and one-off purchases alike. The source of the receipts list and of the ownership check of
+ * GET /api/billing/receipts/<transaction id>. Written only by the webhook pipeline
+ * (src/lib/billing/webhooks.ts); a payment row alone never grants anything.
+ */
+export const billingPayments = pgTable(
+  "billing_payments",
+  {
+    id: id(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    paddleTransactionId: text("paddle_transaction_id").notNull(),
+    /** Null for one-off purchases. */
+    paddleSubscriptionId: text("paddle_subscription_id"),
+    /** subscription | one_off */
+    kind: text("kind").notNull(),
+    /** Plan key the paid price maps to (subscription payments); null when it is not in the catalogue. */
+    planKey: text("plan_key"),
+    /** month | year (subscription payments) */
+    billingInterval: text("billing_interval"),
+    /** Key of ONE_OFF_PRODUCTS (one-off purchases), e.g. "bid_pass". */
+    product: text("product"),
+    priceId: text("price_id"),
+    quantity: integer("quantity").notNull().default(1),
+    /** Amount charged excluding tax, in minor units of `currency`. */
+    subtotalMinor: bigint("subtotal_minor", { mode: "number" }).notNull(),
+    taxMinor: bigint("tax_minor", { mode: "number" }).notNull(),
+    /** Amount charged including tax. Zero for trial starts and payment-method updates (no invoice exists for those). */
+    totalMinor: bigint("total_minor", { mode: "number" }).notNull(),
+    currency: text("currency").notNull(),
+    /** Paddle's invoice number, e.g. "325-10566". */
+    invoiceNumber: text("invoice_number"),
+    /** completed | refunded | partially_refunded | disputed (follows adjustment.* events) */
+    status: text("status").notNull().default("completed"),
+    /** Method this payment was made with (same non-sensitive summary as subscriptions.payment_method). */
+    paymentMethod: jsonb("payment_method").$type<PaymentMethodSummary>(),
+    /** When Paddle billed the transaction: the date of the receipt. */
+    paidAt: tz("paid_at").notNull(),
+    /** sandbox | production — a test-mode payment is never listed next to real ones. */
+    paddleEnvironment: text("paddle_environment").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex("billing_payments_paddle_transaction_id_key").on(t.paddleTransactionId),
+    index("billing_payments_organization_id_paid_at_idx").on(t.organizationId, t.paidAt),
+    index("billing_payments_paddle_subscription_id_idx").on(t.paddleSubscriptionId, t.paidAt),
+  ],
+);
+
+/**
+ * One-off purchases (e.g. a Bid Pass): what was bought, by whom, and whether it has been
+ * handed over (`fulfilled_at`) or taken back (`revoked_at`). One row per Paddle transaction —
+ * the unique transaction id is what makes fulfilment idempotent: a duplicate delivery or a
+ * replay can never grant twice (see src/lib/billing/fulfilment.ts).
+ */
+export const billingPurchases = pgTable(
+  "billing_purchases",
+  {
+    id: id(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    /** The member whose signed checkout paid for it; null once that account is deleted. */
+    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+    /** Key of ONE_OFF_PRODUCTS, e.g. "bid_pass". */
+    kind: text("kind").notNull(),
+    paddleTransactionId: text("paddle_transaction_id").notNull(),
+    priceId: text("price_id").notNull(),
+    quantity: integer("quantity").notNull().default(1),
+    /** What was paid for these items including tax, in minor units of `currency`. */
+    amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+    currency: text("currency").notNull(),
+    /** completed | refunded | partially_refunded | disputed */
+    status: text("status").notNull().default("completed"),
+    /** Set when the purchase was handed to the product (the Bid Pass was granted). */
+    fulfilledAt: tz("fulfilled_at"),
+    /** Set when a full refund or chargeback took back what was still unused. */
+    revokedAt: tz("revoked_at"),
+    /** sandbox | production — purchases made with test cards are removed before going live. */
+    paddleEnvironment: text("paddle_environment").notNull(),
+    createdAt: createdAt(),
+    /**
+     * The Paddle transaction as received, WITHOUT its payment attempts (card and PayPal
+     * details). For debugging; removed after RETENTION_DAYS.purchasePayload.
+     */
+    raw: jsonb("raw"),
+  },
+  (t) => [
+    uniqueIndex("billing_purchases_paddle_transaction_id_key").on(t.paddleTransactionId),
+    index("billing_purchases_organization_id_created_at_idx").on(t.organizationId, t.createdAt),
+  ],
 );
 
 /** Metered usage per organization, metric and period (see consumeQuota). */

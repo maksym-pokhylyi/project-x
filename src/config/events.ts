@@ -36,6 +36,17 @@ export type EventMap = {
   "billing.subscription_past_due": { plan: string };
   "billing.payment_succeeded": { amount: string | null; currency: string | null };
   "billing.payment_failed": { reason: string | null };
+  // Billing: what the owner asked for (the webhook events above record what Paddle then did)
+  "billing.pause_requested": { plan: string };
+  "billing.resume_requested": { plan: string; mode: "resume_now" | "keep_active" };
+  "billing.cancel_requested": { plan: string; effective: "period_end" | "immediately" };
+  "billing.scheduled_change_undone": { plan: string; change: "cancel" | "pause" };
+  "billing.subscription_change_scheduled": { plan: string; change: "cancel" | "pause" };
+  "billing.subscription_change_unscheduled": { plan: string; change: "cancel" | "pause" };
+  // Billing: one-off purchases (amounts in minor units of `currency`)
+  "billing.one_off_checkout_started": { kind: string };
+  "billing.purchase_completed": { kind: string; quantity: number; amount: number; currency: string };
+  "billing.purchase_adjusted": { kind: string; effect: string; revoked: number; kept: number };
 
   // Usage / AI
   "quota.limit_reached": { metric: string; limit: number };
@@ -49,6 +60,15 @@ export type EventMap = {
   radar_viewed: { tab: string; source: "supplier" | "manual" | "none" };
   tender_saved: { ocid: string };
   tender_dismissed: { ocid: string };
+
+  // Bid desk (names as in SPEC §7)
+  bid_created: { source: "upload" | "notice"; allowance: string };
+  pack_uploaded: { files: number; bytes: number };
+  brief_ready: { requirements: number; pass_fail: number; questions: number; citations_verified: number; citations_total: number; seconds: number };
+  brief_viewed: { status: string };
+  question_drafted: { mode: "draft" | "regenerate" | "apply_suggestions"; words: number; gaps: number };
+  answer_evaluated: { scale: "pack" | "default"; score: string; max: string };
+  export_done: { kind: "answers_docx" | "brief_docx" | "requirements_docx" | "requirements_csv" };
 
   // Scheduled e-mails (src/features/notifications; names fixed by docs/product/SPEC.md §7).
   // Counts and ids only: never an e-mail address, never a tender title.

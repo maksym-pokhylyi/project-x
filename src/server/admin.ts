@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { env } from "@/env";
 import { auditLog, errorLog, events, jobs, members, organizations, subscriptions, usageCounters, users, webhookEvents } from "@/db/schema";
 import { getAiSpendUsd, startOfUtcDay, startOfUtcMonth } from "@/lib/ai";
+import { countForeignBillingRows } from "@/lib/billing/environment";
 import { getConfigWarnings, type ConfigWarning } from "@/lib/config-warnings";
 import { NotFoundError } from "@/lib/errors";
 import { requireAdmin } from "./session";
@@ -110,6 +111,18 @@ export async function getAdminConfigWarnings(): Promise<ConfigWarning[]> {
       message:
         `${lapsed!.value} subscription(s) are still "active" here although their paid period ended more than ${env.BILLING_PERIOD_END_GRACE_DAYS} days ago — ` +
         "a Paddle webhook was probably lost. Paid access is suspended for them; compare with Paddle (the daily reconciliation job corrects them when PADDLE_API_KEY is set).",
+    });
+  }
+  // Test mode must not mix with live data: rows recorded in the OTHER Paddle environment.
+  const foreign = await countForeignBillingRows();
+  if (foreign.subscriptions + foreign.purchases + foreign.payments > 0) {
+    warnings.push({
+      level: "error",
+      code: "BILLING_ENVIRONMENT_MIX",
+      message:
+        `This deployment runs Paddle ${env.PADDLE_ENV} billing, but ${foreign.subscriptions} subscription(s), ${foreign.purchases} purchase(s) and ${foreign.payments} payment(s) ` +
+        `were recorded in the Paddle ${foreign.environment} environment. They still grant plans and passes and block real checkouts for their workspaces. ` +
+        'Remove them with `pnpm billing:purge-sandbox` (README, "Before switching PADDLE_ENV to production").',
     });
   }
   return warnings;

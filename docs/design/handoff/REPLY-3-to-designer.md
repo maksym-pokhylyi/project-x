@@ -60,3 +60,10 @@ the supplier page; "Companies House number" as the company identifier; the Contr
 mirroring the 44 / 48 / 52 scale in code, with an automated check that a field and its button always share a height).
 
 **Nothing else is needed from design for the first release.** After these fixes the canvas is the complete reference.
+
+**Addendum (owner feedback from the live app, already applied in code)**
+- **Tabs and section navigation**: an underline alone did not make the current tab obvious. Current tab = ink, semibold, 2 px
+  ink underline; the other tabs = muted `#5A6165`, ink on hover. Please apply to every tab row (Radar tabs, Brief tabs) and to
+  the top bar (Radar · Bids · Documents).
+- **Pointer cursor**: every clickable option, row or link-that-looks-like-a-button shows the pointer; in code such links are one
+  component (`ButtonLink`) beside `Button`.
