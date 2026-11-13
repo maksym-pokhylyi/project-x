@@ -24,6 +24,9 @@ export const landing = {
     titleLead: "Know which public contracts are worth your time",
     titleRest: "and get a compliant first draft in hours, not days.",
     lead: "Bidfolio builds a free page for your company from published procurement notices: your wins, open tenders like them, and rival contracts about to end. When you decide to bid, upload the tender pack and get every requirement quoted and cited, with first-draft answers written only from your own documents.",
+    /** The same promise in fewer words, for phones (as in the 390 px artboard). */
+    leadShort:
+      "Bidfolio builds a free page for your company from published procurement notices. When you bid, upload the tender pack and get every requirement quoted and cited, with first-draft answers written only from your own documents.",
     note: "No account needed to look.",
     sampleLink: { before: "Or ", label: "see a sample bid check", href: "/sample-check" },
   },

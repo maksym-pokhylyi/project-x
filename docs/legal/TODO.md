@@ -57,7 +57,14 @@ notice.
 | `[[CONFIRM_SECURITY_MEASURES: …]]` | DPA §5 | Confirm each listed measure is really in place (MFA on production accounts, backups, logging) |
 | `[[CONFIRM_TRANSFER_MECHANISMS_WITH_LAWYER]]` | DPA §6 | SCC modules and the UK Addendum |
 
-Also confirm that `support@bidfolio.co.uk` exists and is read (it is shown on every page).
+**Support address.** The design handoff asks that the support e-mail stay a placeholder until the owner
+supplies it. The site shows `site.supportEmail` from `src/config/site.ts` (currently the foundation's
+value, `support@bidfolio.co.uk`): confirm that this mailbox exists and is read, or replace it there —
+it appears on the landing page ("A person replies"), the contact page, the legal pages and in emails.
+
+**Footer.** The line "© 2026 Bidfolio. [Registered company name, number and office address.]" fills
+itself in from `site.company` once the legal name, registration number and address are no longer
+placeholders.
 
 ## 3. Statements on the site that must be literally true
 
@@ -86,9 +93,14 @@ true on launch day, change the product or change the words.
 | Non-responders deleted after 90 days; opt-outs kept on a suppression list | privacy §2 and §9 (`site.facts.outreachRetentionDays`) | The retention job exists and runs |
 | No tracking pixels in emails; the link carries a visit-counting code | privacy §8 | Open tracking off in the sending tool; lawyer to confirm the link code is fine under PECR reg. 6 (P2 §10 Q9) |
 | "One independent founder, based in Ukraine" | landing ("Straight answers"), contact, privacy | True today; consider adding the founder's name and a photo for trust |
-| "A bid takes a small firm about five days" | landing | FSB, December 2025 (cited on the page). Re-check the wording against the report |
-| "About four in ten UK procedures are direct awards" | landing | Open Contracting Partnership, first year of Procurement Act data (cited on the page) |
 | "UK guidance (PPN 017) lets buyers ask suppliers to disclose AI use" | landing FAQ | PPN 017, February 2025 |
+| "…get a compliant first draft in hours, not days" | landing hero, social image, FAQ ("a compliant first draft and an honest mark") | The designer's headline, kept as delivered. It must stay a claim about the draft following the pack's requirements, never "100% compliant" or a promise of a pass: lawyer to confirm the wording is safe |
+| "Marked 3 of 5 against the buyer's scheme" | landing (step 3), /styleguide | A reading of the scoring scheme, never a forecast: the product must carry the line "A reading of the scoring scheme, not a forecast of the buyer's decision" wherever a mark is shown |
+| "It will not price your bid, submit it, or forecast the buyer's score" | landing ("Straight answers") | True of the product as built |
+| Built from Find a Tender only; other portals (Contracts Finder, Public Contracts Scotland, Sell2Wales) "not included yet" | landing strip, questions, independence band, footer | The ingestion sources in production |
+| "If a notice is wrong or missing, you can flag it from your page" | landing questions | The supplier page has a working "Flag a mistake" route |
+| "Your page is free and needs no account"; "No account needed to look" | landing | /find and the supplier pages are public |
+| "each claim carries a marker back to the document and page it came from"; a "labelled gap" instead of guessing | landing questions | The drafting pipeline really refuses unsupported claims |
 
 ## 4. Decisions for the lawyer
 

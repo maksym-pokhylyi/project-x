@@ -5,60 +5,63 @@ WCAG 2.2 AA: 4.5:1 for text, 3:1 for large text, icons and control boundaries.
 
 | Foreground | Background | Ratio | Minimum | Result | Used for |
 |---|---|---|---|---|---|
-| `ink #161A1D` | `paper #FAF8F3` | 16.49:1 | 4.5:1 | Pass | Primary text on the page |
-| `ink #161A1D` | `surface #FFFFFF` | 17.50:1 | 4.5:1 | Pass | Primary text on cards and inputs |
-| `ink #161A1D` | `surface-sunken #F3F0E8` | 15.37:1 | 4.5:1 | Pass | Primary text on wells and table headers |
-| `ink-2 #434A50` | `paper #FAF8F3` | 8.47:1 | 4.5:1 | Pass | Secondary text on the page |
-| `ink-2 #434A50` | `surface #FFFFFF` | 8.99:1 | 4.5:1 | Pass | Secondary text on cards |
-| `ink-2 #434A50` | `surface-sunken #F3F0E8` | 7.90:1 | 4.5:1 | Pass | Secondary text on wells, table headers, neutral chips |
-| `ink-3 #6B737A` | `paper #FAF8F3` | 4.53:1 | 4.5:1 | Pass | Tertiary text on the page |
-| `ink-3 #6B737A` | `surface #FFFFFF` | 4.81:1 | 4.5:1 | Pass | Tertiary text and placeholders on cards and inputs |
-| `brand #0F5A47` | `paper #FAF8F3` | 7.68:1 | 4.5:1 | Pass | Links and brand text on the page |
-| `brand #0F5A47` | `surface #FFFFFF` | 8.15:1 | 4.5:1 | Pass | Links on cards |
-| `brand #0F5A47` | `surface-sunken #F3F0E8` | 7.16:1 | 4.5:1 | Pass | Links on wells |
-| `brand #0F5A47` | `brand-tint #E4F0EA` | 6.97:1 | 4.5:1 | Pass | Brand badge, selected row, active navigation |
-| `ink #161A1D` | `brand-tint #E4F0EA` | 14.96:1 | 4.5:1 | Pass | Text on a selected or hovered row |
-| `#FFFFFF` | `brand #0F5A47` | 8.15:1 | 4.5:1 | Pass | Primary button label |
+| `ink #161A1D` | `paper #FAF8F3` | 16.49:1 | 4.5:1 | Pass | Text on the page |
+| `ink #161A1D` | `surface #FFFFFF` | 17.50:1 | 4.5:1 | Pass | Text on cards, inputs and the app bar |
+| `ink #161A1D` | `paper-deep #F2EEE4` | 15.10:1 | 4.5:1 | Pass | Text on bands, wells and quiet chips |
+| `ink-2 #5A6165` | `paper #FAF8F3` | 5.93:1 | 4.5:1 | Pass | Muted text on the page |
+| `ink-2 #5A6165` | `surface #FFFFFF` | 6.30:1 | 4.5:1 | Pass | Muted text and placeholders on cards and inputs |
+| `ink-2 #5A6165` | `paper-deep #F2EEE4` | 5.43:1 | 4.5:1 | Pass | Muted text on bands, wells and the footer |
+| `ink-2 #5A6165` | `brand-tint #E6EFEB` | 5.37:1 | 4.5:1 | Pass | Muted text on a selected row or the Bid Pass panel |
+| `brand #0F5A47` | `paper #FAF8F3` | 7.68:1 | 4.5:1 | Pass | Eyebrows and green text on the page |
+| `brand #0F5A47` | `surface #FFFFFF` | 8.15:1 | 4.5:1 | Pass | Green text and ticks on cards; the label of a white button on green |
+| `brand #0F5A47` | `paper-deep #F2EEE4` | 7.04:1 | 4.5:1 | Pass | Eyebrows on a paper-deep band |
+| `brand #0F5A47` | `brand-tint #E6EFEB` | 6.95:1 | 4.5:1 | Pass | Source markers, avatar initials, eyebrow on the Bid Pass panel |
+| `brand #0F5A47` | `success-tint #E4EFE7` | 6.91:1 | 4.5:1 | Pass | The “Met” pill: brand green on success-tint |
+| `ink #161A1D` | `brand-tint #E6EFEB` | 14.93:1 | 4.5:1 | Pass | Text on the verdict panel, a selected row, a reason chip |
+| `ink #161A1D` | `brand-mark #D5E6DE` | 13.50:1 | 4.5:1 | Pass | A highlighted sentence in a source document |
+| `#FFFFFF` | `brand #0F5A47` | 8.15:1 | 4.5:1 | Pass | Primary button label; text on the featured plan card |
 | `#FFFFFF` | `brand-hover #0B4636` | 10.80:1 | 4.5:1 | Pass | Primary button label, hover and pressed |
-| `paper #FAF8F3` | `brand #0F5A47` | 7.68:1 | 4.5:1 | Pass | Text on the brand panel (auth, final call to action) |
-| `brand-on-dark #C9DED5` | `brand #0F5A47` | 5.78:1 | 4.5:1 | Pass | Secondary text on the brand panel |
-| `accent-ink #8F5206` | `accent-tint #FBF0DC` | 5.50:1 | 4.5:1 | Pass | Amber chip and callout text (deadline soon, Verify) |
-| `accent-ink #8F5206` | `surface #FFFFFF` | 6.21:1 | 4.5:1 | Pass | Amber text on cards |
-| `accent-ink #8F5206` | `paper #FAF8F3` | 5.85:1 | 4.5:1 | Pass | Amber text on the page |
-| `ink #161A1D` | `accent-tint #FBF0DC` | 15.50:1 | 4.5:1 | Pass | Body text inside an amber callout; Evidence needed highlight |
-| `accent #B4690E` | `surface #FFFFFF` | 4.22:1 | 3:1 | Pass | Amber icons, bars and dots on cards (not text) |
-| `accent #B4690E` | `paper #FAF8F3` | 3.98:1 | 3:1 | Pass | Amber icons, bars and dots on the page (not text) |
-| `accent #B4690E` | `accent-tint #FBF0DC` | 3.74:1 | 3:1 | Pass | Amber icon inside an amber callout (not text) |
-| `danger #A3271C` | `danger-tint #FBE9E6` | 6.24:1 | 4.5:1 | Pass | Danger chip and callout text (closing, Gap) |
-| `danger #A3271C` | `surface #FFFFFF` | 7.33:1 | 4.5:1 | Pass | Field errors on cards |
+| `brand-on-dark #BFE0D3` | `brand #0F5A47` | 5.75:1 | 4.5:1 | Pass | Secondary text on brand green |
+| `#FFFFFF` | `ink #161A1D` | 17.50:1 | 4.5:1 | Pass | A pressed filter chip |
+| `paper #FAF8F3` | `ink #161A1D` | 16.49:1 | 4.5:1 | Pass | The independence band; tooltips |
+| `accent-ink #925207` | `paper #FAF8F3` | 5.76:1 | 4.5:1 | Pass | Small amber text on the page |
+| `accent-ink #925207` | `surface #FFFFFF` | 6.11:1 | 4.5:1 | Pass | Small amber text on cards |
+| `accent-ink #925207` | `accent-tint #F7EBD7` | 5.19:1 | 4.5:1 | Pass | Small amber text on its tint (a warning title) |
+| `ink #161A1D` | `accent-tint #F7EBD7` | 14.85:1 | 4.5:1 | Pass | The “14 days left” pill; text in a warning panel |
+| `accent #B4690E` | `paper #FAF8F3` | 3.98:1 | 3:1 | Pass | The deadline dot on the page (a marker, not text) |
+| `accent #B4690E` | `surface #FFFFFF` | 4.22:1 | 3:1 | Pass | The deadline dot on cards (a marker, not text) |
+| `accent #B4690E` | `accent-tint #F7EBD7` | 3.58:1 | 3:1 | Pass | The icon of a warning panel (not text) |
+| `danger #A3271C` | `danger-tint #F6E3E0` | 5.92:1 | 4.5:1 | Pass | The “Gap” pill and the title of a gap panel |
+| `danger #A3271C` | `surface #FFFFFF` | 7.33:1 | 4.5:1 | Pass | Field errors and “waiting on gap” on cards |
 | `danger #A3271C` | `paper #FAF8F3` | 6.90:1 | 4.5:1 | Pass | Field errors on the page |
-| `ink #161A1D` | `danger-tint #FBE9E6` | 14.92:1 | 4.5:1 | Pass | Body text inside a danger callout |
+| `danger #A3271C` | `brand-tint #E6EFEB` | 6.25:1 | 3:1 | Pass | The gap icon on the verdict panel (not text) |
+| `ink #161A1D` | `danger-tint #F6E3E0` | 14.15:1 | 4.5:1 | Pass | Text inside a gap panel |
 | `#FFFFFF` | `danger #A3271C` | 7.33:1 | 4.5:1 | Pass | Destructive button label |
-| `success #1D6F43` | `success-tint #E3F3E9` | 5.36:1 | 4.5:1 | Pass | Success chip and callout text (Met) |
-| `success #1D6F43` | `surface #FFFFFF` | 6.16:1 | 4.5:1 | Pass | Success text and ticks on cards |
-| `success #1D6F43` | `paper #FAF8F3` | 5.80:1 | 4.5:1 | Pass | Success text and ticks on the page |
-| `ink #161A1D` | `success-tint #E3F3E9` | 15.22:1 | 4.5:1 | Pass | Body text inside a success callout |
-| `info #1F4F8F` | `info-tint #E6EEF8` | 6.97:1 | 4.5:1 | Pass | Info chip and callout text (Early notice) |
-| `info #1F4F8F` | `surface #FFFFFF` | 8.16:1 | 4.5:1 | Pass | Info text on cards |
-| `info #1F4F8F` | `paper #FAF8F3` | 7.68:1 | 4.5:1 | Pass | Info text on the page |
-| `ink #161A1D` | `info-tint #E6EEF8` | 14.96:1 | 4.5:1 | Pass | Body text inside an info callout |
-| `paper #FAF8F3` | `ink #161A1D` | 16.49:1 | 4.5:1 | Pass | Tooltip text |
-| `line-control #8A8373` | `surface #FFFFFF` | 3.76:1 | 3:1 | Pass | Input, checkbox, radio and switch boundary on cards |
-| `line-control #8A8373` | `paper #FAF8F3` | 3.54:1 | 3:1 | Pass | Input boundary on the page |
-| `focus #1F4F8F` | `paper #FAF8F3` | 7.68:1 | 3:1 | Pass | Focus ring on the page |
-| `focus #1F4F8F` | `surface #FFFFFF` | 8.16:1 | 3:1 | Pass | Focus ring on cards |
-| `focus #1F4F8F` | `surface-sunken #F3F0E8` | 7.16:1 | 3:1 | Pass | Focus ring on wells |
-| `focus #1F4F8F` | `brand-tint #E4F0EA` | 6.97:1 | 3:1 | Pass | Focus ring on a selected row |
-| `focus-on-dark #FFFFFF` | `brand #0F5A47` | 8.15:1 | 3:1 | Pass | Focus ring on the brand panel |
-| `brand #0F5A47` | `surface #FFFFFF` | 8.15:1 | 3:1 | Pass | Checked checkbox, radio, switch and progress fill |
+| `ink #161A1D` | `success-tint #E4EFE7` | 14.83:1 | 4.5:1 | Pass | Text inside a success panel |
+| `info #1F4F8F` | `info-tint #E3EAF4` | 6.73:1 | 4.5:1 | Pass | The “For you to confirm” pill; notice-type labels |
+| `info #1F4F8F` | `surface #FFFFFF` | 8.16:1 | 4.5:1 | Pass | “Needs your commitments” on cards |
+| `info #1F4F8F` | `brand-tint #E6EFEB` | 6.96:1 | 3:1 | Pass | The info icon on the verdict panel (not text) |
+| `ink #161A1D` | `info-tint #E3EAF4` | 14.45:1 | 4.5:1 | Pass | Text inside an info panel |
+| `line-strong #857F70` | `surface #FFFFFF` | 3.98:1 | 3:1 | Pass | The edge of inputs, tick boxes, radios, switches and outline buttons |
+| `line-strong #857F70` | `paper #FAF8F3` | 3.75:1 | 3:1 | Pass | The edge of a control placed on the page |
+| `line-strong #857F70` | `paper-deep #F2EEE4` | 3.44:1 | 3:1 | Pass | The edge of a control placed on a paper-deep band |
+| `brand #0F5A47` | `surface #FFFFFF` | 8.15:1 | 3:1 | Pass | Checked tick box, radio, switch; progress and score bars |
+| `brand #0F5A47` | `brand-tint #E6EFEB` | 6.95:1 | 3:1 | Pass | Score bars on a brand-tint chip |
+| `ink #161A1D` | `surface #FFFFFF` | 17.50:1 | 3:1 | Pass | The rule under the current tab; the fill of a pressed filter chip |
+| `focus #0F5A47` | `paper #FAF8F3` | 7.68:1 | 3:1 | Pass | Focus ring on the page |
+| `focus #0F5A47` | `surface #FFFFFF` | 8.15:1 | 3:1 | Pass | Focus ring on cards |
+| `focus #0F5A47` | `paper-deep #F2EEE4` | 7.04:1 | 3:1 | Pass | Focus ring on a paper-deep band |
+| `focus #0F5A47` | `brand-tint #E6EFEB` | 6.95:1 | 3:1 | Pass | Focus ring on the verdict panel |
+| `focus-on-dark #FFFFFF` | `brand #0F5A47` | 8.15:1 | 3:1 | Pass | Focus ring on brand green |
+| `focus-on-dark #FFFFFF` | `ink #161A1D` | 17.50:1 | 3:1 | Pass | Focus ring on the independence band |
 
 ## Pairs to avoid
 
 | Foreground | Background | Ratio | Why |
 |---|---|---|---|
-| `ink-3 #6B737A` | `surface-sunken #F3F0E8` | 4.23:1 | Tertiary text on wells: use ink-2 there |
-| `accent #B4690E` | `accent-tint #FBF0DC` | 3.74:1 | Amber text on its tint: use accent-ink |
-| `accent #B4690E` | `paper #FAF8F3` | 3.98:1 | Amber text on the page: use accent-ink |
-| `#FFFFFF` | `accent #B4690E` | 4.22:1 | White text on solid amber: avoid solid amber fills behind text |
-| `line-strong #C9C2B2` | `surface #FFFFFF` | 1.77:1 | Hairline as the only boundary of a control: use line-control |
-| `line #E3DED2` | `paper #FAF8F3` | 1.26:1 | Decorative hairline: never the only cue |
+| `accent #B4690E` | `paper #FAF8F3` | 3.98:1 | Amber as small text on the page: write the words in ink beside an amber dot, or use accent-ink |
+| `accent #B4690E` | `surface #FFFFFF` | 4.22:1 | Amber as small text on cards: the same |
+| `#FFFFFF` | `accent #B4690E` | 4.22:1 | White text on solid amber: amber is never a filled badge |
+| `ink #161A1D` | `accent #B4690E` | 4.14:1 | Ink text on solid amber: the same |
+| `line #E3DED2` | `surface #FFFFFF` | 1.34:1 | A hairline as the only edge of a control: controls use line-strong |
+| `info #1F4F8F` | `brand #0F5A47` | 1.00:1 | Info blue against brand green: equally dark, so never told apart by colour alone |

@@ -84,7 +84,7 @@ export function PricingTable({
         </div>
       ) : null}
 
-      <ul className={cn("grid gap-5 sm:grid-cols-2", layout === "wide" && "lg:grid-cols-4")}>
+      <ul className={cn("grid gap-3.5 sm:grid-cols-2 sm:gap-5", layout === "wide" && "lg:grid-cols-4")}>
         {PLAN_KEYS.map((key) => {
           const display = planDisplay(key);
           const price = interval === "year" ? display.annual : display.monthly;
@@ -97,7 +97,7 @@ export function PricingTable({
               data-testid={`plan-${key}`}
               aria-labelledby={titleId}
               className={cn(
-                "flex flex-col gap-5 rounded-card border px-5 py-6 sm:px-6 sm:py-[1.625rem]",
+                "flex flex-col gap-4 rounded-card border px-5 py-5 sm:gap-5 sm:px-6 sm:py-[1.625rem]",
                 featured ? "on-brand border-brand bg-brand text-white" : "border-line bg-surface text-ink",
               )}
             >
@@ -132,7 +132,7 @@ export function PricingTable({
                 {toggle && display.footnote ? <p className={cn("mt-2 text-xs leading-[1.125rem]", !featured && "text-ink-2", layout === "wide" && "lg:min-h-9")}>{display.footnote}</p> : null}
               </div>
 
-              <ul className="flex flex-1 flex-col gap-2.5 text-sm leading-[1.3125rem]">
+              <ul className="flex flex-1 flex-col gap-2 text-sm leading-[1.3125rem] sm:gap-2.5">
                 {display.leadIn ? <li className="font-semibold">{display.leadIn}</li> : null}
                 {display.bullets.map((bullet) => (
                   <li key={bullet} className="flex items-start gap-2.5">

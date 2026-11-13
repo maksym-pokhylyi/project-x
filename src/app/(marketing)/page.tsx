@@ -31,13 +31,16 @@ export default function LandingPage() {
 
       {/* Hero ---------------------------------------------------------------------------- */}
       <section aria-labelledby="hero-title">
-        <div className="container-content grid gap-y-10 pt-8 pb-12 md:pt-14 md:pb-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:items-center lg:gap-x-12 lg:pt-16 lg:pb-[5.5rem] xl:grid-cols-[33.75rem_minmax(0,1fr)] xl:gap-x-14">
+        <div className="container-content grid gap-y-9 pt-7 pb-10 md:gap-y-10 md:pt-14 md:pb-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:items-center lg:gap-x-12 lg:pt-16 lg:pb-[5.5rem] xl:grid-cols-[33.75rem_minmax(0,1fr)] xl:gap-x-14">
           <div className="flex max-w-[38rem] flex-col gap-5 md:gap-6">
             <Eyebrow>{hero.eyebrow}</Eyebrow>
             <h1 id="hero-title" className="type-hero text-ink">
               {hero.titleLead} <span className="text-brand">— {hero.titleRest}</span>
             </h1>
-            <p className="type-lead text-ink">{hero.lead}</p>
+            <p className="type-lead text-ink">
+              <span className="sm:hidden">{hero.leadShort}</span>
+              <span className="hidden sm:inline">{hero.lead}</span>
+            </p>
             <CompanySearch id="hero-company" className="mt-1 md:mt-2">
               <p className="text-13 text-ink-2">
                 {hero.note} {hero.sampleLink.before}

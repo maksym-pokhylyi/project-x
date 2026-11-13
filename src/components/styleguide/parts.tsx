@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 export function GuideSection({ id, title, lead, children }: { id: string; title: string; lead?: ReactNode; children: ReactNode }) {
   return (
     <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-20 border-t border-line pt-10 first:border-t-0 first:pt-0">
-      <h2 id={`${id}-title`} className="type-h2 text-ink">
+      <h2 id={`${id}-title`} className="type-section text-ink">
         {title}
       </h2>
-      {lead ? <p className="mt-2 max-w-reading text-base text-ink-2">{lead}</p> : null}
+      {lead ? <p className="mt-2 max-w-[42.5rem] text-15 text-ink-2">{lead}</p> : null}
       <div className="mt-8 space-y-10">{children}</div>
     </section>
   );
@@ -18,8 +18,8 @@ export function GuideSection({ id, title, lead, children }: { id: string; title:
 export function Group({ title, note, children, className }: { title: string; note?: ReactNode; children: ReactNode; className?: string }) {
   return (
     <div className={className}>
-      <h3 className="font-sans text-base leading-6 font-semibold text-ink">{title}</h3>
-      {note ? <p className="mt-1 max-w-reading text-sm text-ink-2">{note}</p> : null}
+      <h3 className="font-sans text-17 font-semibold text-ink">{title}</h3>
+      {note ? <p className="mt-1 max-w-[42.5rem] text-sm text-ink-2">{note}</p> : null}
       <div className="mt-4">{children}</div>
     </div>
   );
@@ -41,15 +41,16 @@ export function Row({ children, className }: { children: ReactNode; className?: 
 }
 
 /** A bordered canvas for showing components on a given surface. */
-export function Canvas({ tone = "paper", children, className }: { tone?: "paper" | "surface" | "sunken" | "brand"; children: ReactNode; className?: string }) {
+export function Canvas({ tone = "paper", children, className }: { tone?: "paper" | "surface" | "deep" | "brand" | "ink"; children: ReactNode; className?: string }) {
   return (
     <div
       className={cn(
         "rounded-card border border-line p-5",
         tone === "paper" && "bg-paper",
         tone === "surface" && "bg-surface",
-        tone === "sunken" && "bg-surface-sunken",
-        tone === "brand" && "on-brand border-brand bg-brand text-paper",
+        tone === "deep" && "border-transparent bg-paper-deep",
+        tone === "brand" && "on-brand border-brand bg-brand text-white",
+        tone === "ink" && "on-ink border-ink bg-ink text-paper",
         className,
       )}
     >
@@ -60,13 +61,13 @@ export function Canvas({ tone = "paper", children, className }: { tone?: "paper"
 
 /** Inline code. */
 export function Code({ children }: { children: ReactNode }) {
-  return <code className="rounded-control bg-surface-sunken px-1.5 py-0.5 font-mono text-[0.8125rem] whitespace-nowrap text-ink">{children}</code>;
+  return <code className="rounded-chip bg-paper-deep px-1.5 py-0.5 font-mono text-[0.8125rem] whitespace-nowrap text-ink">{children}</code>;
 }
 
 /** A block of code to copy. */
 export function Snippet({ children }: { children: string }) {
   return (
-    <pre tabIndex={0} className="overflow-x-auto rounded-card border border-line bg-surface-sunken p-4 font-mono text-13 leading-5 text-ink">
+    <pre tabIndex={0} className="overflow-x-auto rounded-lg bg-paper-deep p-4 font-mono text-13 leading-5 text-ink">
       <code>{children}</code>
     </pre>
   );
@@ -76,10 +77,10 @@ export function Snippet({ children }: { children: string }) {
 export function Swatch({ name, value, use, className, bordered = false }: { name: string; value: string; use: string; className: string; bordered?: boolean }) {
   return (
     <div className="flex items-start gap-3">
-      <span aria-hidden className={cn("mt-0.5 size-10 shrink-0 rounded-control", bordered && "border border-line", className)} />
+      <span aria-hidden className={cn("mt-0.5 size-11 shrink-0 rounded-control", bordered && "border border-line", className)} />
       <div className="min-w-0">
-        <p className="text-sm font-medium text-ink">
-          <span className="font-mono text-13">{name}</span>
+        <p className="text-sm font-semibold text-ink">
+          <span className="font-mono text-13 font-medium">{name}</span>
         </p>
         <p className="type-ref text-ink-2 uppercase">{value}</p>
         <p className="mt-0.5 text-13 text-ink-2">{use}</p>

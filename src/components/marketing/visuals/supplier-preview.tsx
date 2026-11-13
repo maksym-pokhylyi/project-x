@@ -67,7 +67,7 @@ export function SupplierPreview({ className }: { className?: string }) {
         <span className="hidden shrink-0 sm:inline">Updated 13 Nov 2026</span>
       </div>
 
-      <div className="flex flex-col gap-[1.125rem] px-5 pt-5 pb-2 sm:px-6 sm:pt-[1.375rem]">
+      <div className="flex flex-col gap-3.5 px-5 pt-[1.125rem] pb-1 sm:gap-[1.125rem] sm:px-6 sm:pt-[1.375rem] sm:pb-2">
         <div>
           <p className="font-display text-[1.375rem] leading-[1.15] font-semibold text-ink sm:text-[1.625rem]">Aldermoor &amp; Pike Building Services Ltd</p>
           <p className="mt-1.5 text-13 text-ink-2">
@@ -88,7 +88,7 @@ export function SupplierPreview({ className }: { className?: string }) {
         </div>
 
         <div>
-          <div className="flex items-baseline justify-between gap-3 pb-2.5">
+          <div className="flex items-baseline justify-between gap-3 pb-1.5">
             <p className="text-13 font-semibold text-ink">Open tenders like your past work</p>
             <p className="shrink-0 text-xs text-ink-2">3 open</p>
           </div>
@@ -109,7 +109,7 @@ export function SupplierPreview({ className }: { className?: string }) {
         </div>
 
         <div className="hidden sm:block">
-          <div className="flex items-baseline justify-between gap-3 pb-2.5">
+          <div className="flex items-baseline justify-between gap-3 pb-1.5">
             <p className="text-13 font-semibold text-ink">Rival contracts ending soon</p>
             <p className="shrink-0 text-xs text-ink-2">likely to be re-tendered</p>
           </div>
@@ -127,7 +127,7 @@ export function SupplierPreview({ className }: { className?: string }) {
           ))}
         </div>
 
-        <p className="border-t border-line pt-3 pb-3 text-13 text-ink-2 sm:hidden">Then: rival contracts ending soon, and buyers in your trade.</p>
+        <p className="-mt-3.5 border-t border-line pt-2.5 pb-3 text-13 text-ink-2 sm:hidden">Then: rival contracts ending soon, and buyers in your trade.</p>
       </div>
     </figure>
   );

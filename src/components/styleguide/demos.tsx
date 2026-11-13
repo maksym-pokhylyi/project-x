@@ -7,6 +7,7 @@ import { FieldError, FieldHint } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { FilterChip, FilterChipGroup } from "@/components/ui/filter-chip";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -142,31 +143,35 @@ export function ChoiceDemo() {
 
 export function TabsDemo() {
   return (
-    <Tabs defaultValue="matches">
-      <TabsList aria-label="Radar views">
-        <TabsTrigger value="matches">
-          Matches <TabsCount>12</TabsCount>
+    <Tabs defaultValue="open">
+      <TabsList aria-label="On this supplier page">
+        <TabsTrigger value="open">
+          Open tenders <TabsCount>4</TabsCount>
         </TabsTrigger>
-        <TabsTrigger value="ending">
-          Ending soon <TabsCount>5</TabsCount>
+        <TabsTrigger value="wins">
+          Your wins <TabsCount>14</TabsCount>
         </TabsTrigger>
-        <TabsTrigger value="buyers">Buyers</TabsTrigger>
-        <TabsTrigger value="early">Early signals</TabsTrigger>
+        <TabsTrigger value="rivals">
+          Rival contracts ending <TabsCount>4</TabsCount>
+        </TabsTrigger>
+        <TabsTrigger value="buyers">
+          Buyers in your trade <TabsCount>5</TabsCount>
+        </TabsTrigger>
         <TabsTrigger value="disabled" disabled>
           Disabled
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="matches" className="text-sm text-ink-2">
-        Open tenders like the ones you have won. Arrow keys move between tabs.
+      <TabsContent value="open" className="text-sm text-ink-2">
+        Open tenders like your past work, soonest deadline first. Arrow keys move between tabs.
       </TabsContent>
-      <TabsContent value="ending" className="text-sm text-ink-2">
-        Contracts held by other suppliers that end in the next twelve months.
+      <TabsContent value="wins" className="text-sm text-ink-2">
+        From contract award notices that name your company.
+      </TabsContent>
+      <TabsContent value="rivals" className="text-sm text-ink-2">
+        Work like yours, held by someone else, ending within 12 months.
       </TabsContent>
       <TabsContent value="buyers" className="text-sm text-ink-2">
-        Buyers that award in your trade.
-      </TabsContent>
-      <TabsContent value="early" className="text-sm text-ink-2">
-        Planning-stage notices.
+        Public bodies that award work like yours.
       </TabsContent>
     </Tabs>
   );
@@ -191,30 +196,50 @@ export function DialogDemo() {
   );
 }
 
-/** The citation pattern: a small reference that opens the verbatim quote with file and page. */
+/** Filter chips as above the requirements list of a bid brief: toggle buttons, one pressed. */
+export function FilterChipDemo() {
+  const filters = [
+    { id: "all", label: "All", count: 23 },
+    { id: "gaps", label: "Gaps", count: 2 },
+    { id: "confirm", label: "To confirm", count: 2 },
+    { id: "met", label: "Met", count: 19 },
+  ] as const;
+  const [selected, setSelected] = useState<(typeof filters)[number]["id"]>("all");
+  return (
+    <FilterChipGroup aria-label="Filter requirements">
+      {filters.map((filter) => (
+        <FilterChip key={filter.id} pressed={selected === filter.id} count={filter.count} onClick={() => setSelected(filter.id)}>
+          {filter.label}
+        </FilterChip>
+      ))}
+    </FilterChipGroup>
+  );
+}
+
+/** A source marker in a draft: the small numbered reference that opens the passage it rests on. */
 export function CitationPopoverDemo() {
   return (
-    <p className="max-w-md text-sm text-ink">
-      Public liability insurance of at least £10m for any one claim{" "}
+    <p className="max-w-md text-15 leading-[1.6] text-ink">
+      On our current responsive repairs contract we attended 96.2% of emergency call-outs within two hours across 4,180 jobs in 2025–26.{" "}
       <Popover>
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="type-ref hit-40 inline-flex items-center rounded-control border border-brand/25 bg-brand-tint px-1.5 py-0.5 font-medium text-brand hover:border-brand data-[state=open]:border-brand"
-            aria-label="Citation: Terms and Conditions, page 14"
+            className="hit-40 inline-flex min-w-5 items-center justify-center rounded-[3px] bg-brand-tint px-1 font-mono text-xs leading-5 font-medium text-brand transition-colors hover:bg-brand-mark data-[state=open]:bg-brand data-[state=open]:text-white"
+            aria-label="Source 3: KPI report Q4 2025-26.pdf, page 3"
           >
-            T&amp;Cs p.14
+            3
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-96">
-          <p className="type-eyebrow text-ink-2">Quoted from the buyer&apos;s documents</p>
-          <blockquote className="mt-2 rounded-control border-l-2 border-brand bg-surface-sunken px-3 py-2 font-display text-base leading-6 text-ink">
-            &ldquo;The Supplier shall maintain Public Liability insurance of not less than £10,000,000 for any one claim.&rdquo;
+          <p className="text-13 font-semibold text-ink">From your documents</p>
+          <blockquote className="type-quote mt-2 text-ink">
+            &ldquo;Emergency attendance within 2 hours: 96.2% (4,021 of 4,180 jobs), year to 31 March 2026.&rdquo;
           </blockquote>
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-            <span className="type-ref text-ink-2">ITT Volume 2 – Terms and Conditions.pdf · page 14</span>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-line pt-3">
+            <span className="type-ref text-ink-2">KPI report Q4 2025-26.pdf · p. 3</span>
             <a href="#overlays" className="link text-13 font-medium">
-              Open source page
+              Open the page
             </a>
           </div>
         </PopoverContent>
@@ -228,7 +253,7 @@ export function TooltipDemo() {
     <div className="flex items-center gap-6">
       <Tooltip>
         <TooltipTrigger asChild>
-          <button type="button" className="rounded-sm text-sm font-medium text-ink underline decoration-ink-3 decoration-dotted underline-offset-4">
+          <button type="button" className="rounded-sm text-sm font-medium text-ink underline decoration-ink-2 decoration-dotted underline-offset-4">
             £102k
           </button>
         </TooltipTrigger>

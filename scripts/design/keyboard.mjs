@@ -3,8 +3,9 @@
 //   - the first stop is not the "Skip to content" link, or the link does not lead into <main>;
 //   - any stop has no visible focus ring (the global 2 px outline) or no accessible name;
 //   - focus ever lands on something hidden.
-// It also exercises the composite widgets: the billing-interval radio group (arrow keys), the
-// marketing menu on phones and the account menu / sheet in the app (open, Escape, focus returns).
+// It also exercises the composite widgets: the company search (Enter submits to /find), the
+// billing-interval radio group (arrow keys), the public menu on phones, and the account menu
+// and the phone menu of the app (open, Escape, focus returns).
 //
 //   BASE_URL=http://localhost:3121 node scripts/design/keyboard.mjs
 //
@@ -91,7 +92,17 @@ async function tabThrough(where, path, { width = 1280, height = 900, auth = fals
   await context.close();
 }
 
-await tabThrough("Landing", "/");
+await tabThrough("Landing", "/", {
+  extra: async (page, where) => {
+    // The company search works from the keyboard: type, Enter, and the browser goes to /find?q=…
+    const field = page.getByLabel("Find your company’s page. It’s free.").first();
+    await field.focus();
+    await page.keyboard.type("Aldermoor Pike");
+    await Promise.all([page.waitForURL(/\/find\?q=Aldermoor(\+|%20)Pike/, { timeout: 5000 }).catch(() => undefined), page.keyboard.press("Enter")]);
+    if (!/\/find\?q=Aldermoor(\+|%20)Pike/.test(page.url())) fail(where, `the company search did not go to /find?q=… (now at ${page.url()})`);
+    else console.log("  Company search: type and press Enter → /find?q=Aldermoor+Pike");
+  },
+});
 
 await tabThrough("Pricing", "/pricing", {
   extra: async (page, where) => {
@@ -178,19 +189,33 @@ await tabThrough("App shell, phone", "/app", {
   height: 800,
   stops: 20,
   extra: async (page, where) => {
-    const tabs = await page.locator('[data-slot="app-tabbar"] a').count();
-    if (tabs !== 4) fail(where, `expected 4 destinations in the tab bar, found ${tabs}`);
-    const small = await page.locator('[data-slot="app-tabbar"] a').evaluateAll((links) => links.filter((link) => link.getBoundingClientRect().height < 40 || link.getBoundingClientRect().width < 40).length);
-    if (small) fail(where, `${small} tab bar target(s) are smaller than 40 px`);
-    const button = page.getByTestId("account-menu");
+    const button = page.getByTestId("app-menu");
     await button.focus();
     await page.keyboard.press("Enter");
     await page.getByRole("dialog").waitFor();
+    const links = page.locator('[role="dialog"] nav[aria-label="App"] a');
+    const count = await links.count();
+    if (count !== 4) fail(where, `expected 4 destinations in the menu (Radar, Bids, Documents, Settings), found ${count}`);
+    const small = await links.evaluateAll((items) => items.filter((item) => item.getBoundingClientRect().height < 44).length);
+    if (small) fail(where, `${small} menu row(s) are shorter than 44 px`);
+    for (let index = 0; index < 10; index += 1) await page.keyboard.press("Tab");
+    const inside = await page.evaluate(() => Boolean(document.activeElement?.closest('[role="dialog"]')));
+    if (!inside) fail(where, "focus escapes the open menu");
     await page.keyboard.press("Escape");
     await page.getByRole("dialog").waitFor({ state: "detached" });
     const back = await page.evaluate(() => document.activeElement?.getAttribute("data-testid"));
-    if (back !== "account-menu") fail(where, "after Escape focus does not return to the account button");
-    else console.log("  Tab bar: 4 destinations of at least 40 px; account sheet opens with Enter and closes with Escape");
+    if (back !== "app-menu") fail(where, "after Escape focus does not return to the menu button");
+    else console.log("  Menu: 4 destinations of at least 44 px; Enter opens, focus is trapped, Escape closes and focus returns");
+
+    const account = page.getByTestId("user-menu");
+    await account.focus();
+    await page.keyboard.press("Enter");
+    await page.getByRole("menu").waitFor();
+    await page.keyboard.press("Escape");
+    await page.getByRole("menu").waitFor({ state: "detached" });
+    const backToAccount = await page.evaluate(() => document.activeElement?.getAttribute("data-testid"));
+    if (backToAccount !== "user-menu") fail(where, "after Escape focus does not return to the account menu button");
+    else console.log("  Account menu: Enter opens, Escape closes and focus returns");
   },
 });
 
