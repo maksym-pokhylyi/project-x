@@ -46,7 +46,12 @@ export function cleanModelAnswer(raw: string): string {
     .join("\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
-  return normaliseGapMarkers(text);
+  return normaliseGapMarkers(splitCombinedMarkers(text));
+}
+
+/** "[E2,E3]" / "[E2, E3 and E5]" -> "[E2][E3][E5]": one marker per source, so each can be checked and shown. */
+export function splitCombinedMarkers(text: string): string {
+  return text.replace(/\[(E\d{1,3}(?:\s*(?:,|;|&|and)\s*E\d{1,3})+)\]/g, (_whole, inner: string) => (inner.match(/E\d{1,3}/g) ?? []).map((marker) => `[${marker}]`).join(""));
 }
 
 /** The word limit to enforce: the stated word limit, else the page limit converted. */

@@ -25,7 +25,10 @@ export function scopeOf(user: TestUser): Scope {
 
 // --- Mock model ---------------------------------------------------------------------------
 
-export type MockCall = { step: ModelStep; which: "primary" | "fallback"; prompt: string };
+export type MockCall = { step: ModelStep; which: "primary" | "fallback"; prompt: string; providerOptions: Record<string, Record<string, unknown>> | undefined };
+
+/** A scripted answer: plain text, or text plus the provider metadata the gateway would attach. */
+export type MockAnswer = string | { text: string; providerMetadata?: Record<string, Record<string, unknown>> };
 
 function flatten(prompt: unknown): string {
   const messages = (prompt as Array<{ role: string; content: unknown }>) ?? [];
@@ -43,17 +46,19 @@ function flatten(prompt: unknown): string {
  * "model" answers (or throws to simulate a failure). Calls are recorded for assertions.
  * Usage is tiny so budgets are never the reason a test fails.
  */
-export function installMockModel(respond: (call: MockCall) => string | Promise<string>): { calls: MockCall[]; restore: () => void } {
+export function installMockModel(respond: (call: MockCall) => MockAnswer | Promise<MockAnswer>): { calls: MockCall[]; restore: () => void } {
   const calls: MockCall[] = [];
   setBidModelResolverForTests((step, which) => {
     return new MockLanguageModelV4({
       provider: "mock",
       modelId: `${step}-${which}`,
       doGenerate: async (options) => {
-        const call: MockCall = { step, which, prompt: flatten(options.prompt) };
+        const call: MockCall = { step, which, prompt: flatten(options.prompt), providerOptions: options.providerOptions as MockCall["providerOptions"] };
         calls.push(call);
-        const text = await respond(call);
+        const answer = await respond(call);
+        const text = typeof answer === "string" ? answer : answer.text;
         return {
+          ...(typeof answer === "string" || !answer.providerMetadata ? {} : { providerMetadata: answer.providerMetadata as never }),
           content: [{ type: "text" as const, text }],
           finishReason: { unified: "stop" as const, raw: undefined },
           usage: { inputTokens: { total: 20, noCache: 20, cacheRead: undefined, cacheWrite: undefined }, outputTokens: { total: 10, text: 10, reasoning: undefined } },

@@ -39,6 +39,13 @@ describe("cleanModelAnswer", () => {
     expect(cleanModelAnswer("Para one.\n\n\n\nPara two. [evidence_needed: a CV]")).toBe("Para one.\n\nPara two. [EVIDENCE NEEDED: a CV]");
   });
 
+  it("splits combined source markers so each source can be checked and shown", () => {
+    expect(cleanModelAnswer("Managed under Chapter 8 by accredited operatives [E2,E3]. Also [E1, E4 and E7]; not [E2-E5] or [see E2].")).toBe(
+      "Managed under Chapter 8 by accredited operatives [E2][E3]. Also [E1][E4][E7]; not [E2-E5] or [see E2].",
+    );
+    expect(findEvidenceMarkers(cleanModelAnswer("One [E2,E3] two [E3; E1]."))).toEqual(["E2", "E3", "E1"]);
+  });
+
   it("keeps a sentence that merely mentions a word count", () => {
     expect(cleanModelAnswer("The buyer set a word count of 500 words for this answer.")).toBe("The buyer set a word count of 500 words for this answer.");
   });

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { generateAiText } from "@/lib/ai";
 import { log } from "@/lib/logger";
 import { ModelJsonError, parseModelJson, salvageTruncatedJson, sanitizeModelValue } from "./json";
-import { isModelUnavailable, resolveModel, type ModelStep } from "./models";
+import { isModelUnavailable, isZdrUnavailable, resolveModel, ZdrUnavailableError, type ModelStep } from "./models";
 
 export type AiUsage = { calls: number; inputTokens: number; outputTokens: number; costUsd: number };
 
@@ -58,17 +58,29 @@ async function runOn(options: AiCallBase, which: "primary" | "fallback"): Promis
 
 /**
  * One model call returning text. Budget checks and usage recording happen in generateAiText.
- * If the step's primary model is not available to the account, the configured secondary
- * model is tried once; any other failure propagates (jobs retry with backoff).
+ * If the step's primary model is not available to the account, or cannot take the request
+ * with zero data retention, the configured secondary model is tried once; any other
+ * failure propagates (jobs retry with backoff).
  */
 export async function callText(options: AiCallBase, which: "primary" | "fallback" = "primary"): Promise<AiTextResult> {
-  if (which === "fallback") return runOn(options, "fallback");
+  const guarded = async (target: "primary" | "fallback") => {
+    try {
+      return await runOn(options, target);
+    } catch (error) {
+      // Never retried without zero data retention: the typed error says why nothing was sent.
+      if (target === "fallback" && isZdrUnavailable(error)) throw new ZdrUnavailableError(options.step, error);
+      throw error;
+    }
+  };
+  if (which === "fallback") return guarded("fallback");
   try {
     return await runOn(options, "primary");
   } catch (error) {
-    if (!isModelUnavailable(error) || !resolveModel(options.step, "fallback")) throw error;
-    log.warn("bids.ai: primary model unavailable, using the secondary model", { step: options.step, feature: options.feature });
-    return runOn(options, "fallback");
+    const zdr = isZdrUnavailable(error);
+    if (!zdr && !isModelUnavailable(error)) throw error;
+    if (!resolveModel(options.step, "fallback")) throw zdr ? new ZdrUnavailableError(options.step, error) : error;
+    log.warn(zdr ? "bids.ai: primary model cannot guarantee zero data retention, using the secondary model" : "bids.ai: primary model unavailable, using the secondary model", { step: options.step, feature: options.feature });
+    return guarded("fallback");
   }
 }
 

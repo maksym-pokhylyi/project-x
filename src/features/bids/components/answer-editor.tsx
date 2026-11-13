@@ -86,6 +86,8 @@ export type EditorProps = {
   bid: { title: string; deadline: string | null; briefHref: string; briefLabel?: string; exportHref: string | null; buyerName: string | null };
   nav: { items: EditorNavItem[]; qualityWeight: number | null; previousHref: string | null; nextHref: string | null };
   sources: EditorSource[];
+  /** Shown inside another page (the public sample): no sub-header, no question navigation. */
+  embedded?: boolean;
 };
 
 const numeric = (score: string): number | null => {
@@ -210,7 +212,7 @@ const PART_ICON = {
 } as const;
 const PART_WORD = { covered: "Covered.", partly: "Partly covered.", missing: "Not answered." } as const;
 
-export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked, canUnlock = false, library, bid, nav, sources }: EditorProps) {
+export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked, canUnlock = false, library, bid, nav, sources, embedded = false }: EditorProps) {
   const router = useRouter();
   const [text, setText] = useState(question.draftText);
   const [mode, setMode] = useState<"read" | "edit">(question.draftText || locked !== null ? "read" : "edit");
@@ -341,7 +343,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
   return (
     <div className="bid-scope @container flex flex-col" data-testid="answer-editor">
       {/* --- Sub-header ------------------------------------------------------------------------ */}
-      <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-b border-(--bid-line) pb-3">
+      <div className={cn("flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-b border-(--bid-line) pb-3", embedded ? "hidden" : "")}>
         <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1">
           <Link href={bid.briefHref} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-(--bid-ink) no-underline hover:text-(--bid-brand)">
             <ChevronLeft aria-hidden className="size-4" />
@@ -366,7 +368,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3">
+      <div className={cn("flex flex-col gap-3", embedded ? "" : "mt-4")}>
         <StandingNotice />
         {locked === "check_only" || locked === "plan_lapsed" ? (
           <UpgradeNotice
@@ -399,7 +401,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
       </div>
 
       {/* Small screens: one question at a time. */}
-      <div className="mt-4 flex items-center justify-between gap-3 @[1180px]:hidden">
+      <div className={cn("mt-4 flex items-center justify-between gap-3 @[1180px]:hidden", embedded ? "hidden" : "")}>
         {nav.previousHref ? (
           <Link href={nav.previousHref} aria-label="Previous question" className="bid-btn px-3">
             <ChevronLeft aria-hidden className="size-5" />
@@ -425,7 +427,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
       <div className="mt-5 grid grid-cols-1 items-start gap-7 @[900px]:grid-cols-[minmax(0,1fr)_minmax(340px,400px)] @[1180px]:mt-7 @[1180px]:grid-cols-[minmax(220px,300px)_minmax(0,1fr)_minmax(340px,440px)]">
         {/* --- Left: questions and sources --------------------------------------------------- */}
         <div className="order-3 flex min-w-0 flex-col gap-7 @[900px]:col-start-2 @[900px]:row-start-2 @[1180px]:col-start-1 @[1180px]:row-start-1">
-          <nav aria-label="Questions" className="hidden flex-col gap-2.5 @[1180px]:flex">
+          <nav aria-label="Questions" className={cn("hidden flex-col gap-2.5", embedded ? "" : "@[1180px]:flex")}>
             <h2 className="bid-h3">
               Questions{nav.qualityWeight !== null ? <span className="font-normal text-(--bid-muted)"> · {nav.qualityWeight}% of marks</span> : null}
             </h2>

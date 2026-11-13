@@ -73,7 +73,9 @@ function headline(verdict: BidVerdict, gates: { gap: number; confirm: number; me
     case "likely_not_eligible":
       return `${count(gates.gap)} ${plural(gates.gap, "gap")} to close before you can bid.`;
     case "biddable_with_gaps":
-      return gates.confirm > 0 ? `Looks biddable, once you confirm ${count(gates.confirm, false)} ${plural(gates.confirm, "point")}.` : "Looks biddable, with gaps outside the pass-or-fail tests.";
+      return gates.confirm > 0
+        ? `No gaps found in what we could check. ${count(gates.confirm)} ${plural(gates.confirm, "point")} for you to confirm.`
+        : "No pass-or-fail gaps found, but there are gaps in other requirements.";
     default:
       return verdict.factsConfirmed ? "Not enough to go on for a verdict yet." : "Confirm your company facts to see where you stand.";
   }

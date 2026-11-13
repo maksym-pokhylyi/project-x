@@ -162,8 +162,8 @@ export type VerdictKey = (typeof VERDICTS)[number];
 
 export const VERDICT_LABELS: Record<VerdictKey, string> = {
   looks_biddable: "Looks biddable",
-  biddable_with_gaps: "Biddable with gaps",
-  likely_not_eligible: "Likely not eligible",
+  biddable_with_gaps: "No gaps found, points to confirm",
+  likely_not_eligible: "Gaps to close",
   not_enough_information: "Not enough information",
 };
 

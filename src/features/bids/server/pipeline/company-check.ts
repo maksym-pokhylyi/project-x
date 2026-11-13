@@ -88,8 +88,24 @@ function isExpired(date: string | null | undefined, on: Date): boolean {
 function checkInsurance(requirement: CheckRequirement, facts: CompanyFacts, today: Date): CheckResult | null {
   const haystack = `${requirement.text} ${requirement.threshold ?? ""}`;
   const types = INSURANCE_PATTERNS.filter((entry) => entry.pattern.test(haystack));
-  if (types.length !== 1) return null; // several covers in one requirement: leave it to a person
   const amounts = requiredAmounts(requirement.threshold, requirement.text);
+  if (types.length >= 1 && amounts.length === 0) {
+    // "Provide details and certificates of your … insurance": no level is asked for, so
+    // holding current cover of each named type is what can be checked.
+    const covers = types.map((entry) => ({ ...entry, cover: facts.insurance?.[entry.type] }));
+    const missing = covers.filter((entry) => !entry.cover || entry.cover.amountGbp === null || entry.cover.amountGbp === undefined);
+    if (missing.length > 0) return { id: requirement.id, status: "unknown", note: `Your company facts do not give your ${missing.map((entry) => entry.label).join(" or ")} cover.` };
+    const expired = covers.filter((entry) => isExpired(entry.cover!.expiresAt, today));
+    if (expired.length > 0) {
+      return { id: requirement.id, status: "verify", note: `The renewal date on file for your ${expired.map((entry) => entry.label).join(" and ")} cover has passed. Check it has been renewed.` };
+    }
+    return {
+      id: requirement.id,
+      status: "met",
+      note: `You hold ${covers.map((entry) => `${gbp(entry.cover!.amountGbp!)} ${entry.label}`).join(" and ")} cover. The tender asks for details, not a set level — have the certificate${covers.length === 1 ? "" : "s"} ready.`,
+    };
+  }
+  if (types.length !== 1) return null; // several covers with levels in one requirement: leave it to a person
   if (amounts.length !== 1) return null;
   const required = amounts[0]!;
   const { type, label } = types[0]!;

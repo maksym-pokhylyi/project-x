@@ -133,3 +133,24 @@ export function isModelUnavailable(error: unknown): boolean {
   if (/do not have access to this model|no_providers_available|model[^.]{0,40}(not found|does not exist|not available|is not supported)|unknown model/i.test(message)) return true;
   return candidate.cause ? isModelUnavailable(candidate.cause) : false;
 }
+
+/** The gateway refused the request because zero data retention could not be guaranteed. */
+export class ZdrUnavailableError extends Error {
+  constructor(step: string, cause?: unknown) {
+    super(`No model could take this request with zero data retention (step "${step}"). Nothing was sent without it.`, { cause });
+    this.name = "ZdrUnavailableError";
+  }
+}
+
+/**
+ * True when the gateway refused a request because zero data retention was asked for and the
+ * account or the model's providers cannot honour it ("ZDR requires a paid account", "no ZDR
+ * provider"). The right response is another model — never the same request without ZDR.
+ */
+export function isZdrUnavailable(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const candidate = error as { message?: unknown; type?: unknown; responseBody?: unknown; cause?: unknown };
+  const text = [candidate.message, candidate.type, candidate.responseBody].filter((part): part is string => typeof part === "string").join(" ");
+  if (/\bzdr\b|zero[\s_-]*data[\s_-]*retention|disallow[\s_-]*prompt[\s_-]*training|data retention polic/i.test(text)) return true;
+  return candidate.cause ? isZdrUnavailable(candidate.cause) : false;
+}

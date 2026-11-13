@@ -122,6 +122,21 @@ function resolveModel(model: GenerateAiTextOptions["model"]): { instance: Langua
   return { instance: model, id: `${model.provider}/${model.modelId}` };
 }
 
+/**
+ * Confidentiality is a product promise: EVERY call asks the AI Gateway for zero data
+ * retention and forbids training on the prompt. Set here, in the one wrapper all model
+ * calls go through, so no call site can forget it. A provider that cannot honour it makes
+ * the gateway refuse the request (403) instead of sending the data.
+ */
+export const AI_PRIVACY_OPTIONS = { gateway: { zeroDataRetention: true, disallowPromptTraining: true } } as const;
+
+/** Cost in USD as reported by the gateway for this response, when it reports one. */
+export function gatewayReportedCostUsd(providerMetadata: unknown): number | null {
+  const raw = (providerMetadata as { gateway?: { cost?: unknown } } | undefined)?.gateway?.cost;
+  const value = typeof raw === "number" ? raw : typeof raw === "string" && raw.trim() !== "" ? Number(raw) : Number.NaN;
+  return Number.isFinite(value) && value >= 0 ? Math.round(value * 1_000_000) / 1_000_000 : null;
+}
+
 export async function generateAiText(options: GenerateAiTextOptions): Promise<GenerateAiTextResult> {
   const { organizationId, feature } = options;
   const userId = options.userId ?? null;
@@ -144,11 +159,13 @@ export async function generateAiText(options: GenerateAiTextOptions): Promise<Ge
       prompt: options.prompt,
       maxOutputTokens: options.maxOutputTokens ?? 1024,
       abortSignal: options.abortSignal,
+      providerOptions: AI_PRIVACY_OPTIONS,
     });
     const latencyMs = Date.now() - started;
     const inputTokens = result.usage.inputTokens ?? 0;
     const outputTokens = result.usage.outputTokens ?? 0;
-    const costUsd = estimateCostUsd(modelId, inputTokens, outputTokens);
+    // The gateway's own figure when it reports one; the static price table is only an estimate.
+    const costUsd = gatewayReportedCostUsd(result.providerMetadata) ?? estimateCostUsd(modelId, inputTokens, outputTokens);
     await db.insert(aiUsage).values({ organizationId, userId, feature, model: modelId, inputTokens, outputTokens, costUsd, latencyMs, status: "ok" });
     await track("ai.request_completed", { organizationId, userId }, { feature, model: modelId });
     return { text: result.text, model: modelId, usage: { inputTokens, outputTokens, costUsd }, latencyMs };

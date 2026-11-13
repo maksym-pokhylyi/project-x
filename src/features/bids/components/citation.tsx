@@ -152,7 +152,7 @@ export function CitationMark({
           aria-label={`Source, ${VERIFICATION_LABELS[state].toLowerCase()}: ${citation.fileName}${citation.loc ? `, ${describeLoc(citation.loc)}` : ""}`}
           className={cn(variant === "chip" ? "bid-chip" : "bid-ref", className)}
         >
-          <span className="min-w-0 truncate">{label}</span>
+          <span className={variant === "chip" ? "min-w-0 truncate" : "min-w-0 [overflow-wrap:anywhere]"}>{label}</span>
           {variant === "chip" ? (
             <span className="bid-chip-state" data-kind={state}>
               <StateGlyph state={state} />

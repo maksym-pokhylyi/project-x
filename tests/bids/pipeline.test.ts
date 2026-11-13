@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { aiUsage, bidFiles, bidQuestions, bidRequirements, bids, emailOutbox, events, jobs } from "@/db/schema";
 import { callJson, callText } from "@/features/bids/server/ai/call";
 import { ModelJsonError } from "@/features/bids/server/ai/json";
+import { isZdrUnavailable } from "@/features/bids/server/ai/models";
 import * as bidsApi from "@/features/bids/server/bids";
 import { processBidJob } from "@/features/bids/server/pipeline/runner";
 import { buildPackIndex } from "@/features/bids/server/pipeline/quote-verify";
@@ -226,6 +227,9 @@ describe("pack pipeline", () => {
     expect(usage).toHaveLength(9);
     expect(usage.map((row) => row.feature)).toEqual(expect.arrayContaining(["bids.overview", "bids.keyfacts", "bids.requirements.primary", "bids.requirements.second", "bids.document", "bids.recheck", "bids.company_check"]));
 
+    // Confidentiality: every request carrying the customer's documents asked for zero data retention and no training.
+    expect(mock.calls.map((call) => call.providerOptions?.gateway)).toEqual(Array(9).fill({ zeroDataRetention: true, disallowPromptTraining: true }));
+
     // Events and the "ready" e-mail, exactly once.
     const names = (await db.select().from(events).where(eq(events.organizationId, user.organizationId))).map((row) => row.name);
     expect(names.filter((name) => name === "brief_ready")).toHaveLength(1);
@@ -438,6 +442,32 @@ describe("callJson (model output is never taken on trust)", () => {
     mock.restore();
     mock = installMockModel(() => "still not json");
     await expect(callJson(base())).rejects.toBeInstanceOf(ModelJsonError);
+  });
+
+  it("asks for zero data retention on every call, falls back when a model cannot give it, and never sends without it", async () => {
+    const text = () => callText({ organizationId: user.organizationId, feature: "test.zdr", step: "draft", system: "s", messages: "p", maxOutputTokens: 50 });
+    mock = installMockModel((call) => {
+      if (call.which === "primary") throw Object.assign(new Error("Zero data retention (ZDR) requires a paid account"), { statusCode: 403 });
+      return "from a model with zero data retention";
+    });
+    expect(await text()).toMatchObject({ text: "from a model with zero data retention", model: "mock/draft-fallback" });
+    expect(mock.calls.map((call) => call.providerOptions?.gateway)).toEqual(Array(2).fill({ zeroDataRetention: true, disallowPromptTraining: true }));
+
+    mock.restore();
+    mock = installMockModel(() => {
+      throw Object.assign(new Error("No ZDR provider is available for this model"), { statusCode: 403 });
+    });
+    await expect(text()).rejects.toMatchObject({ name: "ZdrUnavailableError" });
+    expect(mock.calls.map((call) => call.which)).toEqual(["primary", "fallback"]); // two attempts, both with ZDR; no third without it
+    expect(isZdrUnavailable(new Error("Rate limit exceeded"))).toBe(false);
+    expect(isZdrUnavailable({ message: "wrapped", cause: { message: "zero data retention is not supported by any provider" } })).toBe(true);
+  });
+
+  it("records the cost the gateway reports, not the price-table estimate", async () => {
+    mock = installMockModel(() => ({ text: "ok", providerMetadata: { gateway: { cost: "0.012345" } } }));
+    const result = await callText({ organizationId: user.organizationId, feature: "test.cost", step: "draft", system: "s", messages: "p", maxOutputTokens: 50 });
+    expect(result.usage.costUsd).toBe(0.012345);
+    expect((await db.select().from(aiUsage))[0]).toMatchObject({ feature: "test.cost", costUsd: 0.012345 });
   });
 
   it("switches model only when the primary is not available to the account", async () => {

@@ -80,13 +80,17 @@ export function computeVerdict(requirements: VerdictRequirement[], factsConfirme
   }
 
   const undecided = gates.filter((item) => item.status === "unknown" || item.status === "verify");
+  const gatesMet = gates.filter((item) => item.status === "met").length;
   const otherGaps = requirements.filter((item) => item.status === "gap");
-  if (gates.length > 0 && undecided.length * 2 > gates.length) {
+  // Many pass/fail items are declarations and submission rules that only the bidder can
+  // settle, so "undecided" alone says little. But when NOTHING could be checked, there is
+  // no basis for a verdict at all.
+  if (gates.length > 0 && gatesMet === 0) {
     return {
       ...base,
       verdict: "not_enough_information",
       reasons: [
-        `${undecided.length} of ${plural(gates.length, "pass/fail or mandatory eligibility requirement")} could not be checked against your company facts.`,
+        `None of the ${plural(gates.length, "pass/fail or mandatory eligibility requirement")} could be checked against your company facts.`,
         ...undecided.slice(0, 4).map((item) => `To check: ${short(item.text)}`),
       ],
     };

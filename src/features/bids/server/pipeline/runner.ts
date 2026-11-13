@@ -12,6 +12,7 @@ import { log } from "@/lib/logger";
 import { reportError } from "@/lib/report-error";
 import { addUsage, ZERO_USAGE, type AiUsage } from "../ai/call";
 import { ModelJsonError } from "../ai/json";
+import { ZdrUnavailableError } from "../ai/models";
 import { BID_JOB_MAX_ATTEMPTS, enqueueBidJob, nudgeWorker } from "./dispatch";
 import { filePriority } from "./pack";
 import { citationStats } from "./quote-verify";
@@ -57,6 +58,7 @@ function nextPhase(state: ProcessingState | null | undefined): Phase | null {
 function userMessage(error: unknown): string {
   if (error instanceof PermanentPipelineError) return error.message;
   if (error instanceof AiBudgetExceededError) return error.message;
+  if (error instanceof ZdrUnavailableError) return "The AI provider could not guarantee zero data retention for your documents, so they were not sent. Try again later.";
   if (error instanceof ModelJsonError) return "The AI model returned an answer we could not use. Try again — if it keeps failing, contact support.";
   const message = error instanceof Error ? error.message : "";
   if (/timeout|timed out|aborted/i.test(message)) return "The analysis took too long and was stopped. Try again.";

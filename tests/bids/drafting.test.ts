@@ -127,6 +127,8 @@ describe("draftAnswer", () => {
     expect(flagged).not.toContain("£412000");
 
     expect(await featuresUsed()).toEqual(["bids.claims", "bids.draft", "library.summarise"]);
+    // The company's own documents go to the model: every call asked for zero data retention and no training.
+    expect(mock.calls.every((call) => call.providerOptions?.gateway?.zeroDataRetention === true && call.providerOptions.gateway.disallowPromptTraining === true)).toBe(true);
     const [event] = await db.select().from(events).where(eq(events.name, "question_drafted"));
     expect(event?.properties).toMatchObject({ mode: "draft", gaps: 1 });
   });

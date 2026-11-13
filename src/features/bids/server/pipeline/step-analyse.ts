@@ -340,7 +340,9 @@ export async function runOverview(bid: BidRow, loaded: LoadedPack, attempt: numb
     }
   }
   const deadline = brief.summary.submission_deadline.status === "conflicting" ? null : parseUkLocal(brief.summary.submission_deadline.normalized);
-  const title = brief.summary.title.value?.trim();
+  // Models often return the title as a sentence fragment ("replacement of ten bus shelters.").
+  const rawTitle = brief.summary.title.value?.trim().replace(/[.\s]+$/, "");
+  const title = rawTitle ? rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1) : rawTitle;
   const buyer = brief.summary.buyer.value?.trim();
   const reference = brief.summary.reference.value?.trim();
   await db

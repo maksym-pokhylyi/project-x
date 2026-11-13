@@ -95,6 +95,18 @@ describe("resolveCompanyStatuses", () => {
     expect(out.two).toMatchObject({ status: "verify", note: expect.stringContaining("could not confirm the figures") });
   });
 
+  it("when no level is asked for, checks that current cover of each named type is held", () => {
+    const out = resolve([
+      requirement("pl", { category: "insurance", kind: "mandatory", isPassFail: false, text: "Provide details and certificates of your public liability insurance" }),
+      requirement("both", { category: "insurance", text: "Provide details of employer's liability and public liability insurance" }),
+      requirement("pi", { category: "insurance", text: "Provide details of your professional indemnity insurance" }),
+    ]);
+    expect(out.pl).toMatchObject({ status: "met", note: expect.stringContaining("You hold £5m public liability cover. The tender asks for details, not a set level") });
+    // Employers' liability on file expired on 2026-12-31.
+    expect(out.both).toMatchObject({ status: "verify", note: expect.stringContaining("employers' liability cover has passed") });
+    expect(out.pi).toMatchObject({ status: "unknown", note: "Your company facts do not give your professional indemnity cover." });
+  });
+
   it("decides turnover tests from the band, and admits when the band straddles the threshold", () => {
     const out = resolve([
       requirement("above", { category: "financial", text: "Minimum annual turnover", threshold: "£500,000" }),
@@ -185,7 +197,12 @@ describe("computeVerdict", () => {
   it("is 'biddable with gaps' when gates are fine but something is open, and 'not enough information' when most gates are undecided", () => {
     expect(computeVerdict([item("met"), item("met"), item("unknown")], true).verdict).toBe("biddable_with_gaps");
     expect(computeVerdict([item("met"), item("met"), soft("gap")], true).verdict).toBe("biddable_with_gaps");
-    expect(computeVerdict([item("met"), item("verify"), item("unknown")], true).verdict).toBe("not_enough_information");
+    // Declarations and submission rules are for the bidder to settle: open points alone do not block a verdict…
+    expect(computeVerdict([item("met"), item("verify"), item("unknown")], true).verdict).toBe("biddable_with_gaps");
+    // …but when nothing at all could be checked there is no basis for one.
+    const none = computeVerdict([item("verify"), item("unknown")], true);
+    expect(none.verdict).toBe("not_enough_information");
+    expect(none.reasons[0]).toMatch(/^None of the 2 pass\/fail/);
     expect(computeVerdict([soft("unknown"), soft("unknown")], true).verdict).toBe("not_enough_information");
   });
 
