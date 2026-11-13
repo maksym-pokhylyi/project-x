@@ -36,7 +36,7 @@ export default function PricingPage() {
             </h1>
             <p className="type-lead text-ink max-sm:mt-0.5">{pricing.lead}</p>
           </header>
-          <div id="plans" className="scroll-mt-24">
+          <div id="plans">
             <MarketingPricing headingLevel={2} />
           </div>
         </div>

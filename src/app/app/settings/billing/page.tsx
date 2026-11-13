@@ -12,6 +12,7 @@ import {
   type PauseCancelCardProps,
 } from "@/components/billing/billing-cards";
 import { ConfirmPanel, type BillingClientConfig, type BillingIntent } from "@/components/billing/confirm-panel";
+import { plusVat } from "@/config/billing-copy";
 import { ANNUAL_SAVING, planDisplay } from "@/config/plan-display";
 import { PAID_PLAN_KEYS, PLANS, isBillingInterval, isPlanKey, type BillingInterval, type PaidPlanKey } from "@/config/plans";
 import { env, features } from "@/env";
@@ -80,7 +81,7 @@ function currentPlan(ctx: OrgContext): CurrentPlanCardProps {
       ...base,
       status: { label: "Trial", tone: "info" },
       note: plan.trialFullBids ? `Your trial includes ${plan.trialFullBids} full bid${plan.trialFullBids === 1 ? "" : "s"}. Nothing is charged until it ends.` : "Nothing is charged until the trial ends.",
-      dateLine: trialEnd ? { label: "First payment", value: `${price.amount} on ${trialEnd}` } : null,
+      dateLine: trialEnd ? { label: "First payment", value: `${plusVat(price.amount)} on ${trialEnd}` } : null,
       switchInterval,
     };
   }

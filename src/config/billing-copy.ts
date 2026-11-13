@@ -24,6 +24,13 @@ export const billingCopy = {
   upgrade: "You pay the difference for the rest of your current billing period.",
 } as const;
 
+/**
+ * A payment that will be taken on a date, as opposed to a price in a list: "£149 + VAT".
+ * A price stands next to the VAT note (billingCopy.vat); a payment line stands alone (the
+ * trial strip is on every page of the app), so it carries the VAT with it.
+ */
+export const plusVat = (amount: string) => `${amount} + VAT`;
+
 const plural = (count: number, noun: string) => `${inWords(count)} ${noun}${count === 1 ? "" : "s"}`;
 
 /** The plan that starts with a trial (Bid Desk), if the catalogue has one. */

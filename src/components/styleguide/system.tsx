@@ -447,7 +447,7 @@ export function FiguresSection() {
             { term: "Plan", value: "Bid Desk" },
             { term: "Price", value: "£149 a month" },
             { term: "Trial ends", value: "27 Nov 2026" },
-            { term: "First payment", value: "£149 on 27 Nov 2026" },
+            { term: "First payment", value: "£149 + VAT on 27 Nov 2026" },
           ]}
         />
       </Group>

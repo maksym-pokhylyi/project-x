@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalDocument, type LegalSection } from "@/components/marketing/legal-document";
+import { RETENTION_DAYS } from "@/config/retention";
 import { operatorAddress, operatorLegalName, site, ukRepresentativeLine } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -9,6 +10,9 @@ export const metadata: Metadata = {
 };
 
 const { operator, facts } = site;
+
+/** A retention period of src/config/retention.ts in the words of the table: 395 days -> "13 months". */
+const inMonths = (days: number) => `${Math.round(days / 30.4375)} months`;
 
 const summary = [
   "If we emailed your business about its public contracts and you want that to stop: use the [opt‑out page](/optout) or reply to the email. That is all it takes. The details are in [section 2](#contacted).",
@@ -93,7 +97,8 @@ const sections: LegalSection[] = [
           ],
         },
       },
-      "You can turn digests and reminders off in Settings. We do not sell personal data and we do not use it for advertising.",
+      "You can turn digests, alerts and reminders off in Settings, and every digest and alert carries an unsubscribe link. Our emails carry no tracking pixel, so we never know whether one was opened; when you follow a tender link from one, we note that the link was followed.",
+      "We do not sell personal data and we do not use it for advertising.",
     ],
   },
   {
@@ -174,7 +179,9 @@ const sections: LegalSection[] = [
           rows: [
             ["Account and workspace data", "The life of the account, then deleted within 30 days of closure"],
             ["Uploaded files, library and bids", "Until you delete them or the workspace is deleted"],
+            ["Receipts and one-off purchases listed on your Billing page", "For as long as the workspace exists, then deleted with it"],
             ["Billing records", "As long as tax and accounting law requires; invoices are held by Paddle"],
+            ["Record of the digests, alerts and reminders we sent you: which kind, when, what each one listed and whether a link in it was followed", inMonths(RETENTION_DAYS.notificationLog)],
             ["Outreach contact that never replied", `Deleted ${facts.outreachRetentionDays} days after the last email`],
             ["Opt-outs and objections", "Suppression list, kept for as long as we send email"],
             ["Record of which notices we emailed about", "24 months, as evidence that we followed this notice"],

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 /*
  * Facts as "term — value" lines divided by hairlines, as on the checkout confirmation
- * ("Plan · Bid Desk", "First payment · £149 on 27 Nov 2026"): the term is small and muted
+ * ("Plan · Bid Desk", "First payment · £149 + VAT on 27 Nov 2026"): the term is small and muted
  * and sits in a 120 px column from 768 px (above the value on phones); values wrap, long
  * ids break anywhere, figures are tabular.
  *

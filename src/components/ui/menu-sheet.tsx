@@ -40,6 +40,7 @@ function MenuSheet({
   headClassName,
   triggerProps,
   children,
+  onCloseAutoFocus,
   ...props
 }: Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "children" | "title"> & {
   /** The wordmark shown in the head of the sheet. */
@@ -53,12 +54,13 @@ function MenuSheet({
   children: (close: () => void) => React.ReactNode
 }) {
   const [open, setOpen] = React.useState(false)
-  const close = React.useCallback(() => setOpen(false), [])
+  const close = () => setOpen(false)
+  const trigger = React.useRef<HTMLButtonElement>(null)
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
       <DialogPrimitive.Trigger asChild>
-        <IconButton label={openLabel} {...triggerProps} className={cn("md:hidden", triggerProps?.className)}>
+        <IconButton ref={trigger} label={openLabel} {...triggerProps} className={cn("md:hidden", triggerProps?.className)}>
           <MenuSign />
         </IconButton>
       </DialogPrimitive.Trigger>
@@ -68,6 +70,14 @@ function MenuSheet({
           data-slot="menu-sheet"
           aria-describedby={undefined}
           {...props}
+          onCloseAutoFocus={(event) => {
+            onCloseAutoFocus?.(event)
+            if (event.defaultPrevented) return
+            /* Focus goes back to the menu button WITHOUT a scroll: a link in the sheet has
+               just sent the page somewhere, and a scroll "to" the button would cut that short. */
+            event.preventDefault()
+            trigger.current?.focus({ preventScroll: true })
+          }}
           className={cn(
             "fixed inset-x-0 top-0 z-50 max-h-dvh overflow-y-auto border-b border-line shadow-overlay duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-2 md:hidden",
             tone === "paper" ? "bg-paper" : "bg-surface",

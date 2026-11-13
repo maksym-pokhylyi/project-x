@@ -43,7 +43,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang={site.locale} className={`${inter.variable} ${sourceSerif.variable} ${plexMono.variable}`}>
+    /*
+     * data-scroll-behavior: globals.css makes in-page anchors glide (scroll-behavior: smooth).
+     * With this attribute the router switches that off while it moves to another page, so a new
+     * page opens at its top at once. Without it the router's own scroll is animated too, its
+     * steps overtake one another, and the page ends at a later section (docs: upgrading to
+     * version 16, "scroll behavior override"). Guarded by scripts/design/controls.mjs.
+     */
+    <html lang={site.locale} data-scroll-behavior="smooth" className={`${inter.variable} ${sourceSerif.variable} ${plexMono.variable}`}>
       <body className="min-h-dvh">
         <a
           href="#main"

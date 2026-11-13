@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { formatBillingDate } from "@/components/billing/billing-cards";
 import { CheckoutStatus, type Confirmation } from "@/components/billing/checkout-status";
-import { billingCopy } from "@/config/billing-copy";
+import { billingCopy, plusVat } from "@/config/billing-copy";
 import { BID_PASS_DISPLAY, planDisplay } from "@/config/plan-display";
 import { isBillingInterval, isPlanKey } from "@/config/plans";
 import { site } from "@/config/site";
@@ -39,7 +39,7 @@ function planConfirmation(ctx: OrgContext): Confirmation | null {
           { term: "Plan", value: strong(plan.name) },
           priceRow,
           { term: "Trial ends", value: strong(trialEnd) },
-          { term: "First payment", value: strong(`${price.amount} on ${trialEnd}`) },
+          { term: "First payment", value: strong(`${plusVat(price.amount)} on ${trialEnd}`) },
           { term: "Included", value: plan.trialFullBids ? `${plan.billingLine}. The trial includes ${plan.trialFullBids} full bid${plan.trialFullBids === 1 ? "" : "s"}.` : plan.billingLine },
           { term: "Receipts", value: "Paddle emails one after each payment." },
         ]

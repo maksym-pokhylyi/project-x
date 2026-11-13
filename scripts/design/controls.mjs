@@ -1,4 +1,4 @@
-// Guard for three rules of the design system, checked in a real browser at 390 and 1280 px:
+// Guard for four rules of the design system, checked in a real browser at 390 and 1280 px:
 //
 //   1. CONTROL SIZES  Fields and buttons share one scale of three heights: 44, 48, 52 px.
 //                     A button beside a field has the field's height; a form's submit
@@ -10,11 +10,19 @@
 //                     item as current (aria-current="page"), and that item differs from
 //                     its siblings in colour or weight, never by a line alone. Tabs: one
 //                     selected tab, heavier and darker than the others, with its rule.
+//   4. WHERE A SCROLL STOPS  A move to another page starts at its very top, wherever you
+//                     came from. A link to a section stops with the section just under
+//                     the sticky header; Back returns to where you were. Focus on a
+//                     control in the header does not move the page, and a control that
+//                     takes focus is never left behind the header. Checked as journeys
+//                     through the public site, with smooth scrolling ON: the faults
+//                     this guards do not show without it.
 //
 //   BASE_URL=http://localhost:3121 node scripts/design/controls.mjs                 the key pages
 //   BASE_URL=… node scripts/design/controls.mjs /find auth:/app/bids               … plus these
 //   BASE_URL=… node scripts/design/controls.mjs --only /find auth:/app/bids        only these
 //   WIDTHS=390 RULES=sizes,pointer node scripts/design/controls.mjs                narrow it down
+//   RULES=scroll node scripts/design/controls.mjs                                  the scroll journeys alone
 //
 // A path prefixed with `auth:` is opened as the seeded demo owner (pnpm db:seed). The script
 // prints every breach with the page, the width and the element, and exits 1 if there is one.
@@ -23,7 +31,8 @@
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:3121";
 const DEMO = { email: process.env.DEMO_EMAIL ?? "demo@example.com", password: process.env.DEMO_PASSWORD ?? "demo-password-123" };
 const WIDTHS = (process.env.WIDTHS ?? "390,1280").split(",").map(Number);
-const RULES = new Set((process.env.RULES ?? "sizes,pointer,nav").split(","));
+const RULES = new Set((process.env.RULES ?? "sizes,pointer,nav,scroll").split(","));
+const PAGE_RULES = ["sizes", "pointer", "nav"].filter((rule) => RULES.has(rule));
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE ?? "@playwright/test");
 
 /** The key pages. Feature areas add theirs on the command line (or here, when they pass). */
@@ -246,7 +255,7 @@ async function openers(page, width) {
   return found;
 }
 
-for (const width of WIDTHS) {
+for (const width of PAGE_RULES.length > 0 ? WIDTHS : []) {
   const anonymous = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
   let signedIn = null;
   for (const target of targets) {
@@ -258,7 +267,7 @@ for (const width of WIDTHS) {
       await page.goto(`${BASE_URL}${target.path}`, { waitUntil: "load" });
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(250);
-      const options = { rules: [...RULES], sizeExceptions: SIZE_EXCEPTIONS };
+      const options = { rules: PAGE_RULES, sizeExceptions: SIZE_EXCEPTIONS };
       const seen = new Set();
       const record = (found, state) => {
         for (const [rule, message] of found) {
@@ -292,7 +301,149 @@ for (const width of WIDTHS) {
   await signedIn?.close();
 }
 
+/** The scroll position once the page has stopped moving (a glide takes up to a second). */
+async function settledScroll(page) {
+  await page.waitForTimeout(350);
+  let last = -1;
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const y = await page.evaluate(() => Math.round(window.scrollY));
+    if (y === last) return y;
+    last = y;
+    await page.waitForTimeout(150);
+  }
+  return last;
+}
+
+/** Where a section sits once it has been scrolled to: its distance from the bottom edge of the sticky header. */
+const sectionPlace = (page, id) =>
+  page.evaluate((id) => {
+    const bar = document.querySelector("[data-slot='site-header']").getBoundingClientRect().bottom;
+    const section = document.getElementById(id);
+    const heading = document.getElementById(`${id}-title`) ?? section?.querySelector("h1, h2, h3");
+    if (!section) return null;
+    const box = heading?.getBoundingClientRect();
+    return { gap: Math.round(section.getBoundingClientRect().top - bar), headingInView: box ? box.top >= bar && box.bottom <= window.innerHeight : true };
+  }, id);
+
+/*
+ * Rule 4 as journeys. No `reducedMotion` here: with reduced motion the stylesheet switches
+ * smooth scrolling off, and every fault below disappears with it.
+ */
+async function scrollJourneys(width) {
+  const where = `scroll journeys @${width}`;
+  console.log(`\n${where}`);
+  const count = failures.length;
+  const phone = width < 768;
+  const context = await browser.newContext({ viewport: { width, height: 800 } });
+  const page = await context.newPage();
+  const header = page.locator("[data-slot='site-header']");
+  /** Follows a link of the public header; on phones the links are in the menu sheet. */
+  const follow = async (name) => {
+    if (phone && name !== "Bidfolio") {
+      await header.getByRole("button", { name: "Open menu" }).click();
+      await page.getByRole("dialog").getByRole("link", { name, exact: true }).click();
+    } else {
+      await header.getByRole("link", { name, exact: true }).click();
+    }
+  };
+  /** Opens a page, optionally scrolled to one of its sections, and returns where it stands. */
+  const open = async (path, at) => {
+    await page.goto(`${BASE_URL}${path}`, { waitUntil: "load" });
+    if (at) await page.evaluate((id) => document.getElementById(id).scrollIntoView({ behavior: "instant" }), at);
+    return settledScroll(page);
+  };
+  const expectSection = async (id, what) => {
+    const place = await sectionPlace(page, id);
+    if (!place) report(where, "scroll", `${what}: there is no #${id} on ${new URL(page.url()).pathname}`);
+    else if (place.gap < 0 || place.gap > 24) report(where, "scroll", `${what}: #${id} is ${place.gap}px from the header (expected 0 to 24px under it)`);
+    else if (!place.headingInView) report(where, "scroll", `${what}: the heading of #${id} is not in view`);
+  };
+
+  try {
+    // 1. Another page always opens at its top: from the top of the landing page and from far down it.
+    for (const start of [null, "questions"]) {
+      for (const [name, path] of [["Pricing", "/pricing"], ["Sign in", "/sign-in"], ["Find your company", "/find"]]) {
+        const from = await open("/", start);
+        if (start && from < 500) report(where, "scroll", `could not scroll the landing page to #${start} (y=${from})`);
+        await follow(name);
+        await page.waitForURL((url) => url.pathname === path, { timeout: 15000 });
+        const y = await settledScroll(page);
+        if (y !== 0) report(where, "scroll", `"${name}" from the landing page (${start ? `at #${start}` : "at the top"}) opens ${path} at y=${y}, not at its top`);
+      }
+    }
+    // 2. The logo, from the top of /pricing and from its comparison table.
+    for (const start of [null, "compare"]) {
+      await open("/pricing", start);
+      await follow("Bidfolio");
+      await page.waitForURL((url) => url.pathname === "/", { timeout: 15000 });
+      const y = await settledScroll(page);
+      if (y !== 0) report(where, "scroll", `the logo from /pricing (${start ? `at #${start}` : "at the top"}) opens the landing page at y=${y}, not at its top`);
+    }
+    // 3. A link to a section of ANOTHER page stops with the section under the header; Back and Forward return.
+    const left = await open("/pricing", "compare");
+    await follow("How it works");
+    await page.waitForURL((url) => url.pathname === "/" && url.hash === "#how", { timeout: 15000 });
+    await settledScroll(page);
+    await expectSection("how", `"How it works" from /pricing`);
+    await page.goBack();
+    await page.waitForURL((url) => url.pathname === "/pricing");
+    const back = await settledScroll(page);
+    if (Math.abs(back - left) > 2) report(where, "scroll", `Back to /pricing returns to y=${back}, not to where it was left (y=${left})`);
+    await page.goForward();
+    await page.waitForURL((url) => url.hash === "#how");
+    await settledScroll(page);
+    await expectSection("how", "Forward to /#how");
+    // 4. From a section of the landing page, the logo (the same page, without the #) goes to the very top.
+    await follow("Bidfolio");
+    await page.waitForURL((url) => url.pathname === "/" && url.hash === "");
+    const top = await settledScroll(page);
+    if (top !== 0) report(where, "scroll", `the logo on the landing page (from #how) stops at y=${top}, not at the top`);
+    // 5. A link to a section of THIS page glides there and stops under the header.
+    await open("/pricing", null);
+    await follow("Questions");
+    await settledScroll(page);
+    await expectSection("questions", `"Questions" on /pricing`);
+    await page.getByRole("link", { name: "Bid Pass", exact: true }).first().click();
+    await settledScroll(page);
+    await expectSection("bid-pass", `the Bid Pass link under the comparison table`);
+    // 6. Focus on a control in the sticky header does not move the page.
+    const held = await open("/", "questions");
+    await page.evaluate(() => document.querySelector("[data-slot='site-header'] a").focus());
+    const afterFocus = await settledScroll(page);
+    if (afterFocus !== held) report(where, "scroll", `focus on the logo in the sticky header moved the page from y=${held} to y=${afterFocus}`);
+    await page.keyboard.press("Tab");
+    const afterTab = await settledScroll(page);
+    const stillInBar = await page.evaluate(() => Boolean(document.activeElement?.closest("[data-slot='site-header']")));
+    if (stillInBar && afterTab !== held) report(where, "scroll", `Tab to the next control in the sticky header moved the page from y=${held} to y=${afterTab}`);
+    // 7. A control that takes focus while it is above the screen comes out from behind the header.
+    await open("/pricing", null);
+    const hidden = await page.evaluate(() => {
+      const control = document.querySelector("main button, main a[href]");
+      window.scrollTo({ top: control.getBoundingClientRect().top + window.scrollY + 600, behavior: "instant" });
+      control.focus();
+      return true;
+    });
+    await settledScroll(page);
+    const shown = await page.evaluate(() => {
+      const bar = document.querySelector("[data-slot='site-header']").getBoundingClientRect().bottom;
+      const box = document.activeElement.getBoundingClientRect();
+      return { top: Math.round(box.top - bar), inView: box.top >= bar && box.bottom <= window.innerHeight };
+    });
+    if (hidden && !shown.inView) report(where, "scroll", `a control that took focus above the screen is not fully in view (${shown.top}px from the header's edge)`);
+  } catch (error) {
+    report(where, "scroll", `a journey could not be finished: ${error instanceof Error ? error.message.split("\n")[0] : error}`);
+  }
+  await context.close();
+
+  if (failures.length === count) console.log("  ok");
+}
+
+// The journeys belong to the key pages: a run limited to other pages (--only) leaves them out.
+if (RULES.has("scroll") && !only) {
+  for (const width of WIDTHS) await scrollJourneys(width);
+}
+
 await browser.close();
-console.log(`\n${failures.length === 0 ? "All control, pointer and navigation checks passed." : `${failures.length} breach(es):`}`);
+console.log(`\n${failures.length === 0 ? "All control, pointer, navigation and scroll checks passed." : `${failures.length} breach(es):`}`);
 for (const failure of failures) console.log(`  ${failure}`);
 process.exit(failures.length === 0 ? 0 : 1);

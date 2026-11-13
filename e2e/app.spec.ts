@@ -219,6 +219,97 @@ test("pricing page renders the plan catalogue with a monthly/annual toggle", asy
   await expect(page.getByText("You confirm Bid Desk and pay on the next step.")).toBeVisible();
 });
 
+/** The scroll position once the page has stopped moving (a glide takes up to a second). */
+async function settledScrollY(page: Page): Promise<number> {
+  await page.waitForTimeout(350);
+  let last = -1;
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const y = await page.evaluate(() => Math.round(window.scrollY));
+    if (y === last) return y;
+    last = y;
+    await page.waitForTimeout(150);
+  }
+  return last;
+}
+
+/** How far under the sticky header a section sits, and whether its heading is on screen. */
+const sectionPlace = (page: Page, id: string) =>
+  page.evaluate((id) => {
+    const bar = document.querySelector("[data-slot='site-header']")!.getBoundingClientRect().bottom;
+    const heading = document.getElementById(`${id}-title`)!.getBoundingClientRect();
+    return { gap: Math.round(document.getElementById(id)!.getBoundingClientRect().top - bar), headingInView: heading.top >= bar && heading.bottom <= window.innerHeight };
+  }, id);
+
+test("another page always opens at its top; a link to a section stops under the header; Back returns", async ({ page }) => {
+  // Owner report: "Pricing" from the top of the landing page opened /pricing at its comparison
+  // table. Smooth scrolling is on in this browser, as for most visitors: the fault needs it.
+  const header = page.locator("[data-slot='site-header']");
+  for (const start of [null, "questions"]) {
+    for (const [name, path] of [["Pricing", "/pricing"], ["Sign in", "/sign-in"], ["Find your company", "/find"]] as const) {
+      await page.goto("/");
+      if (start) {
+        await page.evaluate((id) => document.getElementById(id)!.scrollIntoView({ behavior: "instant" }), start);
+        expect(await settledScrollY(page)).toBeGreaterThan(500);
+      }
+      await header.getByRole("link", { name, exact: true }).click();
+      await page.waitForURL((url) => url.pathname === path);
+      expect(await settledScrollY(page), `${path} from the landing page ${start ? `at #${start}` : "at its top"}`).toBe(0);
+    }
+  }
+  // The logo, from far down /pricing.
+  await page.goto("/pricing");
+  await page.evaluate(() => document.getElementById("compare")!.scrollIntoView({ behavior: "instant" }));
+  const left = await settledScrollY(page);
+  expect(left).toBeGreaterThan(300);
+  await header.getByRole("link", { name: "Bidfolio", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/");
+  expect(await settledScrollY(page), "the landing page from the logo").toBe(0);
+
+  // A section of another page: just under the header, heading on screen. Back returns to the table.
+  await page.goBack();
+  await page.waitForURL((url) => url.pathname === "/pricing");
+  expect(Math.abs((await settledScrollY(page)) - left), "Back to /pricing").toBeLessThanOrEqual(2);
+  await header.getByRole("link", { name: "How it works", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/" && url.hash === "#how");
+  await settledScrollY(page);
+  let place = await sectionPlace(page, "how");
+  expect(place.gap).toBeGreaterThanOrEqual(0);
+  expect(place.gap).toBeLessThanOrEqual(24);
+  expect(place.headingInView).toBe(true);
+  await page.goBack();
+  await page.waitForURL((url) => url.pathname === "/pricing");
+  expect(Math.abs((await settledScrollY(page)) - left), "Back from /#how").toBeLessThanOrEqual(2);
+  await page.goForward();
+  await page.waitForURL((url) => url.hash === "#how");
+  // From a section, the logo means the very top of the same page.
+  await settledScrollY(page);
+  await header.getByRole("link", { name: "Bidfolio", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/" && url.hash === "");
+  expect(await settledScrollY(page), "the logo on the landing page, from #how").toBe(0);
+
+  // Phones: the links are in the menu sheet, and focus going back to the menu button must not
+  // cut the move short (it did: the page slid back to where the menu was opened).
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/pricing");
+  await header.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("dialog").getByRole("link", { name: "Questions", exact: true }).click();
+  await settledScrollY(page);
+  place = await sectionPlace(page, "questions");
+  expect(place.gap).toBeGreaterThanOrEqual(0);
+  expect(place.gap).toBeLessThanOrEqual(24);
+  await header.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("dialog").getByRole("link", { name: "How it works", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/" && url.hash === "#how");
+  await settledScrollY(page);
+  place = await sectionPlace(page, "how");
+  expect(place.gap).toBeGreaterThanOrEqual(0);
+  expect(place.gap).toBeLessThanOrEqual(24);
+  // Focus on a control of the sticky header leaves the page where it is.
+  const held = await settledScrollY(page);
+  await page.evaluate(() => (document.querySelector("[data-slot='site-header'] a") as HTMLElement).focus());
+  expect(await settledScrollY(page), "focus on the logo").toBe(held);
+});
+
 test("signed-out visitors are redirected to sign-in from /app and /admin", async ({ page }) => {
   await page.goto("/app");
   await expect(page).toHaveURL(/\/sign-in\?redirect=%2Fapp$/);

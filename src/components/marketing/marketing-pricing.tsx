@@ -68,7 +68,7 @@ export function BidPassBand({
       id="bid-pass"
       aria-labelledby="bid-pass-title"
       data-testid="bid-pass"
-      className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3 rounded-card bg-brand-tint p-5 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-10 sm:gap-y-5 sm:px-7 sm:py-[1.625rem]"
+      className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3 rounded-card bg-brand-tint p-5 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-10 sm:gap-y-5 sm:px-7 sm:py-[1.625rem]"
     >
       <div className="contents sm:flex sm:min-w-0 sm:flex-[1_1_28.75rem] sm:flex-col sm:gap-1.5">
         <p className="type-eyebrow">{BID_PASS_DISPLAY.name}</p>

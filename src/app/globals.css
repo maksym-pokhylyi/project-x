@@ -243,8 +243,10 @@
   }
 
   html {
+    /* In-page anchors glide. A move to another page never does: <html data-scroll-behavior="smooth">
+       in src/app/layout.tsx lets the router switch this off while it changes the route. */
     scroll-behavior: smooth;
-    scroll-padding-top: calc(var(--header-height) + 1rem);
+    /* No scroll-padding-top here, on purpose: see the scroll-margin rule below. */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
@@ -279,6 +281,34 @@
   table,
   time {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* WHERE A SCROLL STOPS. Three rules, in this order (each is specificity 0; scroll-mt-* on an
+     element overrides them). Checked in a browser by scripts/design/controls.mjs (rule
+     "scroll") and by e2e/app.spec.ts.
+
+     1. The top-level blocks of a page. When the router has to bring "the page" into view
+        (a link to the page you are on, followed from one of its #sections) it scrolls to
+        the first block; with the whole screen asked for above it, that stops at the very
+        top instead of sliding the block under the bar. */
+  :where(main > *) {
+    scroll-margin-top: 100vh;
+  }
+  /* 2. What the browser scrolls to inside a page (the target of an anchor, a control that
+        takes keyboard focus) stops 16 px under the sticky bar instead of behind it.
+
+        This is a margin of the TARGET, not padding of the page (scroll-padding-top on
+        html): page padding also counts the bar's own links and buttons as out of view, so
+        the page jumped half a screen whenever one of them took focus (Tab into the header,
+        focus coming back to the menu button), and the router took every page top for
+        hidden. Limited to <main>: menus, selects and dialogs are rendered outside it and
+        scroll on their own. */
+  :where(main, main :is([id], a, button, input, select, textarea, summary, [tabindex])) {
+    scroll-margin-top: calc(var(--header-height) + 1rem);
+  }
+  /* 3. What sticks is in view already: its own controls ask for no room. */
+  :where(.sticky, .sticky *) {
+    scroll-margin-top: 0;
   }
 
   /* Keyboard focus: one ring, everywhere, always visible. */

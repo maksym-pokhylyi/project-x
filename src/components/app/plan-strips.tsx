@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Dot } from "@/components/ui/dot";
+import { plusVat } from "@/config/billing-copy";
 import { planPrice } from "@/config/plan-display";
 import { PLANS, isBillingInterval, isPlanKey } from "@/config/plans";
 import { BILLING_PATH } from "@/lib/billing/handoff";
@@ -69,8 +70,17 @@ export function TrialStrip({ ctx, now = new Date() }: { ctx: OrgContext; now?: D
           <span className="font-semibold">Trial</span>
           <span className="font-semibold text-accent-ink">{left}</span>
         </p>
+        {/* Two facts, each an inline block: where the line is too short (phones) it breaks
+            between them, after the dot, and never inside the amount or the date. */}
         <p className="order-3 basis-full md:order-2 md:basis-auto">
-          {bids ? `${bids} full bid${bids === 1 ? "" : "s"} included · ` : ""}First payment {planPrice(plan.key, interval).amount} on {formatDate(subscription.trialEnd)}
+          {bids ? (
+            <span className="inline-block">
+              {bids} full bid{bids === 1 ? "" : "s"} included ·&nbsp;
+            </span>
+          ) : null}
+          <span className="inline-block">
+            First payment {plusVat(planPrice(plan.key, interval).amount)} on {formatDate(subscription.trialEnd)}
+          </span>
         </p>
         {ctx.role === "owner" ? (
           <Link href={BILLING_PATH} className="link order-2 inline-flex min-h-11 items-center rounded-sm font-medium md:order-3 md:ml-1.5">
