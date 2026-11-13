@@ -29,6 +29,14 @@ export type CspOptions = {
 
 const PADDLE_SCRIPTS = ["https://cdn.paddle.com", "https://public.profitwell.com"];
 
+/**
+ * Tender packs and library documents go from the browser straight to Vercel Blob (a
+ * serverless function cannot receive bodies over about 4.5 MB): `upload()` from
+ * @vercel/blob/client sends them to this API, and only to it. The trailing slash makes the
+ * source match that path and nothing else on vercel.com.
+ */
+const BLOB_UPLOAD_API = "https://vercel.com/api/blob/";
+
 export function buildContentSecurityPolicy(options: CspOptions): string {
   const analytics = options.analyticsOrigins ?? [];
   const evalForDev = options.isDevelopment ? ["'unsafe-eval'"] : [];
@@ -45,7 +53,7 @@ export function buildContentSecurityPolicy(options: CspOptions): string {
     ["style-src", "'self'", "'unsafe-inline'", "https://cdn.paddle.com", "https://sandbox-cdn.paddle.com"],
     ["img-src", "'self'", "data:", "blob:", "https://*.paddle.com"],
     ["font-src", "'self'", "data:"],
-    ["connect-src", "'self'", "https://*.paddle.com", "https://*.profitwell.com", ...analytics],
+    ["connect-src", "'self'", "https://*.paddle.com", "https://*.profitwell.com", BLOB_UPLOAD_API, ...analytics],
     ["frame-src", "https://buy.paddle.com", "https://sandbox-buy.paddle.com"],
     ["worker-src", "'self'", "blob:"],
     ["frame-ancestors", "'none'"],

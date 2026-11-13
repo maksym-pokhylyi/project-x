@@ -25,6 +25,8 @@ export const formatBillingDate = (date: Date) => date.toLocaleDateString("en-GB"
 const card = "flex min-w-0 flex-col rounded-card border border-line bg-surface p-4 md:px-6 md:pt-[1.375rem] md:pb-6";
 const label = "font-sans text-base leading-[1.5] font-semibold text-ink md:text-15";
 const actions = "mt-auto flex flex-col gap-2.5 pt-4 sm:flex-row sm:flex-wrap md:pt-[1.125rem]";
+/** A further block inside a card, under a hairline: 16 px above and below the rule on phones, 18 px from 768 px. */
+const divided = "mt-4 border-t border-line pt-4 md:mt-4.5 md:pt-4.5";
 const serifTitle = "font-display text-xl leading-[1.25] font-semibold tracking-normal text-ink md:text-[1.375rem]";
 
 /** Two cards side by side from 1200 px of page; one under the other below that. */
@@ -103,7 +105,7 @@ export function CurrentPlanCard({ planName, price, summary, status, note, dateLi
 export type AllowancePerson = { id: string; name: string; email: string; isOwner: boolean; isYou: boolean };
 
 export type AllowanceCardProps = {
-  /** From the bids module through src/server/bid-allowance.ts. Null while it is not connected: no count is shown. */
+  /** From the bids module through src/server/bid-allowance.ts. Null when it cannot be read: no count is shown. */
   allowance: BidAllowance | null;
   /** Full bids the plan gives each billing period, from the catalogue (0 on Free and Radar Pro). */
   planFullBids: number;
@@ -125,7 +127,11 @@ function initials(name: string, email: string): string {
 
 export function AllowanceCard({ allowance, planFullBids, planName, renewsAt, seats, people, inviteHref }: AllowanceCardProps) {
   const bids = allowance?.fullBids ?? null;
-  const renews = bids?.renewsAt ?? renewsAt;
+  const checks = allowance?.checks ?? null;
+  const hasBids = bids !== null && bids.limit !== 0;
+  const hasChecks = checks !== null && checks.limit !== 0;
+  // What renews is the bids, or the checks on a plan without bids; the subscription's date when neither is known.
+  const renews = allowance ? (bids?.renewsAt ?? checks?.renewsAt ?? null) : renewsAt;
   const passes = allowance?.bidPasses ?? 0;
   return (
     <section aria-labelledby="billing-allowance" data-testid="usage-panel" className={card}>
@@ -134,11 +140,16 @@ export function AllowanceCard({ allowance, planFullBids, planName, renewsAt, sea
       </h2>
 
       <div className="mt-3.5">
-        {bids && bids.limit > 0 ? (
+        {bids && hasBids ? (
           <UsageBar label="Full bids" used={bids.used} limit={bids.limit}>
+            {bids.trial ? (
+              <p className="text-13 leading-[1.5] text-ink-2" data-testid="allowance-note">
+                {bids.limit === 1 ? "One full bid is" : `${bids.limit} full bids are`} included in your trial.{planFullBids > 0 ? ` ${planFullBids} a month start with your first payment.` : ""}
+              </p>
+            ) : null}
             {bids.rolledOver ? (
-              <p className="flex items-start gap-2 text-13 leading-[1.5] text-ink tabular-nums">
-                <span aria-hidden className="mt-[0.3125rem] size-[0.5625rem] shrink-0 rounded-full bg-accent" />
+              <p className="flex items-baseline gap-2 text-13 leading-[1.5] text-ink tabular-nums">
+                <span aria-hidden className="size-[0.5625rem] shrink-0 rounded-full bg-accent" />
                 <span>
                   {bids.rolledOver.count} unused {bids.rolledOver.count === 1 ? "bid" : "bids"} rolled over from {bids.rolledOver.fromLabel}:{" "}
                   <span className="font-semibold text-accent-ink">
@@ -155,7 +166,7 @@ export function AllowanceCard({ allowance, planFullBids, planName, renewsAt, sea
             ) : null}
           </UsageBar>
         ) : (
-          /* No count to show: either the plan has no full bids, or the bids module is not connected yet. */
+          /* No count to show: either the plan has no full bids, or the count could not be read. */
           <UsageBar label="Full bids" value={bids ? (passes > 0 ? `${passes} from ${BID_PASS_DISPLAY.name}${passes === 1 ? "" : "es"}` : "None") : planFullBids > 0 ? `${planFullBids} a month` : "None"}>
             <p className="text-13 leading-[1.5] text-ink-2" data-testid="allowance-note">
               {planFullBids > 0
@@ -166,7 +177,17 @@ export function AllowanceCard({ allowance, planFullBids, planName, renewsAt, sea
         )}
       </div>
 
-      <div className="mt-4 border-t border-line pt-4 md:mt-[1.125rem] md:pt-[1.125rem]">
+      {checks && hasChecks ? (
+        <div className={divided}>
+          <UsageBar label="Cited bid checks" used={checks.used} limit={checks.limit} />
+        </div>
+      ) : allowance?.freeCheckAvailable && !hasBids ? (
+        <p className="mt-3 text-13 leading-[1.5] text-ink" data-testid="free-check-note">
+          Your one free cited bid check is still unused.
+        </p>
+      ) : null}
+
+      <div className={divided}>
         <UsageBar label="Seats" used={seats.used} limit={seats.limit} data-testid="billing-seats">
           <div className="flex flex-col gap-x-4 gap-y-2 pt-0.5 md:flex-row md:flex-wrap md:items-end md:justify-between md:gap-y-2.5 max-md:controls-md">
             <ul aria-label="People using a seat" className="flex min-w-0 flex-col md:flex-[1_1_16.25rem]">

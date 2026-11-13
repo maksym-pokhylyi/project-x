@@ -46,7 +46,7 @@ export const QUOTA_METRICS = defineQuotaMetrics({
   },
   "briefs.monthly": {
     label: "Cited bid checks",
-    description: "Cited bid checks run on their own this month (a full bid includes its check).",
+    description: "Cited bid checks run on their own this month. A full bid includes its check, so the plans with full bids have no separate allowance (0).",
     period: "month",
   },
 });
@@ -205,7 +205,8 @@ export const PLANS: Record<PlanKey, Plan> = {
       "radar.profiles": 5,
       "radar.matches": null,
       "briefs.lifetime": 1,
-      "briefs.monthly": null,
+      // No separate allowance: on these plans the check comes with each full bid.
+      "briefs.monthly": 0,
       "bids.monthly": FULL_BIDS.pro,
     },
     features: { apiAccess: true, advancedExports: true, auditLog: true, prioritySupport: false, "radar.full": true, "bids.drafting": true, "workspaces.clients": false },
@@ -236,7 +237,8 @@ export const PLANS: Record<PlanKey, Plan> = {
       "radar.profiles": 5,
       "radar.matches": null,
       "briefs.lifetime": 1,
-      "briefs.monthly": null,
+      // No separate allowance: on these plans the check comes with each full bid.
+      "briefs.monthly": 0,
       "bids.monthly": FULL_BIDS.business,
     },
     features: { apiAccess: true, advancedExports: true, auditLog: true, prioritySupport: true, "radar.full": true, "bids.drafting": true, "workspaces.clients": true },

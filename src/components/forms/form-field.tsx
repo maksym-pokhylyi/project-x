@@ -4,6 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
+/**
+ * The shape every field shares: a label line (14 px on a 21 px line), 6 px, the control,
+ * then 6 px to a hint or an error. FormField, Field and FormRowAction are all built from
+ * these two constants, which is what makes the controls of a row line up by construction.
+ */
+const fieldStack = "flex flex-col gap-1.5";
+const labelLine = "text-sm leading-[1.5]";
+
 /** Helper text under a control. */
 export function FieldHint({ id, className, children }: { id?: string; className?: string; children: ReactNode }) {
   return (
@@ -46,9 +54,11 @@ export function FormField({
   const id = `field-${name}`;
   const describedBy = [error ? `${id}-error` : null, hint ? `${id}-hint` : null].filter(Boolean).join(" ") || undefined;
   return (
-    <div className="space-y-1.5">
+    <div data-slot="form-field" className={fieldStack}>
       <div className="flex items-baseline justify-between gap-2">
-        <Label htmlFor={id}>{label}</Label>
+        <Label htmlFor={id} className={labelLine}>
+          {label}
+        </Label>
         {trailing}
       </div>
       <Input id={id} name={name} aria-invalid={error ? true : undefined} aria-describedby={describedBy} {...inputProps} />
@@ -59,9 +69,8 @@ export function FormField({
 }
 
 /**
- * Label above any other control (a select, a textarea, a custom input), with the same 6 px
- * and the same hint and error lines as FormField. The control is the child; give it the
- * `id` you pass as `htmlFor`.
+ * Label above any other control (a select, a textarea, a custom input), with the same
+ * shape as FormField. The control is the child; give it the `id` you pass as `htmlFor`.
  */
 export function Field({
   label,
@@ -79,8 +88,10 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("space-y-1.5", className)}>
-      <Label htmlFor={htmlFor}>{label}</Label>
+    <div data-slot="form-field" className={cn(fieldStack, className)}>
+      <Label htmlFor={htmlFor} className={labelLine}>
+        {label}
+      </Label>
       {children}
       {hint && !error ? <FieldHint id={`${htmlFor}-hint`}>{hint}</FieldHint> : null}
       {error ? <FieldError id={`${htmlFor}-error`}>{error}</FieldError> : null}
@@ -89,16 +100,35 @@ export function Field({
 }
 
 /**
- * Fields side by side with their button, as one line of a form: the button lines up with
- * the fields (it starts under the label line: 21 px of label and 6 px of gap), so a hint or
- * an error under a field does not move it. One under the other on phones, the button last
- * and full width.
+ * A row of labelled fields with its action button (invite a teammate, add a row, search by
+ * two criteria…). Stacks on phones, sits in one line from 640 px.
+ *
+ * Every child has the SAME structure — a label line, a gap, then the control — so controls
+ * line up by construction, with or without an error under a field. The action goes in
+ * <FormRowAction>, which reserves the label line with an invisible spacer. Never line a
+ * button up with fields by a margin offset or by `items-end` (that breaks as soon as a field
+ * shows an error under it).
  */
-export function FormRow({ action, className, children }: { action: ReactNode; className?: string; children: ReactNode }) {
+export function FormRow({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-3", className)}>
+    <div data-slot="form-row" className={cn("flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-3", className)}>
       {children}
-      <div className="flex shrink-0 max-sm:[&>*]:w-full sm:pt-[1.6875rem]">{action}</div>
+    </div>
+  );
+}
+
+/**
+ * The action of a <FormRow>: mirrors a field (label line + gap + control) so the button
+ * meets the controls exactly. On phones the label line is not reserved and the button takes
+ * the full width, last in the stack.
+ */
+export function FormRowAction({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <div data-slot="form-row-action" className={cn(fieldStack, "shrink-0", className)}>
+      <span aria-hidden className={cn(labelLine, "hidden select-none sm:block")}>
+        &nbsp;
+      </span>
+      {children}
     </div>
   );
 }

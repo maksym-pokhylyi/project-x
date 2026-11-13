@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Form } from "@/components/forms/form";
-import { Field, FormError, FormField, FormRow } from "@/components/forms/form-field";
+import { Field, FormError, FormField, FormRow, FormRowAction } from "@/components/forms/form-field";
 import { NativeSelect } from "@/components/forms/native-select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,13 +58,7 @@ export function InviteForm({ seatsAvailable, canInvite }: { seatsAvailable: bool
   return (
     <Form onSubmit={onSubmit} noValidate className="space-y-3" data-testid="invite-form">
       <FormError message={formError} />
-      <FormRow
-        action={
-          <Button type="submit" disabled={!seatsAvailable} loading={pending}>
-            {pending ? "Sending…" : "Send invitation"}
-          </Button>
-        }
-      >
+      <FormRow>
         <div className="min-w-0 flex-1">
           <FormField label="Email address" name="email" type="email" placeholder="colleague@company.com" required error={errors.email?.[0]} />
         </div>
@@ -74,6 +68,11 @@ export function InviteForm({ seatsAvailable, canInvite }: { seatsAvailable: bool
             <option value="admin">Admin</option>
           </NativeSelect>
         </Field>
+        <FormRowAction>
+          <Button type="submit" disabled={!seatsAvailable} loading={pending}>
+            {pending ? "Sending…" : "Send invitation"}
+          </Button>
+        </FormRowAction>
       </FormRow>
       {!seatsAvailable ? (
         <p role="status" className="text-sm text-ink-2">

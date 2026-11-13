@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/app/page-header";
 import { SettingsFrame } from "@/components/app/settings-nav";
 import { UsagePanel } from "@/components/app/usage-panel";
 import { ButtonLink } from "@/components/ui/button-link";
+import { getBidAllowance } from "@/server/bid-allowance";
 import { requireOrgForPage } from "@/server/session";
 import { getUsageSummary } from "@/server/usage";
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = { title: "Usage" };
 
 export default async function UsagePage() {
   const ctx = await requireOrgForPage();
-  const usage = await getUsageSummary(ctx);
+  const [usage, allowance] = await Promise.all([getUsageSummary(ctx), getBidAllowance(ctx)]);
   return (
     <SettingsFrame>
       <PageHeader
@@ -25,7 +26,7 @@ export default async function UsagePage() {
           ) : null
         }
       />
-      <UsagePanel usage={usage} planName={ctx.plan.name} />
+      <UsagePanel usage={usage} allowance={allowance} planName={ctx.plan.name} />
     </SettingsFrame>
   );
 }
