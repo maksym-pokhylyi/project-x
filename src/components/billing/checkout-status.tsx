@@ -57,8 +57,8 @@ export function CheckoutStatus({ planNames }: { planNames: Record<string, string
     return (
       <div className="flex flex-col items-center gap-3 text-center" role="status">
         <CheckCircle2 aria-hidden className="size-10 text-success" />
-        <h1 className="text-xl font-semibold tracking-tight">You are on the {planKey ? (planNames[planKey] ?? planKey) : "new"} plan</h1>
-        <p className="max-w-sm text-sm text-muted-foreground">Thank you! Your workspace has been upgraded. A receipt is on its way by e-mail from Paddle.</p>
+        <h1 className="type-h2 text-ink">You are on the {planKey ? (planNames[planKey] ?? planKey) : "new"} plan</h1>
+        <p className="max-w-sm text-sm text-ink-2">Your workspace has been upgraded. Paddle is sending your receipt by e-mail.</p>
         <Button asChild>
           <Link href="/app">Continue</Link>
         </Button>
@@ -69,8 +69,8 @@ export function CheckoutStatus({ planNames }: { planNames: Record<string, string
   if (state === "timeout") {
     return (
       <div className="flex flex-col items-center gap-3 text-center" role="status">
-        <h1 className="text-xl font-semibold tracking-tight">Still confirming your payment</h1>
-        <p className="max-w-sm text-sm text-muted-foreground">
+        <h1 className="type-h2 text-ink">Still confirming your payment</h1>
+        <p className="max-w-sm text-sm text-ink-2">
           This is taking longer than usual. You do not need to pay again: your plan will update automatically as soon as
           the payment is confirmed. If it has not updated in a few minutes, contact support.
         </p>
@@ -83,9 +83,9 @@ export function CheckoutStatus({ planNames }: { planNames: Record<string, string
 
   return (
     <div className="flex flex-col items-center gap-3 text-center" role="status" aria-live="polite">
-      <Loader2 aria-hidden className="size-8 animate-spin text-muted-foreground" />
-      <h1 className="text-xl font-semibold tracking-tight">Confirming your payment…</h1>
-      <p className="max-w-sm text-sm text-muted-foreground">This usually takes a few seconds. Please keep this page open.</p>
+      <Loader2 aria-hidden className="size-8 animate-spin text-ink-2" />
+      <h1 className="type-h2 text-ink">Confirming your payment…</h1>
+      <p className="max-w-sm text-sm text-ink-2">This usually takes a few seconds. Please keep this page open.</p>
     </div>
   );
 }

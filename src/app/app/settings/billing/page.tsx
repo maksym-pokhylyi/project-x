@@ -13,16 +13,16 @@ import { getUsageSummary } from "@/server/usage";
 
 export const metadata: Metadata = { title: "Billing" };
 
-const STATUS_LABEL: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  active: { label: "Active", variant: "default" },
-  trialing: { label: "Trial", variant: "default" },
+const STATUS_LABEL: Record<string, { label: string; variant: "success" | "info" | "secondary" | "destructive" | "outline" }> = {
+  active: { label: "Active", variant: "success" },
+  trialing: { label: "Trial", variant: "info" },
   past_due: { label: "Past due", variant: "destructive" },
   paused: { label: "Paused", variant: "outline" },
-  canceled: { label: "Canceled", variant: "outline" },
+  canceled: { label: "Cancelled", variant: "outline" },
 };
 
 const formatDate = (date: Date | null | undefined) =>
-  date ? date.toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" }) : null;
+  date ? date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : null;
 
 export default async function BillingPage({ searchParams }: { searchParams: Promise<{ plan?: string; interval?: string }> }) {
   // Owner only: admins and members get the 403 page.
@@ -79,29 +79,31 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
                       : "Subscription active."}
           </CardDescription>
         </CardHeader>
+        {subscription?.customerEmail || subscription?.paddleCustomerId ? (
         <CardContent className="space-y-3">
           {subscription?.customerEmail ? (
-            <p className="text-sm text-muted-foreground">
-              Receipts are sent to <span className="font-medium text-foreground">{subscription.customerEmail}</span>.
+            <p className="text-sm text-ink-2">
+              Receipts are sent to <span className="font-medium text-ink">{subscription.customerEmail}</span>.
             </p>
           ) : null}
           {subscription?.paddleCustomerId ? (
             features.paddleApi ? (
               <ManageBillingButton />
             ) : (
-              <p className="text-sm text-muted-foreground" data-testid="portal-not-configured">
+              <p className="text-sm text-ink-2" data-testid="portal-not-configured">
                 Self-service billing is unavailable because <code>PADDLE_API_KEY</code> is not configured. Use the links in
                 your Paddle receipt, or contact support.
               </p>
             )
           ) : null}
         </CardContent>
+        ) : null}
       </Card>
 
       <UsagePanel usage={usage} planName={ctx.plan.name} />
 
       <section aria-labelledby="plans-title" className="space-y-4">
-        <h2 id="plans-title" className="text-lg font-semibold tracking-tight">
+        <h2 id="plans-title" className="type-h3 text-ink">
           Plans
         </h2>
         <BillingPlans

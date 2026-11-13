@@ -7,26 +7,31 @@ export function UsageMeter({
   used,
   limit,
   hint,
-  format = (value) => value.toLocaleString("en-US"),
+  valueText,
+  format = (value) => value.toLocaleString("en-GB"),
 }: {
   label: string;
   used: number;
   limit: number | null;
   hint?: string;
+  /** Replaces the default "used of limit" text, e.g. "12% used". */
+  valueText?: string;
   format?: (value: number) => string;
 }) {
   const percent = limit === null ? 0 : limit === 0 ? 100 : Math.min(100, Math.round((used / limit) * 100));
   const atLimit = limit !== null && used >= limit;
+  const nearLimit = !atLimit && limit !== null && percent >= 90;
   return (
     <div className="space-y-2">
-      <div className="flex items-baseline justify-between gap-2 text-sm">
-        <span className="font-medium">{label}</span>
-        <span className={cn("tabular-nums text-muted-foreground", atLimit && "font-medium text-destructive")}>
-          {format(used)} {limit === null ? "· unlimited" : `of ${format(limit)}`}
+      <div className="flex items-baseline justify-between gap-3 text-sm">
+        <span className="font-medium text-ink">{label}</span>
+        <span className={cn("text-ink-2 tabular-nums", nearLimit && "font-medium text-accent-ink", atLimit && "font-medium text-danger")}>
+          {valueText ?? `${format(used)} ${limit === null ? "· unlimited" : `of ${format(limit)}`}`}
+          {atLimit ? <span className="ml-1.5">· limit reached</span> : null}
         </span>
       </div>
-      {limit === null ? null : <Progress value={percent} aria-label={`${label}: ${percent}% used`} />}
-      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {limit === null ? null : <Progress value={percent} tone={atLimit ? "danger" : nearLimit ? "warning" : "brand"} aria-label={`${label}: ${percent}% used`} />}
+      {hint ? <p className="text-13 text-ink-2">{hint}</p> : null}
     </div>
   );
 }

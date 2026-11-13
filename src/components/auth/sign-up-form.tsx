@@ -77,7 +77,7 @@ export function SignUpForm({
           hint="At least 8 characters."
           error={errors.password?.[0]}
         />
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button type="submit" className="w-full" loading={pending}>
           {pending ? "Creating account…" : "Create account"}
         </Button>
       </form>

@@ -21,7 +21,16 @@ import { WorkspaceAvatar } from "./workspace-avatar";
 
 export type SwitcherWorkspace = { id: string; name: string; logo: string | null; role: string };
 
-export function WorkspaceSwitcher({ current, workspaces }: { current: SwitcherWorkspace; workspaces: SwitcherWorkspace[] }) {
+export function WorkspaceSwitcher({
+  current,
+  workspaces,
+  testId = "workspace-switcher",
+}: {
+  current: SwitcherWorkspace;
+  workspaces: SwitcherWorkspace[];
+  /** The sidebar instance keeps the default id; a second instance (mobile sheet) must pass its own. */
+  testId?: string;
+}) {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -63,24 +72,24 @@ export function WorkspaceSwitcher({ current, workspaces }: { current: SwitcherWo
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-auto w-full justify-between gap-2 px-2 py-1.5" data-testid="workspace-switcher">
-            <span className="flex min-w-0 items-center gap-2">
+          <Button variant="outline" className="h-11 w-full justify-between gap-2 px-2.5" data-testid={testId}>
+            <span className="flex min-w-0 items-center gap-2.5">
               <WorkspaceAvatar name={current.name} logo={current.logo} />
               <span className="truncate text-sm font-medium" data-testid="current-workspace-name">
                 {current.name}
               </span>
             </span>
-            <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+            <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-ink-2" />
             <span className="sr-only">Switch workspace</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64">
-          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Workspaces</DropdownMenuLabel>
+        <DropdownMenuContent align="start" className="w-(--radix-dropdown-menu-trigger-width) min-w-56">
+          <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
           {workspaces.map((workspace) => (
             <DropdownMenuItem key={workspace.id} onSelect={() => void switchTo(workspace.id)} className="gap-2">
               <WorkspaceAvatar name={workspace.name} logo={workspace.logo} />
               <span className="min-w-0 flex-1 truncate">{workspace.name}</span>
-              {workspace.id === current.id ? <Check aria-label="Current workspace" className="size-4" /> : null}
+              {workspace.id === current.id ? <Check aria-label="Current workspace" className="size-4 text-brand" /> : null}
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
@@ -103,7 +112,7 @@ export function WorkspaceSwitcher({ current, workspaces }: { current: SwitcherWo
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={pending}>
+              <Button type="submit" loading={pending}>
                 {pending ? "Creating…" : "Create workspace"}
               </Button>
             </DialogFooter>

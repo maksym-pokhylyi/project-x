@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { tabListClasses, tabTriggerClasses } from "@/components/ui/tabs";
 
+/** Settings sections as link tabs (same look as the Tabs primitive; real links, so they deep-link). */
 export function SettingsNav({ showBilling }: { showBilling: boolean }) {
   const pathname = usePathname();
   const tabs = [
@@ -11,21 +12,14 @@ export function SettingsNav({ showBilling }: { showBilling: boolean }) {
     { href: "/app/settings/workspace", label: "Workspace" },
     { href: "/app/settings/members", label: "Members" },
     ...(showBilling ? [{ href: "/app/settings/billing", label: "Billing" }] : []),
+    { href: "/app/usage", label: "Usage" },
   ];
   return (
-    <nav aria-label="Settings" className="-mx-1 flex gap-1 overflow-x-auto border-b px-1">
+    <nav aria-label="Settings" className={tabListClasses}>
       {tabs.map((tab) => {
         const active = pathname.startsWith(tab.href);
         return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium transition-colors",
-              active ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
-            )}
-          >
+          <Link key={tab.href} href={tab.href} aria-current={active ? "page" : undefined} className={tabTriggerClasses}>
             {tab.label}
           </Link>
         );

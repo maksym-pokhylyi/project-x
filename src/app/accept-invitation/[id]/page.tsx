@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AcceptInvitationButton, SignOutButton } from "@/components/auth/accept-invitation";
 import { AuthCard } from "@/components/auth/auth-card";
-import { Logo } from "@/components/logo";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { invitations, organizations } from "@/db/schema";
@@ -53,7 +53,7 @@ export default async function AcceptInvitationPage({ params }: { params: Promise
         title={`Join ${invitation.organizationName}`}
         description={
           <>
-            You were invited as <strong className="text-foreground">{invitation.email}</strong>. Create an account or sign in
+            You were invited as <strong className="font-semibold text-ink">{invitation.email}</strong>. Create an account or sign in
             with that address to accept.
           </>
         }
@@ -74,8 +74,8 @@ export default async function AcceptInvitationPage({ params }: { params: Promise
         title="Wrong account"
         description={
           <>
-            This invitation was sent to <strong className="text-foreground">{invitation.email}</strong>, but you are signed
-            in as <strong className="text-foreground">{user.email}</strong>.
+            This invitation was sent to <strong className="font-semibold text-ink">{invitation.email}</strong>, but you are signed
+            in as <strong className="font-semibold text-ink">{user.email}</strong>.
           </>
         }
       >
@@ -88,7 +88,7 @@ export default async function AcceptInvitationPage({ params }: { params: Promise
         title={`Join ${invitation.organizationName}`}
         description={
           <>
-            You have been invited to join as <strong className="text-foreground">{invitation.role ?? "member"}</strong>.
+            You have been invited to join as <strong className="font-semibold text-ink">{invitation.role ?? "member"}</strong>.
           </>
         }
       >
@@ -97,16 +97,5 @@ export default async function AcceptInvitationPage({ params }: { params: Promise
     );
   }
 
-  return (
-    <div className="flex min-h-dvh flex-col bg-muted/30">
-      <header className="px-4 py-5">
-        <div className="mx-auto max-w-6xl">
-          <Logo />
-        </div>
-      </header>
-      <main id="main" className="flex flex-1 items-start justify-center px-4 pb-16 pt-6 sm:pt-12">
-        {content}
-      </main>
-    </div>
-  );
+  return <AuthShell>{content}</AuthShell>;
 }

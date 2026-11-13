@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/app/page-header";
+import { SettingsNav } from "@/components/app/settings-nav";
 import { UsagePanel } from "@/components/app/usage-panel";
 import { Button } from "@/components/ui/button";
 import { requireOrgForPage } from "@/server/session";
@@ -13,6 +14,7 @@ export default async function UsagePage() {
   const usage = await getUsageSummary(ctx);
   return (
     <div className="space-y-6">
+      <SettingsNav showBilling={ctx.role === "owner"} />
       <PageHeader
         title="Usage"
         description="What this workspace has used against the limits of its plan."

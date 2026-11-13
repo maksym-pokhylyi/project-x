@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { SystemPage } from "@/components/system-page";
 import { Button } from "@/components/ui/button";
+import { site } from "@/config/site";
 
 /**
  * Route-level error boundary. The server error itself is recorded by
@@ -8,13 +11,33 @@ import { Button } from "@/components/ui/button";
  */
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
-    <main id="main" className="flex min-h-[60dvh] flex-col items-center justify-center gap-4 px-4 text-center">
-      <h1 className="text-2xl font-semibold tracking-tight">Something went wrong</h1>
-      <p className="max-w-sm text-sm text-muted-foreground">
-        We have been notified. You can try again; if it keeps happening, contact support
-        {error.digest ? ` and mention reference ${error.digest}` : ""}.
-      </p>
-      <Button onClick={reset}>Try again</Button>
-    </main>
+    <SystemPage
+      code="Error"
+      title="Something went wrong"
+      actions={
+        <>
+          <Button size="lg" onClick={reset}>
+            Try again
+          </Button>
+          <Button asChild size="lg" variant="outline">
+            <Link href="/">Back to the homepage</Link>
+          </Button>
+        </>
+      }
+      reference={
+        error.digest ? (
+          <>
+            If it keeps happening, write to <a href={`mailto:${site.supportEmail}`}>{site.supportEmail}</a> and quote reference{" "}
+            <span className="type-ref font-medium text-ink">{error.digest}</span>.
+          </>
+        ) : (
+          <>
+            If it keeps happening, write to <a href={`mailto:${site.supportEmail}`}>{site.supportEmail}</a>.
+          </>
+        )
+      }
+    >
+      <p>The page could not be shown. The problem has been recorded. Nothing you entered has been lost unless you were in the middle of saving it.</p>
+    </SystemPage>
   );
 }

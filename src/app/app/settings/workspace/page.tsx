@@ -36,26 +36,26 @@ export default async function WorkspaceSettingsPage() {
           </CardHeader>
           <CardContent>
             {!auditEnabled ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ink-2">
                 The audit log is part of the Pro plan and above.{" "}
                 {ctx.role === "owner" ? (
-                  <Link href="/app/settings/billing" className="font-medium text-foreground underline underline-offset-4">
+                  <Link href="/app/settings/billing" className="link font-medium">
                     Upgrade
                   </Link>
                 ) : null}
               </p>
             ) : audit.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No activity recorded yet.</p>
+              <p className="text-sm text-ink-2">No activity recorded yet.</p>
             ) : (
-              <ul className="divide-y text-sm">
+              <ul className="divide-y divide-line text-sm">
                 {audit.map((entry) => (
                   <li key={entry.id} className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center sm:justify-between">
                     <span>
                       <span className="font-medium">{entry.action}</span>{" "}
-                      <span className="text-muted-foreground">by {entry.actorName ?? entry.actorType}</span>
+                      <span className="text-ink-2">by {entry.actorName ?? entry.actorType}</span>
                     </span>
-                    <time dateTime={entry.createdAt.toISOString()} className="text-xs text-muted-foreground">
-                      {entry.createdAt.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" })} UTC
+                    <time dateTime={entry.createdAt.toISOString()} className="text-xs text-ink-2">
+                      {entry.createdAt.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" })} UTC
                     </time>
                   </li>
                 ))}

@@ -1,60 +1,261 @@
-import type { ReactNode } from "react";
+import { TriangleAlert } from "lucide-react";
+import Link from "next/link";
+import { Fragment, type ReactNode } from "react";
 import { site } from "@/config/site";
+import { Placeholders } from "./placeholders";
+
+/**
+ * A block of a legal section:
+ *   string                      a paragraph
+ *   string[]                    a bullet list
+ *   { subheading }              a sub-heading inside the section
+ *   { note }                    a highlighted note
+ *   { table: { head, rows } }   a small table (e.g. retention periods)
+ *
+ * Text supports two inline marks: [label](/path-or-url) for links and [[PLACEHOLDER]] for
+ * seller-specific details that have not been confirmed yet (rendered highlighted).
+ */
+export type LegalBlock =
+  | string
+  | string[]
+  | { subheading: string }
+  | { note: string }
+  | { table: { head: string[]; rows: string[][] } };
 
 export type LegalSection = {
   heading: string;
-  /** Paragraphs (strings) and bullet lists (string arrays), rendered in order. */
-  body: Array<string | string[]>;
+  /** Anchor id; derived from the heading when omitted. */
+  id?: string;
+  body: LegalBlock[];
 };
+
+const slug = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+const sectionId = (section: LegalSection) => section.id ?? slug(section.heading);
 
 /** True while any seller detail in src/config/site.ts is still a [[PLACEHOLDER]]. */
 export function hasUnfilledPlaceholders(): boolean {
   return Object.values(site.company).some((value) => value.includes("[["));
 }
 
-/**
- * Shared renderer for the legal templates in src/app/(marketing)/legal.
- * The content is a starting point written for a B2B SaaS sold through Paddle
- * (merchant of record). Have it reviewed before launch.
- */
-export function LegalDocument({ title, intro, sections, children }: { title: string; intro: string; sections: LegalSection[]; children?: ReactNode }) {
+const LINK = /\[([^\]\[]+)\]\(([^)\s]+)\)/g;
+
+/** Renders the inline marks of a legal string: links and placeholders. */
+export function LegalText({ text }: { text: string }): ReactNode {
+  const parts: ReactNode[] = [];
+  let last = 0;
+  for (const match of text.matchAll(LINK)) {
+    const [whole, label, href] = match;
+    const index = match.index ?? 0;
+    if (index > last) parts.push(<Placeholders key={`t${index}`} text={text.slice(last, index)} />);
+    parts.push(
+      href!.startsWith("/") ? (
+        <Link key={`l${index}`} href={href!}>
+          {label}
+        </Link>
+      ) : (
+        <a key={`l${index}`} href={href} rel="noopener">
+          {label}
+        </a>
+      ),
+    );
+    last = index + whole.length;
+  }
+  if (last < text.length) parts.push(<Placeholders key="tail" text={text.slice(last)} />);
+  return <>{parts}</>;
+}
+
+function Block({ block }: { block: LegalBlock }) {
+  if (typeof block === "string") {
+    return (
+      <p>
+        <LegalText text={block} />
+      </p>
+    );
+  }
+  if (Array.isArray(block)) {
+    return (
+      <ul className="list-disc space-y-2 pl-5 marker:text-ink-3">
+        {block.map((item) => (
+          <li key={item} className="pl-1">
+            <LegalText text={item} />
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  if ("subheading" in block) {
+    return <h3 className="pt-3 font-sans text-base leading-6 font-semibold text-ink">{block.subheading}</h3>;
+  }
+  if ("note" in block) {
+    return (
+      <p role="note" className="rounded-card border border-info/20 bg-info-tint px-4 py-3 text-base leading-6 text-ink">
+        <LegalText text={block.note} />
+      </p>
+    );
+  }
   return (
-    <article className="mx-auto max-w-3xl px-4 py-14">
-      <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Last updated: {site.legal.lastUpdated}</p>
-
-      {hasUnfilledPlaceholders() ? (
-        <p role="note" className="mt-6 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
-          <strong>Draft template.</strong> Seller details marked like <code>[[THIS]]</code> have not been filled in yet
-          (see <code>src/config/site.ts</code>). This document is not legal advice.
-        </p>
-      ) : null}
-
-      <p className="mt-6 text-sm leading-6 text-muted-foreground">{intro}</p>
-
-      <div className="mt-8 space-y-8">
-        {sections.map((section, index) => (
-          <section key={section.heading} aria-labelledby={`section-${index}`}>
-            <h2 id={`section-${index}`} className="text-lg font-semibold tracking-tight">
-              {index + 1}. {section.heading}
-            </h2>
-            <div className="mt-2 space-y-3 text-sm leading-6 text-muted-foreground">
-              {section.body.map((block, blockIndex) =>
-                Array.isArray(block) ? (
-                  <ul key={blockIndex} className="list-disc space-y-1 pl-5">
-                    {block.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
+    <div className="overflow-x-auto rounded-card border border-line">
+      <table className="w-full min-w-[30rem] border-separate border-spacing-0 text-left text-sm leading-5">
+        <thead>
+          <tr>
+            {block.table.head.map((cell) => (
+              <th key={cell} scope="col" className="border-b border-line bg-surface-sunken px-4 py-2.5 text-13 font-medium text-ink-2">
+                {cell}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="[&_tr:last-child>*]:border-b-0">
+          {block.table.rows.map((row) => (
+            <tr key={row.join("|")}>
+              {row.map((cell, index) =>
+                index === 0 ? (
+                  <th key={index} scope="row" className="border-b border-line bg-surface px-4 py-3 align-top font-medium text-ink">
+                    <LegalText text={cell} />
+                  </th>
                 ) : (
-                  <p key={blockIndex}>{block}</p>
+                  <td key={index} className="border-b border-line bg-surface px-4 py-3 align-top text-ink-2">
+                    <LegalText text={cell} />
+                  </td>
                 ),
               )}
-            </div>
-          </section>
-        ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+const formatDate = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+
+/**
+ * Shared renderer for the long-form pages under /legal: a reading column of 68 characters,
+ * numbered sections with stable anchors, and a table of contents that is sticky beside the
+ * text on desktop and a disclosure above it on phones. Prints as a clean document.
+ *
+ * The documents are written for this product and marked for review; they are not legal advice.
+ * Everything a lawyer or the founder must confirm is listed in docs/legal/TODO.md.
+ */
+export function LegalDocument({
+  title,
+  intro,
+  summary,
+  sections,
+  children,
+}: {
+  title: string;
+  intro: string;
+  /** Optional "at a glance" points shown before the sections. */
+  summary?: string[];
+  sections: LegalSection[];
+  children?: ReactNode;
+}) {
+  const toc = (
+    <ol className="space-y-0.5 text-sm">
+      {sections.map((section, index) => (
+        <li key={sectionId(section)}>
+          <a href={`#${sectionId(section)}`} className="link-quiet grid min-h-8 grid-cols-[1.5rem_1fr] items-baseline rounded-sm py-1.5 text-ink-2">
+            <span className="text-ink-3 tabular-nums">{index + 1}</span>
+            <span>{section.heading}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  );
+
+  return (
+    <div className="container-content py-12 lg:py-16">
+      <div className="grid gap-x-16 gap-y-8 lg:grid-cols-[15rem_minmax(0,1fr)]">
+        <aside data-print="hide" className="hidden lg:block">
+          <nav aria-label="On this page" className="sticky top-24 max-h-[calc(100dvh-8rem)] overflow-y-auto pr-2">
+            <p className="type-eyebrow mb-3 text-ink-2">On this page</p>
+            {toc}
+          </nav>
+        </aside>
+
+        <article data-print="urls" className="max-w-reading min-w-0">
+          <header>
+            <p className="type-eyebrow text-brand">Legal</p>
+            <h1 className="type-h1 mt-3 text-ink">{title}</h1>
+            <p className="mt-3 text-sm text-ink-2">
+              Last updated <time dateTime={site.legal.lastUpdated}>{formatDate(site.legal.lastUpdated)}</time>
+            </p>
+          </header>
+
+          {hasUnfilledPlaceholders() ? (
+            <p role="note" className="mt-6 flex items-start gap-3 rounded-card border border-accent/25 bg-accent-tint px-4 py-3 text-sm text-ink">
+              <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-accent-ink" />
+              <span>
+                <strong className="font-semibold">Draft for review.</strong> Details marked like <Placeholders text="[[THIS]]" /> have not been confirmed yet. This
+                document has not been reviewed by a lawyer and is not legal advice.
+              </span>
+            </p>
+          ) : null}
+
+          <p className="type-lead mt-6">
+            <LegalText text={intro} />
+          </p>
+
+          {summary ? (
+            <section aria-labelledby="at-a-glance" className="mt-8 rounded-card border border-line bg-surface p-5">
+              <h2 id="at-a-glance" className="font-sans text-base leading-6 font-semibold text-ink">
+                At a glance
+              </h2>
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-base leading-6 text-ink-2 marker:text-ink-3">
+                {summary.map((item) => (
+                  <li key={item} className="pl-1">
+                    <LegalText text={item} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          <details data-print="hide" className="group mt-8 rounded-card border border-line bg-surface lg:hidden">
+            <summary className="flex min-h-12 items-center justify-between px-4 text-sm font-medium text-ink">
+              On this page
+              <span aria-hidden className="text-ink-2 transition-transform group-open:rotate-45">
+                +
+              </span>
+            </summary>
+            <nav aria-label="On this page" className="border-t border-line px-4 py-3">
+              {toc}
+            </nav>
+          </details>
+
+          <div className="mt-10 space-y-12">
+            {sections.map((section, index) => (
+              <section key={sectionId(section)} id={sectionId(section)} aria-labelledby={`${sectionId(section)}-title`} className="scroll-mt-24">
+                <h2 id={`${sectionId(section)}-title`} className="type-h3 font-semibold text-ink">
+                  <span className="mr-2 text-ink-3 tabular-nums">{index + 1}.</span>
+                  {section.heading}
+                </h2>
+                <div className="type-reading mt-4 space-y-4 text-ink">
+                  {section.body.map((block, blockIndex) => (
+                    <Fragment key={blockIndex}>
+                      <Block block={block} />
+                    </Fragment>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+
+          {children}
+
+          <footer className="mt-12 border-t border-line pt-6 text-sm text-ink-2">
+            <p>
+              Questions about this document? Write to <a href={`mailto:${site.supportEmail}`}>{site.supportEmail}</a>.
+            </p>
+          </footer>
+        </article>
       </div>
-      {children}
-    </article>
+    </div>
   );
 }

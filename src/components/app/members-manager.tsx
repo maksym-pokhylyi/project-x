@@ -52,7 +52,7 @@ export function InviteForm({ seatsAvailable, canInvite }: { seatsAvailable: bool
   }
 
   if (!canInvite) {
-    return <p className="text-sm text-muted-foreground">Only owners and admins can invite members.</p>;
+    return <p className="text-sm text-ink-2">Only owners and admins can invite members.</p>;
   }
 
   return (
@@ -69,12 +69,12 @@ export function InviteForm({ seatsAvailable, canInvite }: { seatsAvailable: bool
             <option value="admin">Admin</option>
           </NativeSelect>
         </div>
-        <Button type="submit" disabled={pending || !seatsAvailable} className="sm:mt-[1.625rem]">
+        <Button type="submit" disabled={!seatsAvailable} loading={pending} className="sm:mt-[1.625rem]">
           {pending ? "Sending…" : "Send invitation"}
         </Button>
       </div>
       {!seatsAvailable ? (
-        <p role="status" className="text-sm text-muted-foreground">
+        <p role="status" className="text-sm text-ink-2">
           All seats of your plan are in use. Upgrade the plan or remove a member to invite someone new.
         </p>
       ) : null}
@@ -118,18 +118,18 @@ export function MembersList({
 
   return (
     <>
-      <ul className="divide-y" data-testid="members-list">
+      <ul className="divide-y divide-line" data-testid="members-list">
         {members.map((member) => {
           const isSelf = member.userId === currentUserId;
           // Admins manage members and admins; only owners can touch owners.
           const editable = canManage && !isSelf && (currentRole === "owner" || member.role !== "owner");
           return (
-            <li key={member.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between" data-testid="member-row">
+            <li key={member.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between" data-testid="member-row">
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">
-                  {member.name} {isSelf ? <span className="font-normal text-muted-foreground">(you)</span> : null}
+                <p className="truncate text-sm font-medium text-ink">
+                  {member.name} {isSelf ? <span className="font-normal text-ink-2">(you)</span> : null}
                 </p>
-                <p className="truncate text-sm text-muted-foreground">{member.email}</p>
+                <p className="truncate text-sm text-ink-2">{member.email}</p>
               </div>
               <div className="flex items-center gap-2">
                 {editable ? (
@@ -208,18 +208,18 @@ export function InvitationsList({ invitations }: { invitations: InvitationItem[]
   }
 
   if (invitations.length === 0) {
-    return <p className="text-sm text-muted-foreground">No pending invitations.</p>;
+    return <p className="text-sm text-ink-2">No pending invitations.</p>;
   }
 
   return (
-    <ul className="divide-y" data-testid="invitations-list">
+    <ul className="divide-y divide-line" data-testid="invitations-list">
       {invitations.map((invitation) => (
-        <li key={invitation.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <li key={invitation.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{invitation.email}</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="truncate text-sm font-medium text-ink">{invitation.email}</p>
+            <p className="text-sm text-ink-2">
               {ROLE_LABEL[invitation.role as keyof typeof ROLE_LABEL] ?? invitation.role} · expires{" "}
-              {new Date(invitation.expiresAt).toLocaleDateString("en-US", { dateStyle: "medium" })}
+              {new Date(invitation.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
             </p>
           </div>
           <div className="flex items-center gap-2">

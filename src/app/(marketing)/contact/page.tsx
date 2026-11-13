@@ -1,49 +1,91 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { Placeholders } from "@/components/marketing/placeholders";
+import { Eyebrow } from "@/components/marketing/section";
 import { site } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: `How to reach the ${site.name} team.`,
+  description: `How to reach ${site.name}: support, corrections to a public page, privacy requests and billing.`,
   alternates: { canonical: "/contact" },
 };
 
+const { company } = site;
+
+function Row({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="grid gap-x-8 gap-y-1 border-t border-line py-5 sm:grid-cols-[14rem_1fr]">
+      <dt className="text-base leading-6 font-semibold text-ink">{title}</dt>
+      <dd className="space-y-2 text-base text-ink-2">{children}</dd>
+    </div>
+  );
+}
+
+const Mail = ({ address }: { address: string }) =>
+  address.includes("[[") ? <Placeholders text={address} /> : <a href={`mailto:${address}`}>{address}</a>;
+
 export default function ContactPage() {
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14">
-      <h1 className="text-3xl font-semibold tracking-tight">Contact</h1>
-      <p className="mt-3 text-muted-foreground">We read every message and usually reply within one business day.</p>
+    <div className="container-content py-12 lg:py-16">
+      <div className="max-w-3xl">
+        <Eyebrow>Contact</Eyebrow>
+        <h1 className="type-h1 mt-3 text-ink">Talk to the person who builds it.</h1>
+        <p className="type-lead mt-4">
+          {site.name} is run by one founder. Write by email and a person replies, usually within one working day.
+        </p>
 
-      <dl className="mt-8 divide-y rounded-xl border bg-card text-sm">
-        <div className="grid gap-1 p-4 sm:grid-cols-3">
-          <dt className="font-medium">Support &amp; sales</dt>
-          <dd className="sm:col-span-2">
-            <a className="underline underline-offset-4" href={`mailto:${site.supportEmail}`}>
-              {site.supportEmail}
-            </a>
-          </dd>
-        </div>
-        <div className="grid gap-1 p-4 sm:grid-cols-3">
-          <dt className="font-medium">Privacy requests</dt>
-          <dd className="sm:col-span-2">{site.company.privacyContactEmail}</dd>
-        </div>
-        <div className="grid gap-1 p-4 sm:grid-cols-3">
-          <dt className="font-medium">Company</dt>
-          <dd className="sm:col-span-2">
-            {site.company.legalName}
-            <br />
-            {site.company.address}
-            <br />
-            Registration no. {site.company.registrationNumber}
-          </dd>
-        </div>
-        <div className="grid gap-1 p-4 sm:grid-cols-3">
-          <dt className="font-medium">Billing questions</dt>
-          <dd className="sm:col-span-2">
-            Payments, invoices and refunds are handled by Paddle, our merchant of record. Use the link in your receipt
-            or write to us and we will help.
-          </dd>
-        </div>
-      </dl>
+        <dl className="mt-10 border-b border-line">
+          <Row title="Support and questions">
+            <p>
+              <Mail address={site.supportEmail} />
+            </p>
+            <p>Say which workspace you are writing about. Do not send tender documents by email: upload them in the app, where they stay private.</p>
+          </Row>
+          <Row title="Correct or remove a public page">
+            <p>
+              If a supplier, buyer or tender page shows something wrong about your organisation, or you want a page removed, write to <Mail address={site.supportEmail} />{" "}
+              with the address of the page. We act within five working days.
+            </p>
+          </Row>
+          <Row title="Stop emails from us">
+            <p>
+              If we emailed your business about its public contracts, use the <Link href="/optout">opt-out page</Link> or reply to the email. We will not contact you
+              again.
+            </p>
+          </Row>
+          <Row title="Privacy requests and complaints">
+            <p>
+              <Mail address={company.privacyContactEmail} />
+            </p>
+            <p>
+              For a copy of your data, a correction, a deletion or a data protection complaint. We acknowledge complaints within 30 days. See the{" "}
+              <Link href="/legal/privacy">privacy notice</Link>.
+            </p>
+            <p>
+              UK representative: <Placeholders text={company.ukRepresentative} />
+            </p>
+          </Row>
+          <Row title="Billing, invoices and refunds">
+            <p>
+              Payments are processed by Paddle, our merchant of record. Use the link in your Paddle receipt to get an invoice or update a card, or write to us and we
+              will help. Refunds are covered in the <Link href="/legal/refunds">refund policy</Link>.
+            </p>
+          </Row>
+          <Row title="Who we are">
+            <p>
+              <Placeholders text={company.legalName} />
+              <br />
+              <Placeholders text={company.address}></Placeholders>
+              <br />
+              Registration no. <Placeholders text={company.registrationNumber} />
+            </p>
+            <p>
+              {site.name} is an independent service based in {site.facts.operatorCountry}. It is not affiliated with, or endorsed by, the UK Government.
+            </p>
+          </Row>
+        </dl>
+      </div>
     </div>
   );
 }
