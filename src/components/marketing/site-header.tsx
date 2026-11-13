@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
+import { NavLink, navLinkVariants } from "@/components/ui/nav-link";
 import { HeaderSessionLink } from "./header-session-link";
 import { MobileNav } from "./mobile-nav";
 import { findCompany, primaryNav } from "./site-nav";
 
-const navLink = "link-quiet inline-flex min-h-11 items-center rounded-sm text-15 font-medium";
+const navLink = navLinkVariants({ variant: "header" });
 
 /**
  * Public header, as in the landing artboard: the lockup on the left; on the right the
@@ -23,9 +24,9 @@ export function SiteHeader() {
         <div className="hidden items-center gap-8 md:flex">
           <nav aria-label="Main" className="flex items-center gap-8">
             {primaryNav.map((item) => (
-              <Link key={item.href} href={item.href} className={navLink}>
+              <NavLink key={item.href} href={item.href} variant="header" match="exact">
                 {item.label}
-              </Link>
+              </NavLink>
             ))}
             <HeaderSessionLink className={navLink} />
           </nav>

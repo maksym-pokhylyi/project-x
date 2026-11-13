@@ -454,12 +454,24 @@ test("the founder (ADMIN_EMAILS) can open /admin and drill into a workspace", as
   await expect(page).toHaveURL(/\/verify-email/);
   await followOutboxLink(page, founder.email, "verify-email");
   await expect(page).toHaveURL(/\/admin$/);
+  // Navigation always shows where you are: exactly one current item, and it is not marked by a line alone.
+  const adminNav = page.getByRole("navigation", { name: "Admin" });
+  await expect(adminNav.getByRole("link", { name: "Overview" })).toHaveAttribute("aria-current", "page");
+  await expect(adminNav.locator('[aria-current="page"]')).toHaveCount(1);
   await expect(page.getByRole("heading", { level: 1, name: "Overview" })).toBeVisible();
   await expect(page.getByTestId("admin-stat").first()).toContainText("Sign-ups");
   await expect(page.getByTestId("admin-stat").first()).toContainText("3");
   await expect(page.getByText("member.invited").first()).toBeVisible();
 
   await page.goto(`/admin/organizations?q=${encodeURIComponent(WORKSPACE)}`);
+  await expect(adminNav.getByRole("link", { name: "Organizations" })).toHaveAttribute("aria-current", "page");
+  await expect(adminNav.locator('[aria-current="page"]')).toHaveCount(1);
+  const weights = await adminNav.getByRole("link").evaluateAll((links) => links.map((link) => ({ current: link.getAttribute("aria-current") === "page", weight: Number(getComputedStyle(link).fontWeight), color: getComputedStyle(link).color })));
+  const currentLink = weights.find((link) => link.current)!;
+  for (const other of weights.filter((link) => !link.current)) {
+    expect(currentLink.weight, "the current section is heavier than the others").toBeGreaterThan(other.weight);
+    expect(currentLink.color, "the current section differs in colour too").not.toBe(other.color);
+  }
   await page.getByRole("link", { name: WORKSPACE }).click();
   await expect(page.getByRole("heading", { level: 1, name: WORKSPACE })).toBeVisible();
   await expect(page.getByText(owner.email)).toBeVisible();

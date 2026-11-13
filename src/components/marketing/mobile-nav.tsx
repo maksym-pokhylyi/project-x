@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { NavLink } from "@/components/ui/nav-link";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useState } from "react";
 import { Wordmark } from "@/components/logo";
@@ -60,9 +61,9 @@ export function MobileNav() {
             <ul className="divide-y divide-line border-b border-line">
               {primaryNav.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} onClick={close} className="link-quiet flex min-h-[3.25rem] items-center text-17 font-medium">
+                  <NavLink href={item.href} variant="menu" match="exact" onClick={close}>
                     {item.label}
-                  </Link>
+                  </NavLink>
                 </li>
               ))}
               <li>
