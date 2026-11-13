@@ -2,7 +2,8 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import type { OcdsRelease } from "@/features/procurement/domain/ocds";
 import { DEFAULT_SEGMENT, type OutreachSegment } from "@/features/outreach/domain/segment";
-import { actAs, createTestUser, type TestUser } from "../helpers/auth";
+import { forgetOptionalTables } from "@/lib/optional-table";
+import { actAs, createTestUser, requestState, type TestUser } from "../helpers/auth";
 import { resetDatabase } from "../helpers/db";
 import { contractRelease, ingest, NOW } from "../procurement/helpers/factory";
 import { resetProcurement } from "../procurement/helpers/schema";
@@ -91,6 +92,136 @@ export async function signInFounder(): Promise<TestUser> {
   const founder = await createTestUser({ email: founderEmail, name: "Fay Founder" });
   actAs(founder);
   return founder;
+}
+
+/**
+ * The words of rendered markup, as someone reads them: tags become spaces, the comment
+ * markers React puts between adjacent pieces of text disappear, entities are decoded.
+ */
+export function pageText(html: string): string {
+  return html
+    .replace(/<!--.*?-->/gs, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&#x27;|&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** A request with no session, from one client address (the opt-out page's visitor). */
+export function asVisitor(ip = "203.0.113.10"): void {
+  requestState.headers = new Headers({ "x-forwarded-for": ip, origin: "http://localhost:3000", host: "localhost:3000" });
+}
+
+/** Form data from plain values; an array repeats the field (ticked rows). */
+export function form(values: Record<string, string | string[] | File>): FormData {
+  const data = new FormData();
+  for (const [key, value] of Object.entries(values)) for (const entry of Array.isArray(value) ? value : [value]) data.append(key, entry);
+  return data;
+}
+
+export type Sent = { url: string; path: string; params: URLSearchParams };
+
+/**
+ * Posts a form to a Server Action and says where it sent the browser. The outreach actions
+ * always answer with a redirect; with next/navigation mocked as in ./mocks/next that is an
+ * error "REDIRECT:<url>" — or "FORBIDDEN" for someone who is not the founder.
+ */
+export async function submit(action: (formData: FormData) => Promise<void>, values: Record<string, string | string[] | File>): Promise<Sent> {
+  try {
+    await action(form(values));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message === "FORBIDDEN") return { url: "FORBIDDEN", path: "FORBIDDEN", params: new URLSearchParams() };
+    if (message.startsWith("REDIRECT:")) {
+      const url = message.slice("REDIRECT:".length);
+      const parsed = new URL(url, "http://localhost:3000");
+      return { url, path: parsed.pathname, params: parsed.searchParams };
+    }
+    throw error;
+  }
+  throw new Error("the action returned without redirecting");
+}
+
+export type ProspectState = {
+  id: string;
+  company: string;
+  email: string | null;
+  emailKind: string;
+  status: string;
+  skippedReason: string | null;
+  refCode: string;
+  exportedAt: Date | null;
+  sentAt: Date | null;
+  optedOutAt: Date | null;
+  erasedAt: Date | null;
+};
+
+/** Prospects with their company, in list order (the order of the table and of the exported file). */
+export async function prospectStates(campaignId?: string): Promise<ProspectState[]> {
+  const rows = (await db.execute(sql`
+    select p.id, s.name as company, p.email, p.email_kind, p.status, p.skipped_reason, p.ref_code, p.exported_at, p.sent_at, p.opted_out_at, p.erased_at
+    from outreach_prospects p join suppliers s on s.id = p.supplier_id
+    ${campaignId ? sql`where p.campaign_id = ${campaignId}::uuid` : sql``}
+    order by p.created_at asc, p.id asc
+  `)) as unknown as Array<Record<string, unknown>>;
+  const date = (value: unknown) => (value === null || value === undefined ? null : value instanceof Date ? value : new Date(String(value)));
+  return rows.map((row) => ({
+    id: String(row.id),
+    company: String(row.company),
+    email: row.email === null ? null : String(row.email),
+    emailKind: String(row.email_kind),
+    status: String(row.status),
+    skippedReason: row.skipped_reason === null ? null : String(row.skipped_reason),
+    refCode: String(row.ref_code),
+    exportedAt: date(row.exported_at),
+    sentAt: date(row.sent_at),
+    optedOutAt: date(row.opted_out_at),
+    erasedAt: date(row.erased_at),
+  }));
+}
+
+/** One company's prospect. */
+export async function prospectOf(company: string, campaignId?: string): Promise<ProspectState> {
+  const found = (await prospectStates(campaignId)).find((prospect) => prospect.company === company);
+  if (!found) throw new Error(`no prospect for ${company}`);
+  return found;
+}
+
+const tableExists = async (table: string): Promise<boolean> => {
+  const rows = (await db.execute(sql`select to_regclass(${`public.${table}`}) is not null as present`)) as unknown as Array<{ present: boolean }>;
+  return rows[0]?.present === true;
+};
+
+/** Has the bid desk's migration been applied to the test database? (It arrives with another branch.) */
+export const bidDeskInstalled = (): Promise<boolean> => tableExists("bids");
+
+/**
+ * Runs `run` with the bid desk's tables present. Where its migration is not installed,
+ * stand-ins are created with the columns the outreach results and the founder's numbers
+ * read (named as in that migration: `bids.organization_id/title/created_at/ready_at`,
+ * `bid_credits.organization_id/kind/source/granted_at`) and dropped again afterwards.
+ */
+export async function withBidDeskTables<T>(run: () => Promise<T>): Promise<T> {
+  const created: string[] = [];
+  if (!(await tableExists("bids"))) {
+    await db.execute(sql`create table bids (id uuid primary key default gen_random_uuid(), organization_id text not null, title text not null, created_at timestamptz not null default now(), ready_at timestamptz)`);
+    created.push("bids");
+  }
+  if (!(await tableExists("bid_credits"))) {
+    await db.execute(
+      sql`create table bid_credits (id uuid primary key default gen_random_uuid(), organization_id text not null, kind text not null default 'bid_pass', source text not null default 'admin', granted_at timestamptz not null default now())`,
+    );
+    created.push("bid_credits");
+  }
+  forgetOptionalTables();
+  try {
+    return await run();
+  } finally {
+    for (const table of created.reverse()) await db.execute(sql.raw(`drop table if exists "${table}"`));
+    forgetOptionalTables();
+  }
 }
 
 export const count = async (table: string): Promise<number> => {

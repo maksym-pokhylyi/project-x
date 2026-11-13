@@ -270,7 +270,7 @@ export async function getCampaign(campaignId: string, now: Date = new Date()): P
       left join suppliers m on m.id = s.merged_into
       left join lateral (
         select count(*)::int as visits, min(pv.created_at) as first_visit_at
-        from page_visits pv where pv.ref_code = p.ref_code and pv.is_bot = false
+        from page_visits pv where pv.ref_code = p.ref_code and pv.is_bot = false and pv.page_type = 'supplier'
       ) v on true
       where p.campaign_id = ${campaignId}::uuid
       order by p.created_at asc, p.id asc

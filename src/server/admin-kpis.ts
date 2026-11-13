@@ -1,7 +1,6 @@
 import "server-only";
 import { sql } from "drizzle-orm";
-import * as planCatalogue from "@/config/plans";
-import { PLANS, isPlanKey } from "@/config/plans";
+import { PLAN_CURRENCY, PLANS, isPlanKey } from "@/config/plans";
 import { db } from "@/db";
 import { env } from "@/env";
 import { countOpenDataRequests } from "@/features/outreach/server/data-requests";
@@ -58,9 +57,6 @@ const date = (value: unknown): Date | null => {
   return text ? new Date(text) : null;
 };
 const windowed = (row: Row | undefined): Windowed => ({ total: n(row?.total), last7Days: n(row?.d7), last30Days: n(row?.d30) });
-
-/** Catalogue prices are in one currency; a later catalogue names it (`PLAN_CURRENCY`), this product bills in pounds. */
-const CATALOGUE_CURRENCY = (planCatalogue as { PLAN_CURRENCY?: string }).PLAN_CURRENCY ?? "GBP";
 
 const DAY_MS = 86_400_000;
 
@@ -164,7 +160,8 @@ export async function getFounderKpis(now: Date = new Date()): Promise<FounderKpi
       pastDue: subscriptions.filter((subscription) => subscription.status === "past_due").length,
       byPlan: [...byPlan.values()].sort((a, b) => b.paying - a.paying || a.name.localeCompare(b.name)),
     },
-    mrr: { minor: subscriptions.reduce((sum, subscription) => sum + monthlyRevenueCents(subscription), 0), currency: CATALOGUE_CURRENCY },
+    // Catalogue prices are in minor units of one currency (pence), despite the helper's older name.
+    mrr: { minor: subscriptions.reduce((sum, subscription) => sum + monthlyRevenueCents(subscription), 0), currency: PLAN_CURRENCY },
     bidPassSales,
     aiSpendUsd: { today: aiToday, last7Days: ai7, last30Days: ai30, dailyBudget: env.AI_DAILY_BUDGET_USD },
     jobs: { pending: n(jobRow?.pending), running: n(jobRow?.running), failedLast24Hours: n(jobRow?.failed_24h), oldestPendingAt: date(jobRow?.oldest_pending) },
