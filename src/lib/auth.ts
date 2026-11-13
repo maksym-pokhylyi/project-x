@@ -4,7 +4,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware, createEmailVerificationToken, getSessionFromCtx } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins";
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 import { site } from "@/config/site";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
@@ -20,6 +20,7 @@ import { log } from "@/lib/logger";
 import { rateLimit, trustedIpHeaders } from "@/lib/rate-limit";
 import { reportError } from "@/lib/report-error";
 import { SIGNUP_BINDING_COOKIE, issueSignupBinding, signupBindingCookieOptions, signupBindingMatches } from "@/lib/signup-binding";
+import { emailSchema, nameSchema, sanitizeDisplayName, workspaceNameSchema, workspaceSlugSchema } from "@/lib/validation";
 import { createPersonalWorkspace, defaultOrganizationIdForUser } from "@/server/workspaces";
 
 /**
@@ -64,6 +65,52 @@ const SIGN_UP_DISABLED_MESSAGE =
   "Sign-up is not available right now: this site cannot send the e-mail needed to confirm your address. Please try again later or contact support.";
 const EMAIL_UNAVAILABLE_MESSAGE =
   "This site cannot send e-mail right now, so this action is unavailable. Please try again later or contact support.";
+
+/**
+ * 400 with a stable code. The same rules as the app's own forms, enforced HERE so that
+ * calling /api/auth/* directly cannot bypass them (the Server Actions are not the boundary).
+ */
+function invalid(message: string): APIError {
+  return new APIError("BAD_REQUEST", { code: "VALIDATION", message });
+}
+
+function firstIssue(error: { issues: Array<{ message: string }> }, fallback: string): string {
+  return error.issues[0]?.message ?? fallback;
+}
+
+/** Invitations per workspace, however they are created (Server Action or raw endpoint). */
+const INVITATIONS_PER_WORKSPACE = { limit: 30, windowSeconds: 60 * 60 };
+const MEMBER_ROLES = new Set(["member", "admin", "owner"]);
+const INVITABLE_ROLES = new Set(["member", "admin"]);
+
+function assertWorkspaceName(name: unknown): void {
+  const parsed = workspaceNameSchema.safeParse(name);
+  if (!parsed.success) throw invalid(`Workspace name: ${firstIssue(parsed.error, "invalid")}`);
+  if (parsed.data !== name) throw invalid("Workspace name: remove leading and trailing spaces.");
+}
+
+function assertWorkspaceSlug(slug: unknown): void {
+  const parsed = workspaceSlugSchema.safeParse(slug);
+  if (!parsed.success) throw invalid(`Workspace slug: ${firstIssue(parsed.error, "invalid")}`);
+}
+
+/**
+ * Removes the member that was just added if the workspace is now over its seat limit.
+ * Better Auth checks the limit before inserting (check-then-insert), so two invitations
+ * accepted at the same moment could both pass; under a per-workspace lock exactly the
+ * surplus joiners are undone.
+ */
+export async function enforceSeatLimitAfterJoin(organizationId: string, memberId: string, invitationId?: string): Promise<boolean> {
+  const limit = await seatLimit(organizationId);
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`seats:${organizationId}`}))`);
+    const [row] = await tx.select({ value: count() }).from(schema.members).where(eq(schema.members.organizationId, organizationId));
+    if ((row?.value ?? 0) <= limit) return true;
+    await tx.delete(schema.members).where(and(eq(schema.members.id, memberId), eq(schema.members.organizationId, organizationId)));
+    if (invitationId) await tx.update(schema.invitations).set({ status: "pending" }).where(eq(schema.invitations.id, invitationId));
+    return false;
+  });
+}
 
 /** 503 for flows that depend on a deliverable e-mail when there is no way to deliver one. */
 function emailUnavailable(code: string, message: string): APIError {
@@ -197,6 +244,19 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
+        /**
+         * Names end up in other people's inboxes (invitation subject and body). The sign-up
+         * endpoint is strict; a name from an OAuth profile is cleaned instead of refused.
+         */
+        before: async (user, ctx) => {
+          if (ctx?.path === "/sign-up/email") {
+            const parsed = nameSchema.safeParse(user.name);
+            if (!parsed.success) throw invalid(`Name: ${firstIssue(parsed.error, "invalid")}`);
+            if (user.image) throw invalid("A profile image cannot be set at sign-up.");
+            return { data: { ...user, name: parsed.data } };
+          }
+          return { data: { ...user, name: sanitizeDisplayName(user.name ?? "", user.email.split("@")[0] || "User") } };
+        },
         // Runs after the user row is committed. requireOrg() self-heals if this fails.
         after: async (user, ctx) => {
           try {
@@ -206,6 +266,18 @@ export const auth = betterAuth({
           }
           const method = ctx?.path?.startsWith("/callback") || ctx?.path?.startsWith("/sign-in/social") ? "google" : "email";
           await track("user.signed_up", { userId: user.id }, { method });
+        },
+      },
+      update: {
+        before: async (data, ctx) => {
+          if (ctx?.path !== "/update-user") return;
+          if (data.name !== undefined) {
+            const parsed = nameSchema.safeParse(data.name);
+            if (!parsed.success) throw invalid(`Name: ${firstIssue(parsed.error, "invalid")}`);
+            if (parsed.data !== data.name) return { data: { ...data, name: parsed.data } };
+          }
+          // No avatar upload exists; an arbitrary URL would be rendered to other members.
+          if (data.image !== undefined && data.image !== null) throw invalid("A profile image cannot be set.");
         },
       },
     },
@@ -273,9 +345,54 @@ export const auth = betterAuth({
       cancelPendingInvitationsOnReInvite: true,
       // Unconditional: an invitation is only ever accepted by a PROVEN owner of the invited address.
       requireEmailVerificationOnInvitation: true,
+      /**
+       * Server-side rules for every workspace mutation, so the raw /api/auth/organization/*
+       * endpoints obey what the app's forms and Server Actions enforce (name, slug, logo,
+       * roles, invitation volume). Seats are enforced by the two limits above.
+       */
       organizationHooks: {
-        beforeCreateInvitation: async () => {
+        beforeCreateOrganization: async ({ organization: input }) => {
+          assertWorkspaceName(input.name);
+          assertWorkspaceSlug(input.slug);
+          if (input.logo !== undefined && input.logo !== null) throw invalid("A logo can only be set by uploading it.");
+          // `metadata` marks personal workspaces and is never client-writable.
+          if (input.metadata !== undefined && input.metadata !== null) throw invalid("Workspace metadata cannot be set.");
+        },
+        beforeUpdateOrganization: async ({ organization: input, member }) => {
+          if (input.name !== undefined) assertWorkspaceName(input.name);
+          if (input.slug !== undefined) assertWorkspaceSlug(input.slug);
+          if (input.metadata !== undefined) throw invalid("Workspace metadata cannot be changed.");
+          if (input.logo !== undefined && input.logo !== null) {
+            // Only a file this workspace uploaded through /api/workspace/logo; never an external URL
+            // or another key (the upload route deletes whatever own-workspace key the logo names).
+            const own = new RegExp(`^/api/files/org/${member.organizationId}/logo/[A-Za-z0-9][A-Za-z0-9._-]{0,80}$`);
+            if (typeof input.logo !== "string" || !own.test(input.logo)) throw invalid("A logo can only be set by uploading it.");
+          }
+        },
+        beforeCreateInvitation: async ({ invitation, organization: org }) => {
           if (features.mailDelivery === "none") throw emailUnavailable("EMAIL_DELIVERY_UNAVAILABLE", EMAIL_UNAVAILABLE_MESSAGE);
+          if (!INVITABLE_ROLES.has(invitation.role)) throw invalid("Invite people as member or admin.");
+          const email = emailSchema.safeParse(invitation.email);
+          if (!email.success) throw invalid("Enter a valid e-mail address.");
+          const allowed = await rateLimit(`invite:${org.id}`, INVITATIONS_PER_WORKSPACE);
+          if (!allowed.ok) {
+            throw new APIError("TOO_MANY_REQUESTS", {
+              code: "RATE_LIMITED",
+              message: "This workspace has sent too many invitations. Please try again later.",
+              retryAfterSeconds: allowed.retryAfterSeconds,
+            });
+          }
+        },
+        beforeAddMember: async ({ member }) => {
+          if (!MEMBER_ROLES.has(member.role)) throw invalid("Unknown role.");
+        },
+        beforeUpdateMemberRole: async ({ newRole }) => {
+          if (!MEMBER_ROLES.has(newRole)) throw invalid("Unknown role.");
+        },
+        afterAcceptInvitation: async ({ invitation, member }) => {
+          if (!(await enforceSeatLimitAfterJoin(member.organizationId, member.id, invitation.id))) {
+            throw new APIError("FORBIDDEN", { code: "ORGANIZATION_MEMBERSHIP_LIMIT_REACHED", message: "Organization membership limit reached" });
+          }
         },
       },
       // Seats: accepted members may never exceed the plan...

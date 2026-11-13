@@ -10,8 +10,50 @@ import { requireOrgForPage, type OrgContext } from "@/server/session";
 
 export const metadata: Metadata = { title: { default: "App", template: "%s · App" }, robots: { index: false } };
 
+/** Shown while the workspace has more members than its plan allows (see OrgContext.seats). */
+function SeatBanner({ ctx }: { ctx: OrgContext }) {
+  if (!ctx.seats.overLimit) return null;
+  return (
+    <div role="status" data-testid="seat-limit-banner" className="border-b border-warning/40 bg-warning/10 px-4 py-2 text-sm">
+      <strong>
+        This workspace has {ctx.seats.used} members but the {ctx.plan.name} plan includes {ctx.seats.limit}.
+      </strong>{" "}
+      It is read-only and nobody can be invited until{" "}
+      {ctx.role === "owner" ? (
+        <>
+          you{" "}
+          <Link href="/app/settings/members" className="font-medium underline underline-offset-4">
+            remove members
+          </Link>{" "}
+          or{" "}
+          <Link href="/app/settings/billing" className="font-medium underline underline-offset-4">
+            upgrade
+          </Link>
+          .
+        </>
+      ) : (
+        "an owner removes members or upgrades the plan."
+      )}
+    </div>
+  );
+}
+
 function BillingBanner({ ctx }: { ctx: OrgContext }) {
   const { source, graceEndsAt } = ctx.entitlements;
+  if (source === "period_lapsed") {
+    return (
+      <div role="status" data-testid="period-lapsed-banner" className="border-b border-warning/40 bg-warning/10 px-4 py-2 text-sm">
+        <strong>We could not confirm the renewal of this subscription.</strong> The workspace is limited to the Free plan for now.{" "}
+        {ctx.role === "owner" ? (
+          <Link href="/app/settings/billing" className="font-medium underline underline-offset-4">
+            Check billing
+          </Link>
+        ) : (
+          "Ask a workspace owner to check billing."
+        )}
+      </div>
+    );
+  }
   if (source !== "past_due_grace" && source !== "past_due_expired") return null;
   const isOwner = ctx.role === "owner";
   return (
@@ -70,6 +112,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
       <div className="min-w-0">
         <BillingBanner ctx={ctx} />
+        <SeatBanner ctx={ctx} />
         <div className="flex items-center justify-end border-b px-4 py-2 md:hidden">
           <div className="w-full max-w-64">
             <UserMenu name={ctx.user.name} email={ctx.user.email} />

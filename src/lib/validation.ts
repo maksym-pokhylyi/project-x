@@ -11,7 +11,34 @@ export const passwordSchema = z
   .string()
   .min(8, "Use at least 8 characters.")
   .max(128, "Use at most 128 characters.");
-export const nameSchema = z.string().trim().min(1, "Enter your name.").max(80, "Use at most 80 characters.");
+/**
+ * Person and workspace names are shown to other people and placed in the subject and body
+ * of e-mails sent from our domain (invitations). So: no control characters and nothing
+ * that reads as a link — otherwise a name becomes a phishing message with our sender.
+ */
+const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f\u2028\u2029]/;
+const LOOKS_LIKE_A_LINK = /(?:[a-z][a-z0-9+.-]*:\/\/|\bwww\.|\b[a-z0-9-]+\.[a-z]{2,}\/)/i;
+
+const displayText = (schema: z.ZodString) =>
+  schema
+    .refine((value) => !CONTROL_CHARACTERS.test(value), "Remove line breaks and control characters.")
+    .refine((value) => !LOOKS_LIKE_A_LINK.test(value), "Names cannot contain links.");
+
+export const nameSchema = displayText(z.string().trim().min(1, "Enter your name.").max(80, "Use at most 80 characters."));
+
+/** Best-effort clean-up for names we do not get to reject (e.g. from an OAuth profile). */
+export function sanitizeDisplayName(value: string, fallback: string): string {
+  const cleaned = value
+    .replace(new RegExp(CONTROL_CHARACTERS.source, "g"), " ")
+    .replace(/[a-z][a-z0-9+.-]*:\/\/\S*/gi, " ")
+    .replace(/\bwww\.\S*/gi, " ")
+    .replace(/\b[a-z0-9-]+\.[a-z]{2,}\/\S*/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 80)
+    .trim();
+  return cleaned || fallback;
+}
 
 export const signUpSchema = z.object({ name: nameSchema, email: emailSchema, password: passwordSchema });
 export const signInSchema = z.object({ email: emailSchema, password: z.string().min(1, "Enter your password.") });
@@ -20,12 +47,16 @@ export const resetPasswordSchema = z.object({ password: passwordSchema });
 
 export const profileSchema = z.object({ name: nameSchema });
 
-export const workspaceNameSchema = z
-  .string()
-  .trim()
-  .min(2, "Use at least 2 characters.")
-  .max(60, "Use at most 60 characters.");
+export const workspaceNameSchema = displayText(
+  z.string().trim().min(2, "Use at least 2 characters.").max(60, "Use at most 60 characters."),
+);
 export const workspaceSchema = z.object({ name: workspaceNameSchema });
+/** Lowercase letters, digits and single dashes — what slugify() produces. */
+export const workspaceSlugSchema = z
+  .string()
+  .min(2)
+  .max(48)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, digits and dashes.");
 
 export const inviteRoleSchema = z.enum(["member", "admin"]);
 export const inviteSchema = z.object({ email: emailSchema, role: inviteRoleSchema });

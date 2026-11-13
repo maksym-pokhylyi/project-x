@@ -92,6 +92,18 @@ export class SeatLimitError extends AppError {
   }
 }
 
+/** The workspace has more members than its plan allows: product data is read-only until that is fixed. */
+export class SeatsOverLimitError extends AppError {
+  constructor(used: number, limit: number) {
+    super(
+      "SEAT_LIMIT_REACHED",
+      `This workspace has ${used} members but its plan includes ${limit} seat${limit === 1 ? "" : "s"}. It is read-only until an owner removes members or upgrades the plan.`,
+      402,
+      { limit, used, readOnly: true },
+    );
+  }
+}
+
 export class BillingNotConfiguredError extends AppError {
   constructor() {
     super("BILLING_NOT_CONFIGURED", "Billing is not configured for this environment.", 503);
