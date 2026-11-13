@@ -4,9 +4,10 @@ vi.mock("next/headers", () => import("./helpers/next-headers"));
 
 import { POST as uploadLogo } from "@/app/api/workspace/logo/route";
 import { db } from "@/db";
-import { events, organizations } from "@/db/schema";
+import { events, members, organizations, users } from "@/db/schema";
 import { sanitizeAnalyticsEvent, sanitizeAnalyticsUrl } from "@/lib/analytics-url";
 import { isTrustedRequestOrigin, json, route } from "@/server/http";
+import { createPersonalWorkspace } from "@/server/workspaces";
 import { actAs, createTestUser, type TestUser } from "./helpers/auth";
 import { resetDatabase } from "./helpers/db";
 
@@ -220,5 +221,17 @@ describe("analytics forwarding does not block the caller (F-26)", () => {
     expect(captures).toBe(1); // forwarding did start, in the background
     release();
     await new Promise((resolve) => setTimeout(resolve, 20)); // and its failure is swallowed
+  });
+});
+
+describe("personal workspace creation is idempotent (F-21)", () => {
+  it("parallel first requests create exactly one workspace", async () => {
+    await resetDatabase();
+    await db.insert(users).values({ id: "user_parallel", name: "Pat Parallel", email: "pat@example.com", emailVerified: true });
+    const ids = await Promise.all(Array.from({ length: 8 }, () => createPersonalWorkspace({ id: "user_parallel", name: "Pat Parallel", email: "pat@example.com" })));
+    expect(new Set(ids).size).toBe(1);
+    expect(await db.select().from(organizations)).toHaveLength(1);
+    expect(await db.select().from(members)).toHaveLength(1);
+    expect(await db.select().from(events).then((rows) => rows.filter((row) => row.name === "workspace.created"))).toHaveLength(1);
   });
 });
