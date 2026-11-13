@@ -246,10 +246,12 @@ const EVALUATE_TASK = `Mark the ANSWER.
 1. Choose ONE score that exists on the SCORING SCALE, applying its descriptors literally. Unsupported claims, [EVIDENCE NEEDED: ...] placeholders, unanswered sub-parts and an answer over the word limit all lower the score.
 2. Check the answer against the EVIDENCE LIBRARY: a claim about the bidder that the library does not support is a weakness, not a strength — name it. Never suggest adding a claim the library does not support; if an improvement needs evidence the library lacks, set "needs_evidence" to true and say what evidence.
 3. "improvements": concrete edits ordered by the marks they are likely to gain, most valuable first; each says exactly what to add, cut or change and why the scoring descriptors reward it. No generic advice ("add more detail").
-4. "missing_parts": sub-parts of the question the answer does not address.
+4. "parts": every sub-part the QUESTION asks for, in the order asked, each with "status": "covered" (answered and supported by evidence), "partly" (answered but thin, or not evidenced) or "missing" (not answered), and a "note" of at most 15 words saying what is there or what is lacking. A question without sub-parts has one part.
+5. "missing_parts": the sub-parts with status "missing".
+6. "strengths": at most three things an evaluator would credit, each specific to this answer.
 
 Return ONLY one JSON object, no markdown fence:
-{"score": string, "band": string|null, "rationale": string (2–4 sentences tied to the descriptors), "strengths": [string], "improvements": [{"suggestion": string, "rationale": string, "impact": "high"|"medium"|"low", "needs_evidence": boolean}], "missing_parts": [string]}`;
+{"score": string, "band": string|null, "rationale": string (2–4 sentences tied to the descriptors), "parts": [{"part": string, "status": "covered"|"partly"|"missing", "note": string}], "strengths": [string], "improvements": [{"suggestion": string (what to do, at most 12 words), "rationale": string (why the descriptors reward it, one or two sentences), "impact": "high"|"medium"|"low", "needs_evidence": boolean}], "missing_parts": [string]}`;
 
 const evaluationSchema = z.object({
   score: z.preprocess((value) => (typeof value === "number" ? String(value) : value), z.string()),
@@ -267,6 +269,9 @@ const evaluationSchema = z.object({
     )
     .catch([]),
   missing_parts: z.array(z.string()).catch([]),
+  parts: z
+    .array(z.object({ part: z.string(), status: z.enum(["covered", "partly", "missing"]).catch("partly"), note: z.string().catch("") }))
+    .catch([]),
 });
 
 // --- Draft --------------------------------------------------------------------------------
@@ -592,6 +597,10 @@ export async function evaluateAnswer(ctx: Scope, bidId: string, questionId: stri
       .slice(0, 10)
       .map(({ item }) => ({ suggestion: item.suggestion.trim(), rationale: item.rationale.trim(), impact: item.impact, needsEvidence: item.needs_evidence })),
     missingParts: result.value.missing_parts.map((item) => item.trim()).filter(Boolean).slice(0, 10),
+    parts: result.value.parts
+      .filter((item) => item.part.trim())
+      .slice(0, 12)
+      .map((item) => ({ part: item.part.trim().slice(0, 160), status: item.status, note: item.note.trim().slice(0, 240) })),
     overWordLimit: Boolean(limit.limit && words > limit.limit),
     wordCount: words,
     answerHash: answerHash(question.draftText ?? ""),

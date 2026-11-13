@@ -44,6 +44,8 @@ export type RequirementItem = {
   citation: Citation | null;
   companyStatus: CompanyStatus;
   companyNote: string | null;
+  /** True when a person set the status by hand (the company check leaves it alone). */
+  statusByUser?: boolean;
   note: string | null;
   checked: boolean;
   provenance: Provenance | null;

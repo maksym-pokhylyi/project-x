@@ -16,8 +16,8 @@ mkdirSync(outDir, { recursive: true });
 
 const browser = await chromium.launch();
 const errors = [];
-for (const width of [1280, 768, 360]) {
-  const context = await browser.newContext({ viewport: { width, height: width === 360 ? 780 : 900 } });
+for (const width of [1440, 1280, 768, 390]) {
+  const context = await browser.newContext({ viewport: { width, height: width === 390 ? 800 : 900 } });
   const page = await context.newPage();
   page.on("console", (message) => {
     if (message.type() === "error") errors.push(`[${width}] ${message.text().slice(0, 200)}`);
@@ -38,7 +38,7 @@ for (const width of [1280, 768, 360]) {
     ["brief", `/app/bids/${bidId}`],
     ["requirements", `/app/bids/${bidId}/requirements`],
     ["questions", `/app/bids/${bidId}/questions`],
-    ["export", `/app/bids/${bidId}/export`],
+    ["files", `/app/bids/${bidId}/files`],
     ["new", "/app/bids/new"],
     ["library", "/app/library"],
   ];

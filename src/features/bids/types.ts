@@ -279,6 +279,8 @@ export type AnswerEvaluation = {
   improvements: EvaluationImprovement[];
   /** Sub-parts of the question that are not answered. */
   missingParts: string[];
+  /** Every sub-part of the question, in order, with how far the answer covers it. */
+  parts?: Array<{ part: string; status: "covered" | "partly" | "missing"; note: string }>;
   overWordLimit: boolean;
   wordCount: number;
   /** Hash of the answer text that was evaluated (to show "answer changed since"). */

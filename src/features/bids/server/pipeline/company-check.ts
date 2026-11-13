@@ -178,7 +178,7 @@ export function resolveCompanyStatuses(options: ResolveOptions): CheckResult[] {
       return { id: requirement.id, status: "verify", note: `${why} Check the documents before relying on it.` };
     }
     if (!options.factsConfirmed) {
-      return { id: requirement.id, status: "unknown", note: "Confirm your company facts in the Library to check this requirement." };
+      return { id: requirement.id, status: "unknown", note: "Confirm your company facts in Documents to check this requirement." };
     }
     if (requirement.category === "insurance") {
       const decided = checkInsurance(requirement, options.facts, today);

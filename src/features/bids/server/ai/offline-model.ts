@@ -238,10 +238,14 @@ function respond(text: string): string {
       score: String(score),
       band: null,
       rationale: "The answer addresses the question and is clearly structured, but two statements are placeholders rather than evidence, which limits the score under the descriptors.",
+      parts: [
+        { part: "Proposed method", status: "partly", note: "Described, but the supporting example is a placeholder." },
+        { part: "Who will do the work", status: "missing", note: "No named person or qualification." },
+      ],
       strengths: ["Clear structure that follows the question."],
       improvements: [
-        { suggestion: "Replace the case-study placeholder with one comparable project: client, dates, value and a measured result.", rationale: "The higher descriptors ask for relevant, specific evidence.", impact: "high", needs_evidence: true },
-        { suggestion: "Name the lead and state their qualification for this work.", rationale: "Named, qualified people give evaluators confidence in delivery.", impact: "medium", needs_evidence: true },
+        { suggestion: "Give one comparable project with a measured result", rationale: "The higher descriptors ask for relevant, specific evidence.", impact: "high", needs_evidence: true },
+        { suggestion: "Name the lead and their qualification", rationale: "Named, qualified people give evaluators confidence in delivery.", impact: "medium", needs_evidence: true },
       ],
       missing_parts: [],
     });

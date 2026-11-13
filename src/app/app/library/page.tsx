@@ -8,7 +8,7 @@ import { getCompanyFacts } from "@/features/library/server/facts";
 import type { LibraryDocKind } from "@/features/bids/types";
 import { requireOrgForPage } from "@/server/session";
 
-export const metadata: Metadata = { title: "Library" };
+export const metadata: Metadata = { title: "Documents" };
 export const dynamic = "force-dynamic";
 // The website draft (fetch + one model call) and document processing start from here.
 export const maxDuration = 300;

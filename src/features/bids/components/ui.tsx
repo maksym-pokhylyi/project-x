@@ -1,58 +1,62 @@
-import { AlertTriangle, CircleCheck, CircleHelp, CircleX, Info, Lock, SearchCheck } from "lucide-react";
+import "./bid-theme.css";
+import { AlertTriangle, Check, CircleHelp, Info, Lock, SearchCheck, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
 import { STANDING_NOTICE } from "@/features/bids/constants";
 import type { CompanyStatus } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
 
 /**
  * Small presentational pieces shared by the bid desk and the library (no client state).
- * Colours come from the design tokens only (success / warning / destructive / muted), and
- * no state is ever conveyed by colour alone: every pill carries an icon and a word.
+ * Colours come from the handoff tokens in bid-theme.css, and no state is ever conveyed by
+ * colour alone: every pill carries an icon and a word. "Met" is the brand green with a
+ * tick — there is no separate success colour.
  */
 
 /** The standing notice required on the brief and the editor. */
 export function StandingNotice({ className }: { className?: string }) {
   return (
-    <p role="note" className={cn("flex items-start gap-2 rounded-md border bg-muted/50 px-3 py-2 text-xs text-muted-foreground", className)}>
-      <Info aria-hidden className="mt-0.5 size-3.5 shrink-0" />
+    <p role="note" className={cn("flex items-start gap-2 text-[13px] leading-5 text-(--bid-muted)", className)}>
+      <Info aria-hidden className="mt-[3px] size-3.5 shrink-0" />
       <span>{STANDING_NOTICE}</span>
     </p>
   );
 }
 
 const TONES = {
-  success: "border-success/30 bg-success/10 text-success",
-  danger: "border-destructive/30 bg-destructive/10 text-destructive",
-  warning: "border-warning/40 bg-warning/10 text-warning",
-  neutral: "border-border bg-muted text-muted-foreground",
-  brand: "border-primary/20 bg-primary/5 text-primary",
+  success: "bid-pill-met",
+  danger: "bid-pill-danger",
+  warning: "bid-pill-amber",
+  info: "bid-pill-info",
+  neutral: "bid-pill-neutral",
+  brand: "bid-pill-brand",
 } as const;
 
 export type Tone = keyof typeof TONES;
 
 export function Pill({ tone = "neutral", icon, children, className, title }: { tone?: Tone; icon?: ReactNode; children: ReactNode; className?: string; title?: string }) {
   return (
-    <span title={title} className={cn("inline-flex w-fit shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 text-xs font-medium whitespace-nowrap", TONES[tone], className)}>
+    <span title={title} className={cn("bid-pill shrink-0", TONES[tone], className)}>
       {icon}
       {children}
     </span>
   );
 }
 
-const STATUS: Record<CompanyStatus, { label: string; tone: Tone; icon: ReactNode; hint: string }> = {
-  met: { label: "Met", tone: "success", icon: <CircleCheck aria-hidden className="size-3" />, hint: "Your confirmed company facts meet this requirement." },
-  gap: { label: "Gap", tone: "danger", icon: <CircleX aria-hidden className="size-3" />, hint: "Your company facts fall short of this requirement." },
-  unknown: { label: "Unknown", tone: "neutral", icon: <CircleHelp aria-hidden className="size-3" />, hint: "Your company facts do not say. Check it yourself." },
-  verify: { label: "Verify", tone: "warning", icon: <SearchCheck aria-hidden className="size-3" />, hint: "Check this against the tender documents before relying on it." },
+export const STATUS_LABELS: Record<CompanyStatus, string> = { met: "Met", gap: "Gap", unknown: "For you to confirm", verify: "Check the source" };
+
+const STATUS: Record<CompanyStatus, { tone: Tone; icon: ReactNode; hint: string }> = {
+  met: { tone: "success", icon: <Check aria-hidden className="size-3.5" strokeWidth={2.6} />, hint: "Your confirmed company facts meet this requirement." },
+  gap: { tone: "danger", icon: <TriangleAlert aria-hidden className="size-3.5" />, hint: "Your company facts fall short of this requirement." },
+  unknown: { tone: "info", icon: <CircleHelp aria-hidden className="size-3.5" />, hint: "Your company facts do not settle this. Only you can confirm it." },
+  verify: { tone: "warning", icon: <SearchCheck aria-hidden className="size-3.5" />, hint: "We could not find this wording in the pack. Check it in the tender documents before relying on it." },
 };
 
 export function StatusPill({ status }: { status: CompanyStatus }) {
-  const config = STATUS[status] ?? STATUS.unknown;
+  const key = STATUS[status] ? status : "unknown";
   return (
-    <Pill tone={config.tone} icon={config.icon} title={config.hint}>
-      {config.label}
+    <Pill tone={STATUS[key].tone} icon={STATUS[key].icon} title={STATUS[key].hint}>
+      {STATUS_LABELS[key]}
     </Pill>
   );
 }
@@ -74,45 +78,69 @@ export function UpgradeNotice({
   className?: string;
 }) {
   return (
-    <section aria-label="Upgrade" data-testid="upgrade-notice" className={cn("flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between", className)}>
+    <section
+      aria-label="Upgrade"
+      data-testid="upgrade-notice"
+      className={cn("flex flex-col gap-3 rounded-[10px] bg-(--bid-brand-tint) px-5 py-4 sm:flex-row sm:items-center sm:justify-between", className)}
+    >
       <div className="flex min-w-0 gap-3">
-        <Lock aria-hidden className="mt-0.5 size-4 shrink-0 text-primary" />
+        <Lock aria-hidden className="mt-0.5 size-4 shrink-0 text-(--bid-brand)" />
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold">{title}</h3>
-          <div className="mt-0.5 text-sm text-muted-foreground">{children}</div>
+          <h3 className="text-[15px] font-semibold">{title}</h3>
+          <div className="mt-0.5 text-sm">{children}</div>
         </div>
       </div>
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         {secondary}
-        <Button asChild size="sm">
-          <Link href={href}>{actionLabel}</Link>
-        </Button>
+        <Link href={href} className="bid-btn bid-btn-primary bid-btn-sm">
+          {actionLabel}
+        </Link>
       </div>
     </section>
   );
 }
 
+const CALLOUT: Record<Tone, string> = {
+  success: "bg-(--bid-brand-tint)",
+  brand: "bg-(--bid-brand-tint)",
+  danger: "bg-(--bid-danger-tint)",
+  warning: "bg-(--bid-amber-tint)",
+  info: "bg-(--bid-info-tint)",
+  neutral: "bg-(--bid-paper-deep)",
+};
+const CALLOUT_ICON: Record<Tone, string> = {
+  success: "text-(--bid-brand)",
+  brand: "text-(--bid-brand)",
+  danger: "text-(--bid-danger)",
+  warning: "text-(--bid-amber-ink)",
+  info: "text-(--bid-info)",
+  neutral: "text-(--bid-muted)",
+};
+
 export function Callout({ tone = "neutral", title, children, className, action }: { tone?: Tone; title?: string; children: ReactNode; className?: string; action?: ReactNode }) {
   const Icon = tone === "danger" || tone === "warning" ? AlertTriangle : Info;
   return (
-    <div role={tone === "danger" ? "alert" : "status"} className={cn("flex items-start gap-3 rounded-lg border px-4 py-3 text-sm", TONES[tone], className)}>
-      <Icon aria-hidden className="mt-0.5 size-4 shrink-0" />
-      <div className="min-w-0 flex-1 text-foreground">
+    <div role={tone === "danger" ? "alert" : "status"} className={cn("flex flex-wrap items-start gap-x-3 gap-y-2 rounded-[10px] px-4 py-3 text-sm text-(--bid-ink)", CALLOUT[tone], className)}>
+      <Icon aria-hidden className={cn("mt-0.5 size-4 shrink-0", CALLOUT_ICON[tone])} />
+      <div className="min-w-0 flex-1 basis-60">
         {title ? <p className="font-semibold">{title}</p> : null}
-        <div className={cn("text-sm", title ? "mt-0.5 text-muted-foreground" : "")}>{children}</div>
+        <div className={cn("text-sm", title ? "mt-0.5" : "")}>{children}</div>
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   );
 }
 
-export function SectionHeading({ title, count, children }: { title: string; count?: number; children?: ReactNode }) {
+export function SectionHeading({ title, count, children, lead }: { title: string; count?: number; children?: ReactNode; lead?: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-2">
-      <h2 className="text-base font-semibold tracking-tight">
-        {title}
-        {count !== undefined ? <span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">{count}</span> : null}
-      </h2>
+    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+      <div className="flex min-w-0 flex-col gap-1">
+        <h2 className="bid-h2">
+          {title}
+          {count !== undefined ? <span className="bid-mono ml-3 text-sm font-normal text-(--bid-muted) tabular-nums">{count}</span> : null}
+        </h2>
+        {lead ? <p className="text-sm text-(--bid-muted)">{lead}</p> : null}
+      </div>
       {children}
     </div>
   );
@@ -120,27 +148,39 @@ export function SectionHeading({ title, count, children }: { title: string; coun
 
 const DAY = 86_400_000;
 
-/**
- * Deadline with urgency colour + relative time + absolute date (always both, so it reads
- * in print and to screen readers). >14 days neutral, 4–14 amber, ≤3 danger, past = struck.
- */
-export function DeadlineChip({ deadline, now = new Date(), className }: { deadline: Date | null; now?: Date; className?: string }) {
-  if (!deadline) return <Pill className={className}>No deadline read</Pill>;
-  const absolute = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(deadline);
+export function formatDeadline(deadline: Date, withTime = true): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
+  }).format(deadline);
+}
+
+/** "14 days left" / "Closes today" / "Closed": the relative part of a deadline. */
+export function daysLeftLabel(deadline: Date, now: Date = new Date()): { label: string; urgent: boolean; past: boolean } {
   const diff = deadline.getTime() - now.getTime();
+  if (diff < 0) return { label: "Closed", urgent: false, past: true };
   const days = Math.floor(diff / DAY);
-  if (diff < 0) {
-    return (
-      <Pill className={className}>
-        <span className="line-through">Closed · {absolute}</span>
-      </Pill>
-    );
-  }
-  const relative = days === 0 ? "Closes today" : days === 1 ? "Closes tomorrow" : `Closes in ${days} days`;
-  const tone: Tone = days <= 3 ? "danger" : days <= 14 ? "warning" : "neutral";
+  if (days === 0) return { label: "Closes today", urgent: true, past: false };
+  return { label: `${days} day${days === 1 ? "" : "s"} left`, urgent: days <= 3, past: false };
+}
+
+/**
+ * Deadline as dot + absolute date + days left (always both, so it reads in print and to
+ * screen readers). Amber is a marker colour only: the text stays ink.
+ */
+export function DeadlineChip({ deadline, now = new Date(), className, prefix = "Closes" }: { deadline: Date | null; now?: Date; className?: string; prefix?: string }) {
+  if (!deadline) return <span className={cn("text-sm text-(--bid-muted)", className)}>No deadline read</span>;
+  const left = daysLeftLabel(deadline, now);
   return (
-    <Pill tone={tone} className={className}>
-      {relative} · {absolute}
-    </Pill>
+    <span className={cn("inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium tabular-nums", className)}>
+      <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-(--bid-line-strong)" : left.urgent ? "bg-(--bid-danger)" : "bg-(--bid-amber)")} />
+      <span className={left.past ? "line-through" : undefined}>
+        {prefix} {formatDeadline(deadline)}
+      </span>
+      <span className={cn("rounded px-1.5 py-px text-xs font-semibold", left.past ? "bg-(--bid-paper-deep)" : left.urgent ? "bg-(--bid-danger-tint) text-(--bid-danger)" : "bg-(--bid-amber-tint)")}>{left.label}</span>
+    </span>
   );
 }

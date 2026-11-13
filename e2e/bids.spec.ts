@@ -77,8 +77,23 @@ test("upload a pack, get a cited check, draft and mark an answer, export", async
   await expect(page.getByTestId("verdict")).toBeVisible({ timeout: 120_000 });
   await expect(page.getByTestId("processing-state")).toHaveCount(0);
   await expect(page.getByText("AI-assisted analysis. Check against the tender documents").first()).toBeVisible();
-  await expect(page.getByTestId("coverage")).toContainText("quotes were found in the text of your documents");
+  await expect(page.getByTestId("bid-meta")).toContainText("files");
+  await expect(page.getByTestId("coverage")).toContainText("quotes found word for word in the pack");
   await expect(page.getByTestId("fact-submission_deadline")).not.toHaveAttribute("data-fact-status", "not_stated");
+  await expect(page.getByTestId("not-assessed")).toBeAttached();
+
+  // --- the brief: pass-or-fail requirements quoted from the pack, each with a source chip ----
+  const gates = page.getByTestId("gate-row");
+  await expect(gates.first()).toBeVisible();
+  await expect(gates.first().getByTestId("citation-mark")).toContainText(/Verified|Check|Unverified/);
+  await page.getByTestId("gate-filter-confirm").click();
+  await expect(page.getByTestId("gate-filter-confirm")).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("gate-filter-all").click();
+
+  // Pack files: every file with what was read from it.
+  await page.goto(`${bidUrl}/files`);
+  await expect(page.getByTestId("pack-file")).toHaveCount(files.length);
+  await expect(page.getByTestId("coverage-detail")).toContainText("found word for word");
 
   // --- requirements with verified citations ----------------------------------------------
   await page.goto(`${bidUrl}/requirements`);
@@ -118,19 +133,24 @@ test("upload a pack, get a cited check, draft and mark an answer, export", async
   await page.getByTestId("draft-button").click();
   await expect(page.getByTestId("answer-read")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId("evidence-gap").first()).toBeVisible();
-  await expect(page.getByTestId("word-count")).toContainText("/ 150 words");
+  await expect(page.getByTestId("word-count")).toContainText("of 150 words");
   await expect(page.getByTestId("word-count")).not.toHaveAttribute("data-limit-state", "over");
 
   await page.getByTestId("evaluate-button").click();
   await expect(page.getByTestId("evaluation-score")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId("improvement").first()).toBeVisible();
-  await expect(page.getByTestId("evaluator-panel")).toContainText("not a prediction");
+  await expect(page.getByTestId("evaluator-panel")).toContainText("not a forecast");
+  await expect(page.getByTestId("evaluator-panel")).toContainText("What the question asks for");
+  await expect(page.getByTestId("evaluation-score")).toHaveAttribute("aria-label", /^Marked \d+ of \d+$/);
 
   // --- export ----------------------------------------------------------------------------
-  await page.goto(`${bidUrl}/export`);
-  await expect(page.getByTestId("export-summary")).toContainText("1 of");
   const [download] = await Promise.all([page.waitForEvent("download"), page.getByTestId("export-answers").click()]);
   expect(download.suggestedFilename()).toMatch(/-answers\.docx$/);
+  await page.goto(bidUrl);
+  await page.getByTestId("export-menu").click();
+  const [briefDownload] = await Promise.all([page.waitForEvent("download"), page.getByTestId("export-brief").click()]);
+  expect(briefDownload.suggestedFilename()).toMatch(/\.docx$/);
+  await expect(page.getByTestId("scored-questions")).toBeVisible();
   const csv = await page.request.get(`${bidUrl.replace("/app/bids/", "/api/bids/")}/export/requirements-csv`);
   expect(csv.status()).toBe(200);
   expect(await csv.text()).toContain("Quote found in documents");
