@@ -271,7 +271,7 @@ function RequirementRow({
         <div className="min-w-0 flex-1 space-y-1.5">
           <p className="text-sm leading-5">
             {item.text}
-            {item.threshold ? <span className="ml-1.5 rounded bg-paper-deep px-1.5 py-0.5 font-mono text-xs whitespace-nowrap">{item.threshold}</span> : null}
+            {item.threshold ? <span className="ml-1.5 rounded bg-paper-deep [box-decoration-break:clone] px-1.5 py-0.5 font-mono text-xs break-words">{item.threshold}</span> : null}
           </p>
           <div className="flex flex-wrap items-center gap-1.5">
             <Pill tone={item.isPassFail ? "danger" : item.kind === "minimum_score" ? "warning" : "neutral"} className={item.isPassFail ? "bg-paper" : ""}>
