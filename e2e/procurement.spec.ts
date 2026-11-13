@@ -94,11 +94,49 @@ test("public supplier page: company-level data, three items per block, attributi
 
   await expectNoHorizontalScroll(page);
   await shot(page, "supplier-1280");
-  await page.setViewportSize({ width: 360, height: 780 });
-  await page.reload();
-  await expect(page.getByRole("heading", { level: 1, name: "Acme Grounds Ltd" })).toBeVisible();
+  for (const width of [768, 360]) {
+    await page.setViewportSize({ width, height: 780 });
+    await page.reload();
+    await expect(page.getByRole("heading", { level: 1, name: "Acme Grounds Ltd" })).toBeVisible();
+    await expect(page.getByTestId("claim-cta")).toBeVisible();
+    await expectNoHorizontalScroll(page);
+    await shot(page, `supplier-${width}`);
+  }
+});
+
+test("supplier page states: one award, no matches right now, about-the-data request form", async ({ page }) => {
+  // A company with a single award and no open tender in its trade.
+  await page.goto("/suppliers/harbour-catering-ltd-07777777");
+  await expect(page.getByRole("heading", { level: 1, name: "Harbour Catering Ltd" })).toBeVisible();
+  await expect(page.locator("dl[aria-label='Summary']")).toContainText("Contract");
+  await expect(page.getByRole("heading", { name: "Published contract award" })).toBeVisible();
+  const matches = page.locator("section[aria-labelledby='matches']");
+  await expect(matches.getByTestId("empty-state")).toContainText("No open tenders match this company's awards right now");
+  await expect(matches.getByRole("link", { name: "Claim this page to get an alert" })).toBeVisible();
+  await expect(matches.getByTestId("tender-card")).toHaveCount(0);
+  await expect(page.getByTestId("contracts-table").locator("tbody tr")).toHaveCount(1);
   await expectNoHorizontalScroll(page);
-  await shot(page, "supplier-360");
+
+  // "Request a correction or removal" leads to the form with the page pre-filled.
+  await page.getByTestId("correction-link").click();
+  await expect(page).toHaveURL(/\/about-the-data\?page=%2Fsuppliers%2Fharbour-catering-ltd-07777777#request$/);
+  await expect(page.getByRole("heading", { level: 1, name: "About the data" })).toBeVisible();
+  await expect(page.locator("main")).toContainText(OGL);
+  await expect(page.locator("main")).toContainText(INDEPENDENCE);
+  const form = page.getByTestId("data-request-form");
+  await expect(form.getByLabel("Page address")).toHaveValue(/\/suppliers\/harbour-catering-ltd-07777777$/);
+  // Errors are shown as text next to the fields.
+  await form.getByRole("button", { name: "Send request" }).click();
+  await expect(form.getByText("Enter a valid e-mail address.")).toBeVisible();
+  await form.getByLabel("Your e-mail address").fill(`director-${run}@harbourcatering.example`);
+  await form.getByLabel("What should change?").fill("The contract value shown for our Bristol contract is wrong.");
+  await form.getByRole("button", { name: "Send request" }).click();
+  await expect(page.getByTestId("data-request-sent")).toContainText("we have your request");
+  for (const width of [768, 360]) {
+    await page.setViewportSize({ width, height: 780 });
+    await page.goto("/about-the-data");
+    await expectNoHorizontalScroll(page);
+  }
 });
 
 test("pages we do not publish answer 404; tender and buyer pages work and link to the source", async ({ page, request }) => {
@@ -122,6 +160,16 @@ test("pages we do not publish answer 404; tender and buyer pages work and link t
   await expect(page.getByTestId("contracts-table")).toContainText("Acme Grounds Ltd");
   await expect(page.getByTestId("data-attribution")).toContainText(INDEPENDENCE);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+
+  for (const width of [768, 360]) {
+    await page.setViewportSize({ width, height: 780 });
+    for (const path of ["/tenders/ocds-h6vhtk-e00000", page.url(), "/find?q=grounds"]) {
+      await page.goto(path);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await expectNoHorizontalScroll(page);
+    }
+    await shot(page, `find-${width}`);
+  }
 
   // Sitemaps: tenders are listed, supplier and buyer pages are gated off by default.
   expect(await (await request.get("/sitemap-data.xml")).text()).toContain("/sitemaps/tenders-0.xml");
@@ -247,12 +295,19 @@ test("claim → sign up → verify → confirm → radar shows the supplier's ma
   await page.goto("/claim/rival-landscapes-ltd-02222222");
   await expect(page.getByTestId("claim-limit")).toContainText("Your plan includes 1 radar profile");
 
-  // Mobile width.
-  await page.setViewportSize({ width: 360, height: 780 });
-  await page.goto("/app");
-  await expect(page.getByTestId("tender-card").first()).toBeVisible();
-  await expectNoHorizontalScroll(page);
-  await shot(page, "radar-360");
+  // Tablet and mobile widths: radar, tender detail and the claim page.
+  for (const width of [768, 360]) {
+    await page.setViewportSize({ width, height: 780 });
+    await page.goto("/app");
+    await expect(page.getByTestId("tender-card").first()).toBeVisible();
+    await expectNoHorizontalScroll(page);
+    await shot(page, `radar-${width}`);
+    await page.goto("/app/tenders/ocds-h6vhtk-e00000");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expectNoHorizontalScroll(page);
+    await page.goto("/claim/rival-landscapes-ltd-02222222");
+    await expectNoHorizontalScroll(page);
+  }
 });
 
 test("a workspace with no company sees the onboarding choices and can set up a radar manually", async ({ browser }) => {

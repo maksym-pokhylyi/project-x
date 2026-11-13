@@ -86,8 +86,9 @@ export function TenderCard({
 /** Compact one-row variant for lists (saved, deadline strip, locked rows). */
 export function TenderRow({ item, href, now, trailing, className }: { item: TenderCardItem; href: string; now?: Date; trailing?: ReactNode; className?: string }) {
   return (
-    <div className={cn("flex flex-col gap-2 border-b py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between", className)} data-testid="tender-row" data-ocid={item.ocid}>
-      <div className="min-w-0">
+    // Rows sit in narrow columns (the app shell has a sidebar from 768 px), so they only go horizontal on wide screens.
+    <div className={cn("flex flex-col gap-2 border-b py-3 last:border-b-0 lg:flex-row lg:items-center lg:justify-between", className)} data-testid="tender-row" data-ocid={item.ocid}>
+      <div className="min-w-0 flex-1">
         <Link href={href} className="-my-2.5 block py-2.5 text-sm font-medium underline-offset-4 hover:underline">
           <span className="line-clamp-2">{item.title}</span>
         </Link>

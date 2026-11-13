@@ -53,6 +53,19 @@ function strength(closeness: Closeness): "strong" | "related" | "broad" | "none"
   return "none";
 }
 
+/** The past award closest to a notice by CPV (same buyer first), or null when nothing is related. */
+export function closestReference(notice: Pick<ReasonNotice, "cpvCodes" | "buyerId">, references: readonly ReferenceAward[]): ReferenceAward | null {
+  let best: { reference: ReferenceAward; rank: number } | null = null;
+  for (const reference of references) {
+    const closeness = closest(notice.cpvCodes, reference.cpvCodes);
+    if (closeness.depth < 2) continue;
+    const sameBuyer = Boolean(notice.buyerId && reference.buyerId === notice.buyerId);
+    const rank = (sameBuyer ? 100 : 0) + closeness.depth * 2 + (closeness.line ? 1 : 0);
+    if (!best || rank > best.rank) best = { reference, rank };
+  }
+  return best?.reference ?? null;
+}
+
 function yearOf(iso: string): string {
   return iso.slice(0, 4);
 }
@@ -141,5 +154,23 @@ export function isAcceptableReason(reason: unknown): reason is string {
   // No promises, no hype, no contact details.
   if (/\b(guarantee|guaranteed|you will win|sure to win|perfect (fit|match)|ideal (fit|match)|don't miss|act now|hurry)\b/i.test(text)) return false;
   if (/@|https?:\/\//i.test(text)) return false;
+  return true;
+}
+
+/**
+ * A model-written reason may only state figures we gave it: every "£…" amount and every
+ * four-digit year in the sentence must be one of the allowed facts. Catches the classic
+ * slip of turning a year into a price ("your £2026 award").
+ */
+export function isGroundedReason(reason: string, facts: { amounts: Array<string | null>; years: Array<string | null> }): boolean {
+  const amounts = new Set(facts.amounts.filter((value): value is string => Boolean(value)).map((value) => value.toLowerCase()));
+  const years = new Set(facts.years.filter((value): value is string => Boolean(value)));
+  for (const match of reason.matchAll(/£\s?[\d][\d.,]*\s?(?:bn|m|k)?/gi)) {
+    const amount = match[0].replace(/\s+/g, "").replace(/[.,]$/, "").toLowerCase();
+    if (!amounts.has(amount)) return false;
+  }
+  for (const match of reason.matchAll(/\b(19|20)\d{2}\b/g)) {
+    if (!years.has(match[0])) return false;
+  }
   return true;
 }

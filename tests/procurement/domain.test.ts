@@ -17,7 +17,7 @@ import {
 import { competitionOf, legacyStage, noticeBadgeKind } from "@/features/procurement/domain/notice-types";
 import { outreachEligibility, type OutreachContact, type OutreachSupplier } from "@/features/procurement/domain/outreach";
 import { buildSupplierProfile, scoreCpv, scoreNotice, specFromManualProfile, tradeLevels, type ProfileAward, type RadarSpec } from "@/features/procurement/domain/profile";
-import { explainMatch, isAcceptableReason } from "@/features/procurement/domain/reasons";
+import { closestReference, explainMatch, isAcceptableReason, isGroundedReason } from "@/features/procurement/domain/reasons";
 import { regionsLabel, topRegion, topRegions } from "@/features/procurement/domain/regions";
 import { keywordsToWebQuery, termsOf, topKeywords } from "@/features/procurement/domain/text";
 
@@ -327,6 +327,29 @@ describe("supplier profile and match scoring", () => {
     expect(isAcceptableReason("Email jane@buyer.gov.uk to discuss this tender today.")).toBe(false);
     expect(isAcceptableReason("Too short")).toBe(false);
     expect(isAcceptableReason(42)).toBe(false);
+  });
+
+  it("rejects model-written reasons that state figures we did not supply", () => {
+    const facts = { amounts: ["£392k"], years: ["2026"] };
+    expect(isGroundedReason("Pest control for council housing, like your £392k contract with West Kent Housing Association.", facts)).toBe(true);
+    expect(isGroundedReason("Verge mowing, the same service as your 2026 award from Fusion 21.", facts)).toBe(true);
+    // A year turned into a price, an invented value, an invented year.
+    expect(isGroundedReason("Grass cutting, relevant to your £2026 grounds maintenance award.", facts)).toBe(false);
+    expect(isGroundedReason("Grass cutting, close to your £1.2m contract.", facts)).toBe(false);
+    expect(isGroundedReason("Grass cutting, like your 2019 contract.", facts)).toBe(false);
+    expect(isGroundedReason("Grass cutting, the same trade as your recent award.", { amounts: [null], years: [null] })).toBe(true);
+  });
+
+  it("picks the closest past award for a notice", () => {
+    const references = [
+      { ocid: "a", title: "Tree works", cpvCodes: ["77341000"], valueAmount: 656_000, buyerId: "b1", buyerName: "Hillingdon", date: "2026-10-01T00:00:00Z" },
+      { ocid: "b", title: "Pest control", cpvCodes: ["90922000"], valueAmount: 392_000, buyerId: "b2", buyerName: "West Kent", date: "2026-09-22T00:00:00Z" },
+    ];
+    expect(closestReference({ cpvCodes: ["90922000"], buyerId: "b9" }, references)?.ocid).toBe("b");
+    expect(closestReference({ cpvCodes: ["77340000"], buyerId: "b9" }, references)?.ocid).toBe("a");
+    // The same buyer outranks a closer code.
+    expect(closestReference({ cpvCodes: ["90920000", "77000000"], buyerId: "b1" }, references)?.ocid).toBe("a");
+    expect(closestReference({ cpvCodes: ["48000000"], buyerId: "b9" }, references)).toBeNull();
   });
 });
 

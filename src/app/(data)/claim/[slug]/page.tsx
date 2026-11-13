@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { claimSupplierAction } from "@/features/procurement/actions";
+import { DataAttribution } from "@/features/procurement/components/data-attribution";
 import { canAddRadarSource, radarAccess } from "@/features/procurement/access";
 import { pluralise } from "@/features/procurement/domain/format";
 import { getSupplierBySlug } from "@/features/procurement/queries/suppliers";
@@ -92,6 +93,7 @@ export default async function ClaimPage({ params, searchParams }: { params: Prom
           </div>
         </form>
       )}
+      <DataAttribution pagePath={supplier.isPublic ? `/suppliers/${supplier.slug}` : undefined} />
     </div>
   );
 }

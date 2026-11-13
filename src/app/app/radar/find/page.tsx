@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CompanySearch, type CompanyHit } from "@/features/procurement/components/company-search";
+import { DataAttribution } from "@/features/procurement/components/data-attribution";
 import { searchSuppliers } from "@/features/procurement/queries/suppliers";
 import { requireOrgForPage } from "@/server/session";
 
@@ -39,6 +40,7 @@ export default async function RadarFindPage({ searchParams }: { searchParams: Pr
           <Link href="/app/radar/setup">Set up a radar manually</Link>
         </Button>
       </div>
+      <DataAttribution />
     </div>
   );
 }

@@ -6,7 +6,7 @@
  *                                and adds them to the sitemap. Default false: those pages
  *                                launch as noindex (docs/research/round2/P2 §4.6).
  *   AI_MODEL_MATCH_REASON        AI Gateway model id for match reasons
- *                                (default "openai/gpt-5-nano").
+ *                                (default "google/gemini-2.5-flash-lite").
  *   FTS_API_BASE                 Override of the Find a Tender API origin (tests).
  */
 const flag = (value: string | undefined) => value === "true" || value === "1";
@@ -17,7 +17,7 @@ export const procurementConfig = {
     return flag(process.env.PUBLIC_DATA_PAGES_INDEXABLE);
   },
   get matchReasonModel(): string {
-    return process.env.AI_MODEL_MATCH_REASON?.trim() || "openai/gpt-5-nano";
+    return process.env.AI_MODEL_MATCH_REASON?.trim() || "google/gemini-2.5-flash-lite";
   },
   get ftsApiBase(): string {
     return process.env.FTS_API_BASE?.trim() || "https://www.find-tender.service.gov.uk";

@@ -64,6 +64,8 @@ export default async function globalSetup() {
       // A possible sole trader with a personal address: must never surface on a public page.
       contractRelease({ title: "Grass Cutting Rounds", buyer: LEEDS, suppliers: [{ name: "John Smith Gardening", email: "john.smith@gmail.com" }], cpv: GROUNDS, value: 15_000, signedDaysAgo: 100, endsInDays: 90 }),
       contractRelease({ title: "Payroll System Support", buyer: BRISTOL, suppliers: [{ name: "Code Smiths Ltd", coh: "06666666", region: "UKK11" }], cpv: ["72212000"], regions: ["UKK"], endsInDays: 80 }),
+      // One award, and no open tender anywhere near its trade: the "no matches right now" state.
+      contractRelease({ title: "School Meals Catering", buyer: BRISTOL, suppliers: [{ name: "Harbour Catering Ltd", coh: "07777777", region: "UKK11" }], cpv: ["55524000"], regions: ["UKK"], value: 60_000, endsInDays: 500 }),
       ...Array.from({ length: 14 }, (_, index) =>
         tenderRelease({
           ocid: `ocds-h6vhtk-e${String(index).padStart(5, "0")}`,

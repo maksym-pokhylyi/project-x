@@ -9,6 +9,7 @@ import { cpvDivisionLabel } from "../domain/cpv";
 import { pluralise } from "../domain/format";
 import { UK_REGIONS } from "../domain/regions";
 import { VALUE_BANDS, type RadarTab, type RadarView } from "../radar/view";
+import { DataAttribution } from "./data-attribution";
 import { BuyerCard, EndingSoonCard } from "./lists";
 import { EmptyState, SourceLink } from "./primitives";
 import { TenderActions } from "./radar-actions";
@@ -400,6 +401,8 @@ export function RadarScreen({ view, now, justClaimed, canManage }: { view: Radar
           </button>
         </form>
       ) : null}
+
+      <DataAttribution />
     </div>
   );
 }
