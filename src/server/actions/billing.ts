@@ -6,7 +6,7 @@ import { track } from "@/lib/analytics";
 import { recordAudit } from "@/lib/audit";
 import { signCheckoutData, type SignedCheckoutData } from "@/lib/billing/checkout-signature";
 import { changeSubscriptionPlan, createBillingLinks, type BillingLinks } from "@/lib/billing/paddle";
-import { getPriceId } from "@/lib/billing/prices";
+import { isTrialEligible, selectCheckoutPrice } from "@/lib/billing/trial";
 import { BillingNotConfiguredError, ConflictError } from "@/lib/errors";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { changePlanSchema, parseInput } from "@/lib/validation";
@@ -36,7 +36,8 @@ export async function startCheckoutAction(input: unknown): Promise<ActionResult<
     const plan = parsed.plan as PaidPlanKey;
     const interval: BillingInterval = isBillingInterval(parsed.interval) ? parsed.interval : "month";
     if (!features.paddleCheckout) throw new BillingNotConfiguredError();
-    const priceId = getPriceId(plan, interval);
+    // First subscription of a workspace may start with the trial price; a returning workspace gets the no-trial twin.
+    const priceId = selectCheckoutPrice(plan, interval, { trialEligible: await isTrialEligible(ctx.organization.id) });
     if (!priceId) throw new BillingNotConfiguredError();
     if (ctx.subscription && ["active", "trialing", "past_due"].includes(ctx.subscription.status)) {
       throw new ConflictError("This workspace already has a subscription. Change the plan instead of starting a new one.");

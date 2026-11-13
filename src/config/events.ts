@@ -36,6 +36,17 @@ export type EventMap = {
   "billing.subscription_past_due": { plan: string };
   "billing.payment_succeeded": { amount: string | null; currency: string | null };
   "billing.payment_failed": { reason: string | null };
+  // Billing: what the owner asked for (the webhook events above record what Paddle then did)
+  "billing.pause_requested": { plan: string };
+  "billing.resume_requested": { plan: string; mode: "resume_now" | "keep_active" };
+  "billing.cancel_requested": { plan: string; effective: "period_end" | "immediately" };
+  "billing.scheduled_change_undone": { plan: string; change: "cancel" | "pause" };
+  "billing.subscription_change_scheduled": { plan: string; change: "cancel" | "pause" };
+  "billing.subscription_change_unscheduled": { plan: string; change: "cancel" | "pause" };
+  // Billing: one-off purchases (amounts in minor units of `currency`)
+  "billing.one_off_checkout_started": { kind: string };
+  "billing.purchase_completed": { kind: string; quantity: number; amount: number; currency: string };
+  "billing.purchase_adjusted": { kind: string; effect: string; revoked: number; kept: number };
 
   // Usage / AI
   "quota.limit_reached": { metric: string; limit: number };

@@ -218,3 +218,76 @@ test("upload a pack, get a cited check, draft and mark an answer, export", async
   expect(anonymous.status()).toBe(401);
   await stranger.close();
 });
+
+/**
+ * Uploads must not depend on HTTP/2. Behind a TLS-inspecting proxy the browser cannot stream
+ * a request body to the storage host: the streamed attempt fails, the plain one is tried, and
+ * a browser that cannot reach the storage host at all sends small files through our own
+ * route. Here the storage host is unreachable (every request to it is aborted), with the real
+ * Blob client in a real browser; the cookie asks the server for the Blob upload plan although
+ * this run has no store.
+ */
+test("an upload that cannot reach the storage host falls back and completes; a failed one shows its error and can be tried again", async ({ page, context }) => {
+  test.setTimeout(240_000);
+  const second = { name: "Una Uploader", email: `una-${run}@e2e.test`, password: "uploader-password-123" };
+  const files = readdirSync(PACK_DIR)
+    .filter((name) => /\.(pdf|docx|xlsx)$/i.test(name))
+    .sort()
+    .map((name) => path.join(PACK_DIR, name));
+
+  await page.goto("/sign-up");
+  await page.getByLabel("Name").fill(second.name);
+  await page.getByLabel("Work e-mail").fill(second.email);
+  await page.getByLabel("Password").fill(second.password);
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page).toHaveURL(/\/verify-email/);
+  await followOutboxLink(page, second.email, "verify-email");
+  await page.waitForURL(/\/(app|sign-in)/);
+  if (page.url().includes("/sign-in")) {
+    await page.getByLabel("E-mail").fill(second.email);
+    await page.getByLabel("Password").fill(second.password);
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await page.waitForURL(/\/app/);
+  }
+
+  await context.addCookies([{ name: "bids-e2e-upload", value: "blob", url: new URL(page.url()).origin }]);
+  // The token route would need a store: answer as it does, with a client token.
+  await page.route("**/api/bids/upload-token", (route) => route.fulfill({ json: { type: "blob.generate-client-token", clientToken: "vercel_blob_client_e2estore_ZTJlLWZha2UtdG9rZW4=" } }));
+  const storageHostRequests: string[] = [];
+  await page.route("https://vercel.com/api/blob/**", (route) => {
+    storageHostRequests.push(route.request().method());
+    return route.abort("failed");
+  });
+  const ownRoute: string[] = [];
+  let ownRouteBlocked = false;
+  await page.route("**/api/bids/*/upload?**", (route) => {
+    ownRoute.push(route.request().method());
+    return ownRouteBlocked ? route.abort("failed") : route.continue();
+  });
+
+  await page.goto("/app/bids/new");
+  await page.getByTestId("file-input").setInputFiles([files[0]!]);
+  const rows = page.getByTestId("file-list").locator("[data-file-status]");
+  // (a) streamed → (b) plain, shown without a number → (c) our own route: uploaded.
+  await expect(rows.first()).toContainText("Uploading…", { timeout: 30_000 });
+  await expect(rows.first()).toHaveAttribute("data-file-status", "done", { timeout: 120_000 });
+  expect(storageHostRequests.length).toBeGreaterThanOrEqual(2);
+  expect(ownRoute).toEqual(["PUT"]);
+
+  // The session remembers: the next small file goes straight to our own route.
+  const before = storageHostRequests.length;
+  ownRouteBlocked = true;
+  await page.getByTestId("file-input").setInputFiles([files[1]!]);
+  // Everything fails now: the row ends in its error state — it does not hang — and the start is explained.
+  const failed = page.locator('[data-file-status="error"]');
+  await expect(failed).toContainText("Could not upload. Check your connection and try again.", { timeout: 60_000 });
+  expect(storageHostRequests.length).toBe(before);
+  await expect(page.getByTestId("start-check")).toBeDisabled();
+  await expect(page.getByTestId("start-reason")).toContainText("One file is not ready: one could not be uploaded (try again, or remove it).");
+
+  // The connection is back: "Try again" sends the same file, no need to choose it anew.
+  ownRouteBlocked = false;
+  await failed.getByTestId("retry-upload").click();
+  await expect(page.locator('[data-file-status="done"]')).toHaveCount(2, { timeout: 60_000 });
+  await expect(page.getByTestId("start-check")).toBeEnabled();
+});

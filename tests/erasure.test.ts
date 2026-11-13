@@ -30,7 +30,7 @@ import { requireOrg } from "@/server/session";
 import { listTenantTables, registerTenantDataHandler, type WorkspaceExport } from "@/server/tenant-data";
 import { actAs, addMember, createTestUser, type TestUser } from "./helpers/auth";
 import { resetDatabase } from "./helpers/db";
-import { paddleEvent, signedWebhookRequest } from "./helpers/paddle";
+import { adjustmentEvent, oneOffPurchaseEvent, paddleEvent, signedWebhookRequest } from "./helpers/paddle";
 
 /**
  * F-12 — owners can export and delete a workspace, users can delete their account, and
@@ -320,7 +320,69 @@ describe("account deletion (F-12)", () => {
 describe("tenant table catalogue", () => {
   it("finds every table that carries organization_id", async () => {
     expect(await listTenantTables()).toEqual(
-      expect.arrayContaining(["ai_usage", "audit_log", "billing_checkout_nonces", "error_log", "events", "invitations", "members", "subscriptions", "usage_counters"]),
+      expect.arrayContaining([
+        "ai_usage",
+        "audit_log",
+        "billing_checkout_nonces",
+        "billing_payments",
+        "billing_purchases",
+        "error_log",
+        "events",
+        "invitations",
+        "members",
+        "subscriptions",
+        "usage_counters",
+      ]),
     );
+  });
+});
+
+describe("billing records in export and deletion", () => {
+  let owner: TestUser;
+  let bystander: TestUser;
+  const signedFor = (user: TestUser) => ({ organizationId: user.organizationId, userId: user.id });
+
+  beforeEach(async () => {
+    await resetDatabase();
+    owner = await createTestUser({ email: "owner@example.com" });
+    bystander = await createTestUser({ email: "bystander@example.com" });
+    // A Bid Pass bought and refunded by the owner's (Free) workspace, and one bought by somebody else.
+    const pass = oneOffPurchaseEvent({ ...signedFor(owner), transactionId: "txn_01erasurepass0000000000001" });
+    await paddleWebhook(signedWebhookRequest(pass));
+    await paddleWebhook(signedWebhookRequest(adjustmentEvent({ transactionId: "txn_01erasurepass0000000000001" })));
+    await paddleWebhook(signedWebhookRequest(oneOffPurchaseEvent({ ...signedFor(bystander), transactionId: "txn_01erasureother000000000001" })));
+    actAs(owner);
+  });
+
+  it("the export contains the workspace's payments and purchases — without the stored Paddle transaction", async () => {
+    const response = await exportRoute(new Request("http://localhost:3000/api/workspace/export"), undefined);
+    const text = await response.text();
+    const data = JSON.parse(text) as WorkspaceExport;
+    expect(data.tables.billing_purchases!.rows).toEqual([expect.objectContaining({ paddle_transaction_id: "txn_01erasurepass0000000000001", kind: "bid_pass", status: "refunded" })]);
+    expect(data.tables.billing_purchases!.rows[0]).not.toHaveProperty("raw");
+    expect(data.tables.billing_payments!.rows).toEqual([expect.objectContaining({ paddle_transaction_id: "txn_01erasurepass0000000000001", status: "refunded" })]);
+    expect(text).not.toContain("txn_01erasureother000000000001");
+    expect(text).not.toContain("Sam Miller"); // the cardholder in Paddle's payload is stored nowhere we export
+  });
+
+  it("deleting the workspace removes its payments, purchases and every stored event about them — and nobody else's", async () => {
+    expect(await db.select().from(webhookEvents)).toHaveLength(3);
+    const name = (await requireOrg()).organization.name;
+    expect(await deleteWorkspaceAction({ confirmName: name })).toMatchObject({ ok: true });
+    expect(await tenantRowCounts(owner.organizationId)).toEqual({});
+    const left = await db.select().from(webhookEvents);
+    // The purchase event (found by its checkout data) and its refund (found by its transaction) are gone.
+    expect(left.map((row) => (row.payload as { data: { id: string } }).data.id)).toEqual(["txn_01erasureother000000000001"]);
+    expect((await tenantRowCounts(bystander.organizationId)).billing_purchases).toBe(1);
+  });
+
+  it("deleting the buyer's account keeps the purchase with the workspace, without the link to the person", async () => {
+    const buyer = await createTestUser({ email: "buyer@example.com" });
+    await addMember(owner.organizationId, buyer, "admin");
+    await paddleWebhook(signedWebhookRequest(oneOffPurchaseEvent({ organizationId: owner.organizationId, userId: buyer.id, transactionId: "txn_01erasurebuyer000000000001" })));
+    actAs(buyer);
+    expect(await deleteAccountAction({ confirmEmail: buyer.email, password: PASSWORD })).toMatchObject({ ok: true });
+    const [purchase] = await db.execute<{ user_id: string | null; organization_id: string }>(sql`select user_id, organization_id from billing_purchases where paddle_transaction_id = 'txn_01erasurebuyer000000000001'`);
+    expect(purchase).toEqual({ user_id: null, organization_id: owner.organizationId });
   });
 });

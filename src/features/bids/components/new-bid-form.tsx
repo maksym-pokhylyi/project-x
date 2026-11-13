@@ -10,7 +10,10 @@ import { ACCEPT_ATTRIBUTE, fileExtension, formatBytes, MAX_BID_BYTES, MAX_BID_FI
 import { tenderReferenceFromInput, type TenderSummary } from "@/features/bids/tender-lookup";
 import { cn } from "@/lib/utils";
 import { daysLeftLabel } from "./ui";
-import { uploadFile } from "./upload-client";
+import { UPLOAD_FAILED_MESSAGE, UploadError, uploadFile } from "./upload-client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FileInput } from "@/features/bids/components/ui/file-input";
 
 type Row = {
   key: string;
@@ -18,8 +21,11 @@ type Row = {
   size: number;
   /** skipped = a file we do not read (a drawing or photo): listed, never uploaded, no action needed. */
   status: "queued" | "uploading" | "done" | "error" | "skipped";
-  progress: number;
+  /** Percent sent; null while the upload runs in a way that cannot report progress. */
+  progress: number | null;
   error?: string;
+  /** The upload failed on the connection, and the file is still at hand: "Try again" re-sends it. */
+  retryable?: boolean;
   fileId?: string;
 };
 
@@ -38,14 +44,17 @@ const word = (n: number, lower = false) => {
 function notReadyReason(rows: Row[]): string | null {
   const uploading = rows.filter((row) => row.status === "uploading").length;
   const waiting = rows.filter((row) => row.status === "queued").length;
-  const failed = rows.filter((row) => row.status === "error").length;
+  // A file that did not get through can be sent again; one that was refused has to be replaced.
+  const unsent = rows.filter((row) => row.status === "error" && row.retryable).length;
+  const failed = rows.filter((row) => row.status === "error" && !row.retryable).length;
   const ready = rows.filter((row) => row.status === "done").length;
   const parts = [
     uploading > 0 ? `${word(uploading, true)} ${uploading === 1 ? "is" : "are"} uploading` : null,
     waiting > 0 ? `${word(waiting, true)} ${waiting === 1 ? "is" : "are"} waiting` : null,
+    unsent > 0 ? `${word(unsent, true)} could not be uploaded (try again, or remove ${unsent === 1 ? "it" : "them"})` : null,
     failed > 0 ? `${word(failed, true)} ${failed === 1 ? "needs" : "need"} replacing or removing` : null,
   ].filter((part): part is string => Boolean(part));
-  const total = uploading + waiting + failed;
+  const total = uploading + waiting + unsent + failed;
   if (total > 0) {
     const list = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : parts[0]!;
     return `${word(total)} ${total === 1 ? "file is" : "files are"} not ready: ${list}.`;
@@ -112,6 +121,48 @@ export function NewBidForm({
     return creating.current;
   }, [noticeId]);
 
+  /** The files of rows that are not uploaded yet, so a failed row can be tried again without choosing the file anew. */
+  const pendingFiles = useRef(new Map<string, File>());
+
+  /** Uploads one file and registers it. Never leaves a row "uploading": it ends as done or as an error. */
+  const uploadRow = useCallback(
+    async (id: string, row: Row, file: File) => {
+      pendingFiles.current.set(row.key, file);
+      patch(row.key, { status: "uploading", progress: 1, error: undefined, retryable: false });
+      try {
+        const plan = await planUploadAction(id, { name: file.name, size: file.size });
+        if (!plan.ok) throw new UploadError(plan.error.message, false);
+        await uploadFile({
+          file,
+          target: plan.data,
+          tokenUrl: "/api/bids/upload-token",
+          clientPayload: { scope: "bid", bidId: id, fileId: plan.data.fileId, name: file.name },
+          // null: a step that cannot report progress is running (shown as "Uploading…").
+          onProgress: (progress) => patch(row.key, { progress: progress === null ? null : Math.max(1, Math.min(99, progress)) }),
+        });
+        const registered = await registerFileAction(id, { fileId: plan.data.fileId, name: file.name });
+        if (!registered.ok) throw new UploadError(registered.error.message, false);
+        pendingFiles.current.delete(row.key);
+        patch(row.key, { status: "done", progress: 100, fileId: registered.data.id });
+      } catch (error) {
+        const retryable = error instanceof UploadError ? error.retryable : true;
+        if (!retryable) pendingFiles.current.delete(row.key);
+        patch(row.key, { status: "error", retryable, error: error instanceof UploadError ? error.message : UPLOAD_FAILED_MESSAGE });
+      }
+    },
+    [patch],
+  );
+
+  const retry = useCallback(
+    async (row: Row) => {
+      const file = pendingFiles.current.get(row.key);
+      if (!file || disabled) return;
+      const id = await ensureBid();
+      if (id) await uploadRow(id, row, file);
+    },
+    [disabled, ensureBid, uploadRow],
+  );
+
   const addFiles = useCallback(
     async (files: File[]) => {
       if (disabled || files.length === 0) return;
@@ -154,30 +205,11 @@ export function NewBidForm({
       // Three at a time keeps slow connections responsive.
       const queue = [...accepted];
       const worker = async () => {
-        for (let next = queue.shift(); next; next = queue.shift()) {
-          const { row, file } = next;
-          patch(row.key, { status: "uploading", progress: 1 });
-          try {
-            const plan = await planUploadAction(id, { name: file.name, size: file.size });
-            if (!plan.ok) throw new Error(plan.error.message);
-            await uploadFile({
-              file,
-              target: plan.data,
-              tokenUrl: "/api/bids/upload-token",
-              clientPayload: { scope: "bid", bidId: id, fileId: plan.data.fileId, name: file.name },
-              onProgress: (progress) => patch(row.key, { progress: Math.max(1, Math.min(99, progress)) }),
-            });
-            const registered = await registerFileAction(id, { fileId: plan.data.fileId, name: file.name });
-            if (!registered.ok) throw new Error(registered.error.message);
-            patch(row.key, { status: "done", progress: 100, fileId: registered.data.id });
-          } catch (error) {
-            patch(row.key, { status: "error", error: error instanceof Error ? error.message : "The upload failed. Try again." });
-          }
-        }
+        for (let next = queue.shift(); next; next = queue.shift()) await uploadRow(id, next.row, next.file);
       };
       await Promise.all([worker(), worker(), worker()]);
     },
-    [disabled, ensureBid, patch, rows],
+    [disabled, ensureBid, patch, rows, uploadRow],
   );
 
   const remove = async (row: Row) => {
@@ -243,39 +275,39 @@ export function NewBidForm({
         {noticeId ? (
           <div className="bid-card flex flex-wrap items-start gap-x-8 gap-y-4 px-5 py-5 sm:px-6" data-testid="tender-card">
             <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-2">
-              <p className="text-[17px] leading-[1.35] font-semibold">{tender?.title ?? "Linked to a tender notice"}</p>
-              <p className="text-[15px]">{tender?.buyerName ?? "The title, buyer and deadline will be read from the pack you upload."}</p>
+              <p className="text-17 leading-[1.35] font-semibold">{tender?.title ?? "Linked to a tender notice"}</p>
+              <p className="text-15">{tender?.buyerName ?? "The title, buyer and deadline will be read from the pack you upload."}</p>
               <p className="flex flex-wrap items-center gap-2">
                 <span className="bid-pill bid-pill-info text-xs">Tender notice</span>
-                <span className="bid-mono text-xs text-(--bid-muted)">{tender?.reference ?? noticeId}</span>
+                <span className="bid-mono text-xs text-ink-2">{tender?.reference ?? noticeId}</span>
               </p>
             </div>
             {closes && left ? (
               <div className="flex flex-col gap-0.5">
-                <span className="text-xs text-(--bid-muted)">Closes</span>
-                <span className="flex items-center gap-2 text-[17px] font-semibold tabular-nums">
-                  <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-(--bid-line-strong)" : left.urgent ? "bg-(--bid-danger)" : "bg-(--bid-amber)")} />
+                <span className="text-xs text-ink-2">Closes</span>
+                <span className="flex items-center gap-2 text-17 font-semibold tabular-nums">
+                  <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-(--accent)")} />
                   {new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" }).format(closes)}
                 </span>
-                <span className="flex items-center gap-2 text-[13px] text-(--bid-muted)">
+                <span className="flex items-center gap-2 text-13 text-ink-2">
                   {new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit" }).format(closes)}
-                  <span className="rounded bg-(--bid-amber-tint) px-1.5 py-px text-xs font-semibold text-(--bid-ink)">{left.label}</span>
+                  <span className="rounded bg-accent-tint px-1.5 py-px text-xs font-semibold text-ink">{left.label}</span>
                 </span>
               </div>
             ) : null}
-            <button type="button" className="bid-btn" onClick={() => void setTender(null)} disabled={disabled}>
+            <Button variant="outline" type="button"  onClick={() => void setTender(null)} disabled={disabled}>
               Change
-            </button>
+            </Button>
           </div>
         ) : null}
         <div className="flex max-w-[560px] flex-col gap-1.5">
-          <label htmlFor="tender-link" className="text-[15px] font-medium">
+          <label htmlFor="tender-link" className="text-15 font-medium">
             {noticeId ? "Or paste a Find a Tender link" : "Paste a Find a Tender link (optional)"}
           </label>
           <div className="flex flex-wrap gap-2">
-            <input
+            <Input
               id="tender-link"
-              className="bid-input min-w-0 flex-[1_1_260px]"
+              className="min-w-0 flex-[1_1_260px]"
               type="url"
               inputMode="url"
               placeholder="https://www.find-tender.service.gov.uk/Notice/…"
@@ -290,19 +322,19 @@ export function NewBidForm({
               }}
               aria-describedby="tender-link-hint"
               aria-invalid={linkError ? true : undefined}
-            />
+/>
             {link.trim() ? (
-              <button type="button" className="bid-btn" onClick={submitLink}>
+              <Button variant="outline" type="button"  onClick={submitLink}>
                 Link this tender
-              </button>
+              </Button>
             ) : null}
           </div>
           {linkError ? (
-            <p role="alert" className="text-[13px] text-(--bid-danger)">
+            <p role="alert" className="text-13 text-danger">
               {linkError}
             </p>
           ) : (
-            <p id="tender-link-hint" className="text-[13px] text-(--bid-muted)">
+            <p id="tender-link-hint" className="text-13 text-ink-2">
               {noticeId ? "Replaces the tender above." : "You can skip this: the title, buyer and deadline are read from the pack."}
             </p>
           )}
@@ -316,7 +348,7 @@ export function NewBidForm({
         <h2 id="upload-h" className="bid-h2">
           2 · Upload the tender pack
         </h2>
-        {disabled ? <p className="text-[15px] text-(--bid-muted)">Upload opens once you have a bid to use.</p> : null}
+        {disabled ? <p className="text-15 text-ink-2">Upload opens once you have a bid to use.</p> : null}
         <div
           data-testid="dropzone"
           onDragOver={(event) => {
@@ -330,17 +362,16 @@ export function NewBidForm({
             void addFiles(Array.from(event.dataTransfer.files));
           }}
           className={cn(
-            "flex flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed px-6 py-8 text-center",
-            disabled ? "border-(--bid-line) bg-(--bid-paper-deep) opacity-70" : dragging ? "border-(--bid-brand) bg-(--bid-brand-tint)" : "border-(--bid-line-strong) bg-(--bid-surface)",
+            "flex flex-col items-center justify-center gap-3 rounded-card border border-dashed px-6 py-8 text-center",
+            disabled ? "border-line bg-paper-deep opacity-70" : dragging ? "border-brand bg-brand-tint" : "border-line-strong bg-surface",
           )}
         >
           <Upload aria-hidden className="size-6" strokeWidth={1.6} />
-          <p className="text-[17px] font-semibold">Drop the files here</p>
-          <input
+          <p className="text-17 font-semibold">Drop the files here</p>
+          <FileInput
             ref={input}
             id="pack-files"
             data-testid="file-input"
-            type="file"
             multiple
             accept={ACCEPT_ATTRIBUTE}
             className="sr-only"
@@ -350,9 +381,8 @@ export function NewBidForm({
               event.target.value = "";
             }}
           />
-          <input
+          <FileInput
             ref={replaceInput}
-            type="file"
             accept={ACCEPT_ATTRIBUTE}
             className="sr-only"
             tabIndex={-1}
@@ -367,37 +397,46 @@ export function NewBidForm({
               void addFiles([file]);
             }}
           />
-          <button type="button" className="bid-btn" disabled={disabled} onClick={() => input.current?.click()}>
+          <Button variant="outline" type="button"  disabled={disabled} onClick={() => input.current?.click()}>
             Choose files
-          </button>
-          <p className="max-w-[560px] text-sm text-(--bid-muted)">PDF, Word, Excel, CSV, text or ZIP, up to 50 MB a file. Send everything the buyer sent, including appendices and clarifications.</p>
+          </Button>
+          <p className="max-w-[560px] text-sm text-ink-2">PDF, Word, Excel, CSV, text or ZIP, up to 50 MB a file. Send everything the buyer sent, including appendices and clarifications.</p>
         </div>
 
         {rows.length > 0 ? (
           <div className="bid-card" data-testid="file-list">
-            <h3 className="px-5 py-4 text-[15px] font-semibold sm:px-6">
-              Files <span className="font-normal text-(--bid-muted)">· {rows.length} added</span>
+            <h3 className="px-5 py-4 text-15 font-semibold sm:px-6">
+              Files <span className="font-normal text-ink-2">· {rows.length} added</span>
             </h3>
             <ul aria-label="Files">
               {rows.map((row) => (
                 <li key={row.key} className="bid-rule flex flex-wrap items-center gap-x-6 gap-y-1.5 px-5 py-3 sm:px-6" data-file-status={row.status}>
-                  <span className={cn("bid-mono min-w-0 flex-[1_1_240px] text-[13px] [overflow-wrap:anywhere]", row.status === "skipped" ? "text-(--bid-muted)" : "")}>{row.name}</span>
-                  <span className="w-20 shrink-0 text-[13px] text-(--bid-muted) tabular-nums">{formatBytes(row.size)}</span>
-                  <span className="flex min-w-0 flex-[2_1_260px] flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px]">
+                  <span className={cn("bid-mono min-w-0 flex-[1_1_240px] text-13 [overflow-wrap:anywhere]", row.status === "skipped" ? "text-ink-2" : "")}>{row.name}</span>
+                  <span className="w-20 shrink-0 text-13 text-ink-2 tabular-nums">{formatBytes(row.size)}</span>
+                  <span className="flex min-w-0 flex-[2_1_260px] flex-wrap items-center gap-x-3 gap-y-1.5 text-13">
                     {row.status === "done" ? (
-                      <span className="inline-flex items-center gap-1.5 font-semibold text-(--bid-brand)">
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-brand">
                         <Check aria-hidden className="size-3.5" strokeWidth={2.6} />
                         Uploaded
                       </span>
                     ) : row.status === "uploading" ? (
                       <>
-                        <span className="font-semibold tabular-nums">Uploading {row.progress}%</span>
-                        <span className="flex h-1 w-40 max-w-full rounded-full bg-(--bid-line)" role="progressbar" aria-valuenow={row.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Uploading ${row.name}`}>
-                          <span className="rounded-full bg-(--bid-ink) transition-[width]" style={{ width: `${row.progress}%` }} />
-                        </span>
+                        {row.progress === null ? (
+                          // A step without progress events (plain upload behind a proxy): say so, do not show a number.
+                          <span className="font-semibold" role="status">
+                            Uploading…
+                          </span>
+                        ) : (
+                          <>
+                            <span className="font-semibold tabular-nums">Uploading {row.progress}%</span>
+                            <span className="flex h-1 w-40 max-w-full rounded-full bg-line" role="progressbar" aria-valuenow={row.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Uploading ${row.name}`}>
+                              <span className="rounded-full bg-ink transition-[width]" style={{ width: `${row.progress}%` }} />
+                            </span>
+                          </>
+                        )}
                       </>
                     ) : row.status === "queued" ? (
-                      <span className="text-(--bid-muted)">Waiting</span>
+                      <span className="text-ink-2">Waiting</span>
                     ) : row.status === "skipped" ? (
                       <>
                         <span className="bid-pill bid-pill-info text-xs">No action needed</span>
@@ -405,34 +444,39 @@ export function NewBidForm({
                       </>
                     ) : (
                       <>
-                        <span role="alert" className="flex min-w-0 flex-[1_1_200px] items-start gap-2 text-(--bid-danger)">
+                        <span role="alert" className="flex min-w-0 flex-[1_1_200px] items-start gap-2 text-danger">
                           <span aria-hidden className="font-bold">
                             !
                           </span>
                           {row.error}
                         </span>
-                        <button
+                        {row.retryable ? (
+                          <Button variant="outline" size="sm" type="button"  onClick={() => void retry(row)} data-testid="retry-upload">
+                            Try again
+                          </Button>
+                        ) : null}
+                        <Button variant="outline" size="sm"
                           type="button"
-                          className="bid-btn bid-btn-sm"
+                          
                           onClick={() => {
                             replacing.current = row;
                             replaceInput.current?.click();
                           }}
-                        >
+>
                           Replace
-                        </button>
+                        </Button>
                       </>
                     )}
                   </span>
-                  <button
+                  <Button variant="ghost" size="icon"
                     type="button"
-                    className="-mr-2 flex size-11 shrink-0 items-center justify-center rounded text-(--bid-ink) hover:bg-(--bid-paper) disabled:opacity-40"
+                    className="shrink-0"
                     aria-label={`Remove ${row.name}`}
                     disabled={row.status === "uploading"}
                     onClick={() => void remove(row)}
                   >
                     <X aria-hidden className="size-4" />
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -440,17 +484,16 @@ export function NewBidForm({
         ) : null}
       </section>
 
-      <div className="flex flex-col gap-3 border-t border-(--bid-line) pt-7">
+      <div className="flex flex-col gap-3 border-t border-line pt-7">
         {formError ? (
-          <p role="alert" className="rounded-lg bg-(--bid-danger-tint) px-4 py-3 text-sm text-(--bid-danger)">
+          <p role="alert" className="rounded-card bg-danger-tint px-4 py-3 text-sm text-danger">
             {formError}
           </p>
         ) : null}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <button
+          <Button
             type="button"
-            className={cn("bid-btn px-6 text-[17px]", disabled || reason ? "border-(--bid-paper-deep) bg-(--bid-paper-deep) text-(--bid-muted)" : "bid-btn-primary")}
-            style={{ minHeight: 48 }}
+            className="px-6"
             onClick={() => void start()}
             disabled={disabled || starting || Boolean(reason)}
             data-testid="start-check"
@@ -458,12 +501,12 @@ export function NewBidForm({
           >
             {starting ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
             {starting ? "Starting…" : "Start the check"}
-          </button>
-          <Link href="/app/bids" className="bid-link text-[15px] font-medium" data-testid="save-later">
+          </Button>
+          <Link href="/app/bids" className="bid-link text-15 font-medium" data-testid="save-later">
             Save and finish later
           </Link>
         </div>
-        <p id="start-reason" className="text-[15px]" data-testid="start-reason" aria-live="polite">
+        <p id="start-reason" className="text-15" data-testid="start-reason" aria-live="polite">
           {disabled ? "You have no bid checks left on your plan." : (reason ?? `${word(uploadedCount)} ${uploadedCount === 1 ? "file is" : "files are"} ready. Starting takes two to four minutes; you can leave the page.`)}
         </p>
       </div>

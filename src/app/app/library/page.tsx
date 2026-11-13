@@ -53,14 +53,14 @@ export default async function LibraryPage() {
   return (
     <div className="bid-scope flex flex-col">
       <h1 className="bid-h1">Documents</h1>
-      <p className="mt-2 max-w-[760px] text-[17px] leading-[1.45]">What Bidfolio knows about your company. Checks and drafts use only what is here.</p>
+      <p className="mt-2 max-w-[760px] text-17 leading-[1.45]">What Bidfolio knows about your company. Checks and drafts use only what is here.</p>
 
       <section aria-labelledby="facts-heading" className="mt-10 flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 id="facts-heading" className="bid-h2">
             Company facts
           </h2>
-          <p className="max-w-[760px] text-sm text-(--bid-muted)">Every bid check compares the pack&rsquo;s requirements with these. Correct anything that is wrong or out of date: nothing is used until you save it.</p>
+          <p className="max-w-[760px] text-sm text-ink-2">Every bid check compares the pack&rsquo;s requirements with these. Correct anything that is wrong or out of date: nothing is used until you save it.</p>
         </div>
         <CompanyFactsForm
           key={`${record.updatedAt?.toISOString() ?? "new"}-${record.draft ? "draft" : "none"}`}
@@ -77,15 +77,15 @@ export default async function LibraryPage() {
           <h2 id="docs-heading" className="bid-h2">
             Documents
           </h2>
-          <p className="text-sm text-(--bid-muted)">
+          <p className="text-sm text-ink-2">
             {items.length === 0 ? "None yet." : `${items.length} document${items.length === 1 ? "" : "s"}, newest first.`} Each is read and summarised; correct the type or the valid-until date if we got it wrong.
           </p>
         </div>
         <DocsPanel docs={items} now={now} />
       </section>
 
-      <footer className="mt-16 rounded-[10px] bg-(--bid-paper-deep) px-5 py-4 text-[13px] text-(--bid-muted)">
-        <span className="font-semibold text-(--bid-ink)">Where your files are kept.</span> Your tender packs and company documents are stored in the EU (Frankfurt) and encrypted in transit and at rest. Only people in your workspace can open
+      <footer className="mt-16 rounded-card bg-paper-deep px-5 py-4 text-13 text-ink-2">
+        <span className="font-semibold text-ink">Where your files are kept.</span> Your tender packs and company documents are stored in the EU (Frankfurt) and encrypted in transit and at rest. Only people in your workspace can open
         them. They are never used to train AI models.
       </footer>
     </div>

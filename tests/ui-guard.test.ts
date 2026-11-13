@@ -17,20 +17,15 @@ const RAW_CONTROL = /<(input|select|textarea|button)\b(?![^>]*type="hidden")/;
 
 const ALLOWED: Record<string, string> = {
   "app/global-error.tsx": "must render without the app's CSS or components",
+  "features/bids/components/ui/file-input.tsx": "the one raw file input: always hidden, opened by a Button or a drop zone",
 };
 
 const KNOWN_DEBT = new Set([
-  // Bids and library modules were written before the rule; they are converted in the consolidation round.
+  // Bid desk patterns with their own toggle or chip button (source marker, citation chip, fact tick):
+  // they leave this list when the patterns move into src/components/ui.
   "features/bids/components/answer-editor.tsx",
-  "features/bids/components/bid-actions.tsx",
   "features/bids/components/citation.tsx",
   "features/bids/components/fact-confirm.tsx",
-  "features/bids/components/gate-list.tsx",
-  "features/bids/components/new-bid-form.tsx",
-  "features/bids/components/processing-state.tsx",
-  "features/bids/components/requirements-view.tsx",
-  "features/library/components/docs-panel.tsx",
-  "features/library/components/facts-form.tsx",
   "features/procurement/components/data-request-form.tsx",
   "features/procurement/components/radar-profile-form.tsx",
   "features/procurement/components/radar-screen.tsx",

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Popover } from "radix-ui";
 import { useState, useTransition } from "react";
 import { deleteBidAction, setBidArchivedAction, unlockFullBidAction } from "@/features/bids/actions";
+import { Button } from "@/components/ui/button";
 
 /** "Export to Word": the downloads of one bid, as a menu next to the title. */
 export function ExportMenu({ bidId, canExportAnswers, answersReady, label = "Export to Word" }: { bidId: string; canExportAnswers: boolean; answersReady: number; label?: string }) {
@@ -13,17 +14,17 @@ export function ExportMenu({ bidId, canExportAnswers, answersReady, label = "Exp
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
-        <button type="button" className="bid-btn" data-testid="export-menu">
+        <Button variant="outline" type="button"  data-testid="export-menu">
           <Download aria-hidden className="size-4" />
           {label}
           <ChevronDown aria-hidden className="size-3.5" />
-        </button>
+        </Button>
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content align="end" sideOffset={6} collisionPadding={12} className="bid-pop z-50 w-[min(21rem,calc(100vw-1.5rem))] p-1.5 outline-none">
           <a href={`${base}/brief`} className="bid-menu-item" data-testid="export-brief" download>
             Bid check (Word)
-            <span className="text-xs font-normal text-(--bid-muted)">Verdict, key facts, requirements and questions, with sources</span>
+            <span className="text-xs font-normal text-ink-2">Verdict, key facts, requirements and questions, with sources</span>
           </a>
           <a href={`${base}/requirements-docx`} className="bid-menu-item" data-testid="export-requirements-docx" download>
             Requirements checklist (Word)
@@ -34,7 +35,7 @@ export function ExportMenu({ bidId, canExportAnswers, answersReady, label = "Exp
           {canExportAnswers ? (
             <a href={`${base}/answers`} className="bid-menu-item" data-testid="export-answers" download>
               Answers (Word)
-              <span className="text-xs font-normal text-(--bid-muted)">
+              <span className="text-xs font-normal text-ink-2">
                 {answersReady === 0 ? "No answers written yet" : `${answersReady} answer${answersReady === 1 ? "" : "s"} so far, with word counts and open gaps`}
               </span>
             </a>
@@ -70,42 +71,42 @@ export function BidActions({ bidId, status }: { bidId: string; status: string })
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
-        <button type="button" className="bid-btn bid-btn-quiet px-3" aria-label="More actions for this bid" data-testid="bid-more">
+        <Button variant="ghost" type="button" className="px-3" aria-label="More actions for this bid" data-testid="bid-more">
           <MoreHorizontal aria-hidden className="size-5" />
-        </button>
+        </Button>
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content align="end" sideOffset={6} collisionPadding={12} className="bid-pop z-50 w-64 p-1.5 outline-none">
           {status === "archived" ? (
-            <button type="button" className="bid-menu-item" disabled={pending} onClick={() => run(() => setBidArchivedAction(bidId, false))}>
+            <Button variant="ghost" type="button" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" disabled={pending} onClick={() => run(() => setBidArchivedAction(bidId, false))}>
               <span className="inline-flex items-center gap-2">
                 <ArchiveRestore aria-hidden className="size-4" />
                 Restore this bid
               </span>
-            </button>
+            </Button>
           ) : status === "ready" || status === "failed" ? (
-            <button type="button" className="bid-menu-item" disabled={pending} onClick={() => run(() => setBidArchivedAction(bidId, true))}>
+            <Button variant="ghost" type="button" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" disabled={pending} onClick={() => run(() => setBidArchivedAction(bidId, true))}>
               <span className="inline-flex items-center gap-2">
                 <Archive aria-hidden className="size-4" />
                 Archive (read-only)
               </span>
-            </button>
+            </Button>
           ) : null}
-          <button
+          <Button variant="ghost"
             type="button"
-            className="bid-menu-item text-(--bid-danger)"
+            className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal text-danger"
             disabled={pending}
             onClick={() => {
               if (window.confirm("Delete this bid, its files and all answers? This cannot be undone.")) run(() => deleteBidAction(bidId), () => router.push("/app/bids"));
             }}
           >
-            <span className="inline-flex items-center gap-2 text-(--bid-danger)">
+            <span className="inline-flex items-center gap-2 text-danger">
               <Trash2 aria-hidden className="size-4" />
               Delete this bid
             </span>
-          </button>
+          </Button>
           {error ? (
-            <p role="alert" className="px-3 py-2 text-xs text-(--bid-danger)">
+            <p role="alert" className="px-3 py-2 text-xs text-danger">
               {error}
             </p>
           ) : null}
@@ -122,9 +123,9 @@ export function UnlockButton({ bidId, label }: { bidId: string; label: string })
   const [pending, startTransition] = useTransition();
   return (
     <span className="inline-flex flex-col items-end gap-1">
-      <button
+      <Button variant="outline" size="sm"
         type="button"
-        className="bid-btn bid-btn-sm"
+        
         disabled={pending}
         data-testid="unlock-full-bid"
         onClick={() =>
@@ -135,11 +136,11 @@ export function UnlockButton({ bidId, label }: { bidId: string; label: string })
             else router.refresh();
           })
         }
-      >
+>
         {pending ? "Unlocking…" : label}
-      </button>
+      </Button>
       {error ? (
-        <span role="alert" className="text-xs text-(--bid-danger)">
+        <span role="alert" className="text-xs text-danger">
           {error}
         </span>
       ) : null}

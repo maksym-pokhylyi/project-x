@@ -48,6 +48,12 @@ export const RETENTION_DAYS = {
    * content and are NOT touched: they stay until the customer deletes them or the workspace.
    */
   bidWorkFiles: 14,
+  /**
+   * The Paddle transaction kept on a one-off purchase (`billing_purchases.raw`, for debugging).
+   * The purchase itself and the receipts (`billing_payments`) are business records: they stay
+   * as long as the workspace exists and go with it.
+   */
+  purchasePayload: 90,
 } as const;
 
 export type RetentionKey = keyof typeof RETENTION_DAYS;

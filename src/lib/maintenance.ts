@@ -51,6 +51,7 @@ export type MaintenanceSummary = Record<
   | "aiUsage"
   | "auditLog"
   | "checkoutNonces"
+  | "purchasePayloads"
   | "aiReservationsSettled",
   number
 >;
@@ -69,6 +70,12 @@ export async function runMaintenance(batching: Batching = {}): Promise<Maintenan
   const aiUsage = await deleteInBatches("ai_usage", olderThan("created_at", d.aiUsage), batching);
   const auditLog = await deleteInBatches("audit_log", olderThan("created_at", d.auditLog), batching);
   const checkoutNonces = await deleteInBatches("billing_checkout_nonces", olderThan("consumed_at", d.checkoutNonces), batching);
+  // One-off purchases keep their row (a business record); only the stored Paddle transaction goes.
+  const purchasePayloads = await db.execute(sql`
+    update billing_purchases set raw = null
+    where ${olderThan("created_at", d.purchasePayload)} and raw is not null
+    returning 1
+  `);
 
   // Paddle payloads: keep what idempotency and ordering need (ids, type, time), drop the rest.
   const redacted = await db.execute(sql`
@@ -121,6 +128,7 @@ export async function runMaintenance(batching: Batching = {}): Promise<Maintenan
     aiUsage,
     auditLog,
     checkoutNonces,
+    purchasePayloads: purchasePayloads.length,
     aiReservationsSettled,
   };
 }

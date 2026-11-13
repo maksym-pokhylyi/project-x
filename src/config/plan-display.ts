@@ -131,5 +131,12 @@ export const BID_PASS_DISPLAY = {
   shortLine: `A ${BID_PASS.name} adds one full bid for ${formatPrice(BID_PASS.price)}.`,
 } as const;
 
+/**
+ * The same object under the name this module first exported it with: existing imports
+ * (`import { BID_PASS } from "@/config/plan-display"`) keep working. New code uses
+ * BID_PASS_DISPLAY here, or BID_PASS from src/config/plans.ts for the catalogue entry.
+ */
+export { BID_PASS_DISPLAY as BID_PASS };
+
 /** The comparison table, straight from the catalogue. */
 export const COMPARISON: ComparisonGroup[] = PLAN_COMPARISON;

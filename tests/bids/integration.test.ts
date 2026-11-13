@@ -47,12 +47,8 @@ import {
   saveCompanyFactsAction,
 } from "@/features/library/actions";
 import { getTender } from "@/features/procurement/queries/notices";
-import {
-  AiBudgetExceededError,
-  AiInputTooLargeError,
-  estimatePromptTokens,
-  generateAiText,
-} from "@/lib/ai";
+import { AiBudgetExceededError, aiBudgetLimits, AiInputTooLargeError, estimatePromptTokens, generateAiText } from "@/lib/ai";
+import { getOrgEntitlements } from "@/lib/billing/subscription";
 import { SeatsOverLimitError } from "@/lib/errors";
 import { orgFileKey, orgStoragePrefix, storage } from "@/lib/storage";
 import { requireOrg } from "@/server/session";
@@ -119,10 +115,22 @@ const call = (
     ...extra,
   });
 
+/**
+ * A mock price at which one 6,000-token call reserves `share` of what a Free workspace may
+ * hold at once today — its own day, or the shared free pool where that is smaller — so these
+ * tests do not depend on the numbers in the plan catalogue.
+ */
+async function priceCallsAt(share: number, organizationId: string): Promise<{ perCallUsd: number; binding: number }> {
+  const limits = aiBudgetLimits(await getOrgEntitlements(organizationId));
+  const binding = Math.min(limits.organizationDailyUsd, limits.freePoolDailyUsd ?? Number.POSITIVE_INFINITY);
+  const perCallUsd = Math.round(binding * share * 1e6) / 1e6;
+  priceMockModels({ inputPerMTok: 0, outputPerMTok: (perCallUsd / 6_000) * 1e6 });
+  return { perCallUsd, binding };
+}
+
 describe("model calls under the reservation rules", () => {
   it("waits for its own running calls when their worst-case reservations crowd a later call out", async () => {
-    // Free workspace in the test environment: $0.10 a day. Each call reserves 6,000 output tokens = $0.06.
-    priceMockModels({ inputPerMTok: 0, outputPerMTok: 10 });
+    // Each call reserves 60% of what the workspace may hold today: two never fit at once.
     let running = 0;
     let peak = 0;
     const mock = installMockModel(async () => {
@@ -132,58 +140,35 @@ describe("model calls under the reservation rules", () => {
       running -= 1;
       return "hello";
     });
-    priceMockModels({ inputPerMTok: 0, outputPerMTok: 10 });
+    const { perCallUsd } = await priceCallsAt(0.6, user.organizationId);
 
-    const results = await Promise.all([
-      call(user.organizationId),
-      call(user.organizationId),
-      call(user.organizationId),
-    ]);
+    const results = await Promise.all([call(user.organizationId), call(user.organizationId), call(user.organizationId)]);
 
-    expect(results.map((result) => result.text)).toEqual([
-      "hello",
-      "hello",
-      "hello",
-    ]);
+    expect(results.map((result) => result.text)).toEqual(["hello", "hello", "hello"]);
     expect(mock.calls).toHaveLength(3);
     // Never two at once: the second and third waited instead of failing or overspending.
     expect(peak).toBe(1);
-    const rows = await db
-      .select()
-      .from(aiUsage)
-      .where(eq(aiUsage.organizationId, user.organizationId));
+    const rows = await db.select().from(aiUsage).where(eq(aiUsage.organizationId, user.organizationId));
     expect(rows).toHaveLength(3);
-    expect(
-      rows.every((row) => row.status === "ok" && row.reservedUsd === 0.06),
-    ).toBe(true);
+    expect(rows.every((row) => row.status === "ok" && Math.abs((row.reservedUsd ?? 0) - perCallUsd) < 1e-6)).toBe(true);
     mock.restore();
   });
 
   it("passes the refusal on when nothing of its own is running", async () => {
-    priceMockModels({ inputPerMTok: 0, outputPerMTok: 10 });
     const mock = installMockModel(() => "hello");
-    priceMockModels({ inputPerMTok: 0, outputPerMTok: 10 });
-    await db
-      .insert(aiUsage)
-      .values({
-        organizationId: user.organizationId,
-        feature: "seed",
-        model: "mock/draft-primary",
-        costUsd: 0.09,
-      });
+    const { binding } = await priceCallsAt(0.6, user.organizationId);
+    // Nine tenths of today's room is already spent (on the Free plan, so it counts in the free pool too).
+    await db.insert(aiUsage).values({ organizationId: user.organizationId, feature: "seed", model: "mock/draft-primary", costUsd: binding * 0.9, planKey: "free" });
 
-    await expect(call(user.organizationId)).rejects.toBeInstanceOf(
-      AiBudgetExceededError,
-    );
+    await expect(call(user.organizationId)).rejects.toBeInstanceOf(AiBudgetExceededError);
     expect(mock.calls).toHaveLength(0);
     mock.restore();
   });
 
   it("does not wait for calls that were refused themselves", async () => {
-    priceMockModels({ inputPerMTok: 0, outputPerMTok: 10 });
     const mock = installMockModel(() => "hello");
-    priceMockModels({ inputPerMTok: 0, outputPerMTok: 10 });
-    await db.insert(aiUsage).values({ organizationId: user.organizationId, feature: "seed", model: "mock/draft-primary", costUsd: 0.09 });
+    const { binding } = await priceCallsAt(0.6, user.organizationId);
+    await db.insert(aiUsage).values({ organizationId: user.organizationId, feature: "seed", model: "mock/draft-primary", costUsd: binding * 0.9, planKey: "free" });
 
     // Five at once, none of which can ever fit: each is refused once and gives up.
     const results = await Promise.allSettled(Array.from({ length: 5 }, () => call(user.organizationId)));

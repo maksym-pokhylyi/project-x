@@ -159,7 +159,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     limits: {
       seats: SEATS.free,
       units: 50,
-      aiMonthlyBudgetUsd: 0.5,
+      aiMonthlyBudgetUsd: 6,
       "radar.profiles": 1,
       "radar.matches": FREE_RADAR_MATCHES,
       "briefs.lifetime": 1,
@@ -180,7 +180,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     limits: {
       seats: SEATS.starter,
       units: 1000,
-      aiMonthlyBudgetUsd: 5,
+      aiMonthlyBudgetUsd: 6,
       "radar.profiles": 5,
       "radar.matches": null,
       "briefs.lifetime": 1,
@@ -201,7 +201,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     limits: {
       seats: SEATS.pro,
       units: 10000,
-      aiMonthlyBudgetUsd: 25,
+      aiMonthlyBudgetUsd: 30,
       "radar.profiles": 5,
       "radar.matches": null,
       "briefs.lifetime": 1,
