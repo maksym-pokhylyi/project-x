@@ -3,19 +3,44 @@ import Link from "next/link";
 import { ReplayWebhookButton, RetryJobButton } from "@/components/admin/admin-buttons";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminActivity, getAdminConfigWarnings, getAdminMetrics } from "@/server/admin";
+import { getFounderKpis, type Windowed } from "@/server/admin-kpis";
 import { requireAdminForPage } from "@/server/session";
 
 export const metadata: Metadata = { title: "Overview" };
 
 const usd = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+const money = (minor: number, currency: string) => new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(minor / 100);
 const when = (date: Date) => `${date.toISOString().replace("T", " ").slice(0, 16)} UTC`;
+const count = (value: number) => value.toLocaleString("en-GB");
+/** "—" is "not measurable here" (a module that is not installed), never zero. */
+const DASH = "—";
+const inWindows = (figure: Windowed) => `${count(figure.last7Days)} in 7 days · ${count(figure.last30Days)} in 30 days`;
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+/** "12 minutes ago", "3 hours ago", "2 days ago". */
+function ago(date: Date | null, now: Date): string {
+  if (!date) return "never";
+  const minutes = Math.max(0, Math.round((now.getTime() - date.getTime()) / 60_000));
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 48) return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  const days = Math.round(hours / 24);
+  return `${days} days ago`;
+}
+
+function Stat({ label, value, hint, href, testId }: { label: string; value: string; hint?: string; href?: string; testId?: string }) {
   return (
-    <div className="rounded-xl border bg-card p-4" data-testid="admin-stat">
+    <div className="rounded-xl border bg-card p-4" data-testid="admin-stat" data-kpi={testId}>
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
       {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
+      {href ? (
+        <p className="mt-1 text-xs">
+          <Link href={href} className="font-medium underline underline-offset-4">
+            Open
+          </Link>
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -23,8 +48,13 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
 export default async function AdminOverviewPage() {
   // Pages render in parallel with their layout, so each admin page guards itself.
   await requireAdminForPage();
-  const [metrics, activity, configWarnings] = await Promise.all([getAdminMetrics(), getAdminActivity(), getAdminConfigWarnings()]);
-  const conversion = metrics.trials.conversionRate === null ? "—" : `${Math.round(metrics.trials.conversionRate * 100)}%`;
+  const now = new Date();
+  const [metrics, activity, configWarnings, kpis] = await Promise.all([getAdminMetrics(now), getAdminActivity(), getAdminConfigWarnings(), getFounderKpis(now)]);
+  const conversion = metrics.trials.conversionRate === null ? DASH : `${Math.round(metrics.trials.conversionRate * 100)}%`;
+  const byPlan = kpis.paying.byPlan.map((plan) => `${plan.name} ${plan.paying}${plan.trialing > 0 ? ` (+${plan.trialing} trialing)` : ""}`).join(" · ");
+  const aiBudget = kpis.aiSpendUsd.dailyBudget;
+  const aiShare = aiBudget > 0 ? ` (${Math.round((kpis.aiSpendUsd.today / aiBudget) * 100)}%)` : "";
+  const funnel = kpis.outreach;
 
   return (
     <div className="space-y-8">
@@ -40,15 +70,65 @@ export default async function AdminOverviewPage() {
         </section>
       ) : null}
 
-      <section aria-label="Key numbers" className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Sign-ups" value={String(metrics.signups.total)} hint={`${metrics.signups.last7Days} in 7 days · ${metrics.signups.last30Days} in 30 days`} />
-        <Stat label="Activated workspaces" value={String(metrics.organizations.activated)} hint={`of ${metrics.organizations.total} workspaces`} />
-        <Stat label="Paying workspaces" value={String(metrics.subscriptions.paying)} hint={`${metrics.subscriptions.pastDue} past due · ${metrics.subscriptions.trialing} trialing`} />
-        <Stat label="MRR (estimate)" value={usd(metrics.mrrCents / 100)} hint="Catalogue prices, before tax and discounts" />
+      <section aria-label="Key numbers" className="grid grid-cols-2 gap-3 md:grid-cols-4" data-testid="founder-kpis">
+        <Stat testId="signups" label="Sign-ups" value={count(kpis.signups.total)} hint={inWindows(kpis.signups)} />
+        <Stat testId="verified" label="Verified accounts" value={count(kpis.verifiedAccounts.total)} hint={`${inWindows(kpis.verifiedAccounts)} (by sign-up date)`} />
+        <Stat testId="workspaces" label="Workspaces" value={count(kpis.workspaces.total)} hint={inWindows(kpis.workspaces)} />
+        <Stat testId="claimed" label="Claimed companies" value={count(kpis.claimedCompanies.total)} hint={inWindows(kpis.claimedCompanies)} />
+        <Stat
+          testId="activated"
+          label="Activated workspaces"
+          value={kpis.activatedWorkspaces ? count(kpis.activatedWorkspaces.total) : DASH}
+          hint={kpis.activatedWorkspaces ? `First bid check built · ${inWindows(kpis.activatedWorkspaces)}` : "First bid check built — the bid desk is not installed here yet"}
+        />
+        <Stat
+          testId="paying"
+          label="Paying workspaces"
+          value={count(kpis.paying.total)}
+          hint={`${byPlan || "No paid plans yet"} · ${kpis.paying.pastDue} past due · ${kpis.paying.trialing} trialing`}
+        />
+        <Stat testId="mrr" label="MRR" value={money(kpis.mrr.minor, kpis.mrr.currency)} hint="Active subscriptions at catalogue prices, annual ÷ 12, before tax and discounts" />
+        <Stat
+          testId="bid-pass"
+          label="Bid Pass sales"
+          value={kpis.bidPassSales ? count(kpis.bidPassSales.total) : DASH}
+          hint={kpis.bidPassSales ? inWindows(kpis.bidPassSales) : "The bid desk is not installed here yet"}
+        />
         <Stat label="Trial → paid" value={conversion} hint={`${metrics.trials.converted} of ${metrics.trials.started} trials`} />
         <Stat label="Churned (30 days)" value={String(metrics.subscriptions.churnedLast30Days)} hint="Subscriptions canceled" />
-        <Stat label="AI spend today" value={usd(metrics.aiSpendUsd.today)} hint="Estimated, UTC day" />
-        <Stat label="AI spend this month" value={usd(metrics.aiSpendUsd.month)} hint="Estimated, UTC month" />
+        <Stat
+          testId="ai-spend"
+          label="AI spend today"
+          value={usd(kpis.aiSpendUsd.today)}
+          hint={`of ${usd(aiBudget)} a day${aiShare} · 7 days ${usd(kpis.aiSpendUsd.last7Days)} · 30 days ${usd(kpis.aiSpendUsd.last30Days)} · estimated`}
+        />
+        <Stat
+          testId="jobs"
+          label="Job queue"
+          value={`${count(kpis.jobs.pending)} pending`}
+          hint={`${kpis.jobs.failedLast24Hours} failed in 24 hours · ${kpis.jobs.running} running${kpis.jobs.oldestPendingAt ? ` · oldest due ${ago(kpis.jobs.oldestPendingAt, now)}` : ""}`}
+        />
+        <Stat
+          testId="ingestion"
+          label="Data ingestion"
+          value={ago(kpis.ingestion.lastSuccessAt, now)}
+          hint={kpis.ingestion.lastError ? "Last run reported an error" : kpis.ingestion.lastSuccessAt ? `Last successful run ${when(kpis.ingestion.lastSuccessAt)}` : "No successful run recorded"}
+          href="/admin/ingestion"
+        />
+        <Stat
+          testId="outreach"
+          label="Outreach"
+          value={`${count(funnel.sent)} sent`}
+          hint={`${count(funnel.visited)} opened their page · ${count(funnel.claimed)} claimed · ${funnel.bidChecks === null ? DASH : count(funnel.bidChecks)} bid checks · ${count(funnel.optedOut)} opted out`}
+          href="/admin/outreach"
+        />
+        <Stat
+          testId="suppressions"
+          label="Do-not-contact list"
+          value={count(funnel.suppressions)}
+          hint={funnel.openDataRequests > 0 ? `${funnel.openDataRequests} open data ${funnel.openDataRequests === 1 ? "request" : "requests"}, oldest ${ago(funnel.oldestDataRequestAt, now)} — act within five working days` : "No open data requests"}
+          href="/admin/outreach/suppressions"
+        />
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">

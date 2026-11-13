@@ -20,12 +20,21 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-4">
             <Logo href="/admin" />
-            <nav aria-label="Admin" className="flex gap-3 text-sm">
+            <nav aria-label="Admin" className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
               <Link href="/admin" className="font-medium hover:underline">
                 Overview
               </Link>
               <Link href="/admin/organizations" className="font-medium hover:underline">
                 Organizations
+              </Link>
+              <Link href="/admin/outreach" className="font-medium hover:underline">
+                Outreach
+              </Link>
+              <Link href="/admin/outreach/suppressions" className="font-medium hover:underline">
+                Suppressions
+              </Link>
+              <Link href="/admin/ingestion" className="font-medium hover:underline">
+                Ingestion
               </Link>
             </nav>
           </div>

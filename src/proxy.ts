@@ -51,5 +51,6 @@ export const config = {
     "/reset-password",
     "/accept-invitation/:path*",
     "/dev/:path*",
+    "/optout",
   ],
 };
