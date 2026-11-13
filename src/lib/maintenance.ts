@@ -56,7 +56,8 @@ export type MaintenanceSummary = Record<
   | "aiReservationsSettled"
   | "outreachProspectsErased"
   | "outreachAudit"
-  | "outreachContactsStamped",
+  | "outreachContactsStamped"
+  | "supplierContactsErased",
   number
 >;
 
@@ -123,8 +124,15 @@ export async function runMaintenance(batching: Batching = {}): Promise<Maintenan
   const { runOutreachRetention } = await import("@/features/outreach/server/retention");
   const outreach = await runOutreachRetention();
 
+  // Procurement: a contact address from a notice that identifies a person is erased in place
+  // a month after it was stored. After the outreach step, so that an address whose prospect
+  // copy was erased just now goes in the same run.
+  const { runContactRetention } = await import("@/features/procurement/retention");
+  const contacts = await runContactRetention(new Date(), batching);
+
   return {
     ...outreach,
+    ...contacts,
     rateLimits,
     jobsSucceeded,
     jobsFailed,

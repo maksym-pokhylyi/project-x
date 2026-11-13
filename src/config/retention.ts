@@ -75,6 +75,24 @@ export const RETENTION_DAYS = {
   outreachNamedAddresses: 90,
   /** Outreach audit trail: who built, exported or marked a list as sent, and changes to the suppression list. */
   outreachAudit: 730,
+  /**
+   * Contact addresses taken from notices (`supplier_contacts`) that identify a person — a
+   * named or webmail address, or a mailbox published with a contact name. This long after we
+   * first stored one, the address is erased in place: the row stays, holding a fingerprint
+   * so that reading the same notice again does not bring the address back.
+   *
+   * Why 30: it is personal data from a public source. UK GDPR Art. 5(1)(e) (storage
+   * limitation) forbids keeping it longer than its purpose needs, and Art. 14(3)(a) gives us
+   * one month to tell the person that we hold it — so we either write within the month or
+   * stop holding the address. The same 30 days are the first-contact window of the outreach
+   * gate (NAMED_ADDRESS_CONTACT_WINDOW_DAYS): after them the address could not be used anyway.
+   *
+   * Not affected: generic role mailboxes of companies (info@, tenders@ — not personal data),
+   * and an address listed in an outreach campaign, which follows the outreach periods above
+   * until that module has erased its own copy. A suppressed address is erased like any
+   * other: the do-not-contact list keeps its own entry.
+   */
+  supplierNamedContacts: 30,
 } as const;
 
 export type RetentionKey = keyof typeof RETENTION_DAYS;
