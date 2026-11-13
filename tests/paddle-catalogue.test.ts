@@ -3,6 +3,7 @@ import { BID_PASS, BID_PASS_PRICE_ENV_VAR, PAID_PLAN_KEYS, PLANS, PLAN_CURRENCY,
 import {
   APP_TAG,
   CATALOGUE_KEYS,
+  PRICE_TAX_MODE,
   desiredPrices,
   desiredProducts,
   formatEnvLines,
@@ -31,6 +32,7 @@ const price = (plan: string, interval: PriceInterval, overrides: Partial<RemoteP
     interval: interval === "once" ? null : interval,
     frequency: interval === "once" ? null : 1,
     trial: desired.trialDays ? { interval: "day", frequency: desired.trialDays } : null,
+    taxMode: desired.taxMode,
     customData: { app: APP_TAG, plan, interval },
     ...overrides,
   };
@@ -112,6 +114,16 @@ describe("paddle:setup planning (pure)", () => {
     ]);
     // The Bid Pass is paid once: a recurring price in its place is replaced.
     expect(planPriceActions("bid_pass", [price("bid_pass", "once", { interval: "month", frequency: 1 })])[0]).toMatchObject({ type: "replace", archiveId: "pri_bid_pass_once" });
+  });
+
+  it("sells every price net of tax, and replaces one that Paddle would treat as tax-inclusive", () => {
+    // The site says "Prices exclude VAT": Paddle must add the tax on top, not carve it out of £29.
+    expect(PRICE_TAX_MODE).toBe("external");
+    expect(desiredPrices().every((entry) => entry.taxMode === "external")).toBe(true);
+    // Paddle's default for a price created without a tax mode.
+    expect(planPriceActions("starter", [price("starter", "month", { taxMode: "account_setting" }), price("starter", "year")]).map((action) => action.type)).toEqual(["replace", "keep"]);
+    expect(planPriceActions("pro", [price("pro", "month"), price("pro", "year", { taxMode: "internal" })]).map((action) => action.type)).toEqual(["keep", "replace"]);
+    expect(planPriceActions("bid_pass", [price("bid_pass", "once", { taxMode: "account_setting" })])[0]).toMatchObject({ type: "replace", archiveId: "pri_bid_pass_once" });
   });
 
   it("ignores archived objects and objects created by someone else", () => {

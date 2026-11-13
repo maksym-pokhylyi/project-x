@@ -1,16 +1,17 @@
 /**
  * Creates/updates the Paddle products and prices described by src/config/plans.ts:
  * every paid plan (monthly and annual, with the plan's trial where it has one) and the
- * one-off Bid Pass, all in the catalogue currency (GBP).
+ * one-off Bid Pass, all in the catalogue currency (GBP) and tax-exclusive ("external" tax
+ * mode: the amounts are net and Paddle adds VAT at checkout where it applies).
  *
  *   PADDLE_API_KEY=... PADDLE_ENV=sandbox pnpm paddle:setup            # apply
  *   PADDLE_API_KEY=... PADDLE_ENV=sandbox pnpm paddle:setup --dry-run  # only print the plan
  *
  * Idempotent: objects are matched by the custom_data this script writes, so running it
- * again changes nothing unless the catalogue changed. If a price's amount, currency, cycle
- * or trial changed, a NEW price is created and the old one archived (existing subscribers
- * stay on the old price — migrating them is a business decision, do it deliberately in
- * Paddle).
+ * again changes nothing unless the catalogue changed. If a price's amount, currency, cycle,
+ * trial or tax mode differs, a NEW price is created and the old one archived (existing
+ * subscribers stay on the old price — migrating them is a business decision, do it
+ * deliberately in Paddle).
  * Prints the PADDLE_PRICE_* env lines to set. The API key needs Product and Price write
  * permissions. Optional: PADDLE_TAX_CATEGORY (default "standard"; "saas" once approved).
  */
@@ -67,16 +68,17 @@ async function listPrices(productId: string): Promise<RemotePrice[]> {
       interval: price.billingCycle?.interval ?? null,
       frequency: price.billingCycle?.frequency ?? null,
       trial: price.trialPeriod ? { interval: price.trialPeriod.interval, frequency: price.trialPeriod.frequency } : null,
+      taxMode: price.taxMode,
       customData: (price.customData as Record<string, unknown> | null) ?? null,
     });
   }
   return out;
 }
 
-/** "pro/month GBP 149.00, 14-day trial" */
+/** "pro/month GBP 149.00 excl. tax, 14-day trial" */
 function describe(price: DesiredPrice): string {
   const amount = `${price.currencyCode} ${(Number(price.amount) / 100).toFixed(2)}`;
-  return `${price.plan}/${price.interval} ${amount}${price.trialDays ? `, ${price.trialDays}-day trial` : ""}`;
+  return `${price.plan}/${price.interval} ${amount} excl. tax${price.trialDays ? `, ${price.trialDays}-day trial` : ""}`;
 }
 
 async function main() {
@@ -122,6 +124,8 @@ async function main() {
         name: price.name,
         description: price.description,
         unitPrice: { amount: price.amount, currencyCode: price.currencyCode },
+        /* Net amounts: Paddle adds VAT on top at checkout (its default would include it). */
+        taxMode: price.taxMode,
         /* A one-off price (the Bid Pass) has no billing cycle and no trial. */
         ...(price.interval === "once" ? {} : { billingCycle: { interval: price.interval, frequency: 1 } }),
         ...(price.trialDays ? { trialPeriod: { interval: "day" as const, frequency: price.trialDays } } : {}),

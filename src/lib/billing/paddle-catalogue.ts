@@ -19,7 +19,8 @@ import { site } from "@/config/site";
  * What is synced, all of it from src/config/plans.ts:
  *   - one product per paid plan, with a monthly and an annual price in PLAN_CURRENCY;
  *     a plan with `trialDays` gets that trial on both prices (card required);
- *   - one product for the Bid Pass, with a single one-off price (no billing cycle).
+ *   - one product for the Bid Pass, with a single one-off price (no billing cycle);
+ *   - every price is created tax-EXCLUSIVE (PRICE_TAX_MODE), because the site says so.
  *
  * Paddle objects are matched through `custom_data` written by this tool, never by name:
  *   product: { app: <APP_TAG>, plan: "starter" }
@@ -28,6 +29,14 @@ import { site } from "@/config/site";
  * (single lowercase words as keys on purpose: they survive the SDK's camelCase/snake_case conversion).
  */
 export const APP_TAG = "saas-foundation";
+
+/**
+ * How Paddle treats tax on our prices. The site promises "Prices exclude VAT. VAT is added
+ * at checkout where it applies." (billingCopy.vat), so every price is "external": the
+ * amount in src/config/plans.ts is the net price and Paddle adds the tax on top. Paddle's
+ * own default ("account_setting") is tax-inclusive, which would make £29 mean £24.17 net.
+ */
+export const PRICE_TAX_MODE = "external";
 
 /** Something sold through Paddle: a paid plan, or the one-off Bid Pass. */
 export type CatalogueKey = PaidPlanKey | typeof BID_PASS.key;
@@ -48,6 +57,8 @@ export type RemotePrice = {
   frequency: number | null;
   /** Trial before the first payment; null when the price has none. */
   trial: { interval: string; frequency: number } | null;
+  /** "external" (tax added on top), "internal" (tax included), "account_setting" or "location". */
+  taxMode: string;
   customData: Record<string, unknown> | null;
 };
 
@@ -60,6 +71,7 @@ export type DesiredPrice = {
   currencyCode: typeof PLAN_CURRENCY;
   /** Days of trial before the first payment; null for none. */
   trialDays: number | null;
+  taxMode: typeof PRICE_TAX_MODE;
   name: string;
   description: string;
   customData: Record<string, string>;
@@ -93,6 +105,7 @@ export function desiredPrices(): DesiredPrice[] {
         amount: String(prices[interval]),
         currencyCode: PLAN_CURRENCY,
         trialDays: PLANS[plan].trialDays ?? null,
+        taxMode: PRICE_TAX_MODE,
         name: interval === "month" ? "Monthly" : "Annual",
         description: `${PLANS[plan].name} — ${interval === "month" ? "monthly" : "annual"}`,
         customData: { app: APP_TAG, plan, interval },
@@ -105,6 +118,7 @@ export function desiredPrices(): DesiredPrice[] {
     amount: String(BID_PASS.price),
     currencyCode: PLAN_CURRENCY,
     trialDays: null,
+    taxMode: PRICE_TAX_MODE,
     name: "One-off",
     description: `${BID_PASS.name} — one full bid, paid once`,
     customData: { app: APP_TAG, plan: BID_PASS.key, interval: "once" },
@@ -137,7 +151,7 @@ export function planProductActions(existing: RemoteProduct[]): ProductAction[] {
 export type PriceAction =
   | { type: "create"; desired: DesiredPrice }
   | { type: "keep"; id: string; desired: DesiredPrice }
-  /** Amount, currency, cycle or trial changed: create a new price and archive the old one. */
+  /** Amount, currency, cycle, trial or tax mode differs: create a new price and archive the old one. */
   | { type: "replace"; archiveId: string; desired: DesiredPrice };
 
 function sameCycle(match: RemotePrice, desired: DesiredPrice): boolean {
@@ -159,7 +173,12 @@ export function planPriceActions(plan: CatalogueKey, existing: RemotePrice[]): P
         (price) => price.status === "active" && isOurs(price.customData) && price.customData?.plan === plan && price.customData?.interval === desired.interval,
       );
       if (!match) return { type: "create", desired };
-      const same = match.amount === desired.amount && match.currencyCode === desired.currencyCode && sameCycle(match, desired) && sameTrial(match, desired);
+      const same =
+        match.amount === desired.amount &&
+        match.currencyCode === desired.currencyCode &&
+        match.taxMode === desired.taxMode &&
+        sameCycle(match, desired) &&
+        sameTrial(match, desired);
       return same ? { type: "keep", id: match.id, desired } : { type: "replace", archiveId: match.id, desired };
     });
 }
