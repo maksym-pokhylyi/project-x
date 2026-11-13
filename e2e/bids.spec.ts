@@ -42,14 +42,14 @@ test("upload a pack, get a cited check, draft and mark an answer, export", async
   // --- sign up and verify --------------------------------------------------------------
   await page.goto("/sign-up");
   await page.getByLabel("Name").fill(user.name);
-  await page.getByLabel("Work e-mail").fill(user.email);
+  await page.getByLabel("Work email").fill(user.email);
   await page.getByLabel("Password").fill(user.password);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/verify-email/);
   await followOutboxLink(page, user.email, "verify-email");
   await page.waitForURL(/\/(app|sign-in)/);
   if (page.url().includes("/sign-in")) {
-    await page.getByLabel("E-mail").fill(user.email);
+    await page.getByLabel("Work email").fill(user.email);
     await page.getByLabel("Password").fill(user.password);
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await page.waitForURL(/\/app/);
@@ -237,14 +237,14 @@ test("an upload that cannot reach the storage host falls back and completes; a f
 
   await page.goto("/sign-up");
   await page.getByLabel("Name").fill(second.name);
-  await page.getByLabel("Work e-mail").fill(second.email);
+  await page.getByLabel("Work email").fill(second.email);
   await page.getByLabel("Password").fill(second.password);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/verify-email/);
   await followOutboxLink(page, second.email, "verify-email");
   await page.waitForURL(/\/(app|sign-in)/);
   if (page.url().includes("/sign-in")) {
-    await page.getByLabel("E-mail").fill(second.email);
+    await page.getByLabel("Work email").fill(second.email);
     await page.getByLabel("Password").fill(second.password);
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await page.waitForURL(/\/app/);

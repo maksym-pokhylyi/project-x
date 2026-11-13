@@ -31,8 +31,8 @@ export default async function MembersPage() {
             {ctx.role === "owner" && !seatsAvailable ? (
               <>
                 {" "}
-                <Link href="/app/settings/billing" className="link font-medium">
-                  Upgrade for more seats
+                <Link href="/pricing" className="link font-medium">
+                  See plans with more seats
                 </Link>
               </>
             ) : null}
@@ -43,7 +43,7 @@ export default async function MembersPage() {
       <Card>
         <CardHeader>
           <CardTitle>Invite a teammate</CardTitle>
-          <CardDescription>They will receive an e-mail with a link to join this workspace.</CardDescription>
+          <CardDescription>They will receive an email with a link to join this workspace.</CardDescription>
         </CardHeader>
         <CardContent>
           <InviteForm seatsAvailable={seatsAvailable} canInvite={canManage} />

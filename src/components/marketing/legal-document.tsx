@@ -37,9 +37,12 @@ const slug = (text: string) =>
 
 const sectionId = (section: LegalSection) => section.id ?? slug(section.heading);
 
-/** True while any seller detail in src/config/site.ts is still a [[PLACEHOLDER]]. */
-export function hasUnfilledPlaceholders(): boolean {
-  return Object.values(site.company).some((value) => value.includes("[["));
+/**
+ * True while a document still carries a [[MARKER]]: wording that the lawyer or the founder
+ * has to settle. The "Draft for review" notice shows on exactly those documents.
+ */
+export function hasOpenMarkers(...content: unknown[]): boolean {
+  return JSON.stringify(content).includes("[[");
 }
 
 const LINK = /\[([^\]\[]+)\]\(([^)\s]+)\)/g;
@@ -188,7 +191,7 @@ export function LegalDocument({
             <h1 className="type-h1 mt-3 text-ink">{title}</h1>
           </header>
 
-          {hasUnfilledPlaceholders() ? (
+          {hasOpenMarkers(intro, summary, sections) ? (
             <p role="note" className="mt-6 flex items-start gap-3 rounded-control bg-accent-tint px-4 py-3.5 text-sm text-ink">
               <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-accent" />
               <span>

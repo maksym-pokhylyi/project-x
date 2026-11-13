@@ -2,17 +2,25 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DetailList } from "@/components/ui/detail-list";
 import { formatPrice } from "@/config/plans";
-import { NotFoundError } from "@/lib/errors";
 import { entitlementsFor } from "@/lib/billing/subscription";
+import { NotFoundError } from "@/lib/errors";
 import { getAdminOrganization, monthlyRevenueCents } from "@/server/admin";
 import { requireAdminForPage } from "@/server/session";
 
 export const metadata: Metadata = { title: "Organization" };
 
+/** AI spend is an estimated cost in US dollars; revenue is in the catalogue's pounds. */
 const usd = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 const day = (date: Date | null | undefined) => (date ? date.toISOString().slice(0, 10) : "—");
+const minute = (date: Date) => date.toISOString().replace("T", " ").slice(0, 16);
 
+const list = "divide-y divide-line text-sm";
+const row = "flex items-baseline justify-between gap-3 py-3 first:pt-0 last:pb-0";
+const empty = "text-sm text-ink-2";
+
+/** One workspace as the founder sees it: its subscription as Paddle reported it, usage, people and the latest records. */
 export default async function AdminOrganizationPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdminForPage();
   const { id } = await params;
@@ -24,14 +32,14 @@ export default async function AdminOrganizationPage({ params }: { params: Promis
   const entitlements = entitlementsFor(subscription);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link href="/admin/organizations" className="text-sm text-muted-foreground hover:underline">
-          ← Organizations
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-1.5">
+        <Link href="/admin/organizations" className="link inline-flex min-h-11 items-center self-start text-sm text-ink-2">
+          All organizations
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{organization.name}</h1>
-        <p className="break-all text-sm text-muted-foreground">
-          {organization.id} · {organization.slug} · created {day(organization.createdAt)}
+        <h1 className="type-page text-ink">{organization.name}</h1>
+        <p className="text-sm break-all text-ink-2">
+          <span className="font-mono text-13">{organization.id}</span> · {organization.slug} · created {day(organization.createdAt)}
         </p>
       </div>
 
@@ -45,30 +53,21 @@ export default async function AdminOrganizationPage({ params }: { params: Promis
           </CardHeader>
           <CardContent>
             {subscription ? (
-              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-                <dt className="text-muted-foreground">Status</dt>
-                <dd>{subscription.status}</dd>
-                <dt className="text-muted-foreground">Plan</dt>
-                <dd>
-                  {subscription.planKey} · {subscription.billingInterval ?? "—"} · MRR {formatPrice(monthlyRevenueCents(subscription))}
-                </dd>
-                <dt className="text-muted-foreground">Period</dt>
-                <dd>
-                  {day(subscription.currentPeriodStart)} → {day(subscription.currentPeriodEnd)}
-                </dd>
-                <dt className="text-muted-foreground">Cancel at</dt>
-                <dd>{day(subscription.cancelAt)}</dd>
-                <dt className="text-muted-foreground">Paddle subscription</dt>
-                <dd className="break-all">{subscription.paddleSubscriptionId ?? "—"}</dd>
-                <dt className="text-muted-foreground">Paddle customer</dt>
-                <dd className="break-all">{subscription.paddleCustomerId ?? "—"}</dd>
-                <dt className="text-muted-foreground">Billing e-mail</dt>
-                <dd className="break-all">{subscription.customerEmail ?? "—"}</dd>
-                <dt className="text-muted-foreground">Last event</dt>
-                <dd>{subscription.lastEventAt?.toISOString() ?? "—"}</dd>
-              </dl>
+              <DetailList
+                framed={false}
+                rows={[
+                  { term: "Status", value: subscription.status },
+                  { term: "Plan", value: `${subscription.planKey} · ${subscription.billingInterval ?? "—"} · MRR ${formatPrice(monthlyRevenueCents(subscription))}` },
+                  { term: "Period", value: `${day(subscription.currentPeriodStart)} to ${day(subscription.currentPeriodEnd)}` },
+                  { term: "Cancel at", value: day(subscription.cancelAt) },
+                  { term: "Subscription ID", value: subscription.paddleSubscriptionId ?? "—" },
+                  { term: "Customer ID", value: subscription.paddleCustomerId ?? "—" },
+                  { term: "Billing email", value: subscription.customerEmail ?? "—" },
+                  { term: "Last event", value: subscription.lastEventAt?.toISOString() ?? "—" },
+                ]}
+              />
             ) : (
-              <p className="text-sm text-muted-foreground">No subscription: this workspace is on the Free plan.</p>
+              <p className={empty}>No subscription: this workspace is on the Free plan.</p>
             )}
           </CardContent>
         </Card>
@@ -80,15 +79,15 @@ export default async function AdminOrganizationPage({ params }: { params: Promis
           </CardHeader>
           <CardContent>
             {data.counters.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No metered usage yet.</p>
+              <p className={empty}>No metered usage yet.</p>
             ) : (
-              <ul className="divide-y text-sm">
+              <ul className={list}>
                 {data.counters.map((counter) => (
-                  <li key={`${counter.metric}-${counter.periodStart.toISOString()}`} className="flex justify-between py-2">
+                  <li key={`${counter.metric}-${counter.periodStart.toISOString()}`} className={row}>
                     <span>
-                      {counter.metric} <span className="text-muted-foreground">({day(counter.periodStart)})</span>
+                      {counter.metric} <span className="text-ink-2">({day(counter.periodStart)})</span>
                     </span>
-                    <span className="tabular-nums">{counter.quantity.toLocaleString("en-US")}</span>
+                    <span className="tabular-nums">{counter.quantity.toLocaleString("en-GB")}</span>
                   </li>
                 ))}
               </ul>
@@ -102,13 +101,13 @@ export default async function AdminOrganizationPage({ params }: { params: Promis
             <CardDescription>{data.members.length} in this workspace</CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="divide-y text-sm">
+            <ul className={list}>
               {data.members.map((member) => (
-                <li key={member.id} className="flex items-baseline justify-between gap-3 py-2">
+                <li key={member.id} className={row}>
                   <span className="min-w-0">
-                    <span className="font-medium">{member.name}</span> <span className="break-all text-muted-foreground">{member.email}</span>
+                    <span className="font-semibold text-ink">{member.name}</span> <span className="break-all text-ink-2">{member.email}</span>
                   </span>
-                  <span className="shrink-0 text-muted-foreground">{member.role}</span>
+                  <span className="shrink-0 text-ink-2">{member.role}</span>
                 </li>
               ))}
             </ul>
@@ -122,15 +121,15 @@ export default async function AdminOrganizationPage({ params }: { params: Promis
           </CardHeader>
           <CardContent>
             {data.recentAudit.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nothing recorded.</p>
+              <p className={empty}>Nothing recorded.</p>
             ) : (
-              <ul className="divide-y text-sm">
+              <ul className={list}>
                 {data.recentAudit.map((entry) => (
-                  <li key={entry.id} className="flex items-baseline justify-between gap-3 py-2">
+                  <li key={entry.id} className={row}>
                     <span className="min-w-0 break-words">
-                      <span className="font-medium">{entry.action}</span> <span className="text-muted-foreground">{entry.target}</span>
+                      <span className="font-semibold text-ink">{entry.action}</span> <span className="text-ink-2">{entry.target}</span>
                     </span>
-                    <span className="shrink-0 text-xs text-muted-foreground">{entry.createdAt.toISOString().replace("T", " ").slice(0, 16)}</span>
+                    <span className="shrink-0 text-13 text-ink-2 tabular-nums">{minute(entry.createdAt)}</span>
                   </li>
                 ))}
               </ul>
@@ -146,13 +145,13 @@ export default async function AdminOrganizationPage({ params }: { params: Promis
         </CardHeader>
         <CardContent>
           {data.recentEvents.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No events yet.</p>
+            <p className={empty}>No events yet.</p>
           ) : (
-            <ul className="divide-y text-sm">
+            <ul className={list}>
               {data.recentEvents.map((event) => (
-                <li key={event.id} className="flex items-baseline justify-between gap-3 py-2">
-                  <span className="font-medium">{event.name}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground">{event.createdAt.toISOString().replace("T", " ").slice(0, 16)}</span>
+                <li key={event.id} className={row}>
+                  <span className="font-semibold text-ink">{event.name}</span>
+                  <span className="shrink-0 text-13 text-ink-2 tabular-nums">{minute(event.createdAt)}</span>
                 </li>
               ))}
             </ul>

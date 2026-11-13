@@ -4,9 +4,14 @@ import * as React from "react"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Select as SelectPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
-import { controlClasses } from "@/components/ui/input"
+import { controlSize, type ControlSize } from "@/components/ui/control-group"
+import { controlClasses, controlHeight } from "@/components/ui/input"
 
-/* Custom select (Radix). For short lists inside forms on phones, NativeSelect is often better. */
+/*
+ * Custom select (Radix). For short lists inside forms on phones, NativeSelect is often better.
+ * The trigger is a field: its height comes from the control scale shared with inputs and
+ * buttons (44 px on its own, the group's size inside a form or a row; `size` sizes it alone).
+ */
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />
 }
@@ -25,7 +30,7 @@ function SelectTrigger({
   children,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
-  size?: "sm" | "default"
+  size?: ControlSize | "default"
 }) {
   return (
     <SelectPrimitive.Trigger
@@ -33,7 +38,9 @@ function SelectTrigger({
       data-size={size}
       className={cn(
         controlClasses,
-        "flex w-fit cursor-pointer items-center justify-between gap-2 whitespace-nowrap data-[placeholder]:text-ink-2 data-[size=default]:h-11 data-[size=sm]:h-9 data-[size=sm]:text-13 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        controlHeight,
+        size !== "default" && controlSize(size),
+        "flex w-fit cursor-pointer items-center justify-between gap-2 whitespace-nowrap data-[placeholder]:text-ink-2 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}

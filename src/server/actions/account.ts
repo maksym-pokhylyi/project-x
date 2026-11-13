@@ -50,7 +50,7 @@ export async function deleteAccountAction(input: unknown): Promise<ActionResult<
     const user = await requireUser();
     const { confirmEmail, password } = parseInput(z.object({ confirmEmail: z.string().max(320), password: z.string().max(128).optional() }), input);
     if (confirmEmail.trim().toLowerCase() !== user.email.toLowerCase()) {
-      throw new ValidationError("Type your e-mail address exactly to confirm.", { confirmEmail: ["The address does not match."] });
+      throw new ValidationError("Type your email address exactly to confirm.", { confirmEmail: ["The address does not match."] });
     }
     await enforceRateLimit(`account-delete:${user.id}`, { limit: 5, windowSeconds: 900 });
 

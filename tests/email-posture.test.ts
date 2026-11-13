@@ -42,7 +42,7 @@ const post = (app: App, path: string, body: unknown, headers: Record<string, str
 
 const signUp = (app: App, email: string) => post(app, "/sign-up/email", { email, name: "New User", password: "a-good-password-1" });
 
-describe("e-mail delivery and the security posture (F-04)", () => {
+describe("email delivery and the security posture (F-04)", () => {
   beforeEach(resetDatabase);
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -58,12 +58,12 @@ describe("e-mail delivery and the security posture (F-04)", () => {
       expect(response.status).toBe(503);
       const body = (await response.json()) as { code: string; message: string };
       expect(body.code).toBe("SIGN_UP_DISABLED");
-      expect(body.message).toMatch(/cannot send the e-mail needed to confirm your address/);
+      expect(body.message).toMatch(/cannot send the email needed to confirm your address/);
       expect(await db.select().from(users)).toHaveLength(0);
       expect(await db.select().from(sessions)).toHaveLength(0);
     });
 
-    it("disables password reset and verification e-mails instead of pretending to send them", async () => {
+    it("disables password reset and verification emails instead of pretending to send them", async () => {
       const existing = await createTestUser({ email: "member@example.com" });
       const app = await loadApp(PRODUCTION);
       for (const [path, body] of [
@@ -96,7 +96,7 @@ describe("e-mail delivery and the security posture (F-04)", () => {
       vi.spyOn(console, "error").mockImplementation((line: unknown) => void errors.push(String(line)));
       const id = await app.sendEmail("someone@example.com", { name: "reset-password", props: { name: "Jo", url: "https://app.example/reset?token=secret" } });
       const [row] = await db.select().from(emailOutbox).where(eq(emailOutbox.id, id));
-      expect(row).toMatchObject({ status: "failed", html: null, text: null, error: "no e-mail provider configured" });
+      expect(row).toMatchObject({ status: "failed", html: null, text: null, error: "no email provider configured" });
       expect(errors.join("\n")).toContain("NOT delivered");
       vi.restoreAllMocks();
     });
@@ -143,7 +143,7 @@ describe("e-mail delivery and the security posture (F-04)", () => {
       expect(((await response.json()) as { token: string | null }).token).toBeTruthy();
       const warning = app.getConfigWarnings().find((entry) => entry.code === "UNVERIFIED_SIGNUP_ALLOWED");
       expect(warning).toMatchObject({ level: "error" });
-      expect(warning?.message).toContain("WITHOUT e-mail verification");
+      expect(warning?.message).toContain("WITHOUT email verification");
     });
 
     it("logs the warning at start-up", async () => {
@@ -154,7 +154,7 @@ describe("e-mail delivery and the security posture (F-04)", () => {
       vi.restoreAllMocks();
     });
 
-    it("is ignored (and flagged) once e-mail delivery works", async () => {
+    it("is ignored (and flagged) once email delivery works", async () => {
       const app = await loadApp({ ...PRODUCTION, ALLOW_UNVERIFIED_SIGNUP: "1", RESEND_API_KEY: "re_live_key", EMAIL_FROM: "no-reply@bidfolio.co.uk" });
       expect(app.features).toMatchObject({ requireEmailVerification: true, unverifiedSignupAllowed: false });
       expect(app.getConfigWarnings().map((entry) => entry.code)).toContain("UNVERIFIED_SIGNUP_IGNORED");

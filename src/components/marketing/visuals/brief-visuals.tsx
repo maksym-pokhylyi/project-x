@@ -39,7 +39,7 @@ export function VerdictPanel({ className }: { className?: string }) {
         <Badge className="text-13">Verdict</Badge>
         <span>Based on the whole pack and the 12 documents you have uploaded</span>
       </p>
-      <p className="mt-3 font-display text-[1.625rem] leading-[1.15] font-semibold tracking-[-0.015em] text-balance text-ink sm:text-[2rem]">
+      <p className="mt-3 font-display text-26 leading-[1.15] font-semibold tracking-[-0.015em] text-balance text-ink sm:text-32">
         Worth bidding, if you close two gaps first.
       </p>
       <ul className="mt-4 flex flex-col gap-2.5 text-15 text-ink">

@@ -1,9 +1,10 @@
 "use client";
 
-import { Check, ChevronDown, ChevronsUpDown, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { Form } from "@/components/forms/form";
 import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,6 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MenuButton } from "@/components/ui/menu-button";
 import { cn } from "@/lib/utils";
 import { workspaceSchema } from "@/lib/validation";
 import { createWorkspaceAction, switchWorkspaceAction } from "@/server/actions/workspace";
@@ -84,21 +86,10 @@ export function WorkspaceSwitcher({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           {variant === "bar" ? (
-            <button
-              type="button"
-              data-testid={testId}
-              className={cn(
-                "inline-flex min-h-11 min-w-0 cursor-pointer items-center gap-2 rounded-control px-2 text-sm text-ink-2 transition-colors duration-150 hover:bg-paper-deep hover:text-ink",
-                className,
-              )}
-            >
-              {current.logo ? <WorkspaceAvatar name={current.name} logo={current.logo} /> : null}
-              <span className="truncate" data-testid="current-workspace-name">
-                {current.name}
-              </span>
-              <ChevronDown aria-hidden className="size-3.5 shrink-0" strokeWidth={1.8} />
-              <span className="sr-only">Switch workspace</span>
-            </button>
+            <MenuButton data-testid={testId} className={className} leading={current.logo ? <WorkspaceAvatar name={current.name} logo={current.logo} /> : null}>
+              <span data-testid="current-workspace-name">{current.name}</span>
+              <span className="sr-only">. Switch workspace</span>
+            </MenuButton>
           ) : (
             <Button variant="outline" className={cn("w-full justify-between gap-2 px-3", className)} data-testid={testId}>
               <span className="flex min-w-0 items-center gap-2.5">
@@ -131,11 +122,11 @@ export function WorkspaceSwitcher({
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
-          <form onSubmit={onCreate} noValidate className="space-y-4">
-            <DialogHeader>
-              <DialogTitle>Create workspace</DialogTitle>
-              <DialogDescription>Each workspace has its own members, plan and data.</DialogDescription>
-            </DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Create workspace</DialogTitle>
+            <DialogDescription>Each workspace has its own members, plan and data.</DialogDescription>
+          </DialogHeader>
+          <Form onSubmit={onCreate} noValidate>
             <FormField label="Workspace name" name="name" required autoFocus error={error} />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
@@ -145,7 +136,7 @@ export function WorkspaceSwitcher({
                 {pending ? "Creating…" : "Create workspace"}
               </Button>
             </DialogFooter>
-          </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </>

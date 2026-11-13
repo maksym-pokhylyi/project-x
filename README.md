@@ -194,6 +194,7 @@ could receive the verification link.)
 | `pnpm db:migrate` | Apply committed migrations (non-interactive, idempotent). On Vercel it runs for production deployments only |
 | `pnpm db:seed` | Demo data for local development (refuses non-localhost databases) |
 | `pnpm paddle:setup [--dry-run]` | Create/update Paddle products and prices from `src/config/plans.ts`, print env lines |
+| `pnpm ui:audit` | Lists every place that bypasses the component library (the totals are pinned by `tests/ui-smells.test.ts` and may only go down) |
 | `pnpm paddle:simulate <orgId> [plan] [interval] [status]` | Send a signed fake subscription webhook to the local app |
 | `pnpm paddle:pull-events [--since 2h \| --after evt_…] [--watch]` | Local billing without webhooks: feed the sandbox's recent events through the webhook pipeline (refuses on production) |
 | `pnpm paddle:verify-sandbox [--write]` | Check against the real sandbox API what the billing code assumes about Paddle (read-only without `--write`) |
@@ -240,6 +241,10 @@ real production deployment.
 | `AI_GATEWAY_API_KEY` | no | Vercel → AI Gateway (not needed on Vercel: OIDC) | AI calls from local machines |
 | `AI_DAILY_BUDGET_USD` | no (10) | — | Global daily ceiling for estimated AI spend (hard limit; `0` disables AI) |
 | `AI_FREE_DAILY_BUDGET_USD` | no (25 % of the above) | — | Daily pool shared by ALL free-plan workspaces, so they cannot use up the global budget |
+| `PUBLIC_DATA_PAGES_INDEXABLE` | no (off) | — | `true` lets search engines index `/suppliers/*` and `/buyers/*` and lists them in the sitemap. Off at launch: those pages are served `noindex`. Tender pages, `/find` and `/about-the-data` are always indexable |
+| `AI_MODEL_MATCH_REASON` | no (`google/gemini-2.5-flash-lite`) | AI Gateway model id | The model that writes the one-sentence reason of a radar match (rule-based reasons are used whenever AI is off) |
+| `FTS_API_BASE` | no (`https://www.find-tender.service.gov.uk`) | — | Origin of the Find a Tender OCDS API. Override only to point ingestion at a test double |
+| `FTS_USER_AGENT` | no (`procurement-data-client/1.0`) | — | `User-Agent` sent to the Find a Tender API: name the service and a contact address in production |
 | `NEXT_PUBLIC_POSTHOG_KEY` / `NEXT_PUBLIC_POSTHOG_HOST` | no | PostHog project settings | Page views + forwarding of server events |
 | `SENTRY_DSN` | no | Sentry project → Client keys | Forwarding server errors |
 | `LOG_LEVEL` | no (info) | — | Log verbosity |
@@ -600,7 +605,13 @@ See "Before switching PADDLE_ENV to production" in the runbook.
 
 1. Create a sandbox account; create an API key and a client-side token.
 2. `PADDLE_API_KEY=… PADDLE_ENV=sandbox pnpm paddle:setup` → paste the printed
-   `PADDLE_PRICE_*` lines into your env.
+   `PADDLE_PRICE_*` lines into your env. It creates one product per paid plan with a
+   monthly and an annual price, and the one-off Bid Pass, all in the catalogue currency
+   (`PLAN_CURRENCY`, GBP) and **net of tax** (tax mode "external": the site says "Prices
+   exclude VAT", and Paddle's default would include it); a plan with `trialDays` gets that
+   trial on its prices. Run it with `--dry-run` first: prices left in another currency,
+   without the trial or with another tax mode are shown as replaced (a new price is created
+   and the old one archived).
 3. Notifications → new destination → URL `https://<domain>/api/webhooks/paddle`, select the
    events listed above → copy its secret into `PADDLE_WEBHOOK_SECRET`.
 4. Checkout → Checkout settings: set the **default payment link** to `https://<domain>/pay`
@@ -747,8 +758,25 @@ are delivered at least once and retried with exponential backoff (30 s, 1 m, 2 m
 `track("name", { organizationId, userId }, props)` on the server. To make it complete an
 onboarding step, reference it in `src/config/onboarding.ts`.
 
-**An e-mail** — add a React Email component in `src/emails`, a variant in
-`src/lib/email/templates.tsx`, send with `sendEmail(to, { name, props })`.
+**An e-mail** — add a component in `src/emails` built inside `<EmailLayout>` from its parts
+(`EmailText`, `EmailAction`, `EmailHeading`, `EmailList` … in `src/emails/layout.tsx`) and a
+plain-text function built on `emailText()` (`src/emails/text.ts`: the action link is the
+first address in it), a variant in `src/lib/email/templates.tsx`, and send with
+`sendEmail(to, { name, props })`. No images and no web fonts: nothing may be fetched when a
+message is opened. Preview all of them with `pnpm exec tsx scripts/design/render-emails.ts`.
+
+**A screen or a UI pattern** — compose it from `src/components/ui` as `/styleguide`
+("Composing a screen") and `docs/design/DESIGN.md` §5 describe; a pattern that is missing
+becomes a component there first. A control that navigates is a `ButtonLink`, one that acts a
+`Button`; sizes come from the group (`<Form>`, `<ControlGroup>`), never from the call site;
+"where you are" is marked only by `NavLink`. Check with `pnpm ui:audit` and
+`node scripts/design/controls.mjs <your paths>` (sizes, pointer cursor, current item) against
+a running production build; `docs/design/VERIFICATION.md` has the full list.
+
+**An upgrade prompt** — link to `/pricing`, or straight to the confirm step with
+`billingHandoff({ plan, interval })` / `billingHandoff({ buy: "bid_pass" })` from
+`src/lib/billing/handoff.ts` (for a signed-out visitor `signUpThenBilling(…)`). Billing has
+no plan grid; do not build another one.
 
 **A table** — add it to `src/db/schema/app.ts` (tenant data: `organization_id` with a
 foreign key `references organizations(id) on delete cascade`), `pnpm db:generate`, review

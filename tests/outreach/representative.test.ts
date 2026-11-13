@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("next/headers", () => import("../helpers/next-headers"));
 vi.mock("next/navigation", async () => (await import("./mocks/next")).navigation);
 vi.mock("next/cache", async () => (await import("./mocks/next")).cache);
-// NO UK representative: site.company.ukRepresentative is the placeholder it holds before one is appointed.
+// NO UK representative: site.operator.ukRepresentative is the null it holds before one is appointed.
 vi.mock("@/config/site", async () => (await import("./mocks/site")).siteModule(false));
 
 import AdminOutreachPage from "@/app/admin/outreach/page";
@@ -114,7 +114,7 @@ describe("outreach without a UK representative", () => {
 
     const detail = await getCampaign(created.campaignId, NOW);
     expect(detail.senderProblems.map((problem) => problem.field)).toEqual(["ukRepresentative"]);
-    expect(detail.senderProblems[0]!.where).toBe("site.company.ukRepresentative in src/config/site.ts");
+    expect(detail.senderProblems[0]!.where).toBe("site.operator.ukRepresentative in src/config/site.ts");
     await expect(exportCampaignCsv(created.campaignId, "first", NOW)).rejects.toThrow(/Letters cannot be exported yet\. Missing: A UK data-protection representative/);
     // Nothing was marked as exported by the refused attempt.
     expect((await db.select().from(outreachProspects)).every((prospect) => prospect.status === "listed" && prospect.exportedAt === null)).toBe(true);

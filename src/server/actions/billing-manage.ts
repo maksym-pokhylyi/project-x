@@ -179,3 +179,8 @@ export async function startOneOffCheckoutAction(input: unknown): Promise<ActionR
     };
   });
 }
+
+/** The Bid Pass checkout as a step that takes no arguments: what the Billing confirm panel calls. */
+export async function startBidPassCheckoutAction(): Promise<ActionResult<OneOffCheckoutParams>> {
+  return startOneOffCheckoutAction({ kind: "bid_pass" });
+}

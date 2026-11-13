@@ -1,13 +1,18 @@
 import { sql } from "drizzle-orm";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+
+vi.mock("next/cache", () => ({ unstable_cache: (fn: unknown) => fn }));
+
 import { db } from "@/db";
+import { procurementConfig } from "@/features/procurement/config";
 import { specFromManualProfile } from "@/features/procurement/domain/profile";
+import { loadSupplierPage, loadSupplierWins, loadTenderPage } from "@/features/procurement/public-data";
 import { getBuyerBySlug, getBuyerCompetitionMix, getBuyersForSupplier } from "@/features/procurement/queries/buyers";
-import { getBuyerContracts, getEndingSoon, getOwnRenewals, getSupplierContracts } from "@/features/procurement/queries/contracts";
+import { getBuyerContracts, getEndingSoon, getOwnRenewals, getSimilarAwardsFromBuyer, getSupplierContracts } from "@/features/procurement/queries/contracts";
 import { searchTrades } from "@/features/procurement/queries/cpv";
-import { getBuyerNotices, getEarlySignals, getMatchesForSpec, getSupplierMatches } from "@/features/procurement/queries/matches";
+import { getBuyerNotices, getEarlySignals, getMatchForNotice, getMatchesForSpec, getSupplierMatches } from "@/features/procurement/queries/matches";
 import { getTender, resolveOcid } from "@/features/procurement/queries/notices";
-import { UNPUBLISHED_SUPPLIER_LABEL } from "@/features/procurement/queries/shared";
+import { getSupplierSpec, UNPUBLISHED_SUPPLIER_LABEL } from "@/features/procurement/queries/shared";
 import { countPublicSuppliers, getSupplierBySlug, listPublicSupplierSlugs, searchSuppliers } from "@/features/procurement/queries/suppliers";
 import { sitemapChunkXml, sitemapIndexXml } from "@/features/procurement/sitemaps";
 import { resetDatabase } from "../helpers/db";
@@ -104,10 +109,13 @@ beforeAll(async () => {
 });
 
 describe("getSupplierMatches", () => {
-  it("returns live tenders in the supplier's trade, best first, each with a reason", async () => {
-    const { items, total } = await getSupplierMatches(acmeId, { now: NOW });
+  it("returns the STRONG matches by default: the supplier's own line of work, where it works, best first", async () => {
+    const { items, total, strong, wider } = await getSupplierMatches(acmeId, { now: NOW });
     const ocids = items.map((item) => item.ocid);
-    expect(total).toBe(items.length);
+    // Three tenders are grounds maintenance in Yorkshire, from buyers that have awarded Acme a contract.
+    expect({ total, strong, wider }).toEqual({ total: 3, strong: 3, wider: 2 });
+    expect([...ocids].sort()).toEqual([T.leeds, T.updated, T.planningThenTender].sort());
+    expect(items.every((item) => item.tier === "strong")).toBe(true);
     // Same trade, same region, same buyer, right size: first.
     expect(ocids[0]).toBe(T.leeds);
     expect(items[0]).toMatchObject({
@@ -121,35 +129,67 @@ describe("getSupplierMatches", () => {
     });
     expect(items[0]!.breakdown).toMatchObject({ regionMatch: "local", cpvPrefix: "77314" });
     expect(items[0]!.score).toBeGreaterThan(0.8);
-    expect(ocids).toEqual(expect.arrayContaining([T.bristol, T.updated, T.planningThenTender, T.trees]));
-    // Closed yesterday, cancelled by a UK12, or another trade: never a match.
-    for (const excluded of [T.closed, T.cancelled, T.software]) expect(ocids).not.toContain(excluded);
+    // The counted facts behind the chips: Acme's two contracts, one of them from this buyer, both the same work.
+    expect(items[0]!.facts).toMatchObject({ wins: 2, buyerWins: 1, newBuyer: false, sameWorkWins: 2 });
+    expect(items[0]!.facts.buyerContracts).toEqual([{ title: "Grounds Maintenance Services", valueAmount: 120_000, year: "2026" }]);
+    // Closed yesterday, cancelled by a UK12, or another trade: never a match, in any tier.
+    const all = await getSupplierMatches(acmeId, { now: NOW, tier: "all" });
+    for (const excluded of [T.closed, T.cancelled, T.software]) expect(all.items.map((item) => item.ocid)).not.toContain(excluded);
     // One row per procurement: the updated notice replaces the original.
     expect(items.filter((item) => item.ocid === T.updated)).toHaveLength(1);
     expect(items.find((item) => item.ocid === T.updated)!.title).toBe("Sports Pitch Grounds Maintenance (deadline extended)");
-    // Same trade in a region the supplier has never worked in ranks below local work.
-    const bristol = items.find((item) => item.ocid === T.bristol)!;
-    expect(bristol.breakdown.regionMatch).toBe("elsewhere");
-    expect(bristol.score).toBeLessThan(items.find((item) => item.ocid === T.updated)!.score);
-    expect(bristol.reason).toBe("Same category as your £120k award from Leeds City Council");
-    // A neighbouring category ranks below the supplier's own line of work.
-    expect(items.find((item) => item.ocid === T.trees)!.score).toBeLessThan(items[0]!.score);
     // Scores are sorted.
     expect([...items].sort((a, b) => b.score - a.score).map((item) => item.ocid)).toEqual(ocids);
   });
 
+  it("lists the wider matches after the strong ones when asked for every tier", async () => {
+    const { items, total, strong, wider } = await getSupplierMatches(acmeId, { now: NOW, tier: "all" });
+    expect({ total, strong, wider }).toEqual({ total: 5, strong: 3, wider: 2 });
+    expect(items.map((item) => item.tier)).toEqual(["strong", "strong", "strong", "wider", "wider"]);
+    // Each tier in its own order of relevance.
+    for (const tier of ["strong", "wider"] as const) {
+      const scores = items.filter((item) => item.tier === tier).map((item) => item.score);
+      expect([...scores].sort((a, b) => b - a)).toEqual(scores);
+    }
+    // The same work in a region the supplier has never worked in: wider, however well the category fits.
+    const bristol = items.find((item) => item.ocid === T.bristol)!;
+    expect(bristol).toMatchObject({ tier: "wider", reason: "Same category as your £120k award from Leeds City Council" });
+    expect(bristol.breakdown).toMatchObject({ regionMatch: "elsewhere", cpvPrefix: "77314" });
+    expect(bristol.facts).toMatchObject({ buyerWins: 0, newBuyer: true, sameWorkWins: 2 });
+    // A neighbouring category from a buyer it has never won from: wider, and below its own line of work.
+    const trees = items.find((item) => item.ocid === T.trees)!;
+    expect(trees.tier).toBe("wider");
+    expect(trees.score).toBeLessThan(items[0]!.score);
+    expect(trees.facts).toMatchObject({ sameWorkWins: 0 });
+
+    // One tender on its own (the tender page), whatever its tier; null when it is no match at all.
+    const spec = (await getSupplierSpec(acmeId))!;
+    expect(await getMatchForNotice(spec, T.bristol, NOW)).toMatchObject({ ocid: T.bristol, tier: "wider" });
+    expect(await getMatchForNotice(spec, T.leeds, NOW)).toMatchObject({ ocid: T.leeds, tier: "strong" });
+    expect(await getMatchForNotice(spec, T.software, NOW)).toBeNull();
+  });
+
   it("applies filters, paging and exclusions", async () => {
-    const southWest = await getSupplierMatches(acmeId, { now: NOW, filters: { region: "UKK" } });
+    // Counts are of the requested tier, after the filters.
+    expect(await getSupplierMatches(acmeId, { now: NOW, filters: { region: "UKK" } })).toMatchObject({ items: [], total: 0, strong: 0, wider: 1 });
+    const southWest = await getSupplierMatches(acmeId, { now: NOW, tier: "all", filters: { region: "UKK" } });
     expect(southWest.items.map((item) => item.ocid)).toEqual([T.bristol]);
     const belowThreshold = await getSupplierMatches(acmeId, { now: NOW, filters: { kind: "below_threshold" } });
     expect(belowThreshold.items.map((item) => item.ocid)).toEqual([T.leeds]);
     const large = await getSupplierMatches(acmeId, { now: NOW, filters: { valueMin: 1_000_000 } });
     expect(large.items.map((item) => item.ocid)).toEqual([T.planningThenTender]);
+    const closingSoon = await getSupplierMatches(acmeId, { now: NOW, filters: { closingWithinDays: 25 } });
+    expect(closingSoon.items.map((item) => item.ocid)).toEqual([T.leeds]);
     const withoutLeeds = await getSupplierMatches(acmeId, { now: NOW, excludeOcids: [T.leeds] });
     expect(withoutLeeds.items.map((item) => item.ocid)).not.toContain(T.leeds);
-    const page = await getSupplierMatches(acmeId, { now: NOW, limit: 2, offset: 1 });
-    expect(page.items).toHaveLength(2);
+    expect(withoutLeeds).toMatchObject({ total: 2, strong: 2 });
+    // Soonest deadline first, on request.
+    expect((await getSupplierMatches(acmeId, { now: NOW, order: "deadline" })).items.map((item) => item.ocid)).toEqual([T.leeds, T.updated, T.planningThenTender]);
+    const page = await getSupplierMatches(acmeId, { now: NOW, tier: "all", limit: 2, offset: 2 });
+    expect(page.items.map((item) => item.tier)).toEqual(["strong", "wider"]);
     expect(page.total).toBe(5);
+    // A count alone.
+    expect(await getSupplierMatches(acmeId, { now: NOW, limit: 0 })).toMatchObject({ items: [], total: 3, strong: 3, wider: 2 });
     expect((await getSupplierMatches("sup_does_not_exist", { now: NOW })).items).toEqual([]);
   });
 
@@ -162,11 +202,15 @@ describe("getSupplierMatches", () => {
 
   it("matches a manually described radar the same way", async () => {
     const spec = specFromManualProfile({ id: "00000000-0000-4000-8000-000000000001", name: "New Start Gardens", cpvCodes: GROUNDS, keywords: ["sports pitch"], regions: ["UKK"], valueMin: 50_000, valueMax: 250_000 });
-    const { items } = await getMatchesForSpec(spec, { now: NOW });
-    // Its region is the South West: the Bristol tender comes first.
+    // A hand-picked trade is the radar's own line of work: in its region that is a strong match.
+    const strong = await getMatchesForSpec(spec, { now: NOW });
+    expect(strong.items.map((item) => item.ocid)).toEqual([T.bristol]);
+    expect(strong.items[0]).toMatchObject({ tier: "strong", reason: "Matches your trade: label of 77314000" });
+    expect(strong.items[0]!.facts).toMatchObject({ wins: 0, buyerWins: 0, newBuyer: false, trade: expect.any(String) });
+    // The same trade elsewhere in the country is a wider match.
+    const { items } = await getMatchesForSpec(spec, { now: NOW, tier: "all" });
     expect(items[0]!.ocid).toBe(T.bristol);
-    expect(items[0]!.reason).toBe("Matches your trade: label of 77314000");
-    expect(items.find((item) => item.ocid === T.updated)!.reason).toBe('Matches your trade (label of 77314000) and mentions "sports pitch"');
+    expect(items.find((item) => item.ocid === T.updated)).toMatchObject({ tier: "wider", reason: 'Matches your trade (label of 77314000) and mentions "sports pitch"' });
     expect(items.map((item) => item.ocid)).not.toContain(T.software);
   });
 });
@@ -336,9 +380,10 @@ describe("trade picker and sitemaps", () => {
   });
 
   it("lists open tenders always, and supplier/buyer pages only when indexing is switched on", async () => {
-    const original = process.env.PUBLIC_DATA_PAGES_INDEXABLE;
+    // The switch is PUBLIC_DATA_PAGES_INDEXABLE, validated once in src/env.ts and read through the module's config.
+    const indexable = vi.spyOn(procurementConfig, "publicDataPagesIndexable", "get");
     try {
-      delete process.env.PUBLIC_DATA_PAGES_INDEXABLE;
+      indexable.mockReturnValue(false);
       const index = await sitemapIndexXml();
       expect(index).toContain("/sitemaps/tenders-0.xml");
       expect(index).not.toContain("suppliers-");
@@ -347,7 +392,7 @@ describe("trade picker and sitemaps", () => {
       expect(await sitemapChunkXml("buyers-0.xml")).toBeNull();
       expect(await sitemapChunkXml("../../etc/passwd")).toBeNull();
 
-      process.env.PUBLIC_DATA_PAGES_INDEXABLE = "true";
+      indexable.mockReturnValue(true);
       expect(await sitemapIndexXml()).toContain("/sitemaps/suppliers-0.xml");
       const suppliers = await sitemapChunkXml("suppliers-0.xml");
       expect(suppliers).toContain(`/suppliers/${SLUG}</loc>`);
@@ -355,8 +400,76 @@ describe("trade picker and sitemaps", () => {
       expect(await sitemapChunkXml("buyers-0.xml")).toContain("/buyers/leeds-city-council-");
       expect(await sitemapChunkXml("suppliers-7.xml")).toBeNull();
     } finally {
-      if (original === undefined) delete process.env.PUBLIC_DATA_PAGES_INDEXABLE;
-      else process.env.PUBLIC_DATA_PAGES_INDEXABLE = original;
+      indexable.mockRestore();
     }
+  });
+});
+
+describe("the tender page's and the radar's extra reads", () => {
+  it("finds who won similar work from the same buyer, newest first, never naming a possible sole trader", async () => {
+    const [leeds] = await db.execute<{ id: string }>(sql`select id from buyers where ppon = 'PLDS-1111-AAAA'`);
+    const similar = await getSimilarAwardsFromBuyer(leeds!.id, GROUNDS, { now: NOW });
+    expect(similar.map((contract) => [contract.supplierLabel, contract.title, contract.valueAmount])).toEqual([
+      ["Acme Grounds Ltd", "Grounds Maintenance Services", 120_000],
+      [UNPUBLISHED_SUPPLIER_LABEL, "Grass Cutting Rounds", 15_000],
+      ["Rival Landscapes Ltd", "Cemetery Grounds Maintenance", 90_000],
+    ]);
+    // The tender's own procurement is left out; a category stated no deeper than its group still finds the trade.
+    expect((await getSimilarAwardsFromBuyer(leeds!.id, GROUNDS, { now: NOW, excludeOcid: "ocds-h6vhtk-a00001" })).map((contract) => contract.title)).toEqual(["Grass Cutting Rounds", "Cemetery Grounds Maintenance"]);
+    expect(await getSimilarAwardsFromBuyer(leeds!.id, ["77300000"], { now: NOW })).toHaveLength(3);
+    expect(await getSimilarAwardsFromBuyer(leeds!.id, GROUNDS, { now: NOW, limit: 1 })).toHaveLength(1);
+    // Another trade, or nothing to go on: nothing, and the section is left out.
+    expect(await getSimilarAwardsFromBuyer(leeds!.id, ["72212000"], { now: NOW })).toEqual([]);
+    expect(await getSimilarAwardsFromBuyer(leeds!.id, [], { now: NOW })).toEqual([]);
+  });
+
+  it("gives each buyer in the trade its median value, its share to small firms and its open tenders, in the order asked for", async () => {
+    const { items } = await getBuyersForSupplier(acmeId, { now: NOW });
+    const leeds = items.find((item) => item.name === "Leeds City Council")!;
+    // Three contracts of £120,000, £90,000 and £15,000; every supplier's size was published as small or medium.
+    expect(leeds).toMatchObject({ medianValue: 90_000, smeAwards: 3, sizedAwards: 3, openTenders: 2, ownAwards: 1 });
+    expect(items.find((item) => item.name === "City of York Council")).toMatchObject({ openTenders: 1 });
+    expect((await getBuyersForSupplier(acmeId, { now: NOW, sort: "open" })).items[0]).toMatchObject({ name: "Leeds City Council", openTenders: 2 });
+    const byMedian = (await getBuyersForSupplier(acmeId, { now: NOW, sort: "median" })).items.map((item) => item.medianValue ?? 0);
+    expect([...byMedian].sort((a, b) => b - a)).toEqual(byMedian);
+    expect((await getBuyersForSupplier(acmeId, { now: NOW, region: "UKK" })).items.map((item) => item.name)).toEqual(["Bristol City Council"]);
+  });
+
+  it("narrows rival contracts by value and lists them by end date", async () => {
+    expect((await getEndingSoon(acmeId, 12, { now: NOW, order: "end" })).items.map((item) => item.title)).toEqual(["Grass Cutting Rounds", "Cemetery Grounds Maintenance"]);
+    expect((await getEndingSoon(acmeId, 12, { now: NOW, valueMin: 80_000 })).items.map((item) => item.title)).toEqual(["Cemetery Grounds Maintenance"]);
+    expect((await getEndingSoon(acmeId, 12, { now: NOW, valueMax: 80_000 })).items.map((item) => item.title)).toEqual(["Grass Cutting Rounds"]);
+    expect(await getEndingSoon(acmeId, 12, { now: NOW, limit: 0 })).toMatchObject({ items: [], total: 2 });
+  });
+
+  it("says whether a tender's value is stated with or without VAT", async () => {
+    expect(await getTender(T.leeds, NOW)).toMatchObject({ valueAmount: 150_000, valueBasis: "net", lotsCount: 1 });
+  });
+});
+
+describe("what a public page loads", () => {
+  it("loads three items per block and the totals, and nothing for a supplier without a public page", async () => {
+    const page = (await loadSupplierPage(SLUG))!;
+    expect(page.supplier).toMatchObject({ id: acmeId, name: "Acme Grounds Ltd", awardsCount: 2 });
+    expect(page.contracts).toMatchObject({ total: 2 });
+    // Open tenders are the STRONG matches: the three best, shown soonest deadline first.
+    expect(page.matches.total).toBe(3);
+    expect(page.matches.items.map((item) => item.ocid)).toEqual([T.leeds, T.updated, T.planningThenTender]);
+    expect(page.matches.items.every((item) => item.tier === "strong")).toBe(true);
+    for (const block of [page.matches, page.endingSoon, page.buyers]) expect(block.items.length).toBeLessThanOrEqual(procurementConfig.publicBlockItems);
+    expect(page.buyers.total).toBe(3);
+    expect(page.endingSoon.total).toBe(2);
+    expect(page).toHaveProperty("updatedAt");
+    // Company-level data only, in everything the page is given.
+    expect(JSON.stringify(page)).not.toMatch(/@|John Smith/);
+
+    expect(await loadSupplierWins(acmeId, 1)).toMatchObject({ total: 2, items: [{ title: "Grounds Maintenance Services" }, { title: "Grounds Maintenance for Parks" }] });
+    expect((await loadSupplierWins(acmeId, 2)).items).toEqual([]);
+
+    const [john] = await searchSuppliers("john smith gardening", { includeUnpublished: true });
+    expect(await loadSupplierPage(john!.slug)).toMatchObject({ supplier: { isPublic: false }, contracts: { items: [], total: 0 }, matches: { items: [], total: 0 }, endingSoon: { total: 0 }, buyers: { total: 0 } });
+    expect(await loadSupplierPage("no-such-supplier")).toBeNull();
+    expect(await loadTenderPage(T.leeds)).toMatchObject({ ocid: T.leeds });
+    expect(await loadTenderPage("ocds-h6vhtk-zzzzzz")).toBeNull();
   });
 });

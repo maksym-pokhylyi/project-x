@@ -25,19 +25,19 @@ export function getConfigWarnings(): ConfigWarning[] {
     add(
       "error",
       "UNVERIFIED_SIGNUP_ALLOWED",
-      "ALLOW_UNVERIFIED_SIGNUP=1: accounts are created WITHOUT e-mail verification, so anyone can register any address. " +
+      "ALLOW_UNVERIFIED_SIGNUP=1: accounts are created WITHOUT email verification, so anyone can register any address. " +
         "Pre-launch testing only — set RESEND_API_KEY and EMAIL_FROM and remove this variable before real users arrive.",
     );
   } else if (features.mailDelivery === "none") {
     add(
       production ? "error" : "warning",
       "EMAIL_NOT_CONFIGURED",
-      `E-mail cannot be delivered (${!env.RESEND_API_KEY ? "RESEND_API_KEY is not set" : "EMAIL_FROM is not set"}): ` +
+      `Email cannot be delivered (${!env.RESEND_API_KEY ? "RESEND_API_KEY is not set" : "EMAIL_FROM is not set"}): ` +
         "sign-up, password reset and invitations are DISABLED until RESEND_API_KEY and EMAIL_FROM are both set.",
     );
   }
   if (env.ALLOW_UNVERIFIED_SIGNUP === "1" && !features.unverifiedSignupAllowed) {
-    add("warning", "UNVERIFIED_SIGNUP_IGNORED", "ALLOW_UNVERIFIED_SIGNUP=1 is set but ignored because e-mail delivery works. Remove the variable.");
+    add("warning", "UNVERIFIED_SIGNUP_IGNORED", "ALLOW_UNVERIFIED_SIGNUP=1 is set but ignored because email delivery works. Remove the variable.");
   }
 
   if (features.billingBlockedSandbox) {
@@ -59,7 +59,7 @@ export function getConfigWarnings(): ConfigWarning[] {
   }
 
   if (production && !env.CRON_SECRET) {
-    add("error", "CRON_SECRET_MISSING", "CRON_SECRET is not set: background jobs, e-mail retries, data retention and billing reconciliation do not run.");
+    add("error", "CRON_SECRET_MISSING", "CRON_SECRET is not set: background jobs, email retries, data retention and billing reconciliation do not run.");
   }
   if (production && adminEmails.size === 0) {
     add("warning", "ADMIN_EMAILS_MISSING", "ADMIN_EMAILS is not set: nobody can open /admin.");

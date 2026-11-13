@@ -59,6 +59,17 @@ export function formatMoneyShort(amount: number | null | undefined, currency: st
   return symbol ? `${symbol}${body}` : `${body} ${code}`;
 }
 
+/**
+ * Money in a row, as the artboards write it: one decimal place above a million ("£4.2m",
+ * "£1.2bn") and the exact figure in whole pounds below it ("£780,000"). Null when there is
+ * nothing honest to show — say "Value not published" instead.
+ */
+export function formatMoney(amount: number | null | undefined, currency: string | null = "GBP"): string | null {
+  if (amount === null || amount === undefined || !Number.isFinite(amount) || amount <= 0) return null;
+  if (amount >= 1_000_000) return formatMoneyShort(amount, currency);
+  return formatMoneyExact(Math.round(amount), currency);
+}
+
 /** "£102,340" — the exact figure for hover/focus and screen readers. */
 export function formatMoneyExact(amount: number | null | undefined, currency: string | null = "GBP"): string | null {
   if (amount === null || amount === undefined || !Number.isFinite(amount) || amount <= 0) return null;

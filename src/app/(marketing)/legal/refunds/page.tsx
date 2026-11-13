@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { LegalDocument, type LegalSection } from "@/components/marketing/legal-document";
-import { BID_PASS } from "@/config/plan-display";
-import { site } from "@/config/site";
+import { trialIncludes } from "@/config/billing-copy";
+import { BID_PASS_DISPLAY as BID_PASS } from "@/config/plan-display";
+import { operatorAddress, operatorLegalName, site } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Refund policy",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 const days = site.legal.refundWindowDays;
-const { facts } = site;
+const { facts, operator } = site;
 
 const summary = [
   `Subscriptions: ask within ${days} days of your first payment and we refund it in full. You do not need to give a reason.`,
@@ -20,10 +21,11 @@ const summary = [
 
 const sections: LegalSection[] = [
   {
-    heading: "Who processes payments and refunds",
+    heading: "Who we are, and who processes payments and refunds",
     id: "who",
     body: [
-      "Every purchase is made through Paddle.com, our merchant of record. Paddle takes the payment, issues your invoice and pays refunds back to the original payment method on our behalf.",
+      `${site.name} is operated by ${operatorLegalName}, a ${operator.legalForm} registered in ${operator.address.country}, of ${operatorAddress}.`,
+      "Every purchase is made through Paddle.com, our merchant of record: Paddle is the seller on your receipt. Paddle takes the payment, issues your invoice and pays refunds back to the original payment method on our behalf.",
     ],
   },
   {
@@ -38,7 +40,7 @@ const sections: LegalSection[] = [
     heading: `Trials on Bid Desk`,
     id: "trials",
     body: [
-      `Bid Desk can be started with a ${facts.trialDays}-day trial. A card is required, and nothing is charged during the trial. If you cancel before the trial ends, you pay nothing.`,
+      `Bid Desk can be started with a ${facts.trialDays}-day trial. ${trialIncludes} A card is required, and nothing is charged during the trial. If you cancel before the trial ends, you pay nothing.`,
       `If the trial ends and the first payment is taken, the ${days}-day refund above runs from the date of that payment.`,
     ],
   },
@@ -54,7 +56,7 @@ const sections: LegalSection[] = [
     heading: "Renewals",
     id: "renewals",
     body: [
-      "Renewal payments are not normally refunded, which is why we remind you by email at least 7 days before an annual plan renews.",
+      `Renewal payments are not normally refunded, which is why we remind you by email ${facts.renewalReminderDays} days before an annual plan renews.`,
       "If an annual plan renewed and you meant to cancel, write to us within 7 days of the charge. If the plan has not been used since it renewed, we refund the renewal.",
     ],
   },
@@ -62,7 +64,7 @@ const sections: LegalSection[] = [
     heading: "Cancelling and pausing",
     id: "cancelling",
     body: [
-      "You can cancel from Settings, under Billing, at any time: it takes two clicks. Cancelling stops future renewals. The workspace keeps its paid features until the end of the period already paid for, then returns to the free plan. Your data stays.",
+      "You can cancel from Billing at any time: it takes two clicks. Cancelling stops future renewals. The workspace keeps its paid features until the end of the period already paid for, then returns to the free plan. Your data stays.",
       "You can also pause a subscription for one to three months. Nothing is charged while it is paused.",
     ],
   },

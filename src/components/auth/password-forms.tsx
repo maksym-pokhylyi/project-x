@@ -52,7 +52,7 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <FormError message={formError} />
-      <FormField label="E-mail" name="email" type="email" autoComplete="email" required error={errors.email?.[0]} />
+      <FormField label="Email" name="email" type="email" autoComplete="email" required error={errors.email?.[0]} />
       <Button type="submit" className="w-full" loading={pending}>
         {pending ? "Sending…" : "Send reset link"}
       </Button>

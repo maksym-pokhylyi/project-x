@@ -18,6 +18,7 @@ import { buttonVariants } from "./button"
  *
  *   internal href          -> next/link
  *   external / mailto / tel -> plain <a>; `newTab` adds target="_blank" rel="noopener noreferrer"
+ *   download               -> plain <a>: a file is not a page, so nothing is prefetched
  *   disabled               -> a <span aria-disabled="true"> with the same look, not focusable
  */
 type Href = React.ComponentProps<typeof Link>["href"]
@@ -45,7 +46,7 @@ function ButtonLink({ className, variant = "default", size = "default", href, ne
   }
 
   const tabProps = newTab ? { target: "_blank", rel: "noopener noreferrer" } : null
-  if (typeof href === "string" && EXTERNAL.test(href)) {
+  if (typeof href === "string" && (EXTERNAL.test(href) || props.download !== undefined)) {
     return (
       <a data-slot="button-link" data-variant={variant} data-size={size} href={href} className={classes} {...tabProps} {...props}>
         {children}

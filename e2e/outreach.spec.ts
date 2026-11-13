@@ -26,7 +26,7 @@ const OUTBOX = "/dev/outbox?key=e2e-dev-tools-secret-0123456789";
 const SEGMENT = "/admin/outreach?preview=1&divisions=77&batch=10";
 /** Every address in the seed is on one of these domains; none may reach a page a prospect list is shown on. */
 const SEEDED_ADDRESS = /acmegrounds\.example|brightway\.example|castlegardens\.example|heathgardens\.example|soletrader\.example|fenwickgrounds\.example|oldaward\.example/;
-const representativeAppointed = !site.company.ukRepresentative.includes("[[");
+const representativeAppointed = Boolean(site.operator.ukRepresentative);
 
 type Letter = { email: string; company: string; first_name: string; subject: string; body: string; page_link: string; optout_link: string; contact_by: string; ref_code: string };
 
@@ -88,7 +88,7 @@ test("the outreach pages are for the founder only", async ({ page }) => {
 test("the founder signs in and finds Outreach, Suppressions and Ingestion in the admin navigation", async () => {
   await admin.goto("/sign-up?redirect=/admin");
   await admin.getByLabel("Name").fill(founder.name);
-  await admin.getByLabel("Work e-mail").fill(founder.email);
+  await admin.getByLabel("Work email").fill(founder.email);
   await admin.getByLabel("Password").fill(founder.password);
   await admin.getByRole("button", { name: "Create account" }).click();
   await expect(admin).toHaveURL(/\/verify-email/);
@@ -270,10 +270,11 @@ test("the recipient opts out with one button, without JavaScript", async ({ brow
   // Coming back to the link, or reloading, shows the same and changes nothing more.
   await page.reload();
   await expect(page.getByRole("heading", { level: 1, name: "You are unsubscribed" })).toBeVisible();
-  // The further step is the existing request form, with the company's page filled in.
+  // The further step is the request form ("Flag a mistake"), with the company's page filled in: the link goes on to it.
   await page.getByTestId("optout-request").click();
-  await expect(page).toHaveURL(/\/about-the-data\?page=%2Fsuppliers%2Facme-grounds-ltd-01111111#request$/);
-  await expect(page.getByTestId("data-request-form").getByLabel("Page address")).toHaveValue(/\/suppliers\/acme-grounds-ltd-01111111$/);
+  await expect(page).toHaveURL(/\/flag-a-mistake\?page=%2Fsuppliers%2Facme-grounds-ltd-01111111(#request)?$/);
+  await expect(page.getByTestId("flag-form").getByTestId("flag-page")).toContainText("/suppliers/acme-grounds-ltd-01111111");
+  await expect(page.getByTestId("flag-form").locator("input[name='page']")).toHaveValue("/suppliers/acme-grounds-ltd-01111111");
   await context.close();
 });
 

@@ -9,6 +9,7 @@ import { authClient } from "@/lib/auth-client";
 import { fieldErrorsFrom, signInSchema, type FieldErrors } from "@/lib/validation";
 import { GoogleButton, OrDivider } from "./google-button";
 
+/** The sign-in form, laid out as in the SignIn artboards: fields, the password link, one button. */
 export function SignInForm({ redirectTo, googleEnabled }: { redirectTo: string; googleEnabled: boolean }) {
   const router = useRouter();
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -33,7 +34,7 @@ export function SignInForm({ redirectTo, googleEnabled }: { redirectTo: string; 
         router.push(`/verify-email?email=${encodeURIComponent(parsed.data.email)}&redirect=${encodeURIComponent(redirectTo)}&resent=1`);
         return;
       }
-      setFormError(error.status === 401 ? "Wrong e-mail or password." : (error.message ?? "Could not sign in. Please try again."));
+      setFormError(error.status === 401 ? "Wrong email or password." : (error.message ?? "Could not sign in. Please try again."));
       return;
     }
     router.push(redirectTo);
@@ -48,23 +49,16 @@ export function SignInForm({ redirectTo, googleEnabled }: { redirectTo: string; 
           <OrDivider />
         </>
       ) : null}
-      <form onSubmit={onSubmit} noValidate className="space-y-4">
-        <FormError message={formError} />
-        <FormField label="E-mail" name="email" type="email" autoComplete="email" required error={errors.email?.[0]} />
-        <FormField
-          label="Password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          error={errors.password?.[0]}
-          trailing={
-            <Link href="/forgot-password" className="link text-13">
-              Forgot password?
-            </Link>
-          }
-        />
-        <Button type="submit" className="w-full" loading={pending}>
+      <form onSubmit={onSubmit} noValidate className="flex flex-col">
+        <div className="space-y-4">
+          <FormError message={formError} />
+          <FormField label="Work email" name="email" type="email" autoComplete="email" placeholder="name@company.co.uk" required error={errors.email?.[0]} />
+          <FormField label="Password" name="password" type="password" autoComplete="current-password" required error={errors.password?.[0]} />
+        </div>
+        <Link href="/forgot-password" className="link mt-0.5 inline-flex min-h-11 items-center self-start rounded-sm text-sm">
+          Forgot your password?
+        </Link>
+        <Button type="submit" className="mt-1.5 w-full" loading={pending}>
           {pending ? "Signing in…" : "Sign in"}
         </Button>
       </form>

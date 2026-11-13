@@ -14,6 +14,9 @@ import { cn } from "@/lib/utils"
  * hollow dot. A quote that could not be found never looks verified. `ReferenceStateMark` is
  * the same mark on its own, for a legend.
  *
+ * `surface` is the ground the chip sits on: `paper` (default) on a white card, `white` on
+ * paper or on a tint (the page ground, a verdict panel).
+ *
  * `ReferenceChipButton` is the chip as a button — the trigger of the popover that shows the
  * quote. `quiet` drops the box: an underlined reference for fact cards and side lists.
  */
@@ -32,6 +35,8 @@ type ReferenceChipProps = {
   state?: ReferenceState
   /** Without the box: an underlined reference with the mark after it. */
   quiet?: boolean
+  /** The ground the chip sits on decides its fill: `white` on paper and tints. */
+  surface?: "paper" | "white"
   className?: string
 }
 
@@ -57,19 +62,19 @@ function ReferenceStateMark({ state, className }: { state: ReferenceState; class
   )
 }
 
-function chipClasses(quiet: boolean | undefined, interactive: boolean, className?: string) {
+function chipClasses(quiet: boolean | undefined, interactive: boolean, className?: string, surface: "paper" | "white" = "paper") {
   return cn(
     quiet
       ? "type-ref inline-flex max-w-full items-center gap-1.5 text-ink underline decoration-line-strong decoration-1 underline-offset-[3px]"
-      : "type-ref inline-flex max-w-full items-center gap-1.5 rounded-chip border border-line bg-paper px-2 py-[0.1875rem] text-ink",
+      : cn("type-ref inline-flex max-w-full items-center gap-1.5 rounded-chip border border-line px-2 py-[0.1875rem] text-ink", surface === "white" ? "bg-surface" : "bg-paper"),
     interactive && (quiet ? "cursor-pointer transition-colors duration-150 hover:text-brand hover:decoration-brand" : "cursor-pointer transition-colors duration-150 hover:border-line-strong hover:text-brand"),
     className
   )
 }
 
-function ReferenceChip({ file, page, clause, href, owner, state, quiet, className }: ReferenceChipProps) {
+function ReferenceChip({ file, page, clause, href, owner, state, quiet, surface, className }: ReferenceChipProps) {
   const content = <ReferenceContent file={file} page={page} clause={clause} owner={owner} state={state} quiet={quiet} />
-  const classes = chipClasses(quiet, Boolean(href), className)
+  const classes = chipClasses(quiet, Boolean(href), className, surface)
   if (href) {
     return (
       <a data-slot="reference-chip" data-state-kind={state} href={href} className={classes}>
@@ -92,11 +97,12 @@ function ReferenceChipButton({
   owner,
   state,
   quiet,
+  surface,
   className,
   ...props
 }: Omit<ReferenceChipProps, "href"> & Omit<React.ComponentProps<"button">, "type" | "children">) {
   return (
-    <button type="button" data-slot="reference-chip" data-state-kind={state} className={chipClasses(quiet, true, className)} {...props}>
+    <button type="button" data-slot="reference-chip" data-state-kind={state} className={chipClasses(quiet, true, className, surface)} {...props}>
       <ReferenceContent file={file} page={page} clause={clause} owner={owner} state={state} quiet={quiet} />
     </button>
   )

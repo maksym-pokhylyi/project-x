@@ -20,21 +20,7 @@ const ALLOWED: Record<string, string> = {
   "features/bids/components/ui/file-input.tsx": "the one raw file input: always hidden, opened by a Button or a drop zone",
 };
 
-const KNOWN_DEBT = new Set([
-  "components/app/app-nav.tsx",
-  "components/app/user-menu.tsx",
-  "components/app/workspace-form.tsx",
-  "components/app/workspace-switcher.tsx",
-  "components/billing/pricing-table.tsx",
-  "components/forms/native-select.tsx",
-  "components/marketing/company-search.tsx",
-  "components/marketing/mobile-nav.tsx",
-  "components/marketing/plan-comparison.tsx",
-  "components/styleguide/demos.tsx",
-  "features/procurement/components/data-request-form.tsx",
-  "features/procurement/components/radar-profile-form.tsx",
-  "features/procurement/components/radar-screen.tsx",
-]);
+const KNOWN_DEBT = new Set<string>([]);
 
 function sourceFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {

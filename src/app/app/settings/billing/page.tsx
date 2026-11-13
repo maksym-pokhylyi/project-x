@@ -1,39 +1,150 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/app/page-header";
-import { UsagePanel } from "@/components/app/usage-panel";
-import { BillingPlans, type BillingClientConfig } from "@/components/billing/billing-plans";
-import { ManageBillingButton } from "@/components/billing/manage-billing-button";
-import { TestModeNotice } from "@/components/billing/test-mode-notice";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AllowanceCard,
+  BidPassCard,
+  BillingRow,
+  CurrentPlanCard,
+  PauseCancelCard,
+  PaymentMethodCard,
+  ReceiptsCard,
+  formatBillingDate,
+  type CurrentPlanCardProps,
+  type PauseCancelCardProps,
+} from "@/components/billing/billing-cards";
+import { ConfirmPanel, type BillingClientConfig, type BillingIntent } from "@/components/billing/confirm-panel";
+import { plusVat } from "@/config/billing-copy";
+import { ANNUAL_SAVING, planDisplay } from "@/config/plan-display";
 import { PAID_PLAN_KEYS, PLANS, isBillingInterval, isPlanKey, type BillingInterval, type PaidPlanKey } from "@/config/plans";
 import { env, features } from "@/env";
+import { billingHandoff } from "@/lib/billing/handoff";
+import { getBillingOverview } from "@/lib/billing/overview";
 import { getPriceCatalogue } from "@/lib/billing/prices";
-import { requireOrgForPage } from "@/server/session";
-import { getUsageSummary } from "@/server/usage";
+import {
+  cancelSubscriptionAction,
+  pauseSubscriptionAction,
+  resumeSubscriptionAction,
+  startBidPassCheckoutAction,
+  undoScheduledChangeAction,
+} from "@/server/actions/billing-manage";
+import { getBidAllowance } from "@/server/bid-allowance";
+import { listMembers } from "@/server/members";
+import { requireOrgForPage, type OrgContext } from "@/server/session";
 
 export const metadata: Metadata = { title: "Billing" };
 
-const STATUS_LABEL: Record<string, { label: string; variant: "success" | "info" | "secondary" | "destructive" | "outline" }> = {
-  active: { label: "Active", variant: "success" },
-  trialing: { label: "Trial", variant: "info" },
-  past_due: { label: "Past due", variant: "destructive" },
-  paused: { label: "Paused", variant: "outline" },
-  canceled: { label: "Cancelled", variant: "outline" },
-};
+const isPaidPlan = (value: unknown): value is PaidPlanKey => isPlanKey(value) && value !== "free";
 
-const formatDate = (date: Date | null | undefined) =>
-  date ? date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : null;
+/** What the "Current plan" card says for the state the subscription is in. */
+function currentPlan(ctx: OrgContext): CurrentPlanCardProps {
+  const subscription = ctx.subscription;
+  const { source, graceEndsAt } = ctx.entitlements;
+  const subscribed = subscription && isPaidPlan(subscription.planKey) && subscription.status !== "canceled" ? subscription.planKey : null;
+  const interval: BillingInterval = isBillingInterval(subscription?.billingInterval) ? subscription.billingInterval : "month";
 
-export default async function BillingPage({ searchParams }: { searchParams: Promise<{ plan?: string; interval?: string }> }) {
+  if (!subscription || !subscribed) {
+    return {
+      planName: PLANS.free.name,
+      price: null,
+      summary: PLANS.free.summary,
+      note: subscription?.status === "canceled" ? "Your subscription has ended. This workspace is on Free." : null,
+      changePlan: { label: "See plans", href: "/pricing" },
+    };
+  }
+
+  const plan = planDisplay(subscribed);
+  const price = interval === "year" ? plan.annual : plan.monthly;
+  const base = { planName: plan.name, price: { amount: price.amount, period: price.period }, summary: plan.billingLine, changePlan: { label: "Change plan", href: "/pricing" } };
+  const date = (value: Date | null | undefined) => (value ? formatBillingDate(value) : null);
+  const renewal = date(subscription.currentPeriodEnd);
+  const trialEnd = date(subscription.trialEnd);
+  const cancelAt = date(subscription.cancelAt);
+  const pauseAt = date(subscription.pauseAt);
+
+  if (subscription.status === "paused") {
+    return { ...base, status: { label: "Paused", tone: "neutral" }, note: "Your subscription is paused. This workspace is on Free until it resumes." };
+  }
+  if (source === "period_lapsed") {
+    return { ...base, status: { label: "Renewal not confirmed", tone: "warning" }, note: "We could not confirm the renewal of this subscription. The workspace is limited to Free for now." };
+  }
+  if (source === "past_due_grace") {
+    return {
+      ...base,
+      status: { label: "Payment failed", tone: "danger" },
+      note: "The last payment failed. Update your payment method to keep your plan.",
+      dateLine: graceEndsAt ? { label: "Paid features until", value: formatBillingDate(graceEndsAt) } : null,
+    };
+  }
+  if (source === "past_due_expired") {
+    return { ...base, status: { label: "Past due", tone: "danger" }, note: `The last payment failed and the grace period is over. Update your payment method to restore ${plan.name}.` };
+  }
+  if (cancelAt) {
+    return { ...base, status: { label: "Ending", tone: "warning" }, note: "A cancellation is scheduled. Nothing more is charged.", dateLine: { label: "Access until", value: cancelAt } };
+  }
+  if (pauseAt) {
+    return { ...base, status: { label: "Pausing", tone: "warning" }, note: "A pause is scheduled. Nothing is charged while the subscription is paused.", dateLine: { label: "Plan until", value: pauseAt } };
+  }
+  /* Monthly, renewing: the one case where "Switch to annual" is offered, as on the artboard. */
+  const switchInterval =
+    interval === "month" && plan.annual.amount
+      ? { lead: "Switch to annual:", detail: `${plan.annual.line}, ${ANNUAL_SAVING}`, href: billingHandoff({ plan: subscribed, interval: "year" }) }
+      : null;
+  if (subscription.status === "trialing") {
+    return {
+      ...base,
+      status: { label: "Trial", tone: "info" },
+      note: plan.trialFullBids ? `Your trial includes ${plan.trialFullBids} full bid${plan.trialFullBids === 1 ? "" : "s"}. Nothing is charged until it ends.` : "Nothing is charged until the trial ends.",
+      dateLine: trialEnd ? { label: "First payment", value: `${plusVat(price.amount)} on ${trialEnd}` } : null,
+      switchInterval,
+    };
+  }
+  return { ...base, dateLine: renewal ? { label: "Next payment", value: renewal } : null, switchInterval };
+}
+
+/**
+ * Billing, as in docs/design/handoff/Billing-1440 and Billing-390: what you are on, your
+ * allowance and seats, pausing and cancelling, the Bid Pass, the payment method and the
+ * receipts. Plans are compared and chosen in ONE place, /pricing; this page only confirms a
+ * choice, in the panel that opens when the address carries the hand-off
+ * (?plan=…&interval=… or ?buy=bid_pass — see src/lib/billing/handoff.ts).
+ *
+ * What can be done right now — pause, resume, cancel, undo a scheduled change, change plan —
+ * is decided by the billing backend (getBillingOverview: read from our own database, no
+ * Paddle call, so the page loads when Paddle is down). A step that is not possible is not
+ * offered; each button is the server action for that step.
+ */
+export default async function BillingPage({ searchParams }: { searchParams: Promise<{ plan?: string; interval?: string; buy?: string }> }) {
   // Owner only: admins and members get the 403 page.
   const ctx = await requireOrgForPage({ role: "owner" });
   const params = await searchParams;
-  const usage = await getUsageSummary(ctx);
+  const [people, allowance, overview] = await Promise.all([listMembers(ctx), getBidAllowance(ctx), getBillingOverview(ctx)]);
+
   const subscription = ctx.subscription;
   const isLive = subscription ? ["active", "trialing", "past_due"].includes(subscription.status) : false;
   const subscribedPlan = subscription && isPlanKey(subscription.planKey) ? subscription.planKey : null;
   const subscribedInterval: BillingInterval | null = isBillingInterval(subscription?.billingInterval) ? subscription.billingInterval : null;
+  /* Self-service links exist only where Paddle knows the customer and the API key is set. */
+  const portalAvailable = features.paddleApi && Boolean(subscription?.paddleCustomerId);
+  const planFullBids = ctx.entitlements.limits["bids.monthly"] ?? 0;
+
+  const { manage } = overview;
+  const pauseState: PauseCancelCardProps["state"] =
+    !subscription || subscription.status === "canceled"
+      ? "none"
+      : subscription.status === "paused"
+        ? "paused"
+        : overview.cancelAt
+          ? "cancelling"
+          : overview.pauseAt
+            ? "pausing"
+            : isLive
+              ? "active"
+              : "none";
+  const scheduledFor = overview.cancelAt ?? overview.pauseAt;
+  const method = overview.paymentMethod;
+  const expires = method?.expiryMonth && method.expiryYear ? `${String(method.expiryMonth).padStart(2, "0")}/${String(method.expiryYear).slice(-2)}` : null;
+
+  const intent: BillingIntent | null =
+    params.buy === "bid_pass" ? { kind: "bid_pass" } : isPaidPlan(params.plan) ? { kind: "plan", plan: params.plan, interval: isBillingInterval(params.interval) ? params.interval : "month" } : null;
 
   const catalogue = getPriceCatalogue();
   const config: BillingClientConfig = {
@@ -42,82 +153,74 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
     availablePrices: Object.fromEntries(
       PAID_PLAN_KEYS.map((plan) => [plan, { month: Boolean(catalogue[plan].month), year: Boolean(catalogue[plan].year) }]),
     ) as Record<PaidPlanKey, Record<BillingInterval, boolean>>,
+    bidPassAvailable: Boolean(env.PADDLE_PRICE_BID_PASS),
     showSetupHints: !features.isRealProduction,
   };
 
-  const status = subscription ? STATUS_LABEL[subscription.status] : undefined;
-  const renewal = formatDate(subscription?.currentPeriodEnd);
-  const cancelAt = formatDate(subscription?.cancelAt);
-  const trialEnd = formatDate(subscription?.trialEnd);
-  const graceEnd = formatDate(ctx.entitlements.graceEndsAt);
-
   return (
-    <>
-      <PageHeader level={2} title="Billing" description="Plan, payment details and usage for this workspace." />
-      <TestModeNotice inline />
+    <div className="flex flex-col pt-1 md:pt-3">
+      <h1 className="type-page text-ink">Billing</h1>
 
-      <Card data-testid="current-plan">
-        <CardHeader>
-          <div className="flex flex-wrap items-center gap-2">
-            <CardTitle>{ctx.plan.name} plan</CardTitle>
-            {status ? <Badge variant={status.variant}>{status.label}</Badge> : <Badge variant="secondary">Free</Badge>}
-          </div>
-          <CardDescription>
-            {!subscription || !isLive
-              ? subscription?.status === "canceled"
-                ? "Your subscription has ended. This workspace is on the Free plan."
-                : subscription?.status === "paused"
-                  ? "Your subscription is paused. This workspace is on the Free plan until it resumes."
-                  : "This workspace is on the Free plan."
-              : subscription.status === "past_due"
-                ? graceEnd
-                  ? `The last payment failed. Paid features stay available until ${graceEnd}; update your payment method to keep them.`
-                  : `The last payment failed and the grace period is over. Update your payment method to restore the ${subscribedPlan ? PLANS[subscribedPlan].name : "paid"} plan.`
-                : cancelAt
-                  ? `Scheduled to cancel on ${cancelAt}. You keep paid features until then.`
-                  : subscription.status === "trialing" && trialEnd
-                    ? `Trial ends on ${trialEnd}; the first payment is taken then.`
-                    : renewal
-                      ? `Renews on ${renewal} (${subscribedInterval === "year" ? "annual" : "monthly"} billing).`
-                      : "Subscription active."}
-          </CardDescription>
-        </CardHeader>
-        {subscription?.customerEmail || subscription?.paddleCustomerId ? (
-        <CardContent className="space-y-3">
-          {subscription?.customerEmail ? (
-            <p className="text-sm text-ink-2">
-              Receipts are sent to <span className="font-medium text-ink">{subscription.customerEmail}</span>.
-            </p>
-          ) : null}
-          {subscription?.paddleCustomerId ? (
-            features.paddleApi ? (
-              <ManageBillingButton />
-            ) : (
-              <p className="text-sm text-ink-2" data-testid="portal-not-configured">
-                Self-service billing is unavailable because <code>PADDLE_API_KEY</code> is not configured. Use the links in
-                your Paddle receipt, or contact support.
-              </p>
-            )
-          ) : null}
-        </CardContent>
-        ) : null}
-      </Card>
+      <div className="mt-5 flex flex-col gap-4 md:mt-7 md:gap-6">
+        <BillingRow>
+          <CurrentPlanCard {...currentPlan(ctx)} />
+          <AllowanceCard
+            allowance={allowance}
+            planFullBids={planFullBids}
+            planName={ctx.plan.name}
+            renewsAt={isLive ? (subscription?.currentPeriodEnd ?? null) : null}
+            seats={{ used: ctx.seats.used, limit: ctx.seats.limit }}
+            people={people.map((person) => ({ id: person.id, name: person.name, email: person.email, isOwner: person.role === "owner", isYou: person.userId === ctx.user.id }))}
+            inviteHref={ctx.seats.limit === null || ctx.seats.used < ctx.seats.limit ? "/app/settings/members" : null}
+          />
+        </BillingRow>
+        <BillingRow>
+          <PauseCancelCard
+            state={pauseState}
+            endsOn={scheduledFor ? formatBillingDate(scheduledFor) : null}
+            cancelNow={manage.cancel.step === "cancel_now"}
+            resumeConfirm={manage.resume.billing === "new_period" ? "The time you had paid for has run out, so resuming starts a new billing period: your card is charged today." : null}
+            onPause={manage.pause.allowed ? pauseSubscriptionAction : undefined}
+            onCancel={manage.cancel.allowed ? cancelSubscriptionAction : undefined}
+            onResume={pauseState === "paused" ? (manage.resume.allowed ? resumeSubscriptionAction : undefined) : manage.undo.allowed ? undoScheduledChangeAction : undefined}
+            portalAvailable={portalAvailable}
+          />
+          <BidPassCard passes={allowance?.bidPasses ?? null} buyHref={billingHandoff({ buy: "bid_pass" })} hasMonthlyBids={planFullBids > 0} />
+        </BillingRow>
+        <BillingRow>
+          {/* The method and the receipts are what the webhooks stored; a receipt link asks Paddle for the invoice PDF on demand. */}
+          <PaymentMethodCard
+            method={method ? { label: method.label, expires } : null}
+            hasSubscription={Boolean(subscription?.paddleCustomerId) && subscription?.status !== "canceled"}
+            portalAvailable={portalAvailable}
+          />
+          <ReceiptsCard
+            receipts={overview.receipts.map((receipt) => ({
+              id: receipt.transactionId,
+              date: receipt.paidAt,
+              description: receipt.description,
+              amount: receipt.amountExcludingTax,
+              url: receipt.invoicePath,
+            }))}
+            email={overview.billingEmail}
+            portalAvailable={portalAvailable}
+          />
+        </BillingRow>
+      </div>
 
-      <UsagePanel usage={usage} planName={ctx.plan.name} />
-
-      <section aria-labelledby="plans-title" className="space-y-4">
-        <h3 id="plans-title" className="font-display text-xl font-semibold text-ink">
-          Plans
-        </h3>
-        <BillingPlans
+      {intent ? (
+        <ConfirmPanel
+          key={intent.kind === "plan" ? `${intent.plan}:${intent.interval}` : "bid_pass"}
+          intent={intent}
           config={config}
-          currentPlan={ctx.entitlements.planKey}
-          subscribedPlan={subscribedPlan}
-          subscribedInterval={subscribedInterval}
-          hasLiveSubscription={isLive}
-          defaultInterval={isBillingInterval(params.interval) ? params.interval : (subscribedInterval ?? "month")}
+          subscribed={isLive && subscribedPlan ? { plan: subscribedPlan, interval: subscribedInterval } : null}
+          paused={subscription?.status === "paused" && Boolean(subscription.paddleSubscriptionId)}
+          trialEligible={overview.trialEligible}
+          startBidPassCheckout={startBidPassCheckoutAction}
+          downgradeNote="Your plan changes straight away. The unused part of what you have already paid is kept as credit and taken off your next payments."
+          changeBlocked={subscription && isLive && !overview.planChange.allowed ? overview.planChange.message : null}
         />
-      </section>
-    </>
+      ) : null}
+    </div>
   );
 }

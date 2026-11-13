@@ -49,6 +49,8 @@ export const SMELLS = {
     title: "Colour written as a hex value",
     fix: "use a token (ink, ink-2, paper, line, brand, accent, danger, info …)",
     pattern: /#[0-9A-Fa-f]{6}\b/g,
+    // The browser's own chrome (the `theme-color` meta of the root layout) is outside CSS: a token cannot reach it.
+    exceptLine: /\bthemeColor\s*:/,
   },
   arbitraryFontSize: {
     title: "Font size outside the type scale",
@@ -89,6 +91,11 @@ export function scanUiSmells(root = ROOT) {
     const text = withoutComments(readFileSync(path, "utf8"));
     for (const [key, smell] of Object.entries(SMELLS)) {
       for (const match of text.matchAll(smell.pattern)) {
+        if (smell.exceptLine) {
+          const lineStart = text.lastIndexOf("\n", match.index) + 1;
+          const lineEnd = text.indexOf("\n", match.index);
+          if (smell.exceptLine.test(text.slice(lineStart, lineEnd === -1 ? undefined : lineEnd))) continue;
+        }
         totals[key] += 1;
         findings.push({ smell: key, file, line: text.slice(0, match.index).split("\n").length, sample: match[0].replace(/\s+/g, " ").slice(0, 90) });
       }

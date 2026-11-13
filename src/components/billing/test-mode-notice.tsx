@@ -10,8 +10,9 @@ import { features } from "@/env";
  * opted in with ALLOW_SANDBOX_BILLING=1. Nobody should mistake a test purchase for a real one.
  * Server component: reads the flag itself, so pages only need to place it.
  *
- * By default it is a full-width band (place it directly under the top bar); `inline` makes
- * it a rounded panel for use inside a page column.
+ * By default it is a full-width band directly under the top bar: the app layout places it
+ * there on Billing and the checkout confirmation (see OnBillingRoutes). `inline` makes it a
+ * rounded panel for use inside a page column.
  */
 export function TestModeNotice({ inline = false }: { inline?: boolean } = {}) {
   if (!features.billingTestMode) return null;
@@ -23,8 +24,7 @@ export function TestModeNotice({ inline = false }: { inline?: boolean } = {}) {
       className={inline ? "rounded-control" : undefined}
       containerClassName={inline ? "px-4" : "container-app"}
     >
-      <strong className="font-semibold">Test mode.</strong> Payments are simulated and no card is charged. Use Paddle&apos;s test cards: plans bought
-      here are not real purchases.
+      <strong className="font-semibold">Test mode.</strong> Payments are simulated and no card is charged.
     </NoticeBand>
   );
 }

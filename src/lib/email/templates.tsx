@@ -1,21 +1,22 @@
 import { render } from "@react-email/render";
 import type { ReactElement } from "react";
-import { AccountExists, accountExistsSubject, type AccountExistsProps } from "@/emails/account-exists";
+import { AccountExists, accountExistsSubject, accountExistsText, type AccountExistsProps } from "@/emails/account-exists";
 import { BriefReady, briefReadySubject, type BriefReadyProps } from "@/emails/brief-ready";
-import { Invitation, invitationSubject, type InvitationProps } from "@/emails/invitation";
-import { ResetPassword, resetPasswordSubject, type ResetPasswordProps } from "@/emails/reset-password";
-import { VerifyEmail, verifyEmailSubject, type VerifyEmailProps } from "@/emails/verify-email";
+import { Invitation, invitationSubject, invitationText, type InvitationProps } from "@/emails/invitation";
+import { ResetPassword, resetPasswordSubject, resetPasswordText, type ResetPasswordProps } from "@/emails/reset-password";
+import { VerifyEmail, verifyEmailSubject, verifyEmailText, type VerifyEmailProps } from "@/emails/verify-email";
 import { radarEmail, type RadarEmailProps } from "@/features/notifications/emails/radar-email";
 import { reminderEmail, type ReminderEmailProps } from "@/features/notifications/emails/reminder-email";
 import { renewalEmail, type RenewalEmailProps } from "@/features/notifications/emails/renewal-email";
 
 /**
- * All transactional e-mails the app can send. To add one: create the React Email
- * component in src/emails, add a variant here and a case in renderEmail().
+ * All e-mails the app can send. To add one: create the React Email component in src/emails
+ * (inside <EmailLayout>, with a plain-text function built on emailText() from
+ * src/emails/text.ts), add a variant here and a case in parts().
  *
  * The scheduled e-mails (weekly digest, daily alert, deadline and renewal reminders) live in
- * src/features/notifications/emails and bring their own plain-text version (`text`); for
- * the others the text part is derived from the HTML.
+ * src/features/notifications/emails and bring their own plain-text version too. A template
+ * without one gets the text scraped from its HTML.
  */
 export type EmailTemplate =
   | { name: "verify-email"; props: VerifyEmailProps }
@@ -30,28 +31,33 @@ export type EmailTemplate =
 
 export type RenderedEmail = { subject: string; html: string; text: string };
 
+/** `text` is the hand-written plain-text part. */
+type Parts = { subject: string; element: ReactElement; text?: string };
+
+function parts(template: EmailTemplate): Parts {
+  switch (template.name) {
+    case "verify-email":
+      return { subject: verifyEmailSubject, element: <VerifyEmail {...template.props} />, text: verifyEmailText(template.props) };
+    case "reset-password":
+      return { subject: resetPasswordSubject, element: <ResetPassword {...template.props} />, text: resetPasswordText(template.props) };
+    case "invitation":
+      return { subject: invitationSubject(template.props), element: <Invitation {...template.props} />, text: invitationText(template.props) };
+    case "account-exists":
+      return { subject: accountExistsSubject, element: <AccountExists {...template.props} />, text: accountExistsText(template.props) };
+    case "brief-ready":
+      return { subject: briefReadySubject(template.props), element: <BriefReady {...template.props} /> };
+    case "radar-digest":
+    case "radar-alert":
+      return radarEmail(template.props);
+    case "deadline-reminder":
+      return reminderEmail(template.props);
+    case "renewal-reminder":
+      return renewalEmail(template.props);
+  }
+}
+
 export async function renderEmail(template: EmailTemplate): Promise<RenderedEmail> {
-  const { subject, element, text: ownText } = ((): { subject: string; element: ReactElement; text?: string } => {
-    switch (template.name) {
-      case "verify-email":
-        return { subject: verifyEmailSubject, element: <VerifyEmail {...template.props} /> };
-      case "reset-password":
-        return { subject: resetPasswordSubject, element: <ResetPassword {...template.props} /> };
-      case "invitation":
-        return { subject: invitationSubject(template.props), element: <Invitation {...template.props} /> };
-      case "account-exists":
-        return { subject: accountExistsSubject, element: <AccountExists {...template.props} /> };
-      case "brief-ready":
-        return { subject: briefReadySubject(template.props), element: <BriefReady {...template.props} /> };
-      case "radar-digest":
-      case "radar-alert":
-        return radarEmail(template.props);
-      case "deadline-reminder":
-        return reminderEmail(template.props);
-      case "renewal-reminder":
-        return renewalEmail(template.props);
-    }
-  })();
-  const [html, text] = await Promise.all([render(element), ownText ?? render(element, { plainText: true })]);
-  return { subject, html, text };
+  const { subject, element, text } = parts(template);
+  const [html, plain] = await Promise.all([render(element), text ?? render(element, { plainText: true })]);
+  return { subject, html, text: plain };
 }

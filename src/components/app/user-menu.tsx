@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { IconButton } from "@/components/ui/icon-button";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +40,7 @@ export type UserMenuPlan = {
   /** Name of the workspace's plan: "Free", "Radar Pro" … */
   name: string;
   isFree: boolean;
-  /** Owners are the ones who can pay: only they see "Upgrade" and "Manage plan". */
+  /** Owners are the ones who can pay: only they see "Upgrade" and "Billing". */
   isOwner: boolean;
   /** One line under the plan on Free: what the next plan adds and what it costs. */
   upgradeNote: string;
@@ -47,21 +48,18 @@ export type UserMenuPlan = {
 
 /**
  * Account menu, opened from the avatar at the right of the top bar: who is signed in, the
- * workspace's plan (with "Upgrade" on Free), Settings, help and sign out.
+ * workspace's plan, Billing (owners), Settings, help and sign out. On Free an owner also
+ * gets the menu's one call to action, "Upgrade", which goes to /pricing: the one place where
+ * plans are compared and chosen.
  */
 export function UserMenu({ name, email, workspaceName, plan, isAdmin }: { name: string; email: string; workspaceName: string; plan: UserMenuPlan; isAdmin: boolean }) {
   const signOut = useSignOut();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full transition-colors duration-150 hover:bg-paper-deep"
-          data-testid="user-menu"
-        >
+        <IconButton shape="round" labelAsText label={`Open account menu: ${name || email}`} data-testid="user-menu">
           <UserInitial name={name} email={email} />
-          <span className="sr-only">Open account menu: {name || email}</span>
-        </button>
+        </IconButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={4} className="w-72">
         <div className="px-2.5 pt-2 pb-2.5">
@@ -78,12 +76,17 @@ export function UserMenu({ name, email, workspaceName, plan, isAdmin }: { name: 
           </div>
           {plan.isFree ? <p className="mt-1.5 text-13 text-ink-2">{plan.isOwner ? plan.upgradeNote : "A workspace owner can upgrade the plan."}</p> : null}
         </div>
-        {plan.isOwner ? (
-          <DropdownMenuItem asChild className={plan.isFree ? "mx-1.5 mb-1.5 justify-center bg-brand font-semibold text-white focus:bg-brand-hover focus:text-white" : undefined}>
-            <Link href="/app/settings/billing">{plan.isFree ? "Upgrade" : "Manage plan"}</Link>
+        {plan.isOwner && plan.isFree ? (
+          <DropdownMenuItem asChild variant="cta" className="mt-0">
+            <Link href="/pricing">Upgrade</Link>
           </DropdownMenuItem>
         ) : null}
         <DropdownMenuSeparator />
+        {plan.isOwner ? (
+          <DropdownMenuItem asChild>
+            <Link href="/app/settings/billing">Billing</Link>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem asChild>
           <Link href="/app/settings/profile">Settings</Link>
         </DropdownMenuItem>

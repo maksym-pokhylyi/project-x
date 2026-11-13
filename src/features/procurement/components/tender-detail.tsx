@@ -1,182 +1,410 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { formatDate, formatDateTime } from "../domain/format";
-import { NOTICE_TYPES } from "../domain/notice-types";
-import { regionsLabel } from "../domain/regions";
+import { Badge } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button-link";
+import { DeadlineMarker } from "@/components/ui/deadline-marker";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { describeClosing, formatDate, formatMonth, formatTerm, pluralise } from "../domain/format";
+import { bidCheckHrefFor } from "../domain/links";
+import { reasonChips } from "../domain/reasons";
+import { areaLabel, regionLabel } from "../domain/regions";
+import type { ContractRow } from "../queries/contracts";
+import type { MatchItem } from "../queries/matches";
 import type { TenderDetail } from "../queries/notices";
-import { competitionLabel } from "./lists";
-import { DeadlineChip, Money, NoticeBadge, SourceLink } from "./primitives";
+import { placeOf } from "./match-row";
+import { Closes, Money, NoticeRef, NoticeTypeChip, SourceLink } from "./notice-bits";
+import { SaveButton } from "./save-button";
+import { CategoryChip, CategoryChipList } from "./ui/category-chip";
+import { KeyFacts, type KeyFact } from "./ui/key-facts";
+import { ListCard } from "./ui/list-card";
+import { QuoteCard } from "./ui/quote-card";
+import { BookmarkIcon } from "./ui/save-toggle";
+import { SectionHead } from "./ui/section-head";
 
-function Fact({ label, children }: { label: string; children: ReactNode }) {
+/**
+ * One procurement, as the Tender and TenderSignedIn artboards draw it — the same view on
+ * the public page and inside the app:
+ *
+ *   head     kind of notice · reference · title · buyer
+ *   side     the dates (closing date first), the key facts and the actions, in one card
+ *            (two cards on phones, where it sits right under the title)
+ *   body     categories and regions · the buyer's own description, quoted · and, for a
+ *            signed-in workspace with a radar: why this matches it and who won similar
+ *            work from this buyer
+ *
+ * "Open the official notice on Find a Tender" is always there: never behind sign-up, a plan
+ * or the state of the tender. Everything shown is read from notices; a fact the notice does
+ * not give is said to be missing, in words.
+ */
+export type TenderViewer =
+  | { kind: "visitor" }
+  | {
+      kind: "member";
+      saved: boolean;
+      /** How the workspace's radar matches this procurement; null when it has no radar or the tender is not a match. */
+      match: MatchItem | null;
+      /** Contracts the same buyer awarded for similar work; empty leaves the section out. */
+      similar: ContractRow[];
+      /** Suppliers the workspace has claimed: their rows are marked "You". */
+      ownSupplierIds: string[];
+    };
+
+/** The buyer's description as paragraphs; a very long one is cut at twelve (the official notice has the rest). */
+function paragraphsOf(text: string): string[] {
+  return text
+    .split(/\n{2,}|\n(?=[•\-–\d])/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, 12);
+}
+
+function You() {
   return (
-    <div className="border-t py-3 sm:grid sm:grid-cols-[11rem_1fr] sm:gap-4">
-      <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-1 text-sm sm:mt-0">{children}</dd>
+    <Badge variant="secondary" className="ml-1 align-middle">
+      You
+    </Badge>
+  );
+}
+
+function places(tender: TenderDetail): string[] {
+  const areas = [...new Set(tender.regionCodes.map((code) => areaLabel(code)).filter((label): label is string => Boolean(label)))];
+  if (areas.length > 0 && areas.length <= 6 && tender.regionCodes.every((code) => areaLabel(code))) return areas;
+  return [...new Set(tender.regions.map((code) => regionLabel(code)).filter((label): label is string => Boolean(label)))];
+}
+
+function facts(tender: TenderDetail): KeyFact[] {
+  const term = formatTerm(tender.contractStart, tender.contractEnd);
+  const period =
+    tender.contractStart && tender.contractEnd ? `${formatDate(tender.contractStart)} to ${formatDate(tender.contractEnd)}${term ? ` (${term})` : ""}` : tender.contractStart ? `From ${formatDate(tender.contractStart)}` : null;
+  const lotTitles = tender.lots.map((lot) => lot.title).filter((title): title is string => Boolean(title));
+  const winners = tender.winners.map((winner) => winner.name);
+  return [
+    {
+      label: "Estimated value",
+      value:
+        tender.valueAmount !== null ? (
+          <>
+            <Money amount={tender.valueAmount} currency={tender.currency} className="font-semibold" />, {tender.valueBasis === "gross" ? "including VAT" : "excluding VAT"}
+          </>
+        ) : (
+          <span className="text-ink-2">Value not published</span>
+        ),
+    },
+    { label: "Contract term", value: period ?? <span className="text-ink-2">Not stated in the notice</span> },
+    {
+      label: "Lots",
+      value:
+        tender.lotsCount <= 1 ? (
+          "Not divided into lots"
+        ) : (
+          <>
+            {pluralise(tender.lotsCount, "lot")}
+            {/* The first three by name, one to a line; a tender with many lots says how many more the notice has. */}
+            {lotTitles.length > 0 ? (
+              <span className="flex flex-col gap-0.5 pt-0.5 text-sm text-ink-2">
+                {lotTitles.slice(0, 3).map((title, index) => (
+                  <span key={index}>{title}</span>
+                ))}
+                {tender.lotsCount > Math.min(3, lotTitles.length) ? <span>and {tender.lotsCount - Math.min(3, lotTitles.length)} more in the official notice</span> : null}
+              </span>
+            ) : null}
+          </>
+        ),
+    },
+    { label: "Procedure", value: tender.procedure },
+    { label: "Awarded to", value: winners.length > 0 ? `${winners.slice(0, 3).join(", ")}${winners.length > 3 ? ` and ${winners.length - 3} more` : ""}` : null },
+  ];
+}
+
+function Dates({ tender, now }: { tender: TenderDetail; now: Date }) {
+  const questions = tender.enquiryDeadlineAt ? describeClosing(tender.enquiryDeadlineAt, now) : null;
+  const engagement = tender.stage === "planning" && tender.engagementDeadlineAt ? describeClosing(tender.engagementDeadlineAt, now) : null;
+  const items: Array<{ label: string; value: ReactNode }> = [];
+  if (questions && questions.dateTime) {
+    items.push({
+      label: "Questions to the buyer by",
+      value: (
+        <DeadlineMarker size="lg" closed={questions.state === "closed"} left={questions.left ?? undefined} className="max-lg:text-sm">
+          <time dateTime={questions.iso ?? undefined}>{questions.dateTime}</time>
+        </DeadlineMarker>
+      ),
+    });
+  }
+  if (engagement && engagement.dateTime) {
+    items.push({
+      label: "Market engagement closes",
+      value: (
+        <DeadlineMarker size="lg" closed={engagement.state === "closed"} left={engagement.left ?? undefined} className="max-lg:text-sm">
+          <time dateTime={engagement.iso ?? undefined}>{engagement.dateTime}</time>
+        </DeadlineMarker>
+      ),
+    });
+  }
+  items.push({ label: "Published", value: <span className="text-sm text-ink tabular-nums lg:text-15">{formatDate(tender.publishedAt)}</span> });
+  return (
+    <ul aria-label="Other dates" className="flex flex-col divide-y divide-line border-t border-line lg:order-2 lg:mx-5.5">
+      {items.map((item) => (
+        <li key={item.label} className="flex flex-col gap-0.5 px-4 py-3 lg:px-0">
+          <span className="text-13 text-ink-2">{item.label}</span>
+          {item.value}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Actions({ tender, viewer }: { tender: TenderDetail; viewer: TenderViewer }) {
+  const member = viewer.kind === "member";
+  return (
+    <div className="flex flex-col gap-1 px-4 pb-2.5 lg:order-4 lg:border-t lg:border-line lg:px-5.5 lg:pt-5 lg:pb-3" data-testid="tender-actions">
+      <div className="flex items-center gap-2">
+        {tender.isLive ? (
+          <ButtonLink href={bidCheckHrefFor(tender.ocid, member)} className="flex-1" data-testid="start-bid-check">
+            Start a bid check
+          </ButtonLink>
+        ) : null}
+        {member ? (
+          <SaveButton ocid={tender.ocid} saved={viewer.saved} className={tender.isLive ? "px-4" : "flex-1 px-4"} />
+        ) : (
+          <ButtonLink variant="outline" href={`/sign-up?next=${encodeURIComponent(`/app/tenders/${tender.ocid}`)}`} className={cn("gap-1.5 px-4 text-sm", !tender.isLive && "flex-1")}>
+            <BookmarkIcon pressed={false} />
+            Save
+          </ButtonLink>
+        )}
+      </div>
+      <p className="flex flex-wrap items-center gap-x-2.5">
+        <SourceLink href={tender.noticeUrl} label="Open the official notice on Find a Tender" icon />
+        <span className="text-13 text-ink-2">Always free.</span>
+      </p>
     </div>
   );
 }
 
-function noticeName(noticeType: string | null, stage: string): string {
-  if (noticeType && NOTICE_TYPES[noticeType]) return NOTICE_TYPES[noticeType].officialName;
-  return stage === "award" ? "Contract award notice" : stage === "planning" ? "Prior information notice" : "Contract notice";
+function Side({ tender, now, viewer }: { tender: TenderDetail; now: Date; viewer: TenderViewer }) {
+  const expected = formatMonth(tender.futureNoticeAt);
+  return (
+    <section aria-label="Dates, key facts and actions" className="flex flex-col gap-3 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:gap-0 lg:self-start lg:rounded-card lg:border lg:border-line lg:bg-surface" data-testid="tender-side">
+      <div className="flex flex-col rounded-card border border-line bg-surface lg:contents">
+        <div className="px-4 pt-4 pb-3.5 lg:order-1 lg:px-5.5 lg:pt-5">
+          {tender.stage === "planning" ? (
+            <div className="flex flex-col gap-0.5" data-testid="deadline" data-state="planned">
+              <span className="text-13 text-ink-2">Expected to be published</span>
+              <span className={cn(expected ? "type-figure text-3xl text-ink" : "text-sm text-ink-2")}>{expected ?? "No date given in the notice"}</span>
+              <span className="text-sm text-ink-2">The buyer’s own estimate; it can move.</span>
+            </div>
+          ) : tender.stage === "tender" ? (
+            <Closes deadline={tender.deadlineAt} now={now} form="figure" />
+          ) : (
+            <div className="flex flex-col gap-0.5" data-testid="deadline" data-state="awarded">
+              <span className="text-13 text-ink-2">Status</span>
+              <span className="text-17 font-semibold text-ink">{tender.stage === "award" ? "Awarded" : "Not open for bids"}</span>
+            </div>
+          )}
+        </div>
+        <Actions tender={tender} viewer={viewer} />
+        <Dates tender={tender} now={now} />
+      </div>
+      <div className="rounded-card border border-line bg-surface p-4 lg:order-3 lg:rounded-none lg:border-0 lg:border-t lg:p-5.5">
+        <KeyFacts items={facts(tender)} />
+      </div>
+    </section>
+  );
 }
 
-/**
- * Body of a tender page, shared by the public page and the in-app detail. `actions` holds
- * the calls to action of the surrounding page; the Find a Tender link is part of this
- * component and therefore always present.
- */
-export function TenderDetailView({ tender, now, actions }: { tender: TenderDetail; now: Date; actions?: ReactNode }) {
-  const criteria = tender.awardCriteria?.criteria ?? [];
-  const paragraphs = (tender.description ?? "").split(/\n{2,}|\n(?=[•\-–\d])/).map((text) => text.trim()).filter(Boolean).slice(0, 40);
+function Why({ match }: { match: MatchItem }) {
+  const chips = reasonChips(match.facts);
+  const place = placeOf(match);
+  const rows: Array<{ key: string; chip: ReactNode; text: ReactNode }> = [];
+  for (const chip of chips) {
+    if (chip.kind === "buyer") {
+      rows.push({
+        key: chip.kind,
+        chip: <Badge variant="brand">{chip.label}</Badge>,
+        text: match.facts.buyerContracts.map((contract, index) => (
+          <span key={index}>
+            {index > 0 ? " · " : null}
+            {contract.title}
+            {contract.valueAmount !== null ? (
+              <>
+                , <Money amount={contract.valueAmount} exact />
+              </>
+            ) : null}
+            , {contract.year}
+          </span>
+        )),
+      });
+    } else if (chip.kind === "work") {
+      const labels = match.facts.sameWorkLabels;
+      rows.push({ key: chip.kind, chip: <Badge variant="secondary">{chip.label}</Badge>, text: labels.length > 0 ? labels.join(", ").replace(/^./, (first) => first.toUpperCase()) : "The same category as contracts you have won" });
+    } else if (chip.kind === "new_buyer") {
+      rows.push({ key: chip.kind, chip: <Badge variant="secondary">{chip.label}</Badge>, text: "None of your published contracts came from this buyer" });
+    } else if (chip.kind === "trade") {
+      rows.push({ key: chip.kind, chip: <Badge variant="secondary">{chip.label}</Badge>, text: "One of the trades on your radar" });
+    } else {
+      rows.push({ key: chip.kind, chip: <Badge variant="secondary">{chip.label}</Badge>, text: "A keyword on your radar, found in the title" });
+    }
+  }
+  if (place.label) {
+    const where =
+      match.breakdown.regionMatch === "local"
+        ? "One of your regions"
+        : match.breakdown.regionMatch === "nationwide"
+          ? "Open to suppliers across the UK"
+          : match.breakdown.regionMatch === "elsewhere"
+            ? "Outside the regions on your radar"
+            : "The notice does not say where the work is";
+    rows.push({ key: "place", chip: <Badge variant="secondary">{place.label}</Badge>, text: place.note ? `${where} (${place.note})` : where });
+  }
+  if (match.tier === "wider") {
+    rows.push({ key: "wider", chip: <Badge variant="outline">Wider match</Badge>, text: "Not your own line of work or regions: a neighbouring category, a broader code or a keyword. It is not counted among your matches." });
+  }
+  if (rows.length === 0) return null;
   return (
-    <div className="space-y-8">
-      <header className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <NoticeBadge notice={tender} />
-          {tender.stage === "tender" ? <DeadlineChip deadline={tender.deadlineAt} now={now} /> : null}
-        </div>
-        <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">{tender.title}</h1>
-        <p className="text-sm text-muted-foreground">
-          {tender.buyerSlug ? (
-            <Link href={`/buyers/${tender.buyerSlug}`} className="font-medium text-foreground underline-offset-4 hover:underline">
-              {tender.buyerName}
-            </Link>
-          ) : (
-            <span className="font-medium text-foreground">{tender.buyerName ?? "Buyer not stated"}</span>
-          )}{" "}
-          · published {formatDate(tender.publishedAt)}
-        </p>
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-          {actions}
-          <SourceLink href={tender.noticeUrl} label="View the full notice on Find a Tender" />
-        </div>
-      </header>
+    <section aria-labelledby="why-h" className="flex flex-col gap-4" data-testid="why-matches">
+      <SectionHead id="why-h" title="Why this matches you" />
+      <ListCard aria-label="Why this matches you">
+        {rows.map((row) => (
+          <li key={row.key} className="flex flex-col gap-x-6 gap-y-1.5 px-4 py-3.5 md:flex-row md:items-baseline md:px-6 md:py-4">
+            <div className="flex md:w-[18.125rem] md:shrink-0">{row.chip}</div>
+            <p className="min-w-0 flex-1 text-sm text-ink tabular-nums">{row.text}</p>
+          </li>
+        ))}
+      </ListCard>
+    </section>
+  );
+}
 
-      <dl aria-label="Key facts" className="border-b">
-        {tender.stage === "tender" ? (
-          <Fact label="Deadline">{tender.deadlineAt ? formatDateTime(tender.deadlineAt) : "Not published"}{tender.enquiryDeadlineAt ? ` · questions by ${formatDateTime(tender.enquiryDeadlineAt)}` : ""}</Fact>
-        ) : null}
-        {tender.stage === "planning" && tender.futureNoticeAt ? <Fact label="Tender expected">{formatDate(tender.futureNoticeAt)}</Fact> : null}
-        {tender.stage === "planning" && tender.engagementDeadlineAt ? <Fact label="Market engagement until">{formatDate(tender.engagementDeadlineAt)}</Fact> : null}
-        <Fact label={tender.stage === "award" ? "Contract value" : "Estimated value"}>
-          <Money amount={tender.valueAmount} currency={tender.currency} />
-          {tender.valueAmount ? <span className="text-muted-foreground"> excluding VAT where stated</span> : null}
-        </Fact>
-        <Fact label="Procedure">
-          {tender.procedure ?? competitionLabel(tender.competition)}
-          {tender.aboveThreshold === false ? " · below threshold" : tender.aboveThreshold === true ? " · above threshold" : ""}
-          {tender.isFramework ? " · sets up a framework" : ""}
-        </Fact>
-        {tender.contractStart || tender.contractEnd ? (
-          <Fact label="Contract dates">
-            {formatDate(tender.contractStart) ?? "Start not stated"} to {formatDate(tender.contractEnd) ?? "end not stated"}
-          </Fact>
-        ) : null}
-        {regionsLabel(tender.regions) ? <Fact label="Where">{regionsLabel(tender.regions)}{tender.regionSource === "buyer" ? " (buyer's location)" : ""}</Fact> : null}
-        {tender.cpv.length > 0 ? (
-          <Fact label="Categories (CPV)">
-            <ul className="space-y-0.5">
-              {tender.cpv.slice(0, 8).map((entry) => (
-                <li key={entry.code}>
-                  <span className="font-mono text-xs text-muted-foreground">{entry.code}</span> {entry.label ?? ""}
-                </li>
-              ))}
-              {tender.cpv.length > 8 ? <li className="text-muted-foreground">and {tender.cpv.length - 8} more</li> : null}
-            </ul>
-          </Fact>
-        ) : null}
-        {tender.lotsCount > 1 ? (
-          <Fact label="Lots">
-            {tender.lotsCount} lots
-            {tender.lots.some((lot) => lot.title) ? (
-              <ul className="mt-1 space-y-0.5 text-muted-foreground">
-                {tender.lots.filter((lot) => lot.title).slice(0, 10).map((lot) => (
-                  <li key={lot.id}>
-                    {lot.title}
-                    {lot.value ? (
-                      <>
-                        {" "}
-                        — <Money amount={lot.value} />
-                      </>
+function Similar({ items, ownSupplierIds }: { items: ContractRow[]; ownSupplierIds: string[] }) {
+  if (items.length === 0) return null;
+  const own = new Set(ownSupplierIds);
+  return (
+    <section aria-labelledby="similar-h" className="flex flex-col gap-4" data-testid="similar-awards">
+      <SectionHead id="similar-h" title="Who won similar work from this buyer" />
+      <div className="overflow-hidden rounded-card border border-line bg-surface">
+        <Table className="max-md:hidden" aria-label="Similar contracts awarded by this buyer">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Supplier</TableHead>
+              <TableHead>Contract</TableHead>
+              <TableHead numeric>Value</TableHead>
+              <TableHead>Awarded</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((contract) => (
+              <TableRow key={`${contract.ocid}:${contract.supplierId}`}>
+                <TableCell className="min-w-[13rem] font-semibold text-ink">
+                  {contract.supplierLabel}
+                  {own.has(contract.supplierId) ? <You /> : null}
+                </TableCell>
+                <TableCell className="min-w-[12rem]">{contract.title}</TableCell>
+                <TableCell numeric>{contract.valueAmount !== null ? <Money amount={contract.valueAmount} exact /> : <span className="text-ink-2">Not published</span>}</TableCell>
+                <TableCell className="whitespace-nowrap">{formatDate(contract.awardedAt) ?? <span className="text-ink-2">Not published</span>}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <ul aria-label="Similar contracts awarded by this buyer" className="flex flex-col divide-y divide-line md:hidden">
+          {items.map((contract) => (
+            <li key={`${contract.ocid}:${contract.supplierId}`} className="flex flex-col gap-0.5 px-4 py-3.5">
+              <span className="flex items-start justify-between gap-3 text-15 leading-snug font-semibold text-ink">
+                <span className="min-w-0 [overflow-wrap:anywhere]">{contract.supplierLabel}</span>
+                {own.has(contract.supplierId) ? <You /> : null}
+              </span>
+              <span className="text-13 text-ink-2">{contract.title}</span>
+              <span className="pt-0.5 text-13 text-ink tabular-nums">
+                {contract.valueAmount !== null ? <Money amount={contract.valueAmount} exact className="font-semibold" /> : "Value not published"}
+                {contract.awardedAt ? ` · awarded ${formatDate(contract.awardedAt)}` : null}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className="text-13 text-ink-2">From contract award notices on Find a Tender, last five years.</p>
+    </section>
+  );
+}
+
+export function TenderView({ tender, now, viewer, before, after }: { tender: TenderDetail; now: Date; viewer: TenderViewer; /** Above the head: the way back. */ before?: ReactNode; /** Under the body: the page's own band. */ after?: ReactNode }) {
+  const where = places(tender);
+  return (
+    <div className="flex flex-col" data-testid="tender-detail">
+      {before}
+      <div className="grid gap-x-10 gap-y-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,28.75rem)] lg:grid-rows-[auto_1fr] lg:gap-y-2.5">
+        <header className="flex min-w-0 flex-col gap-2.5 lg:col-start-1 lg:row-start-1 lg:gap-3">
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <NoticeTypeChip notice={tender} />
+            <NoticeRef id={tender.releaseId} className="lg:text-13" />
+          </p>
+          <h1 className="type-title text-ink [overflow-wrap:anywhere]">{tender.title}</h1>
+          <p className="text-15 text-ink lg:text-17">
+            <span className="block text-13 text-ink-2 lg:mr-1.5 lg:inline lg:text-sm">Buyer</span>
+            {tender.buyerSlug ? (
+              <Link href={`/buyers/${tender.buyerSlug}`} className="link-quiet font-semibold">
+                {tender.buyerName}
+              </Link>
+            ) : (
+              <span className="font-semibold">{tender.buyerName ?? "Not named in the notice"}</span>
+            )}
+          </p>
+        </header>
+
+        <Side tender={tender} now={now} viewer={viewer} />
+
+        <div className="flex min-w-0 flex-col gap-10 lg:col-start-1 lg:row-start-2 lg:gap-12">
+          <dl className="flex flex-col gap-2.5 max-lg:pt-1">
+            {tender.cpv.length > 0 ? (
+              <div className="flex flex-col gap-x-3 gap-y-1.5 lg:flex-row">
+                <dt className="text-13 text-ink-2 lg:w-[5.25rem] lg:shrink-0 lg:pt-1">Categories</dt>
+                <dd className="min-w-0 flex-1">
+                  <CategoryChipList label="Categories">
+                    {tender.cpv.slice(0, 8).map((entry) => (
+                      <li key={entry.code}>
+                        <CategoryChip code={entry.code}>{entry.label ?? "Category"}</CategoryChip>
+                      </li>
+                    ))}
+                    {tender.cpv.length > 8 ? (
+                      <li>
+                        <CategoryChip>and {tender.cpv.length - 8} more</CategoryChip>
+                      </li>
                     ) : null}
-                  </li>
-                ))}
-              </ul>
+                  </CategoryChipList>
+                </dd>
+              </div>
             ) : null}
-          </Fact>
-        ) : null}
-        {tender.smeSuitable ? <Fact label="Small businesses">The buyer marks this as suitable for SMEs.</Fact> : null}
-        {criteria.length > 0 || tender.awardCriteria?.description ? (
-          <Fact label="Award criteria">
-            {criteria.length > 0 ? (
-              <ul className="space-y-0.5">
-                {criteria.map((criterion, index) => (
-                  <li key={`${criterion.name}-${index}`} className="flex justify-between gap-4">
-                    <span>
-                      {criterion.name ?? "Criterion"} {criterion.type ? <span className="text-muted-foreground">({criterion.type})</span> : null}
-                    </span>
-                    {criterion.weight !== null ? <span className="tabular-nums">{criterion.weight}%</span> : null}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            {tender.awardCriteria?.description ? <p className="mt-1 whitespace-pre-line text-muted-foreground">{tender.awardCriteria.description}</p> : null}
-          </Fact>
-        ) : null}
-        {tender.winners.length > 0 ? (
-          <Fact label={tender.winners.length === 1 ? "Awarded to" : "Suppliers"}>
-            <ul className="space-y-0.5">
-              {tender.winners.slice(0, 12).map((winner, index) => (
-                <li key={`${winner.name}-${index}`}>
-                  {winner.slug ? (
-                    <Link href={`/suppliers/${winner.slug}`} className="underline-offset-4 hover:underline">
-                      {winner.name}
-                    </Link>
-                  ) : (
-                    winner.name
-                  )}
-                </li>
-              ))}
-              {tender.winners.length > 12 ? <li className="text-muted-foreground">and {tender.winners.length - 12} more</li> : null}
-            </ul>
-          </Fact>
-        ) : null}
-      </dl>
+            <div className="flex flex-col gap-x-3 gap-y-1.5 lg:flex-row">
+              <dt className="text-13 text-ink-2 lg:w-[5.25rem] lg:shrink-0 lg:pt-1">Regions</dt>
+              <dd className="min-w-0 flex-1">
+                {where.length > 0 ? (
+                  <CategoryChipList label="Regions">
+                    {where.map((label) => (
+                      <li key={label}>
+                        <CategoryChip>{label}</CategoryChip>
+                      </li>
+                    ))}
+                  </CategoryChipList>
+                ) : (
+                  <span className="text-sm text-ink-2">No place of delivery given in the notice</span>
+                )}
+              </dd>
+            </div>
+          </dl>
 
-      {paragraphs.length > 0 ? (
-        <section aria-labelledby="description" className="space-y-3">
-          <h2 id="description" className="text-lg font-semibold tracking-tight">
-            Description
-          </h2>
-          <div className="max-w-[68ch] space-y-3 text-sm leading-6">
-            {paragraphs.map((text, index) => (
-              <p key={index} className="whitespace-pre-line break-words">
-                {text}
-              </p>
-            ))}
-          </div>
-        </section>
-      ) : null}
+          <section aria-labelledby="desc-h" className="flex flex-col gap-4">
+            <SectionHead id="desc-h" title="The buyer’s description" />
+            {tender.description ? (
+              <QuoteCard paragraphs={paragraphsOf(tender.description)} caption="From the notice on Find a Tender. Read the full documents before you rely on it." />
+            ) : (
+              <p className="rounded-card border border-line bg-surface p-5 text-15 text-ink-2 md:px-7 md:py-6">The notice gives no description. Open the official notice for the documents.</p>
+            )}
+          </section>
 
-      {tender.history.length > 1 ? (
-        <section aria-labelledby="history" className="space-y-3">
-          <h2 id="history" className="text-lg font-semibold tracking-tight">
-            Notices for this procurement
-          </h2>
-          <ol className="divide-y rounded-lg border text-sm">
-            {tender.history.map((entry) => (
-              <li key={entry.releaseId} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-3 py-2">
-                <span>
-                  <span className="tabular-nums text-muted-foreground">{formatDate(entry.publishedAt)}</span> · {noticeName(entry.noticeType, entry.stage)}
-                  {entry.isUpdate ? " (update)" : ""}
-                </span>
-                <SourceLink href={entry.noticeUrl} label={entry.releaseId} className="min-h-0 font-mono text-xs" />
-              </li>
-            ))}
-          </ol>
-        </section>
-      ) : null}
+          {viewer.kind === "member" && viewer.match ? <Why match={viewer.match} /> : null}
+          {viewer.kind === "member" ? <Similar items={viewer.similar} ownSupplierIds={viewer.ownSupplierIds} /> : null}
+        </div>
+      </div>
+      {after}
     </div>
   );
 }

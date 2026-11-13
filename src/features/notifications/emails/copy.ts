@@ -1,5 +1,4 @@
-import { site } from "@/config/site";
-import { INDEPENDENCE_STATEMENT, OGL_ATTRIBUTION } from "@/features/procurement/config";
+import { identityText as siteIdentityText, site } from "@/config/site";
 import { describeSince, londonDaysBetween } from "../time";
 import { capitalise, countOf, numberWord } from "../wording";
 import type { IdentityPart } from "./parts";
@@ -11,26 +10,22 @@ import type { IdentityPart } from "./parts";
  * promise, nothing that implies a win.
  */
 
-const isPlaceholder = (text: string) => text.includes("[[");
-
 /**
  * The identity line under every e-mail, as in the artboard: who operates the service, how
  * to reach them, the UK representative, who takes payments, the licence of the data and
- * the independence statement. Names and addresses come from src/config/site.ts — still
- * placeholders there until the owner fills them in, and shown as such.
+ * the independence statement.
+ *
+ * ONE source for every surface: `identityText` in src/config/site.ts. The site footer and
+ * the transactional e-mails (src/emails/layout.tsx) print the same line, so a change of
+ * operator, address or representative is made there once. A detail that is still pending is
+ * worded honestly by that module ("UK representative: being appointed"), so no run of this
+ * line is a placeholder any more.
  */
 export function identityParts(): IdentityPart[] {
-  const { company, facts } = site;
-  return [
-    { text: `${site.name} is operated by ` },
-    { text: company.legalName, placeholder: isPlaceholder(company.legalName) },
-    { text: `, an independent sole trader based in ${facts.operatorCountry}. Contact: ${site.supportEmail} · UK representative: ` },
-    { text: company.ukRepresentative, placeholder: isPlaceholder(company.ukRepresentative) },
-    { text: ` · Payments are processed by Paddle. · ${OGL_ATTRIBUTION} · ${INDEPENDENCE_STATEMENT}` },
-  ];
+  return [{ text: siteIdentityText }];
 }
 
-export const identityText = () => identityParts().map((part) => part.text).join("");
+export const identityText = () => siteIdentityText;
 
 const agree = (count: number, singular: string, plural: string) => (count === 1 ? singular : plural);
 

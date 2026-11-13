@@ -1,5 +1,6 @@
 import "server-only";
 import { sql } from "drizzle-orm";
+import { tidyPlace } from "../domain/format";
 import { normaliseCompanyNumber, normaliseName } from "../domain/normalize";
 import { db, int, iso, num, PUBLIC_SUPPLIER_SQL, queryRows, str, strArray } from "./shared";
 
@@ -30,7 +31,7 @@ function toHit(row: Record<string, unknown>): SupplierHit {
     slug: String(row.slug),
     name: String(row.name),
     companyNumber: str(row.coh),
-    locality: str(row.locality),
+    locality: tidyPlace(str(row.locality)),
     region: str(row.region),
     awardsCount: int(row.awards_count),
     totalValue: num(row.total_value) ?? 0,
@@ -99,6 +100,8 @@ export type SupplierRecord = {
   buyersCount: number;
   firstAwardAt: string | null;
   lastAwardAt: string | null;
+  /** Notices on Find a Tender that name this supplier (every version counts: each one is a published notice). */
+  noticesCount: number;
   isPublic: boolean;
   /** Slug of the supplier this record was merged into (the page redirects there). */
   mergedIntoSlug: string | null;
@@ -123,7 +126,7 @@ function toRecord(row: Record<string, unknown>): SupplierRecord {
     companyNumber: str(row.coh),
     legalForm: String(row.legal_form ?? "unknown"),
     scale: str(row.scale),
-    locality: str(row.locality),
+    locality: tidyPlace(str(row.locality)),
     region: str(row.region),
     postcodeArea: str(row.postcode_area),
     awardsCount: int(row.awards_count),
@@ -131,6 +134,7 @@ function toRecord(row: Record<string, unknown>): SupplierRecord {
     buyersCount: int(row.buyers_count),
     firstAwardAt: iso(row.first_award_at),
     lastAwardAt: iso(row.last_award_at),
+    noticesCount: int(row.notices_count),
     isPublic: row.is_public === true,
     mergedIntoSlug: str(row.merged_into_slug),
     profile: hasProfile
@@ -152,6 +156,7 @@ const RECORD_SELECT = sql`
   select s.id, s.slug, s.name, s.coh, s.legal_form, s.scale, s.locality, s.region, s.postcode_area, s.awards_count, s.total_value, s.buyers_count,
          s.first_award_at, s.last_award_at, ${PUBLIC_SUPPLIER_SQL} as is_public,
          (select m.slug from suppliers m where m.id = s.merged_into) as merged_into_slug,
+         (select count(distinct a.release_id) from awards a where a.supplier_id = s.id) as notices_count,
          p.supplier_id as profile_supplier_id, p.summary, p.keywords, p.regions as profile_regions, p.top_cpv, p.cpv_divisions, p.value_low, p.value_median, p.value_high
   from suppliers s left join supplier_profiles p on p.supplier_id = s.id`;
 

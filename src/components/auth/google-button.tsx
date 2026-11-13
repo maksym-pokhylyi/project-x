@@ -29,7 +29,7 @@ export function GoogleButton({ callbackURL, label = "Continue with Google" }: { 
 
 export function OrDivider() {
   return (
-    <div className="my-5 flex items-center gap-3 text-13 text-ink-2" role="separator">
+    <div className="my-4 flex items-center gap-3 text-13 text-ink-2" role="separator">
       <span className="h-px flex-1 bg-line" />
       or
       <span className="h-px flex-1 bg-line" />

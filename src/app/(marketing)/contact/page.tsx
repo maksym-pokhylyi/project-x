@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Placeholders } from "@/components/marketing/placeholders";
 import { Eyebrow } from "@/components/marketing/section";
-import { site } from "@/config/site";
+import { identity, site } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -11,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 };
 
-const { company } = site;
+const { operator } = site;
 
 function Row({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -22,8 +21,7 @@ function Row({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-const Mail = ({ address }: { address: string }) =>
-  address.includes("[[") ? <Placeholders text={address} /> : <a href={`mailto:${address}`}>{address}</a>;
+const Mail = ({ address }: { address: string }) => <a href={`mailto:${address}`}>{address}</a>;
 
 export default function ContactPage() {
   return (
@@ -32,7 +30,7 @@ export default function ContactPage() {
         <Eyebrow>Contact</Eyebrow>
         <h1 className="type-h1 mt-3 text-ink">Talk to the person who builds it.</h1>
         <p className="type-lead mt-4 max-w-[42.5rem] text-ink">
-          {site.name} is run by one founder. Write by email and a person replies, usually within one working day.
+          {site.name} is built and run by one person, {operator.name}. Write by email and a person replies, usually within one working day.
         </p>
 
         <dl className="mt-10 border-b border-line">
@@ -56,14 +54,21 @@ export default function ContactPage() {
           </Row>
           <Row title="Privacy requests and complaints">
             <p>
-              <Mail address={company.privacyContactEmail} />
+              <Mail address={operator.privacyEmail} />
             </p>
             <p>
               For a copy of your data, a correction, a deletion or a data protection complaint. We acknowledge complaints within 30 days. See the{" "}
               <Link href="/legal/privacy">privacy notice</Link>.
             </p>
-            <p>
-              UK representative: <Placeholders text={company.ukRepresentative} />
+            {/* Pending until a representative is appointed (site.operator.ukRepresentative): say so, and give the address that works today. */}
+            <p data-testid="uk-representative">
+              {operator.ukRepresentative ? (
+                <>UK representative: {operator.ukRepresentative}</>
+              ) : (
+                <>
+                  UK representative: being appointed — contact <Mail address={site.supportEmail} />
+                </>
+              )}
             </p>
           </Row>
           <Row title="Billing, invoices and refunds">
@@ -73,15 +78,25 @@ export default function ContactPage() {
             </p>
           </Row>
           <Row title="Who we are">
-            <p>
-              <Placeholders text={company.legalName} />
+            <address data-testid="operator-details" className="not-italic">
+              {operator.legalName}
               <br />
-              <Placeholders text={company.address}></Placeholders>
+              <span lang="uk">{operator.legalNameLocal}</span>
               <br />
-              Registration no. <Placeholders text={company.registrationNumber} />
-            </p>
+              {operator.address.line1}
+              <br />
+              {operator.address.city}, {operator.address.region}
+              <br />
+              {operator.address.country}
+              {operator.registrationNumber ? (
+                <>
+                  <br />
+                  Registration no. {operator.registrationNumber}
+                </>
+              ) : null}
+            </address>
             <p>
-              {site.name} is an independent service based in {site.facts.operatorCountry}. It is not affiliated with, or endorsed by, the UK Government.
+              {site.name} is the trading name of {operator.name}, a {operator.legalForm} registered in {operator.address.country}. {identity.independence}
             </p>
           </Row>
         </dl>

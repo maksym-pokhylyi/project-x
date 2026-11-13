@@ -1,4 +1,5 @@
 import { cpvClass, cpvDivision, cpvGroup, distinctCpv, isCpvCode } from "./cpv";
+import { tidyPlace } from "./format";
 import { cleanValue, type CleanValue } from "./money";
 import {
   classifyEmail,
@@ -346,7 +347,7 @@ function addressFacts(party: OcdsParty) {
     country,
     regionCode,
     topRegion: topRegion(regionCode),
-    locality: text(address.locality, 120),
+    locality: tidyPlace(text(address.locality, 120)),
     postcodeArea: country === null || country === "GB" ? postcodeArea(address.postalCode) : null,
   };
 }

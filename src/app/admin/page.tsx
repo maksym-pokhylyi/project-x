@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ReplayWebhookButton, RetryJobButton } from "@/components/admin/admin-buttons";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Stat, StatRow } from "@/components/ui/stat";
 import { getAdminActivity, getAdminConfigWarnings, getAdminMetrics } from "@/server/admin";
 import { getFounderKpis, type Windowed } from "@/server/admin-kpis";
 import { requireAdminForPage } from "@/server/session";
 
 export const metadata: Metadata = { title: "Overview" };
 
+/** AI spend is an estimated cost in US dollars; revenue is in the catalogue's pounds. */
 const usd = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 const money = (minor: number, currency: string) => new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(minor / 100);
 const when = (date: Date) => `${date.toISOString().replace("T", " ").slice(0, 16)} UTC`;
@@ -15,6 +18,11 @@ const count = (value: number) => value.toLocaleString("en-GB");
 /** "—" is "not measurable here" (a module that is not installed), never zero. */
 const DASH = "—";
 const inWindows = (figure: Windowed) => `${count(figure.last7Days)} in 7 days · ${count(figure.last30Days)} in 30 days`;
+
+const list = "divide-y divide-line text-sm";
+const row = "py-3 first:pt-0 last:pb-0";
+const meta = "text-13 text-ink-2";
+const empty = "text-sm text-ink-2";
 
 /** "12 minutes ago", "3 hours ago", "2 days ago". */
 function ago(date: Date | null, now: Date): string {
@@ -28,28 +36,19 @@ function ago(date: Date | null, now: Date): string {
   return `${days} days ago`;
 }
 
-/**
- * One cell of the key numbers, after the design system's stat block: a large serif numeral
- * over its label, then one muted line of context. The cells share one white card and are
- * divided by hairlines (the grid's 1 px gaps).
- */
-function Stat({ label, value, hint, link, testId }: { label: string; value: string; hint?: string; link?: { href: string; label: string }; testId?: string }) {
-  return (
-    <div className="flex flex-col gap-1 bg-surface px-5 py-4" data-testid="admin-stat" data-kpi={testId}>
-      <dt className="order-2 text-sm font-semibold text-ink">{label}</dt>
-      <dd className="type-figure order-1 text-3xl text-ink">{value}</dd>
-      {hint ? <dd className="order-3 text-13 text-ink-2">{hint}</dd> : null}
-      {link ? (
-        <dd className="order-4 text-13">
-          <Link href={link.href} className="link">
-            {link.label}
-          </Link>
-        </dd>
-      ) : null}
-    </div>
-  );
-}
+/** Marks a key number for the tests and the founder's scripts: every cell, and its name. */
+const kpi = (name?: string) => ({ "data-testid": "admin-stat", "data-kpi": name });
+const open = (href: string, label: string) => (
+  <Link href={href} className="link">
+    {label}
+  </Link>
+);
 
+/**
+ * Founder overview: what needs attention first (configuration warnings), the key numbers,
+ * then the queues and the latest errors and events. Built from the library: Alert, StatRow,
+ * Card. Plain lists, no charts.
+ */
 export default async function AdminOverviewPage() {
   // Pages render in parallel with their layout, so each admin page guards itself.
   await requireAdminForPage();
@@ -62,88 +61,89 @@ export default async function AdminOverviewPage() {
   const funnel = kpis.outreach;
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
+    <div className="flex flex-col gap-7 md:gap-8">
+      <h1 className="type-page text-ink">Overview</h1>
 
       {configWarnings.length > 0 ? (
-        <section aria-label="Configuration warnings" className="space-y-2" data-testid="config-warnings">
+        <section aria-label="Configuration warnings" className="flex flex-col gap-2.5" data-testid="config-warnings">
           {configWarnings.map((warning) => (
-            <p key={warning.code} role="alert" data-testid="config-warning" data-level={warning.level} className="rounded-md border border-warning/40 bg-warning/10 p-3 text-sm">
-              <strong>{warning.level === "error" ? "Action required" : "Warning"}:</strong> {warning.message}
-            </p>
+            <Alert key={warning.code} variant={warning.level === "error" ? "destructive" : "warning"} data-testid="config-warning" data-level={warning.level}>
+              <AlertTitle>{warning.level === "error" ? "Action required" : "Warning"}</AlertTitle>
+              <AlertDescription>{warning.message}</AlertDescription>
+            </Alert>
           ))}
         </section>
       ) : null}
 
       <section aria-label="Key numbers" data-testid="founder-kpis">
-        {/* Sixteen cells: every row is full at one, two and four columns. */}
-        <dl className="grid gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-          <Stat testId="signups" label="Sign-ups" value={count(kpis.signups.total)} hint={inWindows(kpis.signups)} />
-          <Stat testId="verified" label="Verified accounts" value={count(kpis.verifiedAccounts.total)} hint={`${inWindows(kpis.verifiedAccounts)} (by sign-up date)`} />
-          <Stat testId="workspaces" label="Workspaces" value={count(kpis.workspaces.total)} hint={inWindows(kpis.workspaces)} />
-          <Stat testId="claimed" label="Claimed companies" value={count(kpis.claimedCompanies.total)} hint={inWindows(kpis.claimedCompanies)} />
+        {/* Sixteen cells in the library's stat card: every row is full at two and at four columns. */}
+        <StatRow frame="card" columns={4}>
+          <Stat {...kpi("signups")} label="Sign-ups" value={count(kpis.signups.total)} hint={inWindows(kpis.signups)} />
+          <Stat {...kpi("verified")} label="Verified accounts" value={count(kpis.verifiedAccounts.total)} hint={`${inWindows(kpis.verifiedAccounts)} (by sign-up date)`} />
+          <Stat {...kpi("workspaces")} label="Workspaces" value={count(kpis.workspaces.total)} hint={inWindows(kpis.workspaces)} />
+          <Stat {...kpi("claimed")} label="Claimed companies" value={count(kpis.claimedCompanies.total)} hint={inWindows(kpis.claimedCompanies)} />
           <Stat
-            testId="activated"
+            {...kpi("activated")}
             label="Activated workspaces"
             value={kpis.activatedWorkspaces ? count(kpis.activatedWorkspaces.total) : DASH}
             hint={kpis.activatedWorkspaces ? `First bid check built · ${inWindows(kpis.activatedWorkspaces)}` : "First bid check built — the bid desk is not installed here yet"}
           />
           <Stat
-            testId="paying"
+            {...kpi("paying")}
             label="Paying workspaces"
             value={count(kpis.paying.total)}
             hint={`${byPlan || "No paid plans yet"} · ${kpis.paying.pastDue} past due · ${kpis.paying.trialing} trialing`}
           />
-          <Stat testId="mrr" label="MRR" value={money(kpis.mrr.minor, kpis.mrr.currency)} hint="Active subscriptions at catalogue prices, annual ÷ 12, before tax and discounts" />
+          <Stat {...kpi("mrr")} label="MRR" value={money(kpis.mrr.minor, kpis.mrr.currency)} hint="Active subscriptions at catalogue prices, annual ÷ 12, before tax and discounts" />
           <Stat
-            testId="bid-pass"
+            {...kpi("bid-pass")}
             label="Bid Pass sales"
             value={count(kpis.bidPassSales.total)}
             hint={`${inWindows(kpis.bidPassSales)}${kpis.bidPassSales.refunded > 0 ? ` · ${count(kpis.bidPassSales.refunded)} more refunded or disputed` : ""}`}
           />
-          <Stat label="Trial → paid" value={conversion} hint={`${metrics.trials.converted} of ${metrics.trials.started} trials`} />
-          <Stat label="Churned (30 days)" value={String(metrics.subscriptions.churnedLast30Days)} hint="Subscriptions canceled" />
+          <Stat {...kpi()} label="Trial → paid" value={conversion} hint={`${metrics.trials.converted} of ${metrics.trials.started} trials`} />
+          <Stat {...kpi()} label="Churned (30 days)" value={String(metrics.subscriptions.churnedLast30Days)} hint="Subscriptions canceled" />
           <Stat
-            testId="ai-spend"
+            {...kpi("ai-spend")}
             label="AI spend today"
             value={usd(kpis.aiSpendUsd.today)}
             hint={`of ${usd(aiBudget)} a day${aiShare} · 7 days ${usd(kpis.aiSpendUsd.last7Days)} · 30 days ${usd(kpis.aiSpendUsd.last30Days)} · estimated`}
           />
           <Stat
-            testId="jobs"
+            {...kpi("jobs")}
             label="Job queue"
             value={`${count(kpis.jobs.pending)} pending`}
             hint={`${kpis.jobs.failedLast24Hours} failed in 24 hours · ${kpis.jobs.running} running${kpis.jobs.oldestPendingAt ? ` · oldest due ${ago(kpis.jobs.oldestPendingAt, now)}` : ""}`}
           />
           <Stat
-            testId="ingestion"
+            {...kpi("ingestion")}
             label="Data ingestion"
             value={ago(kpis.ingestion.lastSuccessAt, now)}
             hint={kpis.ingestion.lastError ? "Last run reported an error" : kpis.ingestion.lastSuccessAt ? `Last successful run ${when(kpis.ingestion.lastSuccessAt)}` : "No successful run recorded"}
-            link={{ href: "/admin/ingestion", label: "Open ingestion" }}
+            action={open("/admin/ingestion", "Open ingestion")}
           />
           <Stat
-            testId="outreach"
+            {...kpi("outreach")}
             label="Outreach"
             value={`${count(funnel.sent)} sent`}
             hint={`${count(funnel.visited)} opened their page · ${count(funnel.claimed)} claimed · ${funnel.bidChecks === null ? DASH : count(funnel.bidChecks)} bid checks · ${count(funnel.optedOut)} opted out`}
-            link={{ href: "/admin/outreach", label: "Open outreach" }}
+            action={open("/admin/outreach", "Open outreach")}
           />
           <Stat
-            testId="suppressions"
+            {...kpi("suppressions")}
             label="Do-not-contact list"
             value={count(funnel.suppressions)}
             hint="Addresses and domains that are never listed or exported"
-            link={{ href: "/admin/suppressions", label: "Open the list" }}
+            action={open("/admin/suppressions", "Open the list")}
           />
           <Stat
-            testId="data-requests"
+            {...kpi("data-requests")}
             label="Correction and removal requests"
             value={`${count(funnel.openDataRequests)} open`}
             hint={funnel.openDataRequests > 0 ? `Oldest received ${ago(funnel.oldestDataRequestAt, now)}. Act within five working days.` : "Nothing waiting"}
-            link={{ href: "/admin/suppressions#requests", label: "Open the requests" }}
+            action={open("/admin/suppressions#requests", "Open the requests")}
           />
-        </dl>
+        </StatRow>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -154,17 +154,17 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             {activity.webhookProblems.length === 0 ? (
-              <p className="text-sm text-muted-foreground">All webhook events were processed.</p>
+              <p className={empty}>All webhook events were processed.</p>
             ) : (
-              <ul className="divide-y text-sm">
+              <ul className={list}>
                 {activity.webhookProblems.map((event) => (
-                  <li key={event.id} className="flex items-start justify-between gap-3 py-2">
+                  <li key={event.id} className={`flex items-start justify-between gap-3 ${row}`}>
                     <div className="min-w-0">
-                      <p className="font-medium">{event.eventType}</p>
-                      <p className="break-all text-xs text-muted-foreground">
+                      <p className="font-semibold text-ink">{event.eventType}</p>
+                      <p className={`break-all ${meta}`}>
                         {event.eventId} · {event.processedAt ? event.outcome : `failed ×${event.attempts}`} · {when(event.receivedAt)}
                       </p>
-                      {event.error ? <p className="mt-1 break-words text-xs text-destructive">{event.error}</p> : null}
+                      {event.error ? <p className="mt-1 text-13 break-words text-danger">{event.error}</p> : null}
                     </div>
                     <ReplayWebhookButton eventId={event.eventId} />
                   </li>
@@ -179,27 +179,24 @@ export default async function AdminOverviewPage() {
             <CardTitle>Background jobs</CardTitle>
             <CardDescription>Queue state by status, and jobs that exhausted their retries.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="flex flex-col gap-5">
             {activity.jobCounts.length === 0 ? (
-              <p className="text-sm text-muted-foreground">The queue is empty.</p>
+              <p className={empty}>The queue is empty.</p>
             ) : (
-              <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-                {activity.jobCounts.map((row) => (
-                  <div key={row.status} className="rounded-lg border p-2">
-                    <dt className="text-xs text-muted-foreground">{row.status}</dt>
-                    <dd className="text-lg font-semibold tabular-nums">{row.count}</dd>
-                  </div>
+              <StatRow frame="rules" size="sm">
+                {activity.jobCounts.map((count) => (
+                  <Stat key={count.status} value={count.count.toLocaleString("en-GB")} label={count.status} />
                 ))}
-              </dl>
+              </StatRow>
             )}
             {activity.failedJobs.length > 0 ? (
-              <ul className="divide-y text-sm">
+              <ul className={list}>
                 {activity.failedJobs.map((job) => (
-                  <li key={job.id} className="flex items-start justify-between gap-3 py-2">
+                  <li key={job.id} className={`flex items-start justify-between gap-3 ${row}`}>
                     <div className="min-w-0">
-                      <p className="font-medium">{job.type}</p>
-                      <p className="break-words text-xs text-destructive">{job.lastError}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="font-semibold text-ink">{job.type}</p>
+                      <p className="text-13 break-words text-danger">{job.lastError}</p>
+                      <p className={meta}>
                         {job.attempts} attempts · {when(job.updatedAt)}
                       </p>
                     </div>
@@ -218,13 +215,16 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             {activity.recentErrors.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No errors recorded.</p>
+              <p className={empty}>No errors recorded.</p>
             ) : (
-              <ul className="divide-y text-sm">
+              <ul className={list}>
                 {activity.recentErrors.map((error) => (
-                  <li key={error.id} className="py-2">
-                    <p className="break-words font-medium">{error.message}</p>
-                    <p className="break-all text-xs text-muted-foreground">
+                  <li key={error.id} className={row}>
+                    {/* Three lines are enough to recognise an error; the whole message is in the title and in error_log. */}
+                    <p className="line-clamp-3 break-words text-ink" title={error.message}>
+                      {error.message}
+                    </p>
+                    <p className={`break-all ${meta}`}>
                       {error.route ?? "unknown route"} · {when(error.createdAt)}
                       {error.requestId ? ` · ${error.requestId}` : ""}
                     </p>
@@ -242,20 +242,20 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             {activity.recentEvents.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No events yet.</p>
+              <p className={empty}>No events yet.</p>
             ) : (
-              <ul className="divide-y text-sm">
+              <ul className={list}>
                 {activity.recentEvents.map((event) => (
-                  <li key={event.id} className="flex items-baseline justify-between gap-3 py-2">
+                  <li key={event.id} className={`flex items-baseline justify-between gap-3 ${row}`}>
                     <span className="min-w-0">
-                      <span className="font-medium">{event.name}</span>{" "}
+                      <span className="font-semibold text-ink">{event.name}</span>{" "}
                       {event.organizationId ? (
-                        <Link href={`/admin/organizations/${event.organizationId}`} className="text-muted-foreground hover:underline">
+                        <Link href={`/admin/organizations/${event.organizationId}`} className="link text-ink-2">
                           {event.organizationName ?? event.organizationId}
                         </Link>
                       ) : null}
                     </span>
-                    <time className="shrink-0 text-xs text-muted-foreground" dateTime={event.createdAt.toISOString()}>
+                    <time className={`shrink-0 tabular-nums ${meta}`} dateTime={event.createdAt.toISOString()}>
                       {when(event.createdAt)}
                     </time>
                   </li>

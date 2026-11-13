@@ -39,11 +39,17 @@ export type NoticeCard = {
   cpvLabel: string | null;
   cpvCodes: string[];
   regions: string[];
+  /** Delivery places as published ("UKE42", "UK"); `regions` are their top-level regions. */
+  regionCodes: string[];
   regionSource: string | null;
   publishedAt: string;
   deadlineAt: string | null;
   futureNoticeAt: string | null;
   engagementDeadlineAt: string | null;
+  /** Planned contract period as stated in the notice; either end may be missing. */
+  contractStart: string | null;
+  contractEnd: string | null;
+  lotsCount: number;
   /** The notice on Find a Tender — always shown, never gated. */
   noticeUrl: string;
 };
@@ -53,7 +59,8 @@ export const NOTICE_CARD_COLUMNS = sql`
   n.ocid, n.id as notice_id, n.release_id, n.stage, n.notice_type, n.status, n.title, n.buyer_id, b.name as buyer_name, b.slug as buyer_slug,
   n.value_amount, n.currency, n.value_placeholder, n.above_threshold, n.is_framework, n.sme_suitable, n.cpv_main, n.cpv_codes,
   (select c.label from cpv_codes c where c.code = n.cpv_main) as cpv_label,
-  n.regions, n.region_source, n.published_at, n.deadline_at, n.future_notice_at, n.engagement_deadline_at, n.notice_url`;
+  n.regions, n.region_codes, n.region_source, n.published_at, n.deadline_at, n.future_notice_at, n.engagement_deadline_at,
+  n.contract_start, n.contract_end, n.lots_count, n.notice_url`;
 
 export function toNoticeCard(row: Record<string, unknown>): NoticeCard {
   return {
@@ -77,13 +84,35 @@ export function toNoticeCard(row: Record<string, unknown>): NoticeCard {
     cpvLabel: str(row.cpv_label),
     cpvCodes: strArray(row.cpv_codes),
     regions: strArray(row.regions),
+    regionCodes: strArray(row.region_codes),
     regionSource: str(row.region_source),
     publishedAt: iso(row.published_at) ?? "",
     deadlineAt: iso(row.deadline_at),
     futureNoticeAt: iso(row.future_notice_at),
     engagementDeadlineAt: iso(row.engagement_deadline_at),
+    contractStart: iso(row.contract_start),
+    contractEnd: iso(row.contract_end),
+    lotsCount: int(row.lots_count),
     noticeUrl: String(row.notice_url),
   };
+}
+
+/**
+ * When the Find a Tender data was last brought up to date: the newest successful ingestion
+ * (cron run, backfill or seed). Null when nothing has been ingested through a recorded run.
+ * This is the date behind "updated 13 Nov 2026" in the meta line of a page.
+ */
+export async function getDataUpdatedAt(): Promise<string | null> {
+  const [row] = await queryRows<{ updated_at: unknown }>(
+    db,
+    sql`
+      select greatest(
+        (select max(last_success_at) from ingest_state),
+        (select max(finished_at) from ingest_runs where status in ('ok', 'partial'))
+      ) as updated_at
+    `,
+  );
+  return iso(row?.updated_at);
 }
 
 /** A live tender: newest tender-stage notice of its procurement, still open. Alias `n`. */
@@ -133,6 +162,8 @@ export async function getSupplierSpec(supplierId: string): Promise<RadarSpec | n
     regions: strArray(row.regions),
     valueLow: low !== null && few ? low / 3 : low,
     valueHigh: high !== null && few ? high * 4 : high,
+    trades: tradeLevels(cpvWeights),
+    chosen: [],
   };
 }
 
@@ -166,11 +197,16 @@ export async function getCpvLabels(codes: readonly string[]): Promise<Map<string
  * has no CPV at all.
  */
 export function awardTradeCondition(spec: RadarSpec): SQL | null {
-  const levels = tradeLevels(spec.cpvWeights);
+  const levels = spec.trades ?? tradeLevels(spec.cpvWeights);
+  // Trades the owner picked by hand count at the depth they picked (a deeper code by its class).
+  const chosen = spec.chosen ?? [];
+  const classes = [...new Set([...levels.classes, ...chosen.filter((stem) => stem.length >= 4).map((stem) => stem.slice(0, 4))])];
+  const groups = [...new Set([...levels.groups, ...chosen.filter((stem) => stem.length === 3)])];
+  const divisions = [...new Set([...levels.divisions, ...chosen.filter((stem) => stem.length === 2)])];
   const parts: SQL[] = [];
-  if (levels.classes.length > 0) parts.push(sql`a.cpv_classes && ${textArrayParam(levels.classes)}`);
-  if (levels.groups.length > 0) parts.push(sql`a.cpv_groups && ${textArrayParam(levels.groups)}`);
-  if (levels.divisions.length > 0) parts.push(sql`a.cpv_divisions && ${textArrayParam(levels.divisions)}`);
+  if (classes.length > 0) parts.push(sql`a.cpv_classes && ${textArrayParam(classes)}`);
+  if (groups.length > 0) parts.push(sql`a.cpv_groups && ${textArrayParam(groups)}`);
+  if (divisions.length > 0) parts.push(sql`a.cpv_divisions && ${textArrayParam(divisions)}`);
   if (parts.length === 0) return null;
   return sql`(${sql.join(parts, sql` or `)})`;
 }

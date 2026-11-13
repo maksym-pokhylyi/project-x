@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { site } from "@/config/site";
-import { DataAttribution } from "@/features/procurement/components/data-attribution";
 import { recordDigestClick } from "@/features/notifications/clicks";
-import { TenderDetailView } from "@/features/procurement/components/tender-detail";
+import { DataHeader, DataMain, SourceFooter } from "@/features/procurement/components/public-chrome";
+import { TenderView } from "@/features/procurement/components/tender-detail";
+import { ActionBand } from "@/features/procurement/components/ui/action-band";
 import { formatDate } from "@/features/procurement/domain/format";
 import { formatMoneyShort } from "@/features/procurement/domain/money";
 import { loadTenderPage } from "@/features/procurement/public-data";
 import { cleanRefCode, recordPageVisit } from "@/features/procurement/visits";
+import { getUser } from "@/server/session";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ r?: string | string[]; d?: string | string[] }> };
 
@@ -18,11 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const tender = await loadTenderPage(id);
   if (!tender) return { title: "Tender not found", robots: { index: false } };
   const title = `${tender.title.slice(0, 90)} — ${tender.buyerName ?? "public tender"}`;
-  const parts = [
-    tender.buyerName,
-    formatMoneyShort(tender.valueAmount, tender.currency),
-    tender.isLive && tender.deadlineAt ? `closes ${formatDate(tender.deadlineAt)}` : null,
-  ].filter(Boolean);
+  const parts = [tender.buyerName, formatMoneyShort(tender.valueAmount, tender.currency), tender.isLive && tender.deadlineAt ? `closes ${formatDate(tender.deadlineAt)}` : null].filter(Boolean);
   const description = `${parts.join(" · ")}. ${(tender.description ?? "").replace(/\s+/g, " ").slice(0, 160)}`.trim();
   return {
     title,
@@ -34,7 +31,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** Public tender page: a summary of one procurement with a link to the source on Find a Tender. */
+/**
+ * Public tender page (docs/design/handoff: Tender-1440 / Tender-390): one procurement, read
+ * from its notice, with the way to the official notice always in sight. A signed-in viewer
+ * is offered the same tender inside the app, where it is matched against their radar.
+ */
 export default async function TenderPage({ params, searchParams }: Props) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const tender = await loadTenderPage(id);
@@ -43,49 +44,57 @@ export default async function TenderPage({ params, searchParams }: Props) {
   if (id !== tender.ocid) permanentRedirect(`/tenders/${tender.ocid}${cleanRefCode(query.r) ? `?r=${cleanRefCode(query.r)}` : ""}`); // a link with a code keeps it, so the visit is still counted
   await recordPageVisit({ pageType: "tender", entityId: tender.ocid, refCode: cleanRefCode(query.r) });
   await recordDigestClick({ ocid: tender.ocid, notification: query.d }); // opened from a scheduled e-mail (?d=…)
+  const signedIn = Boolean(await getUser());
   const now = new Date();
-  const live = tender.stage === "tender" && tender.deadlineAt !== null && Date.parse(tender.deadlineAt) > now.getTime() && tender.isLive;
 
   return (
-    <div className="space-y-10">
-      <TenderDetailView
-        tender={tender}
-        now={now}
-        actions={
-          live ? (
-            <>
-              <Button asChild size="lg">
-                <Link href={`/app/bids/new?notice=${encodeURIComponent(tender.ocid)}`}>Start a bid</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/free-bid-brief">Get a free bid brief</Link>
-              </Button>
-            </>
-          ) : (
-            <Button asChild variant="outline" size="lg">
-              <Link href="/find">Find tenders that match your company</Link>
-            </Button>
-          )
+    <>
+      <DataHeader
+        signedIn={signedIn}
+        phone="action"
+        action={
+          <ButtonLink href="/find" className="max-md:px-3 max-md:text-sm">
+            Find your company
+          </ButtonLink>
         }
       />
-
-      <section aria-label="What Bidfolio does" className="rounded-lg border bg-card p-5 sm:p-6">
-        <h2 className="text-lg font-semibold tracking-tight">Deciding whether to bid?</h2>
-        <p className="mt-1 max-w-prose text-sm text-muted-foreground">
-          Upload the tender pack and get a brief with every pass/fail requirement quoted from the documents, the scoring model and the questions you must answer.
-          The first brief is free.
-        </p>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-          <Button asChild>
-            <Link href="/free-bid-brief">Get a free bid brief</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/find">Find your company</Link>
-          </Button>
-        </div>
-      </section>
-
-      <DataAttribution pagePath={`/tenders/${tender.ocid}`} />
-    </div>
+      <DataMain>
+        <TenderView
+          tender={tender}
+          now={now}
+          viewer={{ kind: "visitor" }}
+          after={
+            signedIn ? (
+              <ActionBand
+                className="mt-10"
+                headingLevel="h2"
+                title="See how this matches your radar"
+                actions={
+                  <ButtonLink variant="outline" href={`/app/tenders/${tender.ocid}`} className="max-md:w-full">
+                    Open it in your radar
+                  </ButtonLink>
+                }
+              >
+                Inside your radar this tender is checked against your contract wins, and you can save it.
+              </ActionBand>
+            ) : (
+              <ActionBand
+                className="mt-10"
+                headingLevel="h2"
+                title="Could you win this?"
+                actions={
+                  <ButtonLink variant="outline" href="/find" className="max-md:w-full" data-testid="find-company-cta">
+                    Find your company
+                  </ButtonLink>
+                }
+              >
+                Find your company to see how this tender matches your past work.
+              </ActionBand>
+            )
+          }
+        />
+      </DataMain>
+      <SourceFooter origin="Taken from the notice published on Find a Tender." pagePath={`/tenders/${tender.ocid}`} />
+    </>
   );
 }

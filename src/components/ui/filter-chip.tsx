@@ -2,8 +2,9 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 /*
- * Filter chips, as above the requirements list in the bid brief: a row of toggle buttons,
- * 44 px tall. The chosen one is filled ink; the others are white with a line-strong edge.
+ * Filter chips, as above the requirements list in the bid brief: a row of toggle buttons on
+ * the control scale (44 px in a toolbar; they follow the group's size like any button).
+ * The chosen one is filled ink; the others are white with a line-strong edge.
  * A count follows the label ("Gaps 2").
  *
  *   <FilterChipGroup aria-label="Filter requirements">
@@ -16,7 +17,7 @@ import { cn } from "@/lib/utils"
  */
 export function filterChipClasses(pressed: boolean) {
   return cn(
-    "inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-control border px-3.5 text-sm whitespace-nowrap tabular-nums transition-colors duration-150 ease-out disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex h-(--control-h) shrink-0 cursor-pointer items-center gap-1.5 rounded-control border px-3.5 text-sm whitespace-nowrap tabular-nums transition-colors duration-150 ease-out disabled:pointer-events-none disabled:opacity-50",
     pressed ? "border-ink bg-ink font-semibold text-white" : "border-line-strong bg-surface font-medium text-ink hover:border-ink hover:bg-paper"
   )
 }

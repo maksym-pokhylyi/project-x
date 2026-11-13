@@ -61,7 +61,7 @@ export function Canvas({ tone = "paper", children, className }: { tone?: "paper"
 
 /** Inline code. */
 export function Code({ children }: { children: ReactNode }) {
-  return <code className="rounded-chip bg-paper-deep px-1.5 py-0.5 font-mono text-[0.8125rem] whitespace-nowrap text-ink">{children}</code>;
+  return <code className="rounded-chip bg-paper-deep px-1.5 py-0.5 font-mono text-13 whitespace-nowrap text-ink">{children}</code>;
 }
 
 /** A block of code to copy. */

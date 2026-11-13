@@ -221,10 +221,9 @@ describe("sender details", () => {
     expect(sender.description).toBe("an independent sole trader registered in Ukraine");
     expect(sender.postalAddress).toContain("Ukraine");
     expect(sender.contactEmail).toBe(`hello@${site.domain}`);
-    // The representative and the ICO number are read from site.company, where a [[PLACEHOLDER]] means "not there".
-    const configured = (value: string) => (value.includes("[[") ? null : value);
-    expect(sender.ukRepresentative).toBe(configured(site.company.ukRepresentative));
-    expect(sender.icoNumber).toBe(configured(site.company.icoRegistrationNumber));
+    // The representative and the ICO number are read from site.operator, where null means "not there yet".
+    expect(sender.ukRepresentative).toBe(site.operator.ukRepresentative);
+    expect(sender.icoNumber).toBe(site.operator.icoRegistrationNumber);
     expect(ukRepresentativeAppointed(sender)).toBe(sender.ukRepresentative !== null);
   });
 

@@ -77,14 +77,14 @@ async function followOutboxLink(page: Page, to: string, template: string) {
 
 async function fillSignUp(page: Page, user: { name: string; email: string; password: string }) {
   await page.getByLabel("Name").fill(user.name);
-  await page.getByLabel("Work e-mail").fill(user.email);
+  await page.getByLabel("Work email").fill(user.email);
   await page.getByLabel("Password").fill(user.password);
   await page.getByRole("button", { name: "Create account" }).click();
 }
 
 async function signIn(page: Page, user: { email: string; password: string }) {
   await page.goto("/sign-in");
-  await page.getByLabel("E-mail").fill(user.email);
+  await page.getByLabel("Email").fill(user.email);
   await page.getByLabel("Password").fill(user.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 }
@@ -111,7 +111,11 @@ test("public pages render with security headers and a healthy backend", async ({
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["x-powered-by"]).toBeUndefined();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Terms of Service" })).toBeVisible();
+  const footer = page.getByRole("contentinfo");
+  await expect(footer.getByRole("link", { name: "Terms", exact: true })).toBeVisible();
+  // The seller identity comes from one place (src/config/site.ts) and is under every public page.
+  await expect(page.getByTestId("site-identity")).toContainText("Bidfolio is operated by Maksym Pokhylyi, an independent sole trader registered in Ukraine");
+  await expect(page.getByTestId("site-identity")).toContainText("UK representative: being appointed");
 
   for (const path of ["/legal/terms", "/legal/privacy", "/legal/refunds", "/legal/dpa", "/contact"]) {
     const legal = await page.goto(path);
@@ -150,7 +154,7 @@ test("dynamic pages get a per-request nonce policy, hydrate under it, and do not
   expect(scripts.every(Boolean)).toBe(true);
   // …the page is interactive (client-side validation runs)…
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.getByText("Enter a valid e-mail address.")).toBeVisible();
+  await expect(page.getByText("Enter a valid email address.")).toBeVisible();
   expect(cspViolations).toEqual([]);
 
   // …and markup injected into the page cannot execute.
@@ -174,31 +178,142 @@ test("dynamic pages get a per-request nonce policy, hydrate under it, and do not
 
 test("pricing page renders the plan catalogue with a monthly/annual toggle", async ({ page }) => {
   await page.goto("/pricing");
-  await expect(page.getByRole("heading", { level: 1, name: "Pricing" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Free to look. Pay when you bid." })).toBeVisible();
   for (const plan of ["free", "starter", "pro", "business"]) await expect(page.getByTestId(`plan-${plan}`)).toBeVisible();
 
   // Radar Pro (plan key "starter"): £29 a month, £290 a year (two months free).
   await expect(page.getByTestId("plan-starter")).toContainText("Radar Pro");
+  await expect(page.getByTestId("interval-month")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("price-starter")).toHaveText("£29");
-  await expect(page.getByTestId("plan-starter")).toContainText("Billed monthly");
+  await expect(page.getByTestId("plan-starter")).toContainText("or £290 a year");
+  // The comparison table is one table and its heads follow the toggle.
+  await expect(page.getByTestId("plan-comparison")).toHaveCount(1);
+  await expect(page.getByTestId("compare-price-starter")).toContainText("£29");
   await page.getByTestId("interval-year").click();
-  await expect(page.getByTestId("interval-year")).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByTestId("interval-year")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByTestId("interval-month")).toHaveAttribute("aria-pressed", "false");
   await expect(page.getByTestId("price-starter")).toHaveText("£290");
-  await expect(page.getByTestId("plan-starter")).toContainText("Two months free. Works out at £24.17 a month.");
+  await expect(page.getByTestId("plan-starter")).toContainText("two months free");
+  await expect(page.getByTestId("compare-price-starter")).toContainText("£290");
   await expect(page.getByTestId("price-free")).toHaveText("£0");
+  // Annual plans are chosen as annual.
+  await expect(page.getByTestId("plan-pro").getByRole("link")).toHaveAttribute("href", `/sign-up?redirect=${encodeURIComponent("/app/settings/billing?plan=pro&interval=year")}`);
   await page.getByTestId("interval-month").click();
   await expect(page.getByTestId("price-pro")).toHaveText("£149");
+  // The trial includes one full bid, and the card says so.
+  await expect(page.getByTestId("plan-pro")).toContainText("14-day trial, one full bid included");
   // The one-off Bid Pass sits next to the plans.
   await expect(page.getByTestId("price-bid-pass")).toHaveText("£99");
+  await expect(page.getByText("Prices exclude VAT. VAT is added at checkout where it applies.").first()).toBeVisible();
 
-  // Paid plans lead to sign-up with the plan carried along.
-  await expect(page.getByTestId("plan-pro").getByRole("link")).toHaveAttribute("href", "/sign-up?plan=pro&interval=month");
+  // Signed out: Free goes to the company search; a paid plan or the Bid Pass goes to sign-up
+  // and from there to the one hand-off into Billing.
+  await expect(page.getByTestId("plan-free").getByRole("link")).toHaveAttribute("href", "/find");
+  await expect(page.getByTestId("plan-pro").getByRole("link")).toHaveAttribute("href", `/sign-up?redirect=${encodeURIComponent("/app/settings/billing?plan=pro&interval=month")}`);
+  await expect(page.getByTestId("bid-pass").getByRole("link")).toHaveAttribute("href", `/sign-up?redirect=${encodeURIComponent("/app/settings/billing?buy=bid_pass")}`);
+
+  // Sign-up reads the hand-off it will continue to and says what was chosen.
+  await page.getByTestId("plan-pro").getByRole("link").click();
+  await expect(page).toHaveURL(/\/sign-up\?redirect=/);
+  await expect(page.getByRole("heading", { level: 2, name: /^Bid Desk: £149 a month/ })).toBeVisible();
+  await expect(page.getByText("You confirm Bid Desk and pay on the next step.")).toBeVisible();
+});
+
+/** The scroll position once the page has stopped moving (a glide takes up to a second). */
+async function settledScrollY(page: Page): Promise<number> {
+  await page.waitForTimeout(350);
+  let last = -1;
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const y = await page.evaluate(() => Math.round(window.scrollY));
+    if (y === last) return y;
+    last = y;
+    await page.waitForTimeout(150);
+  }
+  return last;
+}
+
+/** How far under the sticky header a section sits, and whether its heading is on screen. */
+const sectionPlace = (page: Page, id: string) =>
+  page.evaluate((id) => {
+    const bar = document.querySelector("[data-slot='site-header']")!.getBoundingClientRect().bottom;
+    const heading = document.getElementById(`${id}-title`)!.getBoundingClientRect();
+    return { gap: Math.round(document.getElementById(id)!.getBoundingClientRect().top - bar), headingInView: heading.top >= bar && heading.bottom <= window.innerHeight };
+  }, id);
+
+test("another page always opens at its top; a link to a section stops under the header; Back returns", async ({ page }) => {
+  // Owner report: "Pricing" from the top of the landing page opened /pricing at its comparison
+  // table. Smooth scrolling is on in this browser, as for most visitors: the fault needs it.
+  const header = page.locator("[data-slot='site-header']");
+  for (const start of [null, "questions"]) {
+    for (const [name, path] of [["Pricing", "/pricing"], ["Sign in", "/sign-in"], ["Find your company", "/find"]] as const) {
+      await page.goto("/");
+      if (start) {
+        await page.evaluate((id) => document.getElementById(id)!.scrollIntoView({ behavior: "instant" }), start);
+        expect(await settledScrollY(page)).toBeGreaterThan(500);
+      }
+      await header.getByRole("link", { name, exact: true }).click();
+      await page.waitForURL((url) => url.pathname === path);
+      expect(await settledScrollY(page), `${path} from the landing page ${start ? `at #${start}` : "at its top"}`).toBe(0);
+    }
+  }
+  // The logo, from far down /pricing.
+  await page.goto("/pricing");
+  await page.evaluate(() => document.getElementById("compare")!.scrollIntoView({ behavior: "instant" }));
+  const left = await settledScrollY(page);
+  expect(left).toBeGreaterThan(300);
+  await header.getByRole("link", { name: "Bidfolio", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/");
+  expect(await settledScrollY(page), "the landing page from the logo").toBe(0);
+
+  // A section of another page: just under the header, heading on screen. Back returns to the table.
+  await page.goBack();
+  await page.waitForURL((url) => url.pathname === "/pricing");
+  expect(Math.abs((await settledScrollY(page)) - left), "Back to /pricing").toBeLessThanOrEqual(2);
+  await header.getByRole("link", { name: "How it works", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/" && url.hash === "#how");
+  await settledScrollY(page);
+  let place = await sectionPlace(page, "how");
+  expect(place.gap).toBeGreaterThanOrEqual(0);
+  expect(place.gap).toBeLessThanOrEqual(24);
+  expect(place.headingInView).toBe(true);
+  await page.goBack();
+  await page.waitForURL((url) => url.pathname === "/pricing");
+  expect(Math.abs((await settledScrollY(page)) - left), "Back from /#how").toBeLessThanOrEqual(2);
+  await page.goForward();
+  await page.waitForURL((url) => url.hash === "#how");
+  // From a section, the logo means the very top of the same page.
+  await settledScrollY(page);
+  await header.getByRole("link", { name: "Bidfolio", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/" && url.hash === "");
+  expect(await settledScrollY(page), "the logo on the landing page, from #how").toBe(0);
+
+  // Phones: the links are in the menu sheet, and focus going back to the menu button must not
+  // cut the move short (it did: the page slid back to where the menu was opened).
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/pricing");
+  await header.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("dialog").getByRole("link", { name: "Questions", exact: true }).click();
+  await settledScrollY(page);
+  place = await sectionPlace(page, "questions");
+  expect(place.gap).toBeGreaterThanOrEqual(0);
+  expect(place.gap).toBeLessThanOrEqual(24);
+  await header.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("dialog").getByRole("link", { name: "How it works", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/" && url.hash === "#how");
+  await settledScrollY(page);
+  place = await sectionPlace(page, "how");
+  expect(place.gap).toBeGreaterThanOrEqual(0);
+  expect(place.gap).toBeLessThanOrEqual(24);
+  // Focus on a control of the sticky header leaves the page where it is.
+  const held = await settledScrollY(page);
+  await page.evaluate(() => (document.querySelector("[data-slot='site-header'] a") as HTMLElement).focus());
+  expect(await settledScrollY(page), "focus on the logo").toBe(held);
 });
 
 test("signed-out visitors are redirected to sign-in from /app and /admin", async ({ page }) => {
   await page.goto("/app");
   await expect(page).toHaveURL(/\/sign-in\?redirect=%2Fapp$/);
-  await expect(page.getByRole("heading", { name: /Sign in to/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Sign in" })).toBeVisible();
   await page.goto("/app/settings/billing");
   await expect(page).toHaveURL(/\/sign-in\?redirect=%2Fapp%2Fsettings%2Fbilling$/);
   await page.goto("/admin");
@@ -210,14 +325,14 @@ test("signed-out visitors are redirected to sign-in from /app and /admin", async
   await expect(page).toHaveURL(/\/sign-in/);
 });
 
-test("sign up, verify e-mail through the dev outbox, land in an auto-created workspace", async () => {
+test("sign up, verify email through the dev outbox, land in an auto-created workspace", async () => {
   const page = ownerPage;
   await page.goto("/sign-up");
 
   // Client-side validation
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.getByText("Enter your name.")).toBeVisible();
-  await expect(page.getByText("Enter a valid e-mail address.")).toBeVisible();
+  await expect(page.getByText("Enter a valid email address.")).toBeVisible();
 
   await fillSignUp(page, owner);
   await expect(page).toHaveURL(/\/verify-email/);
@@ -235,6 +350,10 @@ test("sign up, verify e-mail through the dev outbox, land in an auto-created wor
   await expect(page.getByTestId("radar-onboarding")).toBeVisible();
   await expect(page.getByTestId("current-workspace-name").first()).toHaveText("Olivia's workspace");
   await expectPlanBadge(page, "Free");
+  // On Free the bar says so and offers the one place where plans are compared.
+  await expect(page.getByTestId("plan-chip").first()).toHaveText("Free plan");
+  await expect(page.getByRole("link", { name: "See plans" }).first()).toHaveAttribute("href", "/pricing");
+  await expect(page.getByTestId("trial-strip")).toHaveCount(0);
   // A field and the button beside it always share one height (design-system rule).
   const searchRow = page.getByTestId("radar-onboarding").getByRole("search");
   const fieldHeight = (await searchRow.getByRole("searchbox").boundingBox())!.height;
@@ -285,9 +404,9 @@ test("the Free plan has a single seat; Radar Pro has two", async () => {
   // Design-system rule: in a form row the controls line up exactly — field, select and button share
   // one top and one bottom edge (no margin offsets), at desktop width.
   const inviteRow = page.getByTestId("invite-form").locator('[data-slot="form-row"]');
+  // boundingBox() does not wait: make sure the row is on the page before measuring it.
   await expect(inviteRow.getByRole("button")).toBeVisible();
-  await expect(inviteRow.getByLabel("E-mail address")).toBeVisible();
-  const edges = await Promise.all([inviteRow.getByLabel("E-mail address"), inviteRow.locator("#invite-role"), inviteRow.getByRole("button")].map(async (control) => (await control.boundingBox())!));
+  const edges = await Promise.all([inviteRow.getByLabel("Email address"), inviteRow.locator("#invite-role"), inviteRow.getByRole("button")].map(async (control) => (await control.boundingBox())!));
   for (const box of edges.slice(1)) {
     expect(Math.abs(box.y - edges[0]!.y), "controls in a form row share a top edge").toBeLessThanOrEqual(0.5);
     expect(Math.abs(box.y + box.height - (edges[0]!.y + edges[0]!.height)), "controls in a form row share a bottom edge").toBeLessThanOrEqual(0.5);
@@ -299,19 +418,21 @@ test("the Free plan has a single seat; Radar Pro has two", async () => {
   await page.reload();
   await expectPlanBadge(page, "Radar Pro");
   await expect(page.getByTestId("seat-usage")).toContainText("1 of 2 seats in use on the Radar Pro plan");
+  // A paid workspace no longer carries the Free chip.
+  await expect(page.getByTestId("plan-chip")).toHaveCount(0);
 });
 
-test("invite a member by e-mail", async () => {
+test("invite a member by email", async () => {
   const page = ownerPage;
   await page.goto("/app/settings/members");
   await expect(page.getByTestId("seat-usage")).toContainText("1 of 2 seats in use");
   await expect(page.getByTestId("member-row")).toHaveCount(1);
 
-  await page.getByLabel("E-mail address").fill("not-an-email");
+  await page.getByLabel("Email address").fill("not-an-email");
   await page.getByRole("button", { name: "Send invitation" }).click();
-  await expect(page.getByText("Enter a valid e-mail address.")).toBeVisible();
+  await expect(page.getByText("Enter a valid email address.")).toBeVisible();
 
-  await page.getByLabel("E-mail address").fill(invitee.email);
+  await page.getByLabel("Email address").fill(invitee.email);
   await page.getByRole("button", { name: "Send invitation" }).click();
   await expect(page.getByText(`Invitation sent to ${invitee.email}.`)).toBeVisible();
   await expect(page.getByTestId("invitations-list")).toContainText(invitee.email);
@@ -329,7 +450,7 @@ test("the invitee accepts from a second browser via the outbox link", async () =
 
   await page.getByRole("link", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/sign-up\?/);
-  await expect(page.getByLabel("Work e-mail")).toHaveValue(invitee.email);
+  await expect(page.getByLabel("Work email")).toHaveValue(invitee.email);
   await fillSignUp(page, invitee);
   await expect(page).toHaveURL(/\/verify-email/);
 
@@ -381,6 +502,12 @@ test("a member cannot reach billing or other owner/admin-only actions", async ()
   // Members can see usage.
   await page.goto("/app/usage");
   await expect(page.getByTestId("usage-panel")).toContainText("Seats");
+
+  // Pricing knows who is looking: the workspace's plan is marked, and a member reads who can change it.
+  await page.goto("/pricing");
+  await expect(page.getByTestId("plan-starter").getByRole("button", { name: "Current plan" })).toBeDisabled();
+  await expect(page.getByTestId("plan-pro").getByTestId("plan-owner-only")).toHaveText("A workspace owner can change the plan.");
+  await expect(page.getByTestId("plan-pro").getByRole("link")).toHaveCount(0);
 });
 
 test("the owner sees the new member and the billing page without Paddle configured", async () => {
@@ -392,11 +519,44 @@ test("the owner sees the new member and the billing page without Paddle configur
 
   const billing = await page.goto("/app/settings/billing");
   expect(billing?.status()).toBe(200);
-  await expect(page.getByTestId("current-plan")).toContainText("Radar Pro plan");
+  await expect(page.getByRole("heading", { level: 1, name: "Billing" })).toBeVisible();
+  await expect(page.getByTestId("current-plan-name")).toHaveText("Radar Pro");
+  await expect(page.getByTestId("current-plan")).toContainText("£29");
   await expect(page.getByTestId("usage-panel")).toContainText("2 of 2");
-  // No Paddle env in e2e: checkout is clearly disabled instead of crashing.
-  await expect(page.getByTestId("billing-not-configured")).toHaveCount(3);
-  await expect(page.getByTestId("billing-not-configured").first()).toContainText("Billing not configured");
+  // There is one place to compare and pick plans: Billing has no plan grid, it links to Pricing.
+  for (const plan of ["free", "starter", "pro", "business"]) await expect(page.getByTestId(`plan-${plan}`)).toHaveCount(0);
+  await expect(page.getByTestId("current-plan").getByRole("link", { name: "Change plan" })).toHaveAttribute("href", "/pricing");
+  // Billing is a page of its own, not a Settings tab.
+  await expect(page.getByRole("navigation", { name: "Settings" })).toHaveCount(0);
+  // Nothing is invented where the data is not connected: the cards say where things are.
+  await expect(page.getByTestId("receipts-empty")).toBeVisible();
+  await expect(page.getByTestId("billing-confirm")).toHaveCount(0);
+
+  // Pricing, signed in as the owner: the current plan is marked; the others lead to the hand-off.
+  await page.goto("/pricing");
+  await expect(page.getByTestId("plan-starter").getByRole("button", { name: "Current plan" })).toBeDisabled();
+  const upgrade = page.getByTestId("plan-pro").getByRole("link", { name: "Change to Bid Desk" });
+  await expect(upgrade).toHaveAttribute("href", "/app/settings/billing?plan=pro&interval=month");
+  await expect(page.getByTestId("bid-pass").getByRole("link")).toHaveAttribute("href", "/app/settings/billing?buy=bid_pass");
+
+  // The hand-off opens the confirm panel on Billing. No Paddle env in e2e: it says so plainly
+  // instead of offering a button that cannot work.
+  await upgrade.click();
+  await expect(page).toHaveURL(/\/app\/settings\/billing\?plan=pro&interval=month$/);
+  const confirm = page.getByTestId("billing-confirm");
+  await expect(confirm).toBeVisible();
+  await expect(confirm).toContainText("Bid Desk");
+  await expect(confirm.getByTestId("billing-confirm-price")).toContainText("£149");
+  await expect(confirm.getByTestId("billing-not-configured")).toContainText("Payments are not open yet.");
+  await expect(confirm.getByRole("button", { name: /Continue to payment|Confirm change/ })).toHaveCount(0);
+  // Closing the panel returns to the plain Billing page.
+  await page.keyboard.press("Escape");
+  await expect(page).toHaveURL(/\/app\/settings\/billing$/);
+  await expect(confirm).toHaveCount(0);
+
+  await page.goto("/app/settings/billing?buy=bid_pass");
+  await expect(page.getByTestId("billing-confirm")).toContainText("It does not expire while your account is open.");
+  await page.keyboard.press("Escape");
 
   const status = await page.request.get("/api/billing/status");
   expect(await status.json()).toMatchObject({ planKey: "starter", isPaid: true });
@@ -411,10 +571,10 @@ test("sign out and back in: workspace, members and settings persisted", async ()
   await page.goto("/app");
   await expect(page).toHaveURL(/\/sign-in\?redirect=%2Fapp$/);
 
-  await page.getByLabel("E-mail").fill(owner.email);
+  await page.getByLabel("Email").fill(owner.email);
   await page.getByLabel("Password").fill("wrong-password");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.getByText("Wrong e-mail or password.")).toBeVisible();
+  await expect(page.getByText("Wrong email or password.")).toBeVisible();
 
   await page.getByLabel("Password").fill(owner.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
@@ -440,7 +600,7 @@ test("password reset through the outbox link", async ({ browser }) => {
   const context = await newContext(browser);
   const page = await context.newPage();
   await page.goto("/forgot-password");
-  await page.getByLabel("E-mail").fill(invitee.email);
+  await page.getByLabel("Email").fill(invitee.email);
   await page.getByRole("button", { name: "Send reset link" }).click();
   await expect(page.getByText("we have sent a link to reset the password")).toBeVisible();
 
@@ -456,7 +616,7 @@ test("password reset through the outbox link", async ({ browser }) => {
   await expect(memberPage).toHaveURL(/\/sign-in/);
 
   await signIn(page, { email: invitee.email, password: invitee.password });
-  await expect(page.getByText("Wrong e-mail or password.")).toBeVisible();
+  await expect(page.getByText("Wrong email or password.")).toBeVisible();
   await signIn(page, { email: invitee.email, password: newPassword });
   await expect(page).toHaveURL(/\/app$/);
   await context.close();
@@ -509,22 +669,22 @@ test("a verification link opened in another browser asks for a password instead 
   const page = await victimContext.newPage();
   await followOutboxLink(page, victim.email, "verify-email");
   await expect(page).toHaveURL(/\/verify-email\/confirm\?token=/);
-  await expect(page.getByRole("heading", { name: "Confirm your e-mail" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Confirm your email" })).toBeVisible();
   // Nothing has been activated yet: the attacker's password does not get them in.
   await signIn(attacker, { email: victim.email, password: "attacker-knows-this-1" });
   await expect(attacker).toHaveURL(/\/verify-email/);
 
   await page.getByLabel("Password").fill("short");
-  await page.getByRole("button", { name: "Confirm e-mail and set password" }).click();
+  await page.getByRole("button", { name: "Confirm email and set password" }).click();
   await expect(page.getByText("Use at least 8 characters.")).toBeVisible();
   await page.getByLabel("Password").fill("chosen-by-the-owner-2");
-  await page.getByRole("button", { name: "Confirm e-mail and set password" }).click();
+  await page.getByRole("button", { name: "Confirm email and set password" }).click();
   await expect(page).toHaveURL(/\/app$/);
   await expect(page.getByRole("heading", { level: 1, name: "Radar" })).toBeVisible();
 
   // The password chosen before the mailbox was proven is dead.
   await signIn(attacker, { email: victim.email, password: "attacker-knows-this-1" });
-  await expect(attacker.getByText("Wrong e-mail or password.")).toBeVisible();
+  await expect(attacker.getByText("Wrong email or password.")).toBeVisible();
   await attackerContext.close();
   await victimContext.close();
 });
@@ -574,7 +734,7 @@ test("owner can export the workspace, delete it, and delete the account", async 
   await page.goto("/app");
   await expect(page).toHaveURL(/\/sign-in/);
   await signIn(page, user);
-  await expect(page.getByText("Wrong e-mail or password.")).toBeVisible();
+  await expect(page.getByText("Wrong email or password.")).toBeVisible();
   await context.close();
 });
 

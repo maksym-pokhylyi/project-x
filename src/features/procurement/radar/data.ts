@@ -1,14 +1,14 @@
 import "server-only";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { orgSupplierLinks, radarItems, radarProfiles, supplierContacts, suppliers } from "@/db/schema";
+import { events, libraryDocs, orgSupplierLinks, radarItems, radarProfiles, supplierContacts, suppliers } from "@/db/schema";
 import { ConflictError, NotFoundError, QuotaExceededError, ValidationError } from "@/lib/errors";
 import type { OrgContext } from "@/server/session";
 import { canAddRadarSource, radarAccess } from "../access";
-import { isCpvCode } from "../domain/cpv";
+import { cpvPrefixes, cpvStem, isCpvCode } from "../domain/cpv";
 import { isFreemailDomain } from "../domain/normalize";
-import type { RadarSpec } from "../domain/profile";
-import { UK_REGIONS } from "../domain/regions";
+import { tradeLevels, type RadarSpec } from "../domain/profile";
+import { NATIONWIDE, UK_REGIONS } from "../domain/regions";
 import { getNoticeCardsByOcid } from "../queries/notices";
 import { getSupplierSpec, specForManualProfile, type NoticeCard } from "../queries/shared";
 
@@ -19,14 +19,50 @@ import { getSupplierSpec, specForManualProfile, type NoticeCard } from "../queri
  */
 
 export type RadarSource =
-  | { kind: "supplier"; key: string; supplierId: string; name: string; slug: string; awardsCount: number; linkId: string }
-  | { kind: "manual"; key: string; profileId: string; name: string; cpvCodes: string[]; keywords: string[]; regions: string[]; valueMin: number | null; valueMax: number | null };
+  | {
+      kind: "supplier";
+      key: string;
+      supplierId: string;
+      name: string;
+      slug: string;
+      awardsCount: number;
+      linkId: string;
+      /** The workspace's own regions for this radar; null = the regions of the company's awards. */
+      regionsOverride: string[] | null;
+      /** Trades the workspace added to the ones the company's awards show. */
+      extraCpvCodes: string[];
+      /** Trades the company's awards show that the workspace switched off. */
+      excludedCpvCodes: string[];
+      firstRunPending: boolean;
+    }
+  | {
+      kind: "manual";
+      key: string;
+      profileId: string;
+      name: string;
+      cpvCodes: string[];
+      keywords: string[];
+      regions: string[];
+      valueMin: number | null;
+      valueMax: number | null;
+      firstRunPending: boolean;
+    };
 
 /** The workspace's radar sources: claimed companies first (oldest first), then manual profiles. */
 export async function listRadarSources(ctx: OrgContext): Promise<RadarSource[]> {
   const [links, profiles] = await Promise.all([
     db
-      .select({ linkId: orgSupplierLinks.id, supplierId: suppliers.id, name: suppliers.name, slug: suppliers.slug, awardsCount: suppliers.awardsCount })
+      .select({
+        linkId: orgSupplierLinks.id,
+        supplierId: suppliers.id,
+        name: suppliers.name,
+        slug: suppliers.slug,
+        awardsCount: suppliers.awardsCount,
+        regions: orgSupplierLinks.regions,
+        extraCpvCodes: orgSupplierLinks.extraCpvCodes,
+        excludedCpvCodes: orgSupplierLinks.excludedCpvCodes,
+        firstRunPending: orgSupplierLinks.firstRunPending,
+      })
       .from(orgSupplierLinks)
       .innerJoin(suppliers, eq(suppliers.id, orgSupplierLinks.supplierId))
       .where(eq(orgSupplierLinks.organizationId, ctx.organization.id))
@@ -34,7 +70,21 @@ export async function listRadarSources(ctx: OrgContext): Promise<RadarSource[]> 
     db.select().from(radarProfiles).where(eq(radarProfiles.organizationId, ctx.organization.id)).orderBy(asc(radarProfiles.createdAt)),
   ]);
   return [
-    ...links.map((link): RadarSource => ({ kind: "supplier", key: `s:${link.supplierId}`, supplierId: link.supplierId, name: link.name, slug: link.slug, awardsCount: link.awardsCount, linkId: link.linkId })),
+    ...links.map(
+      (link): RadarSource => ({
+        kind: "supplier",
+        key: `s:${link.supplierId}`,
+        supplierId: link.supplierId,
+        name: link.name,
+        slug: link.slug,
+        awardsCount: link.awardsCount,
+        linkId: link.linkId,
+        regionsOverride: link.regions,
+        extraCpvCodes: link.extraCpvCodes,
+        excludedCpvCodes: link.excludedCpvCodes,
+        firstRunPending: link.firstRunPending,
+      }),
+    ),
     ...profiles.map(
       (profile): RadarSource => ({
         kind: "manual",
@@ -46,14 +96,64 @@ export async function listRadarSources(ctx: OrgContext): Promise<RadarSource[]> 
         regions: profile.regions,
         valueMin: profile.valueMin,
         valueMax: profile.valueMax,
+        firstRunPending: profile.firstRunPending,
       }),
     ),
   ];
 }
 
+export type SourceOverrides = { regions: string[] | null; extraCpvCodes: readonly string[]; excludedCpvCodes?: readonly string[] };
+
+/**
+ * A company's spec with the workspace's own adjustments applied (PURE):
+ *  - chosen regions replace the ones its awards show;
+ *  - trades it switched off stop counting — the trade itself, every code beneath it, and
+ *    as much of the broader codes above it as rested on it;
+ *  - trades it added count fully at each of their depths and are its trade at exactly the
+ *    depth chosen (`chosen`), as in a manually described radar.
+ * With no adjustments the spec comes back unchanged, so a radar nobody has edited matches
+ * exactly as the company's public page does.
+ */
+export function applySourceOverrides(spec: RadarSpec, overrides: SourceOverrides): RadarSpec {
+  const extra = overrides.extraCpvCodes.filter(isCpvCode);
+  const muted = [...new Set((overrides.excludedCpvCodes ?? []).filter(isCpvCode).map(cpvStem))];
+  if (overrides.regions === null && extra.length === 0 && muted.length === 0) return spec;
+
+  const isMuted = (prefix: string) => muted.some((stem) => prefix.startsWith(stem));
+  const cpvWeights: Record<string, number> = {};
+  for (const [prefix, weight] of Object.entries(spec.cpvWeights)) if (!isMuted(prefix)) cpvWeights[prefix] = weight;
+  // A broader code keeps only the weight of what is left beneath it; with nothing left it goes too.
+  for (const stem of muted) {
+    for (let length = stem.length - 1; length >= 2; length -= 1) {
+      const parent = stem.slice(0, length);
+      if (!(parent in cpvWeights)) continue;
+      const beneath = Object.entries(cpvWeights).filter(([prefix]) => prefix.length > length && prefix.startsWith(parent));
+      if (beneath.length === 0) delete cpvWeights[parent];
+      else cpvWeights[parent] = Math.min(cpvWeights[parent]!, Math.max(...beneath.map(([, weight]) => weight)));
+    }
+  }
+  const own = spec.trades ?? tradeLevels(spec.cpvWeights);
+  const trades = { classes: own.classes.filter((level) => !isMuted(level)), groups: own.groups.filter((level) => !isMuted(level)), divisions: own.divisions.filter((level) => !isMuted(level)) };
+
+  for (const code of extra) for (const prefix of cpvPrefixes(code)) cpvWeights[prefix] = 1;
+  const prefixes = Object.keys(cpvWeights);
+  return {
+    ...spec,
+    cpvWeights,
+    cpvDivisions: prefixes.filter((prefix) => prefix.length === 2),
+    cpvGroups: [...new Set([...spec.cpvGroups.filter((group) => group in cpvWeights), ...extra.flatMap((code) => cpvPrefixes(code)).filter((prefix) => prefix.length === 3)])],
+    regions: overrides.regions ?? spec.regions,
+    trades,
+    chosen: [...new Set([...(spec.chosen ?? []), ...extra.map(cpvStem)])],
+  };
+}
+
 /** The spec to match against for one of the workspace's own sources. */
 export async function specForSource(source: RadarSource): Promise<RadarSpec | null> {
-  if (source.kind === "supplier") return getSupplierSpec(source.supplierId);
+  if (source.kind === "supplier") {
+    const spec = await getSupplierSpec(source.supplierId);
+    return spec ? applySourceOverrides(spec, { regions: source.regionsOverride, extraCpvCodes: source.extraCpvCodes, excludedCpvCodes: source.excludedCpvCodes }) : null;
+  }
   return specForManualProfile({ id: source.profileId, name: source.name, cpvCodes: source.cpvCodes, keywords: source.keywords, regions: source.regions, valueMin: source.valueMin, valueMax: source.valueMax });
 }
 
@@ -101,7 +201,7 @@ export async function linkSupplier(ctx: OrgContext, supplierId: string): Promise
   }
   const inserted = await db
     .insert(orgSupplierLinks)
-    .values({ organizationId: ctx.organization.id, supplierId: targetId, createdBy: ctx.user.id, method })
+    .values({ organizationId: ctx.organization.id, supplierId: targetId, createdBy: ctx.user.id, method, firstRunPending: true })
     .onConflictDoNothing()
     .returning({ id: orgSupplierLinks.id });
   return { created: inserted.length > 0, method };
@@ -109,6 +209,38 @@ export async function linkSupplier(ctx: OrgContext, supplierId: string): Promise
 
 export async function unlinkSupplier(ctx: OrgContext, supplierId: string): Promise<void> {
   await db.delete(orgSupplierLinks).where(and(eq(orgSupplierLinks.organizationId, ctx.organization.id), eq(orgSupplierLinks.supplierId, supplierId)));
+}
+
+export type SupplierRadarInput = {
+  /** Chosen top-level regions; null keeps following the company's awards, an empty list means anywhere in the UK. */
+  regions: string[] | null;
+  /** Trades added to the ones the company's awards show. */
+  extraCpvCodes: string[];
+  /** Trades its awards show that the workspace switched off. */
+  excludedCpvCodes: string[];
+};
+
+/**
+ * Stores a workspace's own regions and trades for a company it has claimed. The company's
+ * public page and every other workspace's radar are untouched.
+ */
+export async function updateSupplierRadar(ctx: OrgContext, supplierId: string, input: SupplierRadarInput): Promise<void> {
+  const regions = input.regions === null ? null : [...new Set(input.regions.filter((region) => region in UK_REGIONS))];
+  const extraCpvCodes = [...new Set(input.extraCpvCodes.filter(isCpvCode))].slice(0, 40);
+  const excludedCpvCodes = [...new Set(input.excludedCpvCodes.filter(isCpvCode))].slice(0, 40);
+  const updated = await db
+    .update(orgSupplierLinks)
+    .set({ regions, extraCpvCodes, excludedCpvCodes })
+    .where(and(eq(orgSupplierLinks.organizationId, ctx.organization.id), eq(orgSupplierLinks.supplierId, supplierId)))
+    .returning({ id: orgSupplierLinks.id });
+  if (updated.length === 0) throw new NotFoundError("That company is not on this workspace's radar.");
+}
+
+/** True when two region selections are the same set. "UK" (works nationwide) is not a tick box, so it is ignored. */
+export function sameRegions(a: readonly string[], b: readonly string[]): boolean {
+  const left = new Set(a.filter((region) => region !== NATIONWIDE));
+  const right = new Set(b.filter((region) => region !== NATIONWIDE));
+  return left.size === right.size && [...left].every((region) => right.has(region));
 }
 
 export type RadarProfileInput = { name: string; cpvCodes: string[]; keywords: string[]; regions: string[]; valueMin: number | null; valueMax: number | null };
@@ -135,7 +267,7 @@ export async function createRadarProfile(ctx: OrgContext, input: RadarProfileInp
   if (!canAddRadarSource(access, sources.length)) throw new QuotaExceededError("radar profiles", access.maxProfiles ?? 0, sources.length);
   const [row] = await db
     .insert(radarProfiles)
-    .values({ ...data, organizationId: ctx.organization.id, createdBy: ctx.user.id })
+    .values({ ...data, organizationId: ctx.organization.id, createdBy: ctx.user.id, firstRunPending: true })
     .returning({ id: radarProfiles.id });
   if (!row) throw new ConflictError("Could not save the radar profile.");
   return row.id;
@@ -161,6 +293,53 @@ export async function getRadarProfile(ctx: OrgContext, profileId: string) {
     .from(radarProfiles)
     .where(and(eq(radarProfiles.id, profileId), eq(radarProfiles.organizationId, ctx.organization.id)));
   return row ?? null;
+}
+
+// --- first run -------------------------------------------------------------------------------
+
+/**
+ * The three things the first-run guide asks for, and how the workspace is seen to have done
+ * each one:
+ *   1 profile     it saved its trades and regions       — our own event
+ *   2 documents   it has a document in its library      — a row of its own in library_docs
+ *   3 check       it started a bid check                — the bid desk's event (SPEC §7)
+ * The guide ends when all three are done, or when it is hidden.
+ */
+export const FIRST_RUN_STEP_EVENTS: Record<"profile" | "check", readonly string[]> = {
+  profile: ["radar_profile_saved"],
+  check: ["bid_created"],
+};
+
+export type FirstRunSteps = { profile: boolean; documents: boolean; check: boolean };
+
+/** Which first-run steps the workspace has completed. */
+export async function getFirstRunSteps(ctx: OrgContext): Promise<FirstRunSteps> {
+  const names = [...new Set(Object.values(FIRST_RUN_STEP_EVENTS).flat())];
+  const [rows, documents] = await Promise.all([
+    db
+      .selectDistinct({ name: events.name })
+      .from(events)
+      .where(and(eq(events.organizationId, ctx.organization.id), inArray(events.name, names))),
+    db.select({ id: libraryDocs.id }).from(libraryDocs).where(eq(libraryDocs.organizationId, ctx.organization.id)).limit(1),
+  ]);
+  const seen = new Set(rows.map((row) => row.name));
+  const done = (step: keyof typeof FIRST_RUN_STEP_EVENTS) => FIRST_RUN_STEP_EVENTS[step].some((name) => seen.has(name));
+  return { profile: done("profile"), documents: documents.length > 0, check: done("check") };
+}
+
+/** Stops showing the first-run guide for one of the workspace's radar sources ("s:<supplier id>" or "r:<profile id>"). */
+export async function dismissFirstRun(ctx: OrgContext, key: string): Promise<void> {
+  if (key.startsWith("s:")) {
+    await db
+      .update(orgSupplierLinks)
+      .set({ firstRunPending: false })
+      .where(and(eq(orgSupplierLinks.organizationId, ctx.organization.id), eq(orgSupplierLinks.supplierId, key.slice(2))));
+  } else if (key.startsWith("r:") && /^[0-9a-f-]{36}$/i.test(key.slice(2))) {
+    await db
+      .update(radarProfiles)
+      .set({ firstRunPending: false })
+      .where(and(eq(radarProfiles.organizationId, ctx.organization.id), eq(radarProfiles.id, key.slice(2))));
+  }
 }
 
 // --- saved / dismissed ---------------------------------------------------------------------

@@ -4,7 +4,8 @@ import * as React from "react"
 import { Check, Copy } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "./button"
-import { controlClasses } from "./input"
+import { ControlGroup } from "./control-group"
+import { Input } from "./input"
 import { Label } from "./label"
 
 /*
@@ -12,10 +13,10 @@ import { Label } from "./label"
  *
  * - The value sits in a read-only field (mono, selectable; focusing it selects everything),
  *   so it can always be copied by hand when the clipboard is not available.
- * - Field and button share one height (48 px, 52 px on phones — the "Control sizes" rule).
+ * - Field and button share one height through the control scale: the row is a form row
+ *   (<ControlGroup size="form">: 48 px, 52 px on phones), neither is sized by hand.
  * - Feedback is announced politely and shown on the button for two seconds: "Copied".
  */
-const HEIGHT = "h-[3.25rem] md:h-12"
 
 type CopyFieldProps = {
   label: string
@@ -54,8 +55,8 @@ function CopyField({ label, value, hint, copyLabel, className, "data-testid": te
   return (
     <div data-slot="copy-field" className={cn("flex flex-col gap-1.5", className)} data-testid={testId}>
       <Label htmlFor={id}>{label}</Label>
-      <div className="flex max-w-[32.5rem] items-stretch gap-2">
-        <input
+      <ControlGroup size="form" className="flex max-w-[32.5rem] gap-2">
+        <Input
           ref={inputRef}
           id={id}
           readOnly
@@ -63,15 +64,15 @@ function CopyField({ label, value, hint, copyLabel, className, "data-testid": te
           spellCheck={false}
           aria-describedby={hint ? `${id}-hint` : undefined}
           onFocus={(event) => event.currentTarget.select()}
-          className={cn(controlClasses, HEIGHT, "bg-paper font-mono text-sm text-ink")}
+          className="font-mono text-sm sm:text-sm"
         />
-        <Button type="button" variant="outline" onClick={() => void copy()} aria-label={copyLabel ?? `Copy ${label}`} className={cn(HEIGHT, "min-w-[6.5rem] px-4")}>
+        <Button type="button" variant="outline" onClick={() => void copy()} aria-label={copyLabel ?? `Copy ${label}`} className="min-w-[6.5rem]">
           {state === "copied" ? <Check aria-hidden className="size-4 text-brand" /> : <Copy aria-hidden className="size-4" />}
           {state === "copied" ? "Copied" : "Copy"}
         </Button>
-      </div>
+      </ControlGroup>
       {hint ? (
-        <p id={`${id}-hint`} className="text-sm text-ink-2">
+        <p id={`${id}-hint`} className="text-13 leading-[1.5] text-ink-2">
           {hint}
         </p>
       ) : null}

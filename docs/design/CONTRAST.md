@@ -26,22 +26,33 @@ WCAG 2.2 AA: 4.5:1 for text, 3:1 for large text, icons and control boundaries.
 | `paper #FAF8F3` | `ink #161A1D` | 16.49:1 | 4.5:1 | Pass | The independence band; tooltips |
 | `accent-ink #925207` | `paper #FAF8F3` | 5.76:1 | 4.5:1 | Pass | Small amber text on the page |
 | `accent-ink #925207` | `surface #FFFFFF` | 6.11:1 | 4.5:1 | Pass | Small amber text on cards |
-| `accent-ink #925207` | `accent-tint #F7EBD7` | 5.19:1 | 4.5:1 | Pass | Small amber text on its tint (a warning title) |
+| `accent-ink #925207` | `accent-tint #F7EBD7` | 5.19:1 | 4.5:1 | Pass | Small amber text on its tint: “14 days left”, the trial strip, a warning title |
+| `accent-ink #925207` | `paper-deep #F2EEE4` | 5.28:1 | 4.5:1 | Pass | A deadline on a paper-deep band |
+| `accent-ink #925207` | `brand-tint #E6EFEB` | 5.21:1 | 4.5:1 | Pass | A deadline on the verdict panel or an upgrade band |
 | `ink #161A1D` | `accent-tint #F7EBD7` | 14.85:1 | 4.5:1 | Pass | The “14 days left” pill; text in a warning panel |
 | `accent #B4690E` | `paper #FAF8F3` | 3.98:1 | 3:1 | Pass | The deadline dot on the page (a marker, not text) |
 | `accent #B4690E` | `surface #FFFFFF` | 4.22:1 | 3:1 | Pass | The deadline dot on cards (a marker, not text) |
-| `accent #B4690E` | `accent-tint #F7EBD7` | 3.58:1 | 3:1 | Pass | The icon of a warning panel (not text) |
+| `accent #B4690E` | `accent-tint #F7EBD7` | 3.58:1 | 3:1 | Pass | The icon of a warning panel and the dot of the trial strip (not text) |
+| `accent #B4690E` | `brand-tint #E6EFEB` | 3.60:1 | 3:1 | Pass | The deadline dot on a brand-tint band (a marker, not text) |
 | `danger #A3271C` | `danger-tint #F6E3E0` | 5.92:1 | 4.5:1 | Pass | The “Gap” pill and the title of a gap panel |
 | `danger #A3271C` | `surface #FFFFFF` | 7.33:1 | 4.5:1 | Pass | Field errors and “waiting on gap” on cards |
 | `danger #A3271C` | `paper #FAF8F3` | 6.90:1 | 4.5:1 | Pass | Field errors on the page |
 | `danger #A3271C` | `brand-tint #E6EFEB` | 6.25:1 | 3:1 | Pass | The gap icon on the verdict panel (not text) |
 | `ink #161A1D` | `danger-tint #F6E3E0` | 14.15:1 | 4.5:1 | Pass | Text inside a gap panel |
 | `#FFFFFF` | `danger #A3271C` | 7.33:1 | 4.5:1 | Pass | Destructive button label |
+| `#FFFFFF` | `danger-hover #861F15` | 9.45:1 | 4.5:1 | Pass | Destructive button label, hover and pressed |
+| `danger #A3271C` | `danger-tint #F6E3E0` | 5.92:1 | 4.5:1 | Pass | The quiet destructive button on hover (red label on danger-tint) |
 | `ink #161A1D` | `success-tint #E4EFE7` | 14.83:1 | 4.5:1 | Pass | Text inside a success panel |
 | `info #1F4F8F` | `info-tint #E3EAF4` | 6.73:1 | 4.5:1 | Pass | The “For you to confirm” pill; notice-type labels |
 | `info #1F4F8F` | `surface #FFFFFF` | 8.16:1 | 4.5:1 | Pass | “Needs your commitments” on cards |
 | `info #1F4F8F` | `brand-tint #E6EFEB` | 6.96:1 | 3:1 | Pass | The info icon on the verdict panel (not text) |
 | `ink #161A1D` | `info-tint #E3EAF4` | 14.45:1 | 4.5:1 | Pass | Text inside an info panel |
+| `ink-2 #5A6165` | `accent-tint #F7EBD7` | 5.34:1 | 4.5:1 | Pass | Muted text in the trial strip or a warning panel |
+| `ink-2 #5A6165` | `info-tint #E3EAF4` | 5.20:1 | 4.5:1 | Pass | Muted text in the test-mode band |
+| `#F2EEE4` | `#1B2023` | 14.18:1 | 4.5:1 | Pass | E-mail, dark: text on the sheet |
+| `#B4B9BC` | `#1B2023` | 8.30:1 | 4.5:1 | Pass | E-mail, dark: muted text on the sheet |
+| `#E7B36A` | `#1B2023` | 8.65:1 | 4.5:1 | Pass | E-mail, dark: a deadline on the sheet |
+| `#7CC3AD` | `#1B2023` | 8.03:1 | 3:1 | Pass | E-mail, dark: the mark and the underline of the action (not text) |
 | `line-strong #857F70` | `surface #FFFFFF` | 3.98:1 | 3:1 | Pass | The edge of inputs, tick boxes, radios, switches and outline buttons |
 | `line-strong #857F70` | `paper #FAF8F3` | 3.75:1 | 3:1 | Pass | The edge of a control placed on the page |
 | `line-strong #857F70` | `paper-deep #F2EEE4` | 3.44:1 | 3:1 | Pass | The edge of a control placed on a paper-deep band |

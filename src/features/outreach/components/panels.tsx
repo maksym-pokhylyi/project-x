@@ -44,7 +44,7 @@ export function NamedAddressesNotice() {
       <AlertDescription>
         <p>
           A named address is personal data, and an operator outside the UK needs a UK representative before writing to one (UK GDPR Art. 27). Until one is set in{" "}
-          <code>site.company.ukRepresentative</code>, a list can hold generic mailboxes only, and the letters name no representative.
+          <code>site.operator.ukRepresentative</code>, a list can hold generic mailboxes only, and the letters name no representative.
         </p>
       </AlertDescription>
     </Alert>

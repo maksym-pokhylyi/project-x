@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("next/headers", () => import("../helpers/next-headers"));
 vi.mock("next/cache", () => ({ revalidatePath: () => undefined, unstable_cache: (fn: unknown) => fn }));
 
+import { identityText as siteIdentityText } from "@/config/site";
 import { db } from "@/db";
 import { organizations, subscriptions } from "@/db/schema";
 import { notificationsConfig } from "@/features/notifications/config";
@@ -154,7 +155,7 @@ describe("the reminder", () => {
       expect(text.includes("Nothing to do if you want to carry on. Pause or cancel in two clicks from Billing. You keep access until the end of the period you have paid for."), "body").toBe(true);
       expect(text.includes("Open Billing"), "billing link").toBe(true);
       expect(text.includes("We email this reminder seven days before an annual plan renews. Reply to this email if anything looks wrong."), "reason and sign-off").toBe(true);
-      expect(text.includes("Bidfolio is operated by [[COMPANY_LEGAL_NAME]]"), "identity").toBe(true);
+      expect(text.includes(siteIdentityText), "identity").toBe(true);
       // The 14-day refund covers a first payment only: it has no place in a renewal notice.
       expect(/refund|14[- ]day|money back/i.test(text), "refund wording").toBe(false);
     }
