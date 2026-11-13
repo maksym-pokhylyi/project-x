@@ -102,7 +102,9 @@ function Block({ block }: { block: LegalBlock }) {
     );
   }
   return (
-    <div className="overflow-x-auto rounded-card border border-line">
+    // A table wider than a phone scrolls sideways inside its frame: the frame is a named region
+    // and a Tab stop, so the keyboard can scroll it too (WCAG 2.1.1).
+    <div role="region" aria-label={`Table: ${block.table.head.join(", ")}`} tabIndex={0} className="overflow-x-auto rounded-card border border-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
       <table className="w-full min-w-[30rem] border-separate border-spacing-0 bg-surface text-left text-sm leading-5">
         <thead>
           <tr>

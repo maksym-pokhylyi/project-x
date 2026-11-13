@@ -16,7 +16,7 @@ import { requireAdmin } from "./session";
  * requireAdmin() (ADMIN_EMAILS + verified e-mail) — keep that as the first line.
  */
 
-/** Monthly recurring revenue contribution of one subscription, in USD cents (catalogue price). */
+/** Monthly recurring revenue contribution of one subscription, in pence — minor units of the catalogue currency (GBP). The name is historical. */
 export function monthlyRevenueCents(subscription: { status: string; planKey: string; billingInterval: string | null; quantity: number }): number {
   if (subscription.status !== "active" && subscription.status !== "past_due") return 0;
   if (!isPlanKey(subscription.planKey)) return 0;

@@ -170,10 +170,11 @@ test("supplier page: the company's record, three items a block, where it comes f
   await expect(attribution.getByRole("link", { name: "Data sources" })).toHaveAttribute("href", "/about-the-data");
   await expect(attribution.getByRole("link", { name: "Privacy" })).toHaveAttribute("href", "/legal/privacy");
 
-  // No personal data anywhere in the HTML: no e-mail address, no telephone number. (A supplier
-  // page ends with "Where this comes from"; the operator's own contact line is on Find, Claim,
-  // About the data and Flag a mistake.)
-  const html = await page.content();
+  // No personal data anywhere in the HTML: no e-mail address, no telephone number. The one
+  // address the document may carry is the service's own: a supplier page does not show it (it
+  // ends with "Where this comes from"), but the page's not-found fallback, which has the
+  // identity line, travels in the same payload.
+  const html = (await page.content()).replaceAll("hello@bidfolio.co.uk", "");
   expect(html).not.toMatch(/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(example|com|co\.uk)/);
   expect(html).not.toContain("acmegrounds.example");
   expect(html).not.toMatch(/tel:/);
