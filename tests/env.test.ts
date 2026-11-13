@@ -48,6 +48,22 @@ describe("environment validation and feature flags", () => {
     expect((await loadEnv({ NEXT_PUBLIC_APP_URL: "" })).appUrl).toBe("http://localhost:3000");
   });
 
+  it("validates the procurement module's settings, which it reads from here and nowhere else", async () => {
+    const { env } = await loadEnv({ PUBLIC_DATA_PAGES_INDEXABLE: "true", AI_MODEL_MATCH_REASON: "test/model", FTS_API_BASE: " https://fts.example.test ", FTS_USER_AGENT: "bidfolio-test/1.0" });
+    expect(env).toMatchObject({ PUBLIC_DATA_PAGES_INDEXABLE: "true", AI_MODEL_MATCH_REASON: "test/model", FTS_API_BASE: "https://fts.example.test", FTS_USER_AGENT: "bidfolio-test/1.0" });
+    const { procurementConfig } = await import("@/features/procurement/config");
+    expect(procurementConfig).toMatchObject({ publicDataPagesIndexable: true, matchReasonModel: "test/model", ftsApiBase: "https://fts.example.test", ftsUserAgent: "bidfolio-test/1.0" });
+
+    // Empty means "not set": the module's own defaults apply, and supplier pages stay out of search engines.
+    const blank = await loadEnv({ PUBLIC_DATA_PAGES_INDEXABLE: "", AI_MODEL_MATCH_REASON: "", FTS_API_BASE: "", FTS_USER_AGENT: "" });
+    expect(blank.env).toMatchObject({ PUBLIC_DATA_PAGES_INDEXABLE: undefined, FTS_API_BASE: undefined });
+    const defaults = (await import("@/features/procurement/config")).procurementConfig;
+    expect(defaults).toMatchObject({ publicDataPagesIndexable: false, matchReasonModel: "google/gemini-2.5-flash-lite", ftsApiBase: "https://www.find-tender.service.gov.uk", ftsUserAgent: "procurement-data-client/1.0" });
+    expect((await loadEnv({ PUBLIC_DATA_PAGES_INDEXABLE: "yes" }).then(() => import("@/features/procurement/config"))).procurementConfig.publicDataPagesIndexable).toBe(false);
+
+    await expect(loadEnv({ FTS_API_BASE: "not a url" })).rejects.toThrow(/FTS_API_BASE/);
+  });
+
   it("parses ADMIN_EMAILS case-insensitively", async () => {
     const { adminEmails } = await loadEnv({ ADMIN_EMAILS: " Founder@Example.com , ops@example.com,," });
     expect([...adminEmails]).toEqual(["founder@example.com", "ops@example.com"]);

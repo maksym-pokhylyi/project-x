@@ -150,9 +150,11 @@ describe("only strong matches, inside the plan", () => {
     const ctx = await workspace.ctx();
     const [source] = await listRadarSources(ctx);
     const spec = (await specForSource(source!))!;
-    const radar = await getMatchesForSpec(spec, { now: MONDAY, limit: 50 });
+    // The query lists strong matches unless asked for every tier: the radar shows the wider ones behind "Show wider matches".
+    const radar = await getMatchesForSpec(spec, { now: MONDAY, limit: 50, tier: "all" });
     const onRadar = new Map(radar.items.map((item) => [item.ocid, item]));
     expect([...onRadar.keys()].sort()).toEqual([strong, elsewhere, neighbour].sort());
+    expect((await getMatchesForSpec(spec, { now: MONDAY, limit: 50 })).items.map((item) => item.ocid)).toEqual([strong]);
     expect(onRadar.has(unrelated)).toBe(false);
     expect(onRadar.get(strong)!.score).toBeGreaterThanOrEqual(STRONG_MATCH.minScore);
     expect(onRadar.get(elsewhere)!.breakdown.regionMatch).toBe("elsewhere");
