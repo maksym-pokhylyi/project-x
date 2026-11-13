@@ -50,6 +50,7 @@ export const config = {
     "/verify-email/:path*",
     "/reset-password",
     "/accept-invitation/:path*",
+    "/unsubscribe",
     "/dev/:path*",
   ],
 };

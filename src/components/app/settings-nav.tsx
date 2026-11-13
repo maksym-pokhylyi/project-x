@@ -11,6 +11,7 @@ export function SettingsNav({ showBilling, className }: { showBilling: boolean; 
   const pathname = usePathname();
   const tabs = [
     { href: "/app/settings/profile", label: "Profile" },
+    { href: "/app/settings/notifications", label: "Notifications" },
     { href: "/app/settings/workspace", label: "Workspace" },
     { href: "/app/settings/members", label: "Members" },
     ...(showBilling ? [{ href: "/app/settings/billing", label: "Billing" }] : []),
