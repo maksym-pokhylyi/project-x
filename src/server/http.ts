@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_rethrow } from "next/navigation";
-import { AppError, serializeError, type SerializedError } from "@/lib/errors";
+import { trustedOrigins } from "@/env";
+import { AppError, ForbiddenError, serializeError, type SerializedError } from "@/lib/errors";
 import { reportError } from "@/lib/report-error";
 
 /** Correlation id: Vercel's request id when present, otherwise generated. */
@@ -17,16 +18,39 @@ export function json(body: unknown, init: ResponseInit & { requestId?: string } 
 
 type RouteHandler<Context> = (request: Request, context: Context, meta: { requestId: string }) => Promise<Response>;
 
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
+/**
+ * CSRF check for cookie-authenticated Route Handlers. SameSite=Lax alone is not a complete
+ * defence (sibling subdomains, top-level form posts in some browsers), so a state-changing
+ * request must come from one of our own origins:
+ *  - `Origin` present  -> must be a trusted origin (the same list Better Auth uses);
+ *  - no `Origin` but `Sec-Fetch-Site` -> must be same-origin (or a direct navigation);
+ *  - neither header -> not a browser (curl, server-to-server): no ambient cookies to abuse.
+ */
+export function isTrustedRequestOrigin(request: Request): boolean {
+  if (SAFE_METHODS.has(request.method.toUpperCase())) return true;
+  const origin = request.headers.get("origin");
+  if (origin) return trustedOrigins.includes(origin.replace(/\/+$/, ""));
+  const site = request.headers.get("sec-fetch-site");
+  return !site || site === "same-origin" || site === "none";
+}
+
 /**
  * Wraps a Route Handler with uniform error handling:
  *  - AppError (expected)  -> its status + `{ error: { code, message, details }, requestId }`
  *  - anything else        -> error_log/Sentry via reportError + a generic 500
  * The request id is echoed in `x-request-id` so users can quote it to support.
+ *
+ * POST/PUT/PATCH/DELETE requests are refused (403) unless they come from one of our own
+ * origins (`isTrustedRequestOrigin`). Pass `{ csrf: false }` only for endpoints that do not
+ * rely on the session cookie (webhooks with their own signature).
  */
-export function route<Context = unknown>(handler: RouteHandler<Context>) {
+export function route<Context = unknown>(handler: RouteHandler<Context>, options: { csrf?: boolean } = {}) {
   return async (request: Request, context: Context): Promise<Response> => {
     const requestId = requestIdFrom(request.headers);
     try {
+      if (options.csrf !== false && !isTrustedRequestOrigin(request)) throw new ForbiddenError("Cross-site request refused.");
       const response = await handler(request, context, { requestId });
       if (!response.headers.has("x-request-id")) {
         try {

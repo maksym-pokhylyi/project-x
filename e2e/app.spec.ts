@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { E2E_DEV_TOOLS_SECRET } from "../playwright.config";
 
 /**
  * One serial journey through the critical paths, against a production build:
@@ -6,7 +7,8 @@ import { expect, test, type Browser, type BrowserContext, type Page } from "@pla
  *   public pages → sign up → verify e-mail (dev outbox) → app with auto-created workspace
  *   → rename workspace → invite a member → invitee accepts in a second browser
  *   → member is locked out of owner/admin surfaces → sign out / sign in → data persisted
- *   → password reset → founder admin.
+ *   → password reset → founder admin → verification in a foreign browser (takeover
+ *   protection) → export, workspace deletion and account deletion.
  */
 test.describe.configure({ mode: "serial" });
 
@@ -15,6 +17,7 @@ const owner = { name: "Olivia Owner", email: `olivia-${run}@e2e.test`, password:
 const invitee = { name: "Ivan Invitee", email: `ivan-${run}@e2e.test`, password: "invitee-password-123" };
 const founder = { name: "Fay Founder", email: "founder@e2e.test", password: "founder-password-123" };
 const WORKSPACE = `Acme Bids ${run}`;
+const OUTBOX = `/dev/outbox?key=${E2E_DEV_TOOLS_SECRET}`;
 
 let ownerContext: BrowserContext;
 let ownerPage: Page;
@@ -27,7 +30,7 @@ async function newContext(browser: Browser): Promise<BrowserContext> {
 
 /** Opens the dev outbox and follows the first link of the newest e-mail for `to`. */
 async function followOutboxLink(page: Page, to: string, template: string) {
-  await page.goto("/dev/outbox");
+  await page.goto(OUTBOX);
   const email = page.locator(`[data-testid="outbox-email"][data-to="${to}"][data-template="${template}"]`).first();
   await expect(email).toBeVisible();
   await email.getByTestId("outbox-link").first().click();
@@ -364,6 +367,89 @@ test("the founder (ADMIN_EMAILS) can open /admin and drill into a workspace", as
   await context.close();
 });
 
+test("a verification link opened in another browser asks for a password instead of activating the stored one", async ({ browser }) => {
+  // Someone registers an address they do not own…
+  const victim = { name: "Vera Victim", email: `vera-${run}@e2e.test` };
+  const attackerContext = await newContext(browser);
+  const attacker = await attackerContext.newPage();
+  await attacker.goto("/sign-up");
+  await fillSignUp(attacker, { ...victim, password: "attacker-knows-this-1" });
+  await expect(attacker).toHaveURL(/\/verify-email/);
+
+  // …and the real owner opens the verification e-mail in their own browser.
+  const victimContext = await newContext(browser);
+  const page = await victimContext.newPage();
+  await followOutboxLink(page, victim.email, "verify-email");
+  await expect(page).toHaveURL(/\/verify-email\/confirm\?token=/);
+  await expect(page.getByRole("heading", { name: "Confirm your e-mail" })).toBeVisible();
+  // Nothing has been activated yet: the attacker's password does not get them in.
+  await signIn(attacker, { email: victim.email, password: "attacker-knows-this-1" });
+  await expect(attacker).toHaveURL(/\/verify-email/);
+
+  await page.getByLabel("Password").fill("short");
+  await page.getByRole("button", { name: "Confirm e-mail and set password" }).click();
+  await expect(page.getByText("Use at least 8 characters.")).toBeVisible();
+  await page.getByLabel("Password").fill("chosen-by-the-owner-2");
+  await page.getByRole("button", { name: "Confirm e-mail and set password" }).click();
+  await expect(page).toHaveURL(/\/app$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Welcome, Vera" })).toBeVisible();
+
+  // The password chosen before the mailbox was proven is dead.
+  await signIn(attacker, { email: victim.email, password: "attacker-knows-this-1" });
+  await expect(attacker.getByText("Wrong e-mail or password.")).toBeVisible();
+  await attackerContext.close();
+  await victimContext.close();
+});
+
+test("owner can export the workspace, delete it, and delete the account", async ({ browser }) => {
+  const user = { name: "Dana Deleter", email: `dana-${run}@e2e.test`, password: "deleter-password-123" };
+  const context = await newContext(browser);
+  const page = await context.newPage();
+  await page.goto("/sign-up");
+  await fillSignUp(page, user);
+  await expect(page).toHaveURL(/\/verify-email/);
+  await followOutboxLink(page, user.email, "verify-email");
+  await expect(page).toHaveURL(/\/app$/);
+
+  // Export: one JSON file with this workspace's records.
+  await page.goto("/app/settings/workspace");
+  await expect(page.getByTestId("workspace-danger-zone")).toBeVisible();
+  const exported = await page.request.get("/api/workspace/export");
+  expect(exported.status()).toBe(200);
+  expect(exported.headers()["content-disposition"]).toContain("attachment");
+  const data = (await exported.json()) as { members: Array<{ email: string }>; tables: Record<string, unknown> };
+  expect(data.members.map((member) => member.email)).toEqual([user.email]);
+  expect(Object.keys(data.tables)).toEqual(expect.arrayContaining(["audit_log", "usage_counters", "subscriptions"]));
+
+  // Delete the workspace: the name must be typed.
+  await page.getByTestId("delete-workspace").click();
+  await page.getByLabel(/Type .* to confirm/).fill("wrong name");
+  await page.getByRole("button", { name: "Delete workspace permanently" }).click();
+  await expect(page.getByText("Type the workspace name exactly to confirm.")).toBeVisible();
+  await page.getByLabel(/Type .* to confirm/).fill("Dana's workspace");
+  await page.getByRole("button", { name: "Delete workspace permanently" }).click();
+  await expect(page).toHaveURL(/\/app$/);
+  // The user always has a workspace: a fresh personal one replaces it.
+  await expect(page.getByTestId("current-workspace-name").first()).toHaveText("Dana's workspace");
+  await expect(page.getByTestId("onboarding-checklist")).toContainText("0 of 3 steps completed");
+
+  // Delete the account: e-mail and password must be confirmed.
+  await page.goto("/app/settings/profile");
+  await page.getByTestId("delete-account").click();
+  await page.getByLabel(/Type .* to confirm/).fill(user.email);
+  await page.getByLabel("Current password").fill("not-the-password");
+  await page.getByRole("button", { name: "Delete account permanently" }).click();
+  await expect(page.getByText("Enter your current password to confirm.")).toBeVisible();
+  await page.getByLabel("Current password").fill(user.password);
+  await page.getByRole("button", { name: "Delete account permanently" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto("/app");
+  await expect(page).toHaveURL(/\/sign-in/);
+  await signIn(page, user);
+  await expect(page.getByText("Wrong e-mail or password.")).toBeVisible();
+  await context.close();
+});
+
 test("layout holds at 360px without horizontal scrolling", async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 360, height: 740 }, storageState: await ownerContext.storageState() });
   const page = await context.newPage();
@@ -376,9 +462,11 @@ test("layout holds at 360px without horizontal scrolling", async ({ browser }) =
   await context.close();
 });
 
-test("operational endpoints: dev outbox is enabled only by DEV_TOOLS, cron requires its secret", async ({ request }) => {
-  // This run sets DEV_TOOLS=1, so the outbox exists (tests/env.test.ts covers the cases where it must not).
-  expect((await request.get("/dev/outbox")).status()).toBe(200);
+test("operational endpoints: dev outbox needs DEV_TOOLS and its key, cron requires its secret", async ({ request }) => {
+  // This run sets DEV_TOOLS=1 on a production build: the outbox exists, but only with the key or an admin session.
+  expect((await request.get("/dev/outbox")).status()).toBe(404);
+  expect((await request.get("/dev/outbox?key=wrong-key-wrong-key")).status()).toBe(404);
+  expect((await request.get(OUTBOX)).status()).toBe(200);
   expect((await request.get("/api/cron/jobs")).status()).toBe(401);
   expect((await request.get("/api/cron/jobs", { headers: { authorization: "Bearer wrong" } })).status()).toBe(401);
   expect((await request.get("/api/cron/jobs", { headers: { authorization: "Bearer e2e-cron-secret-0123456789" } })).status()).toBe(200);

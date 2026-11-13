@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { emailOutbox } from "@/db/schema";
-import { features } from "@/env";
+import { canAccessDevTools } from "@/server/dev-tools";
 
 export const metadata: Metadata = { title: "Dev outbox", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -18,9 +18,11 @@ function extractLinks(text: string | null): string[] {
  * Development mailbox: shows e-mails that were written to `email_outbox` instead of
  * being sent (no RESEND_API_KEY). Returns 404 unless dev tools are enabled, which is
  * impossible on a Vercel production deployment (see `features.devTools` in src/env.ts).
+ * On a production BUILD with DEV_TOOLS=1 it additionally needs a founder session or
+ * `?key=<DEV_TOOLS_SECRET>` (src/server/dev-tools.ts): these links are account access.
  */
-export default async function DevOutboxPage() {
-  if (!features.devTools) notFound();
+export default async function DevOutboxPage({ searchParams }: { searchParams: Promise<{ key?: string }> }) {
+  if (!(await canAccessDevTools((await searchParams).key))) notFound();
   const rows = await db.select().from(emailOutbox).orderBy(desc(emailOutbox.createdAt)).limit(50);
 
   return (

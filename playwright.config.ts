@@ -15,6 +15,8 @@ const PORT = Number(process.env.E2E_PORT ?? 3210);
 const BASE_URL = `http://localhost:${PORT}`;
 export const E2E_DATABASE_URL = process.env.E2E_DATABASE_URL ?? "postgres://app:app@localhost:5432/app_e2e";
 export const E2E_ADMIN_EMAIL = "founder@e2e.test";
+/** On a production build the dev outbox needs an admin session or this key (`/dev/outbox?key=…`). */
+export const E2E_DEV_TOOLS_SECRET = "e2e-dev-tools-secret-0123456789";
 
 process.env.PLAYWRIGHT_BROWSERS_PATH ??= "/opt/pw-browsers";
 
@@ -27,6 +29,7 @@ const serverEnv: Record<string, string> = {
   CRON_SECRET: "e2e-cron-secret-0123456789",
   // Production build, but the dev outbox must be reachable to read verification links.
   DEV_TOOLS: "1",
+  DEV_TOOLS_SECRET: E2E_DEV_TOOLS_SECRET,
   LOG_LEVEL: "warn",
   // Force every optional integration OFF, whatever a developer has in .env.local.
   RESEND_API_KEY: "",

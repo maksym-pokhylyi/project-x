@@ -1,4 +1,5 @@
 import "server-only";
+import { waitUntil } from "@vercel/functions";
 import { PostHog } from "posthog-node";
 import { db } from "@/db";
 import { events } from "@/db/schema";
@@ -33,6 +34,10 @@ function getPosthog(): PostHog | null {
  * Writes to the internal `events` table (the source of truth for /admin) and forwards
  * to PostHog when NEXT_PUBLIC_POSTHOG_KEY is set. Event names and property shapes are
  * checked against src/config/events.ts. Never throws: analytics must not break a flow.
+ *
+ * Only the database insert is awaited. Forwarding to PostHog runs after the response
+ * (`waitUntil`): a slow analytics provider must never delay a sign-in, or push a webhook
+ * acknowledgement past Paddle's timeout.
  */
 export async function track<Name extends EventName>(
   name: Name,
@@ -53,15 +58,17 @@ export async function track<Name extends EventName>(
 
   const client = getPosthog();
   if (!client) return;
-  try {
-    await client.captureImmediate({
-      // Server events without a user are attributed to the workspace.
-      distinctId: context.userId ?? `org:${context.organizationId ?? "unknown"}`,
-      event: name,
-      properties: { ...props, organization_id: context.organizationId ?? undefined, $process_person_profile: false },
-      groups: context.organizationId ? { organization: context.organizationId } : undefined,
-    });
-  } catch (error) {
-    log.warn("analytics: posthog forwarding failed", { name, reason: errorReason(error) });
-  }
+  waitUntil(
+    Promise.resolve()
+      .then(() =>
+        client.captureImmediate({
+          // Server events without a user are attributed to the workspace.
+          distinctId: context.userId ?? `org:${context.organizationId ?? "unknown"}`,
+          event: name,
+          properties: { ...props, organization_id: context.organizationId ?? undefined, $process_person_profile: false },
+          groups: context.organizationId ? { organization: context.organizationId } : undefined,
+        }),
+      )
+      .catch((error: unknown) => log.warn("analytics: posthog forwarding failed", { name, reason: errorReason(error) })),
+  );
 }
