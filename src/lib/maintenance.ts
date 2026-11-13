@@ -51,6 +51,7 @@ export type MaintenanceSummary = Record<
   | "aiUsage"
   | "auditLog"
   | "checkoutNonces"
+  | "notificationLog"
   | "aiReservationsSettled",
   number
 >;
@@ -69,6 +70,7 @@ export async function runMaintenance(batching: Batching = {}): Promise<Maintenan
   const aiUsage = await deleteInBatches("ai_usage", olderThan("created_at", d.aiUsage), batching);
   const auditLog = await deleteInBatches("audit_log", olderThan("created_at", d.auditLog), batching);
   const checkoutNonces = await deleteInBatches("billing_checkout_nonces", olderThan("consumed_at", d.checkoutNonces), batching);
+  const notificationLog = await deleteInBatches("notification_log", olderThan("created_at", d.notificationLog), batching);
 
   // Paddle payloads: keep what idempotency and ordering need (ids, type, time), drop the rest.
   const redacted = await db.execute(sql`
@@ -89,10 +91,10 @@ export async function runMaintenance(batching: Batching = {}): Promise<Maintenan
   const webhookEvents = await deleteInBatches("webhook_events", olderThan("received_at", d.webhookEvents), batching);
 
   const emailOutbox = await deleteInBatches("email_outbox", olderThan("created_at", d.emailOutbox), batching);
-  // Unsent bodies of old e-mails still contain one-time links.
+  // Unsent bodies of old e-mails still contain one-time links (and their headers an unsubscribe link).
   const emailBodies = await db.execute(sql`
-    update email_outbox set html = null, text = null
-    where ${olderThan("created_at", d.emailBodies)} and (html is not null or text is not null)
+    update email_outbox set html = null, text = null, headers = null
+    where ${olderThan("created_at", d.emailBodies)} and (html is not null or text is not null or headers is not null)
     returning 1
   `);
 
@@ -121,6 +123,7 @@ export async function runMaintenance(batching: Batching = {}): Promise<Maintenan
     aiUsage,
     auditLog,
     checkoutNonces,
+    notificationLog,
     aiReservationsSettled,
   };
 }

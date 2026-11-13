@@ -42,6 +42,7 @@ describe("data retention (F-14)", () => {
       aiUsage: 395,
       auditLog: 730,
       checkoutNonces: 90,
+      notificationLog: 395,
     });
   });
 

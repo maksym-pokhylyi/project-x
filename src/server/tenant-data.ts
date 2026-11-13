@@ -2,6 +2,7 @@ import "server-only";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
 import { invitations, members, organizations, subscriptions, users } from "@/db/schema";
+import { notificationsTenantData } from "@/features/notifications/erasure";
 import { track } from "@/lib/analytics";
 import { emailKey } from "@/lib/crypto";
 import { ConflictError, NotFoundError } from "@/lib/errors";
@@ -33,6 +34,9 @@ const handlers: TenantDataHandler[] = [];
 export function registerTenantDataHandler(handler: TenantDataHandler): void {
   if (!handlers.some((existing) => existing.name === handler.name)) handlers.push(handler);
 }
+
+// Registered here, not from the module, so it is in place wherever a workspace can be deleted.
+registerTenantDataHandler(notificationsTenantData);
 
 const LIVE_OR_PAUSED = ["active", "trialing", "past_due", "paused"];
 const IDENTIFIER = /^[a-z_][a-z0-9_]*$/;
