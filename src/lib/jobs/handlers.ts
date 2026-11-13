@@ -37,4 +37,15 @@ export const jobHandlers: { [T in JobType]: JobHandler<T> } = {
     const { runBackfillSlice } = await import("@/features/procurement/ingest/run");
     await runBackfillSlice(payload);
   },
+
+  // Scheduled e-mails: weekly digest, daily alerts, deadline and renewal reminders (lazy, as above).
+  "notifications.fanout": async (payload) => {
+    const { runNotificationFanout } = await import("@/features/notifications/jobs");
+    await runNotificationFanout(payload);
+  },
+
+  "notifications.send": async (payload) => {
+    const { runNotificationSend } = await import("@/features/notifications/jobs");
+    await runNotificationSend(payload);
+  },
 };

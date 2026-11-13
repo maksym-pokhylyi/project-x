@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { env } from "@/env";
+import { scheduleNotifications } from "@/features/notifications/schedule";
 import { enqueueJob } from "@/lib/jobs/queue";
 import { runWorker } from "@/lib/jobs/worker";
 import { log } from "@/lib/logger";
@@ -29,6 +30,8 @@ export const GET = route(async (request, _context, { requestId }) => {
   await enqueueJob("maintenance.cleanup", {}, { dedupeKey: `maintenance.cleanup:${today}` });
   // Once a day: catch subscription changes whose webhook never arrived (no-op without PADDLE_API_KEY).
   await enqueueJob("billing.reconcile", {}, { dedupeKey: `billing.reconcile:${today}`, maxAttempts: 3 });
+  // Scheduled e-mails are due in UK time (digest Mondays 07:30, alerts and reminders daily): one fan-out per period.
+  await scheduleNotifications();
 
   // Leave headroom below maxDuration so the last job can finish.
   const summary = await runWorker({ maxJobs: 500, timeBudgetMs: 240_000 });

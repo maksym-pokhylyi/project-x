@@ -22,6 +22,10 @@ export type JobPayloads = {
   "procurement.backfill": { weekStart: string; until: string; part?: number };
   /** Compare open subscriptions with the Paddle API (no-op without PADDLE_API_KEY). */
   "billing.reconcile": Record<string, never>;
+  /** Scheduled e-mails (src/features/notifications): one send job per member due a `kind` e-mail for `period`… */
+  "notifications.fanout": { kind: "digest" | "alert" | "reminder" | "renewal"; period: string; cursor?: { organizationId: string; userId: string } | null; offset?: number };
+  /** …and one e-mail to one member of one workspace. */
+  "notifications.send": { kind: "digest" | "alert" | "reminder" | "renewal"; period: string; organizationId: string; userId: string; deferrals?: number };
 };
 
 export type JobType = keyof JobPayloads;

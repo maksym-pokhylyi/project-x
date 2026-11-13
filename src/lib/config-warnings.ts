@@ -70,6 +70,9 @@ export function getConfigWarnings(): ConfigWarning[] {
   if (production && !features.blobStorage) {
     add("warning", "BLOB_STORAGE_MISSING", "BLOB_READ_WRITE_TOKEN is not set: uploads go to the instance's local disk and are lost.");
   }
+  if (features.notificationsPaused) {
+    add("warning", "NOTIFICATIONS_PAUSED", "NOTIFICATIONS_PAUSED=1: no weekly digest, daily alert, deadline reminder or renewal reminder is sent. Remove the variable to resume.");
+  }
   if (features.devToolsProtected) {
     add(
       "warning",
