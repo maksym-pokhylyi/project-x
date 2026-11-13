@@ -31,6 +31,7 @@ const OUT = path.resolve(".data/draft-eval");
 const QUESTIONS: Record<string, string[]> = { "canopy-kerb": ["TFC-Q3", "TFC-Q5"], "steppe-english": ["FCDO-PROFILE", "FCDO-GDPR"] };
 /** A capability neither bidder's library contains, planted in the answer each model marks. */
 const PLANTED = "We hold ISO 27001 certification and have delivered more than forty comparable contracts for central government.";
+const DEFAULT_JUDGE = "anthropic/claude-sonnet-5.5";
 const slugOf = (model: string) => model.replace(/[^a-z0-9.-]+/gi, "_");
 const short = (model: string) => model.split("/").pop()!;
 
@@ -47,7 +48,7 @@ function cached<T>(file: string, run: () => Promise<T>): Promise<T> {
 
 async function main() {
   const models = (modelsArg ?? "").split(",").filter(Boolean);
-  const judge = judgeArg ?? "anthropic/claude-sonnet-5.5";
+  const judge = judgeArg ?? DEFAULT_JUDGE;
   if (models.length === 0) throw new Error("usage: draft-eval.ts <model,model> [judgeModel]");
   const { db, pg } = await import("../../src/db");
   const { organizations } = await import("../../src/db/schema");
@@ -70,6 +71,7 @@ async function main() {
   type DraftRow = { model: string; bidder: string; question: string; limit: number; first: number; final: number; trimmed: boolean; gaps: number; unknownMarkers: number; figures: number; unsupported: number; seconds: number; cost: number; error?: string };
   const rows: DraftRow[] = [];
   const marks: Array<{ model: string; bidder: string; score: string; verdict: string; seconds: number; cost: number }> = [];
+  const planted: Array<{ model: string; bidder: string; iso: boolean; forty: boolean; flagged: number; seconds: number; cost: number; error?: string }> = [];
 
   for (const [bidder, ids] of Object.entries(QUESTIONS)) {
     const fixture = JSON.parse(readFileSync(path.join(spikeDir, "evidence", bidder, "questions.json"), "utf8")) as Fixture;
@@ -95,7 +97,7 @@ async function main() {
             return { ...result, ms: Date.now() - started };
           });
           only("CLAIMS", judge);
-          const claims = await cached(path.join(OUT, bidder, id, `${slugOf(model)}.claims.json`), async () => probeClaims(await scope(), { sources, question, draft: draft.text }));
+          const claims = await cached(path.join(OUT, bidder, id, `${slugOf(model)}.claims${judge === DEFAULT_JUDGE ? "" : `.${slugOf(judge)}`}.json`), async () => probeClaims(await scope(), { sources, question, draft: draft.text }));
           rows.push({
             model,
             bidder,
@@ -138,6 +140,27 @@ async function main() {
       } catch (error) {
         marks.push({ model, bidder, score: "-", verdict: `failed: ${error instanceof Error ? error.message.slice(0, 80) : ""}`, seconds: 0, cost: 0 });
       }
+      // The claims check on the same answer: does each model, as the checker, catch both planted claims?
+      only("CLAIMS", model);
+      try {
+        const checked = await cached(path.join(OUT, bidder, firstId, `${slugOf(model)}.planted.json`), async () => {
+          const started = Date.now();
+          const result = await probeClaims(await scope(), { sources, question, draft: answer });
+          return { ...result, ms: Date.now() - started };
+        });
+        const flagged = checked.unsupported.map((entry) => `${entry.claim} ${entry.reason ?? ""}`);
+        planted.push({
+          model,
+          bidder,
+          iso: flagged.some((text) => /iso\s*27001/i.test(text)),
+          forty: flagged.some((text) => /forty|\b40\b/i.test(text)),
+          flagged: checked.unsupported.length,
+          seconds: checked.ms / 1000,
+          cost: checked.usage.costUsd,
+        });
+      } catch (error) {
+        planted.push({ model, bidder, iso: false, forty: false, flagged: 0, seconds: 0, cost: 0, error: error instanceof Error ? error.message.slice(0, 80) : "failed" });
+      }
     }
   }
 
@@ -157,6 +180,12 @@ async function main() {
   }
   console.log("\nMARKING an answer with a planted fabricated capability");
   for (const mark of marks) console.log(`${short(mark.model).padEnd(18)} ${mark.bidder.padEnd(15)} score ${mark.score.padEnd(3)} ${mark.verdict.padEnd(28)} ${mark.seconds.toFixed(0).padStart(3)}s $${mark.cost.toFixed(4)}`);
+  console.log("\nCLAIMS CHECK of the same answer (two planted claims: ISO 27001, forty comparable contracts)");
+  for (const row of planted) {
+    console.log(
+      `${short(row.model).padEnd(18)} ${row.bidder.padEnd(15)} ISO 27001 ${row.iso ? "caught" : "MISSED"}  forty contracts ${row.forty ? "caught" : "MISSED"}  flagged in all ${String(row.flagged).padStart(2)} ${row.seconds.toFixed(0).padStart(3)}s $${row.cost.toFixed(4)}${row.error ? ` ERROR ${row.error}` : ""}`,
+    );
+  }
   await pg.end({ timeout: 5 });
 }
 
