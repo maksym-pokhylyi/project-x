@@ -3,13 +3,13 @@
 Run: python3 docs/economics/model.py  -> prints Markdown tables (also used to generate ECONOMICS.md numbers).
 All inputs are explicit; sources/assumptions are documented in docs/economics/ECONOMICS.md."""
 GBP_USD = 1.3256  # ECB reference rates 2026-11-12 (EUR/USD 1.1081, EUR/GBP 0.83595)
-PRICES = {'radar': 49, 'desk': 149, 'plus': 349}   # GBP / month, ex VAT
+PRICES = {'radar': 29, 'desk': 149, 'plus': 349}   # GBP / month, ex VAT
 PASS_PRICE = 99                                      # GBP, one-off bid pass (not MRR)
 
 SCENARIOS = {
   # Adverse: the personalised page does not beat ordinary cold email, deliverability caps volume, organic stays tiny.
   'adverse': dict(
-     mix=dict(radar=.70, desk=.27, plus=.03),
+     mix=dict(radar=.72, desk=.25, plus=.03),
      emails=[300, 600, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000],
      visit=.03, claim=.25, activate=.40, pay=.10,
      linkedin=[0] + [.3]*11,
@@ -17,7 +17,7 @@ SCENARIOS = {
      partners=[0]*12, churn=.07, pass_rate=.15),
   # Base: funnel ~1.5 paying per 1,000 emails (report B base 1.05; red team median 1.5), modest organic.
   'base': dict(
-     mix=dict(radar=.60, desk=.34, plus=.06),
+     mix=dict(radar=.62, desk=.32, plus=.06),
      emails=[400, 1000] + [1800]*10,
      visit=.07, claim=.30, activate=.48, pay=.15,
      linkedin=[0] + [.5]*11,
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     for label, key, vals in tests:
         for v in vals:
             _, rows = run('base', b, {key: v}); print(f"| {label} | {v} | {rows[-1]['cust']:.0f} | {rows[-1]['mrr']:,.0f} |")
-    for label, mix in [('Plan mix 70/27/3 (mostly Radar)', dict(radar=.70, desk=.27, plus=.03)), ('Plan mix 60/34/6 (base)', b['mix']), ('Plan mix 30/55/15 (mostly Bid Desk)', dict(radar=.30, desk=.55, plus=.15))]:
+    for label, mix in [('Plan mix 72/25/3 (mostly Radar)', dict(radar=.72, desk=.25, plus=.03)), ('Plan mix 62/32/6 (base)', b['mix']), ('Plan mix 30/55/15 (mostly Bid Desk)', dict(radar=.30, desk=.55, plus=.15))]:
         _, rows = run('base', b, {'mix': mix}); print(f"| {label} | ARPA £{arpa_gbp(mix):.0f} | {rows[-1]['cust']:.0f} | {rows[-1]['mrr']:,.0f} |")
     for label, em in [('Emails per month 1,000', 1000), ('Emails per month 1,800 (base)', 1800), ('Emails per month 3,000 (two senders/domains)', 3000)]:
         _, rows = run('base', b, {'emails': [400, 1000] + [em]*10}); print(f"| {label} | {em} | {rows[-1]['cust']:.0f} | {rows[-1]['mrr']:,.0f} |")
