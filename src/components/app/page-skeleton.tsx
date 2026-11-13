@@ -1,6 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Loading() {
+/** Generic loading state for app pages (used by the segment-level loading.tsx files). */
+export function PageSkeleton() {
   return (
     <div className="space-y-6" aria-busy="true" aria-label="Loading">
       <Skeleton className="h-8 w-56" />

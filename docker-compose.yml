@@ -1,0 +1,29 @@
+# Local PostgreSQL for development, unit tests and e2e — same major version as Neon.
+#
+#   docker compose up -d      # start
+#   docker compose down       # stop (data kept in the "pgdata" volume)
+#   docker compose down -v    # stop and wipe all local databases
+#
+# Creates the role/password used throughout the docs (app/app) and three databases:
+# app_dev (pnpm dev), app_test (pnpm test) and app_e2e (pnpm e2e).
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app_dev
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/docker-init-db.sql:/docker-entrypoint-initdb.d/01-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

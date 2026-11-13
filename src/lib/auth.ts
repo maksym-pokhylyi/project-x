@@ -54,6 +54,16 @@ export const auth = betterAuth({
   trustedOrigins: [appUrl],
   database: drizzleAdapter(db, { provider: "pg", usePlural: true, schema }),
   telemetry: { enabled: false },
+  // Route Better Auth's own log lines through our structured logger.
+  logger: {
+    level: "warn",
+    log: (level, message, ...details) => {
+      const fields = details.length > 0 ? { details: details.map((detail) => (detail instanceof Error ? detail.message : detail)) } : undefined;
+      if (level === "error") log.error(`[auth] ${message}`, fields);
+      else if (level === "warn") log.warn(`[auth] ${message}`, fields);
+      else log.info(`[auth] ${message}`, fields);
+    },
+  },
 
   emailAndPassword: {
     enabled: true,

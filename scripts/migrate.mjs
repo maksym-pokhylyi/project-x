@@ -16,6 +16,13 @@ import { loadEnv } from "./load-env.mjs";
 // Load .env.local / .env for local runs (no-op on Vercel, where env is injected).
 loadEnv();
 
+// Escape hatch for environments that must not touch the schema (e.g. a Vercel Preview
+// environment that shares a database with production — better: give previews their own).
+if (process.env.SKIP_DB_MIGRATE === "1") {
+  console.log("[db:migrate] skipped (SKIP_DB_MIGRATE=1)");
+  process.exit(0);
+}
+
 const url = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
 if (!url) {
   console.error("[db:migrate] DATABASE_URL is not set.");

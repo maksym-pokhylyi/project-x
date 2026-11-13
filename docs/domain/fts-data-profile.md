@@ -39,6 +39,7 @@ Source keys in square brackets resolve to URLs in [Sources](#sources). `[SAMPLE]
 | Licence exclusions | OGL does not cover personal data, logos or third-party rights | [OGL] |
 
 - `updatedFrom`/`updatedTo` select on the release `date`; every edit of a notice is a new release with a new `id`, so an incremental harvest by date window sees all versions. [SAMPLE]
+- Window edges look like UK local time: a release dated `2026-10-23T00:22:50+01:00` (22 October 23:22 UTC) came back for `updatedFrom=2026-10-23T00:00:00`. Release `date` itself used `+01:00` on 536 releases before the clock change and `Z` after. REC: overlap windows slightly and de-duplicate on release `id`. [SAMPLE]
 - The plain-HTML notice pages return 403 to a non-browser client; the API and documentation pages do not. [SAMPLE]
 
 ## 2. Release `tag` → notice type → stage
@@ -238,7 +239,7 @@ The UK extension adds `amountGross` (including tax) beside OCDS `amount` (net). 
 | Observation | Count |
 |---|---|
 | UK7 contracts with gross only, no net `amount` | 437 of 2,896 (15%) |
-| Gross/net ratio where both present (UK7) | 1.20 in 2,082 of 2,471 (84%); 1.00 in 299 (12%); other in 4% |
+| Gross/net ratio where both present (all `contracts[]` entries) | 1.20 in 2,082 of 2,471 (84%); 1.00 in 299 (12%); other in 4% |
 | Non-GBP currency values (USD, EUR, NOK, CAD, FKP, THB) | 36 of 7,716 |
 | UK7 releases with more than one contract where all contracts show the same value | 29 of 101 |
 | UK6 releases with more than one award where all awards show the same value | 38 of 120 |
@@ -424,8 +425,8 @@ Days from publication to tender deadline (new UK4, not updates): median 28; abov
 - A direct award that follows a failed competition, and each call-off from a framework, gets its own `ocid`; the link back is in `relatedProcesses[]` (`unsuccessfulProcess`, `framework`, `prior`). [FTS-NT], [G-CDP], [SAMPLE]
 - **An edit is a new release** with a new `id`, a new `date` and a `…Update` tag (`tenderUpdate`, `planningUpdate`, `awardUpdate`+`contractUpdate`). 711 of 7,176 releases were updates. The old release stays retrievable. [SAMPLE]
 - Change text: `tender.amendments[].description` with `amendments[].id` = the new notice id (56% of updates). Legacy updates use `amendments[].unstructuredChanges[]` with `oldValue`, `newValue` and `where.section`/`where.label`. [SAMPLE]
-- A release does not point to the version it replaces. Order versions by `date` within `ocid` and notice type, or read `compiledRelease`. [SAMPLE]
-- `tender.id` is the buyer's own reference in 70% of releases and equals the ocid in 30%; do not use it as a key. `awards[].id` and `contracts[].id` are small integers or `{noticeId}-n` strings, unique only within the ocid. [SAMPLE]
+- Act-regime releases do not point to the version they replace (60 legacy releases carry `links[rel=prev]`). Order versions by `date` within `ocid` and notice type, or read `compiledRelease`. [SAMPLE]
+- `tender.id` equals the ocid in 30% of releases and is something else (typically a buyer reference) in 70%; do not use it as a key. `awards[].id` and `contracts[].id` are small integers (`1`, `2`) or `{noticeId}-n` strings, so they are not globally unique; key them with the ocid. [SAMPLE]
 
 | Sequence of releases sharing one `ocid` (within the 3-week sample) | ocids |
 |---|---:|

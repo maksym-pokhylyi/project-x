@@ -3,10 +3,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listAdminOrganizations } from "@/server/admin";
+import { requireAdminForPage } from "@/server/session";
 
 export const metadata: Metadata = { title: "Organizations" };
 
 export default async function AdminOrganizationsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  await requireAdminForPage();
   const query = (await searchParams).q?.slice(0, 100) ?? "";
   const rows = await listAdminOrganizations(query);
   return (

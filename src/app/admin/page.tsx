@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ReplayWebhookButton, RetryJobButton } from "@/components/admin/admin-buttons";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminActivity, getAdminMetrics } from "@/server/admin";
+import { requireAdminForPage } from "@/server/session";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -20,6 +21,8 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
 }
 
 export default async function AdminOverviewPage() {
+  // Pages render in parallel with their layout, so each admin page guards itself.
+  await requireAdminForPage();
   const [metrics, activity] = await Promise.all([getAdminMetrics(), getAdminActivity()]);
   const conversion = metrics.trials.conversionRate === null ? "—" : `${Math.round(metrics.trials.conversionRate * 100)}%`;
 

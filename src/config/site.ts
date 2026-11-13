@@ -7,16 +7,16 @@
  */
 export const site = {
   /** Product name, used in titles, emails and the app shell. */
-  name: "Acme",
+  name: "Bidfolio",
   /** One-line value proposition (hero + meta description). */
-  tagline: "The placeholder tagline for your B2B product",
+  tagline: "The bid desk for UK public-sector suppliers",
   description:
-    "Acme helps teams do the thing faster. Replace this description in src/config/site.ts.",
+    "Bidfolio is a bid desk for UK public-sector suppliers. Replace this description in src/config/site.ts.",
   /** Bare production domain, no protocol. Used in legal pages and e-mail footers. */
-  domain: "example.com",
-  supportEmail: "support@example.com",
+  domain: "bidfolio.co.uk",
+  supportEmail: "support@bidfolio.co.uk",
   /** Shown as the sender name; the address comes from EMAIL_FROM. */
-  emailFromName: "Acme",
+  emailFromName: "Bidfolio",
   locale: "en",
   social: {
     x: "",

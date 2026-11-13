@@ -5,13 +5,12 @@
   "type": "module",
   "packageManager": "pnpm@10.28.0",
   "engines": {
-    "node": ">=22.18"
+    "node": ">=22.15"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "vercel-build": "pnpm db:migrate && next build",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint",
     "test": "vitest run",
