@@ -1,6 +1,7 @@
 import "server-only";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
+import { reconcileSubscriptions } from "@/lib/billing/reconcile";
 import { deliverOutboxEmail } from "@/lib/email/deliver";
 import { log } from "@/lib/logger";
 import { purgeExpiredRateLimits } from "@/lib/rate-limit";
@@ -19,6 +20,12 @@ export type JobHandler<T extends JobType> = (payload: JobPayloads[T], context: J
 export const jobHandlers: { [T in JobType]: JobHandler<T> } = {
   "email.send": async ({ outboxId }) => {
     await deliverOutboxEmail(outboxId);
+  },
+
+  "billing.reconcile": async () => {
+    const summary = await reconcileSubscriptions();
+    if (summary.skipped) return; // no PADDLE_API_KEY: nothing to compare against
+    log.info("billing.reconcile done", summary);
   },
 
   "maintenance.cleanup": async () => {

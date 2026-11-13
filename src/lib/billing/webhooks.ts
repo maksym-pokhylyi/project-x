@@ -9,9 +9,11 @@ import { log } from "@/lib/logger";
 import { reportError } from "@/lib/report-error";
 import { CHECKOUT_CLOCK_SKEW_SECONDS, CHECKOUT_MAX_AGE_SECONDS, verifyCheckoutData } from "./checkout-signature";
 import {
+  ADJUSTMENT_EVENT_TYPES,
   CUSTOMER_EVENT_TYPES,
   SUBSCRIPTION_EVENT_TYPES,
   TRANSACTION_EVENT_TYPES,
+  paddleAdjustmentSchema,
   paddleCustomerSchema,
   paddleEnvelopeSchema,
   paddleSubscriptionSchema,
@@ -178,6 +180,7 @@ async function handlePaddleEvent(tx: Tx, envelope: PaddleEnvelope): Promise<Hand
   if ((SUBSCRIPTION_EVENT_TYPES as readonly string[]).includes(type)) return handleSubscriptionEvent(tx, envelope);
   if ((TRANSACTION_EVENT_TYPES as readonly string[]).includes(type)) return handleTransactionEvent(tx, envelope);
   if ((CUSTOMER_EVENT_TYPES as readonly string[]).includes(type)) return handleCustomerEvent(tx, envelope);
+  if ((ADJUSTMENT_EVENT_TYPES as readonly string[]).includes(type)) return handleAdjustmentEvent(tx, envelope);
   return { outcome: "ignored_unhandled" };
 }
 
@@ -530,4 +533,49 @@ async function handleCustomerEvent(tx: Tx, envelope: PaddleEnvelope): Promise<Ha
       .where(eq(subscriptions.paddleCustomerId, data.id));
   }
   return { outcome: "processed" };
+}
+
+// ---------------------------------------------------------------------------
+// adjustment.* (refunds, credits, chargebacks)
+// ---------------------------------------------------------------------------
+
+/**
+ * A refund or chargeback does not change the subscription's status in Paddle, so the
+ * workspace would silently keep a plan nobody is paying for. We cannot decide that case
+ * automatically (a partial refund is not a cancellation) — it is written to the
+ * workspace's audit log and surfaced to the operator, who cancels in Paddle if needed.
+ */
+async function handleAdjustmentEvent(tx: Tx, envelope: PaddleEnvelope): Promise<HandlerResult> {
+  const data = paddleAdjustmentSchema.parse(envelope.data);
+  if (!data.subscription_id) return { outcome: "ignored_unmapped", note: `Adjustment ${data.id} is not linked to a subscription` };
+  const [bound] = await tx
+    .select({ organizationId: subscriptions.organizationId })
+    .from(subscriptions)
+    .where(eq(subscriptions.paddleSubscriptionId, data.subscription_id));
+  if (!bound) return { outcome: "ignored_unmapped", note: `No workspace found for adjustment ${data.id}` };
+  const organizationId = bound.organizationId;
+
+  // adjustment.updated carries a new status for the same adjustment: one entry per (event) is enough.
+  if (await alreadyAudited(tx, organizationId, envelope.event_id)) return { outcome: "processed" };
+  const action = data.action.replace(/[^a-z_]/gi, "").toLowerCase().slice(0, 40) || "unknown";
+  await tx.insert(auditLog).values({
+    organizationId,
+    actorType: "paddle",
+    actorId: null,
+    action: `billing.adjustment_${action}`,
+    target: `adjustment:${data.id}`,
+    metadata: {
+      eventId: envelope.event_id,
+      status: data.status,
+      subscriptionId: data.subscription_id,
+      transactionId: data.transaction_id ?? null,
+      amount: data.totals?.total ?? null,
+      currency: data.totals?.currency_code ?? data.currency_code ?? null,
+    },
+  });
+
+  const needsAttention = data.status === "approved" && (action === "refund" || action.startsWith("chargeback"));
+  if (!needsAttention) return { outcome: "processed" };
+  const note = `Paddle ${action} approved for workspace ${organizationId} (${data.subscription_id}): the subscription keeps its status — cancel it in Paddle if access should end`;
+  return { outcome: "processed", note, effects: [() => reportError(new Error(note), { route: "webhook:paddle", organizationId })] };
 }

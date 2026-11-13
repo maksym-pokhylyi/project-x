@@ -147,8 +147,9 @@ describe("POST /api/webhooks/paddle", () => {
         pausedAt: null,
         pastDueSince: null,
       });
-      expect(subscription?.currentPeriodStart?.toISOString()).toBe("2024-04-12T10:18:47.635Z");
-      expect(subscription?.currentPeriodEnd?.toISOString()).toBe("2024-05-12T10:18:47.635Z");
+      const period = envelope.data.current_billing_period as { starts_at: string; ends_at: string };
+      expect(subscription?.currentPeriodStart?.toISOString()).toBe(period.starts_at);
+      expect(subscription?.currentPeriodEnd?.toISOString()).toBe(period.ends_at);
       expect((await getOrgEntitlements(ORG)).planKey).toBe("pro");
       expect(await eventNames()).toContain("billing.subscription_started");
       const [audit] = await db.select().from(auditLog);

@@ -3,6 +3,7 @@ import { desc, eq, ilike, or, sql } from "drizzle-orm";
 import { ACTIVATION_EVENTS } from "@/config/events";
 import { PLANS, isBillingInterval, isPlanKey } from "@/config/plans";
 import { db } from "@/db";
+import { env } from "@/env";
 import { auditLog, errorLog, events, jobs, members, organizations, subscriptions, usageCounters, users, webhookEvents } from "@/db/schema";
 import { getAiSpendUsd, startOfUtcDay, startOfUtcMonth } from "@/lib/ai";
 import { getConfigWarnings, type ConfigWarning } from "@/lib/config-warnings";
@@ -89,10 +90,29 @@ export async function getAdminMetrics(now: Date = new Date()): Promise<AdminMetr
   };
 }
 
-/** Unsafe or incomplete configuration of this deployment (escape hatches, missing secrets). */
+/**
+ * Things the operator must act on: unsafe or incomplete configuration (escape hatches,
+ * missing secrets) and subscriptions we have stopped hearing about.
+ */
 export async function getAdminConfigWarnings(): Promise<ConfigWarning[]> {
   await requireAdmin();
-  return getConfigWarnings();
+  const warnings = getConfigWarnings();
+  const [lapsed] = await db
+    .select({ value: sql<number>`count(*)::int` })
+    .from(subscriptions)
+    .where(
+      sql`${subscriptions.status} in ('active', 'trialing') and ${subscriptions.currentPeriodEnd} < now() - make_interval(days => ${env.BILLING_PERIOD_END_GRACE_DAYS}::int)`,
+    );
+  if ((lapsed?.value ?? 0) > 0) {
+    warnings.push({
+      level: "error",
+      code: "SUBSCRIPTIONS_LAPSED",
+      message:
+        `${lapsed!.value} subscription(s) are still "active" here although their paid period ended more than ${env.BILLING_PERIOD_END_GRACE_DAYS} days ago — ` +
+        "a Paddle webhook was probably lost. Paid access is suspended for them; compare with Paddle (the daily reconciliation job corrects them when PADDLE_API_KEY is set).",
+    });
+  }
+  return warnings;
 }
 
 export async function getAdminActivity() {

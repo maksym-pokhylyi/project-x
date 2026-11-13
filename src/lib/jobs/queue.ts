@@ -18,6 +18,8 @@ export type JobPayloads = {
   "email.send": { outboxId: string };
   /** Housekeeping: expired rate-limit windows, old finished jobs, old outbox bodies. */
   "maintenance.cleanup": Record<string, never>;
+  /** Compare open subscriptions with the Paddle API (no-op without PADDLE_API_KEY). */
+  "billing.reconcile": Record<string, never>;
 };
 
 export type JobType = keyof JobPayloads;

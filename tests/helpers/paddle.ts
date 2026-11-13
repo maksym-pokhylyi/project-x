@@ -50,6 +50,8 @@ export function paddleEvent(
     userId?: string;
     /** Reuse a nonce (replay) instead of a fresh one. */
     nonce?: string;
+    /** Keep the fixture's own (2024) billing period instead of a current one. */
+    keepFixturePeriod?: boolean;
     priceId?: string;
     occurredAt?: string;
     eventId?: string;
@@ -69,6 +71,13 @@ export function paddleEvent(
         issuedAt: new Date(Date.parse(envelope.occurred_at) - 60_000),
         nonce: options.nonce,
       });
+    }
+    // Paid access follows the paid period (F-09): by default the period contains "now".
+    if (envelope.data.current_billing_period && !options.keepFixturePeriod) {
+      envelope.data.current_billing_period = {
+        starts_at: new Date(Date.now() - 86_400_000).toISOString(),
+        ends_at: new Date(Date.now() + 29 * 86_400_000).toISOString(),
+      };
     }
     const firstItem = envelope.data.items?.[0];
     if (firstItem) firstItem.price.id = options.priceId ?? "pri_test_pro_monthly";

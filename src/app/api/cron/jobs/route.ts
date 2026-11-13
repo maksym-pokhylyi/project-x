@@ -7,7 +7,8 @@ import { json, route } from "@/server/http";
 
 /**
  * Job worker tick, invoked by Vercel Cron (see vercel.json) with
- * `Authorization: Bearer $CRON_SECRET`. Also schedules the once-a-day maintenance job.
+ * `Authorization: Bearer $CRON_SECRET`. Also schedules the once-a-day maintenance and
+ * billing-reconciliation jobs.
  * Run it by hand:  curl -H "Authorization: Bearer $CRON_SECRET" https://<domain>/api/cron/jobs
  */
 export const maxDuration = 300;
@@ -26,6 +27,8 @@ export const GET = route(async (request, _context, { requestId }) => {
 
   const today = new Date().toISOString().slice(0, 10);
   await enqueueJob("maintenance.cleanup", {}, { dedupeKey: `maintenance.cleanup:${today}` });
+  // Once a day: catch subscription changes whose webhook never arrived (no-op without PADDLE_API_KEY).
+  await enqueueJob("billing.reconcile", {}, { dedupeKey: `billing.reconcile:${today}`, maxAttempts: 3 });
 
   // Leave headroom below maxDuration so the last job can finish.
   const summary = await runWorker({ maxJobs: 500, timeBudgetMs: 240_000 });
