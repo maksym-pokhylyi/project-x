@@ -74,6 +74,8 @@ const serverSchema = z.object({
   PADDLE_PRICE_PRO_ANNUAL: optional(z.string()),
   PADDLE_PRICE_BUSINESS_MONTHLY: optional(z.string()),
   PADDLE_PRICE_BUSINESS_ANNUAL: optional(z.string()),
+  /** The one-off Bid Pass price (BID_PASS in src/config/plans.ts). No purchase flow reads it yet. */
+  PADDLE_PRICE_BID_PASS: optional(z.string()),
   /** Days a past_due subscription keeps its paid entitlements. */
   BILLING_PAST_DUE_GRACE_DAYS: z.preprocess(emptyToUndefined, z.coerce.number().int().min(0).max(60).default(7)),
   /**

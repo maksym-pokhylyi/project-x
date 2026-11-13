@@ -1,22 +1,27 @@
 /**
- * Creates/updates the Paddle products and prices described by src/config/plans.ts.
+ * Creates/updates the Paddle products and prices described by src/config/plans.ts:
+ * every paid plan (monthly and annual, with the plan's trial where it has one) and the
+ * one-off Bid Pass, all in the catalogue currency (GBP).
  *
  *   PADDLE_API_KEY=... PADDLE_ENV=sandbox pnpm paddle:setup            # apply
  *   PADDLE_API_KEY=... PADDLE_ENV=sandbox pnpm paddle:setup --dry-run  # only print the plan
  *
  * Idempotent: objects are matched by the custom_data this script writes, so running it
- * again changes nothing unless the catalogue changed. If a price amount changed, a NEW
- * price is created and the old one archived (existing subscribers stay on the old price —
- * migrating them is a business decision, do it deliberately in Paddle).
+ * again changes nothing unless the catalogue changed. If a price's amount, currency, cycle
+ * or trial changed, a NEW price is created and the old one archived (existing subscribers
+ * stay on the old price — migrating them is a business decision, do it deliberately in
+ * Paddle).
  * Prints the PADDLE_PRICE_* env lines to set. The API key needs Product and Price write
  * permissions. Optional: PADDLE_TAX_CATEGORY (default "standard"; "saas" once approved).
  */
 import { Environment, LogLevel, Paddle, type TaxCategory } from "@paddle/paddle-node-sdk";
-import type { BillingInterval, PaidPlanKey } from "../src/config/plans";
 import {
   formatEnvLines,
   planPriceActions,
   planProductActions,
+  type CatalogueKey,
+  type DesiredPrice,
+  type PriceInterval,
   type RemotePrice,
   type RemoteProduct,
 } from "../src/lib/billing/paddle-catalogue";
@@ -61,16 +66,23 @@ async function listPrices(productId: string): Promise<RemotePrice[]> {
       currencyCode: price.unitPrice.currencyCode,
       interval: price.billingCycle?.interval ?? null,
       frequency: price.billingCycle?.frequency ?? null,
+      trial: price.trialPeriod ? { interval: price.trialPeriod.interval, frequency: price.trialPeriod.frequency } : null,
       customData: (price.customData as Record<string, unknown> | null) ?? null,
     });
   }
   return out;
 }
 
+/** "pro/month GBP 149.00, 14-day trial" */
+function describe(price: DesiredPrice): string {
+  const amount = `${price.currencyCode} ${(Number(price.amount) / 100).toFixed(2)}`;
+  return `${price.plan}/${price.interval} ${amount}${price.trialDays ? `, ${price.trialDays}-day trial` : ""}`;
+}
+
 async function main() {
   console.log(`Paddle ${environment}${dryRun ? " (dry run — nothing will be changed)" : ""}`);
   const products = await listProducts();
-  const priceIds: Array<{ plan: PaidPlanKey; interval: BillingInterval; id: string }> = [];
+  const priceIds: Array<{ plan: CatalogueKey; interval: PriceInterval; id: string }> = [];
 
   for (const action of planProductActions(products)) {
     const { desired } = action;
@@ -97,7 +109,7 @@ async function main() {
     const existingPrices = productId ? await listPrices(productId) : [];
     for (const priceAction of planPriceActions(desired.plan, existingPrices)) {
       const price = priceAction.desired;
-      const label = `${desired.plan}/${price.interval} ${price.currencyCode} ${(Number(price.amount) / 100).toFixed(2)}`;
+      const label = describe(price);
       if (priceAction.type === "keep") {
         console.log(`  = price  ${label} (${priceAction.id})`);
         priceIds.push({ plan: price.plan, interval: price.interval, id: priceAction.id });
@@ -110,7 +122,9 @@ async function main() {
         name: price.name,
         description: price.description,
         unitPrice: { amount: price.amount, currencyCode: price.currencyCode },
-        billingCycle: { interval: price.interval, frequency: 1 },
+        /* A one-off price (the Bid Pass) has no billing cycle and no trial. */
+        ...(price.interval === "once" ? {} : { billingCycle: { interval: price.interval, frequency: 1 } }),
+        ...(price.trialDays ? { trialPeriod: { interval: "day" as const, frequency: price.trialDays } } : {}),
         quantity: { minimum: 1, maximum: 1 },
         customData: price.customData,
       });

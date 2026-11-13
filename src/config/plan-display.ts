@@ -1,58 +1,92 @@
-import { PLANS, PLAN_KEYS, formatPrice, type BillingInterval, type PlanKey } from "./plans";
-import { site } from "./site";
+import {
+  ANNUAL_FREE_MONTHS,
+  BID_PASS,
+  COMPARISON_NONE,
+  PLANS,
+  PLAN_COMPARISON,
+  PLAN_KEYS,
+  formatPrice,
+  type BillingInterval,
+  type ComparisonGroup,
+  type ComparisonRow,
+  type ComparisonValue,
+  type PlanKey,
+} from "./plans";
 
 /**
- * Display adapter between the plan catalogue (src/config/plans.ts — the source of truth for
- * names, prices, seats and bullets) and the pricing UI: pricing cards, the landing-page
- * teaser, the comparison table and Settings → Billing all read from here.
+ * Display adapter between the plan catalogue (src/config/plans.ts — the single source of
+ * names, prices, limits and feature lines) and the pricing UI: the plan cards, the
+ * comparison table, the landing page and Billing all read from here.
  *
- * Pure data and pure functions: safe to import from client components.
- * What is NOT in the catalogue (the one-off Bid Pass, the comparison rows, trial wording)
- * lives in this file so that the catalogue's shape stays untouched.
+ * It only FORMATS: no figure or feature line is written in this file. Pure functions and
+ * data: safe to import from client components.
  */
+
+export type { ComparisonGroup, ComparisonRow, ComparisonValue };
+export { ANNUAL_FREE_MONTHS, COMPARISON_NONE };
+
+const SMALL_NUMBERS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"] as const;
+/** A small count as running text spells it: 2 -> "two". Larger numbers stay as figures. */
+export function inWords(count: number): string {
+  return SMALL_NUMBERS[count] ?? String(count);
+}
+
+/** "two months free" — how annual billing is described everywhere. */
+export const ANNUAL_SAVING = `${inWords(ANNUAL_FREE_MONTHS)} months free`;
 
 export type PlanPriceDisplay = {
   /** "£29", "£290", "£0" */
   amount: string;
   /** "a month" | "a year" | "" (free) */
   period: string;
-  /** Line under the price. */
+  /** The small line under the price: "or £290 a year" (monthly), "two months free" (annual), "" (free). */
   note: string;
+  /** Price and period in one phrase, for table heads and summaries: "£29 a month", "£0". */
+  line: string;
 };
+
+/** A feature line of a plan card. `lead` is the part set in bold ("3 full bids a month:"). */
+export type PlanFeatureLine = { lead: string | null; text: string };
 
 export type PlanDisplay = {
   key: PlanKey;
   name: string;
   summary: string;
-  /** "Everything in Radar Pro, and:" — the line above the bullets; null for the first plan. */
+  /** The summary in fewer words, for the narrow card on phones. */
+  summaryShort: string;
+  /** The plan in one line, for Billing. */
+  billingLine: string;
+  /** "Everything in Radar Pro, and:" — the line above the bullets; null for the first plans. */
   leadIn: string | null;
-  bullets: string[];
+  features: PlanFeatureLine[];
+  /** Label of the card's call to action on public pages. */
+  cta: string;
   recommended: boolean;
   seats: number | null;
-  /** Shown as a small line under the call to action, e.g. the trial terms. */
-  footnote: string | null;
+  trialDays: number | null;
+  /** Full bids included in the trial; null when the plan has no trial. */
+  trialFullBids: number | null;
   monthly: PlanPriceDisplay;
   annual: PlanPriceDisplay;
 };
 
-const FOOTNOTES: Record<PlanKey, string | null> = {
-  free: "No card needed.",
-  starter: "Pause or cancel in two clicks.",
-  pro: `${site.facts.trialDays}-day trial, card required. Pause or cancel in two clicks.`,
-  business: "Pause or cancel in two clicks.",
-};
-
 export function planPrice(key: PlanKey, interval: BillingInterval): PlanPriceDisplay {
   const prices = PLANS[key].prices;
-  if (!prices) return { amount: formatPrice(0), period: "", note: "Free. No time limit." };
-  if (interval === "year") {
-    return {
-      amount: formatPrice(prices.year),
-      period: "a year",
-      note: `Two months free. Works out at ${formatPrice(Math.round(prices.year / 12))} a month.`,
-    };
+  if (!prices) {
+    const amount = formatPrice(0);
+    return { amount, period: "", note: "", line: amount };
   }
-  return { amount: formatPrice(prices.month), period: "a month", note: "Billed monthly." };
+  if (interval === "year") {
+    const amount = formatPrice(prices.year);
+    return { amount, period: "a year", note: ANNUAL_SAVING, line: `${amount} a year` };
+  }
+  const amount = formatPrice(prices.month);
+  return { amount, period: "a month", note: `or ${formatPrice(prices.year)} a year`, line: `${amount} a month` };
+}
+
+function featureLine(line: string): PlanFeatureLine {
+  const colon = line.indexOf(": ");
+  return colon === -1 ? { lead: null, text: line } : { lead: line.slice(0, colon + 1), text: line.slice(colon + 2) };
 }
 
 export function planDisplay(key: PlanKey): PlanDisplay {
@@ -60,15 +94,20 @@ export function planDisplay(key: PlanKey): PlanDisplay {
   /* A highlight that starts "Everything in …" is the lead-in of the list, not a bullet. */
   const [first, ...rest] = plan.highlights;
   const inherits = first?.startsWith("Everything in ") ?? false;
+  const lines = inherits ? rest : plan.highlights;
   return {
     key,
     name: plan.name,
     summary: plan.description,
-    leadIn: inherits ? `${first}, and:` : null,
-    bullets: inherits ? rest : plan.highlights,
+    summaryShort: plan.descriptionShort,
+    billingLine: plan.summary,
+    leadIn: inherits ? (first ?? null) : null,
+    features: lines.map(featureLine),
+    cta: plan.cta,
     recommended: Boolean(plan.recommended),
     seats: plan.limits.seats,
-    footnote: FOOTNOTES[key],
+    trialDays: plan.trialDays ?? null,
+    trialFullBids: plan.trialFullBids ?? null,
     monthly: planPrice(key, "month"),
     annual: planPrice(key, "year"),
   };
@@ -76,98 +115,21 @@ export function planDisplay(key: PlanKey): PlanDisplay {
 
 export const PLAN_DISPLAYS: PlanDisplay[] = PLAN_KEYS.map(planDisplay);
 
-/** How many monthly payments an annual plan saves (10 × monthly = annual → 2). */
-export const ANNUAL_FREE_MONTHS = 2;
-
-/**
- * Bid Pass: one full bid, paid once, no subscription. Not a plan key — it is sold as a
- * one-off and shown as a first-class option next to the plans.
- */
-export const BID_PASS = {
-  name: "Bid Pass",
-  pricePence: 9900,
-  price: formatPrice(9900),
+/** The Bid Pass as shown to people. The figures come from the catalogue. */
+export const BID_PASS_DISPLAY = {
+  name: BID_PASS.name,
+  headline: BID_PASS.headline,
+  description: BID_PASS.description,
+  descriptionShort: BID_PASS.descriptionShort,
+  cta: BID_PASS.cta,
+  /** "£99" */
+  price: formatPrice(BID_PASS.price),
+  /** In pence, for structured data. */
+  pricePence: BID_PASS.price,
   period: "one-off",
-  summary: "One full bid, paid once. No subscription.",
-  audience: "For firms that bid a few times a year.",
-  bullets: [
-    "One full bid, from tender pack to Word export",
-    "Cited check and scored-question matrix",
-    "First drafts written only from your evidence",
-    "Evaluator-style marking",
-    "Works on any plan, including Free",
-  ],
-  footnote: "Nothing renews. Buy another when you next bid.",
+  /** "A Bid Pass adds one full bid for £99." */
+  shortLine: `A ${BID_PASS.name} adds one full bid for ${formatPrice(BID_PASS.price)}.`,
 } as const;
 
-/** A cell of the comparison table: text, or true (included) / false (not included). */
-export type ComparisonValue = string | boolean;
-
-export type ComparisonRow = {
-  label: string;
-  /** Short clarification under the label. */
-  detail?: string;
-  values: Record<PlanKey, ComparisonValue>;
-};
-
-export type ComparisonGroup = { title: string; rows: ComparisonRow[] };
-
-const seats = (key: PlanKey): string => {
-  const value = PLANS[key].limits.seats;
-  return value === null ? "Unlimited" : String(value);
-};
-
-/** Plan comparison (docs/product/SPEC.md §5). Seats come from the catalogue. */
-export const COMPARISON: ComparisonGroup[] = [
-  {
-    title: "Radar",
-    rows: [
-      {
-        label: "Supplier page and radar",
-        detail: "Open tenders like the ones you have won, contracts ending soon, buyers in your trade.",
-        values: { free: "Top 10 matches", starter: "Every match", pro: "Every match", business: "Every match" },
-      },
-      {
-        label: "Radar profiles",
-        detail: "A profile is a set of trades, regions and contract values to watch.",
-        values: { free: "1", starter: "5", pro: "5", business: "5" },
-      },
-      { label: "Email digest", values: { free: "Weekly", starter: "Daily", pro: "Daily", business: "Daily" } },
-      { label: "Deadline reminders for saved tenders", values: { free: true, starter: true, pro: true, business: true } },
-      { label: "Buyer and competitor watchlists", values: { free: false, starter: true, pro: true, business: true } },
-      { label: "Export to CSV", values: { free: false, starter: true, pro: true, business: true } },
-    ],
-  },
-  {
-    title: "Bids",
-    rows: [
-      {
-        label: "Cited bid checks",
-        detail: "Pass/fail requirements, key dates and scored questions, each quoted with file and page.",
-        values: { free: "1 in total", starter: "1 a month", pro: "With every bid", business: "With every bid" },
-      },
-      {
-        label: "Full bids",
-        detail: "Check, scored-question matrix, first drafts from your evidence, evaluator-style marking, Word export.",
-        values: { free: false, starter: false, pro: "3 a month", business: "10 a month" },
-      },
-      { label: "Unused bids roll over", values: { free: false, starter: false, pro: "One month", business: "One month" } },
-    ],
-  },
-  {
-    title: "Team",
-    rows: [
-      { label: "Seats", values: { free: seats("free"), starter: seats("starter"), pro: seats("pro"), business: seats("business") } },
-      { label: "Separate client workspaces", values: { free: false, starter: false, pro: false, business: true } },
-    ],
-  },
-  {
-    title: "Billing",
-    rows: [
-      { label: "Free trial", values: { free: false, starter: false, pro: `${site.facts.trialDays} days, card required`, business: false } },
-      { label: "Annual billing", values: { free: false, starter: "Two months free", pro: "Two months free", business: "Two months free" } },
-      { label: "Pause or cancel in two clicks", values: { free: false, starter: true, pro: true, business: true } },
-      { label: "Reminder before an annual renewal", values: { free: false, starter: "7 days before", pro: "7 days before", business: "7 days before" } },
-    ],
-  },
-];
+/** The comparison table, straight from the catalogue. */
+export const COMPARISON: ComparisonGroup[] = PLAN_COMPARISON;

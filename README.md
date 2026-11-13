@@ -221,6 +221,7 @@ real production deployment.
 | `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN` | prod | Paddle → Authentication → Client-side tokens | Overlay checkout |
 | `PADDLE_WEBHOOK_SECRET` | prod | Paddle → Notifications → destination secret | Verifying webhooks |
 | `PADDLE_PRICE_{STARTER,PRO,BUSINESS}_{MONTHLY,ANNUAL}` | prod | Printed by `pnpm paddle:setup` | Mapping plans ↔ Paddle prices |
+| `PADDLE_PRICE_BID_PASS` | prod, once passes are sold | Printed by `pnpm paddle:setup` | The one-off Bid Pass price (`BID_PASS` in `src/config/plans.ts`) |
 | `BILLING_PAST_DUE_GRACE_DAYS` | no (7) | — | Days of paid access after a failed renewal |
 | `BILLING_PERIOD_END_GRACE_DAYS` | no (3) | — | Fail-safe: days after the paid period's end before an `active` subscription stops granting its plan when no renewal reached us |
 | `PADDLE_WEBHOOK_TOLERANCE_SECONDS` | no (300) | — | Max age of a webhook signature |
@@ -423,7 +424,11 @@ switch billing OFF (checkout disabled, webhook answers 503) unless `ALLOW_SANDBO
 
 1. Create a sandbox account; create an API key and a client-side token.
 2. `PADDLE_API_KEY=… PADDLE_ENV=sandbox pnpm paddle:setup` → paste the printed
-   `PADDLE_PRICE_*` lines into your env.
+   `PADDLE_PRICE_*` lines into your env. It creates one product per paid plan with a
+   monthly and an annual price, and the one-off Bid Pass, all in the catalogue currency
+   (`PLAN_CURRENCY`, GBP); a plan with `trialDays` gets that trial on its prices. Run it
+   with `--dry-run` first: prices left in another currency or without the trial are shown
+   as replaced (a new price is created and the old one archived).
 3. Notifications → new destination → URL `https://<domain>/api/webhooks/paddle`, select the
    events listed above → copy its secret into `PADDLE_WEBHOOK_SECRET`.
 4. Checkout → Checkout settings: set the default payment link to your domain and add the

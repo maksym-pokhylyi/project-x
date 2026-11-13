@@ -357,10 +357,27 @@ describe("plan gating adapter", () => {
   it("falls back to Free behaviour when the radar keys are absent", () => {
     const access = radarAccess({ features: PLANS.free.features, limits: PLANS.free.limits, plan: PLANS.free });
     expect(access).toMatchObject({ full: false, matchLimit: 10, maxProfiles: 1 });
-    // A paid plan without the keys is still treated as Free for the radar.
-    expect(radarAccess({ features: PLANS.pro.features, limits: PLANS.pro.limits, plan: PLANS.pro })).toMatchObject({ full: false, matchLimit: 10, maxProfiles: 1 });
+    // A paid plan without the keys is still treated as Free for the radar. (The catalogue
+    // defines the keys now, so "absent" is simulated by stripping them.)
+    const withoutRadarKeys = <T extends object>(record: T) => Object.fromEntries(Object.entries(record).filter(([key]) => !key.startsWith("radar."))) as unknown as T;
+    expect(radarAccess({ features: withoutRadarKeys(PLANS.pro.features), limits: withoutRadarKeys(PLANS.pro.limits), plan: PLANS.pro })).toMatchObject({
+      full: false,
+      matchLimit: 10,
+      maxProfiles: 1,
+    });
     expect(canAddRadarSource(access, 0)).toBe(true);
     expect(canAddRadarSource(access, 1)).toBe(false);
+  });
+
+  it("gives every paid plan of the real catalogue the full radar, and Free the capped one", () => {
+    for (const key of ["starter", "pro", "business"] as const) {
+      const plan = PLANS[key];
+      expect(radarAccess({ features: plan.features, limits: plan.limits, plan }), key).toMatchObject({ full: true, matchLimit: null, maxProfiles: plan.limits["radar.profiles"] });
+    }
+    // "Top 10 matches" on the pricing page is the cap the radar applies.
+    const free = radarAccess({ features: PLANS.free.features, limits: PLANS.free.limits, plan: PLANS.free });
+    expect(free.matchLimit).toBe(PLANS.free.limits["radar.matches"]);
+    expect(free.maxProfiles).toBe(PLANS.free.limits["radar.profiles"]);
   });
 
   it("honours radar.full and radar.profiles when the catalogue defines them", () => {
