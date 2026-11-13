@@ -230,10 +230,16 @@ test("sign up, verify e-mail through the dev outbox, land in an auto-created wor
 
   await followOutboxLink(page, owner.email, "verify-email");
   await expect(page).toHaveURL(/\/app$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Welcome, Olivia" })).toBeVisible();
+  // Home of the app is the Radar; a new workspace is offered the two ways to set it up.
+  await expect(page.getByRole("heading", { level: 1, name: "Radar" })).toBeVisible();
+  await expect(page.getByTestId("radar-onboarding")).toBeVisible();
   await expect(page.getByTestId("current-workspace-name").first()).toHaveText("Olivia's workspace");
   await expectPlanBadge(page, "Free");
-  await expect(page.getByTestId("onboarding-checklist")).toContainText("0 of 3 steps completed");
+  // A field and the button beside it always share one height (design-system rule).
+  const searchRow = page.getByTestId("radar-onboarding").getByRole("search");
+  const fieldHeight = (await searchRow.getByRole("searchbox").boundingBox())!.height;
+  const buttonHeight = (await searchRow.getByRole("button", { name: "Search" }).boundingBox())!.height;
+  expect(Math.abs(fieldHeight - buttonHeight), `search field ${fieldHeight}px vs button ${buttonHeight}px`).toBeLessThanOrEqual(0.5);
 });
 
 test("rename the workspace", async () => {
@@ -252,7 +258,7 @@ test("rename the workspace", async () => {
   await expect(page.getByTestId("current-workspace-name").first()).toHaveText(WORKSPACE);
 
   await page.goto("/app");
-  await expect(page.getByTestId("onboarding-checklist")).toContainText("1 of 3 steps completed");
+  await expect(page.getByRole("heading", { level: 1, name: "Radar" })).toBeVisible();
 });
 
 test("upload a workspace logo through the storage abstraction", async () => {
@@ -408,7 +414,7 @@ test("sign out and back in: workspace, members and settings persisted", async ()
   await page.goto("/app/settings/members");
   await expect(page.getByTestId("member-row")).toHaveCount(2);
   await page.goto("/app");
-  await expect(page.getByTestId("onboarding-checklist")).toContainText("2 of 3 steps completed");
+  await expect(page.getByRole("heading", { level: 1, name: "Radar" })).toBeVisible();
 });
 
 test("/admin is forbidden for non-admins", async () => {
@@ -504,7 +510,7 @@ test("a verification link opened in another browser asks for a password instead 
   await page.getByLabel("Password").fill("chosen-by-the-owner-2");
   await page.getByRole("button", { name: "Confirm e-mail and set password" }).click();
   await expect(page).toHaveURL(/\/app$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Welcome, Vera" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Radar" })).toBeVisible();
 
   // The password chosen before the mailbox was proven is dead.
   await signIn(attacker, { email: victim.email, password: "attacker-knows-this-1" });
@@ -543,7 +549,7 @@ test("owner can export the workspace, delete it, and delete the account", async 
   await expect(page).toHaveURL(/\/app$/);
   // The user always has a workspace: a fresh personal one replaces it.
   await expect(page.getByTestId("current-workspace-name").first()).toHaveText("Dana's workspace");
-  await expect(page.getByTestId("onboarding-checklist")).toContainText("0 of 3 steps completed");
+  await expect(page.getByTestId("radar-onboarding")).toBeVisible();
 
   // Delete the account: e-mail and password must be confirmed.
   await page.goto("/app/settings/profile");

@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { NativeSelect } from "@/components/forms/native-select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { removeRadarSourceAction } from "../actions";
 import { cpvDivisionLabel } from "../domain/cpv";
@@ -62,13 +63,7 @@ export function RadarOnboarding() {
           <label htmlFor="radar-find" className="sr-only">
             Company name or Companies House number
           </label>
-          <input
-            id="radar-find"
-            name="q"
-            type="search"
-            placeholder="Company name or number"
-            className="h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          />
+          <Input id="radar-find" name="q" type="search" placeholder="Company name or number" />
           <Button type="submit">Search</Button>
         </form>
       </section>
