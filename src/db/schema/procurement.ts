@@ -286,6 +286,8 @@ export const awards = pgTable(
     supplierId: text("supplier_id")
       .notNull()
       .references(() => suppliers.id, { onDelete: "cascade" }),
+    /** What identified the supplier in this notice: coh | ppon | register | name (matched on its registered name). */
+    supplierBasis: text("supplier_basis").notNull().default("coh"),
     buyerId: text("buyer_id").references(() => buyers.id, { onDelete: "set null" }),
     title: text("title").notNull(),
     cpvMain: text("cpv_main"),

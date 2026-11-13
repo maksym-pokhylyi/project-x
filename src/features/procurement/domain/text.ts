@@ -21,6 +21,20 @@ const STOP_WORDS = new Set(
   ).split(/\s+/),
 );
 
+/**
+ * Words that say something only next to another word: "grounds maintenance" is a trade,
+ * "maintenance" alone is not. Kept inside pairs, never as a keyword on their own.
+ */
+const WEAK_WORDS = new Set(
+  (
+    "maintenance repair repairs design installation install installing installations consultancy consulting consultant consultants provider providers " +
+    "materials equipment hire rental only savings transformation improvement improvements development review assessment assessments " +
+    "specialist technical professional minor major small medium large kit access public sector wider " +
+    "building buildings property properties office offices facilities facility community centre center " +
+    "data digital platform online products goods items upgrade upgrades supply advice advisory planning strategy"
+  ).split(/\s+/),
+);
+
 export function tokenise(text: string | null | undefined): string[] {
   if (!text) return [];
   return text
@@ -52,7 +66,7 @@ export function termsOf(text: string | null | undefined): string[] {
       previous = null;
       continue;
     }
-    out.add(token);
+    if (!WEAK_WORDS.has(token)) out.add(token);
     if (previous) out.add(`${previous} ${token}`);
     previous = token;
   }
@@ -73,7 +87,7 @@ export function topKeywords(documents: Array<{ text: string | null | undefined; 
       count.set(term, (count.get(term) ?? 0) + 1);
     }
   }
-  const minCount = documents.length >= 4 ? 2 : 1;
+  const minCount = documents.length >= 6 ? 2 : 1;
   const candidates = [...score.entries()]
     .filter(([term]) => (count.get(term) ?? 0) >= minCount)
     .map(([term, value]) => ({ term, value: value * (term.includes(" ") ? 1.6 : 1), count: count.get(term) ?? 0 }))

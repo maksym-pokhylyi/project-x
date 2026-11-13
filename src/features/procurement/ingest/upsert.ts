@@ -316,7 +316,7 @@ export async function upsertBatch(db: SqlExecutor, input: readonly MappedRelease
   }
   await bulkUpsert(db, awards, awardRows, {
     columns: [
-      "id", "noticeId", "releaseId", "ocid", "awardRef", "contractRef", "lotKey", "lots", "supplierId", "buyerId", "title", "cpvMain", "cpvCodes",
+      "id", "noticeId", "releaseId", "ocid", "awardRef", "contractRef", "lotKey", "lots", "supplierId", "supplierBasis", "buyerId", "title", "cpvMain", "cpvCodes",
       "cpvDivisions", "cpvGroups", "cpvClasses", "category", "valueAmount", "valueGross", "currency", "valueShared", "suppliersCount", "status",
       "effectiveStatus", "awardedAt", "signedAt", "contractStart", "contractEnd", "maxExtentEnd", "hasRenewal", "procedure", "competition",
       "aboveThreshold", "isFramework", "noticeType", "publishedAt", "regionCodes", "regions",
@@ -324,7 +324,7 @@ export async function upsertBatch(db: SqlExecutor, input: readonly MappedRelease
     conflict: ["id"],
     // effective_status is owned by the recompute step below once the row exists.
     update: [
-      "noticeId", "releaseId", "ocid", "awardRef", "contractRef", "lotKey", "lots", "supplierId", "buyerId", "title", "cpvMain", "cpvCodes", "cpvDivisions",
+      "noticeId", "releaseId", "ocid", "awardRef", "contractRef", "lotKey", "lots", "supplierId", "supplierBasis", "buyerId", "title", "cpvMain", "cpvCodes", "cpvDivisions",
       "cpvGroups", "cpvClasses", "category", "valueAmount", "valueGross", "currency", "valueShared", "suppliersCount", "status", "awardedAt", "signedAt",
       "contractStart", "contractEnd", "maxExtentEnd", "hasRenewal", "procedure", "competition", "aboveThreshold", "isFramework", "noticeType",
       "publishedAt", "regionCodes", "regions",
@@ -458,12 +458,20 @@ export async function recomputeProcurements(db: SqlExecutor, ocids: string[]): P
     )
     update notices n set is_latest = (r.rn = 1) from ranked r where n.id = r.id and n.is_latest is distinct from (r.rn = 1)
   `);
+  // An award row is superseded by any LATER notice of the same procurement that names the same
+  // supplier for the same lots, or for a set of lots that includes one of them: a contract
+  // details notice (UK7) often rolls several per-lot awards (UK6) into one contract.
   await db.execute(sql`
-    with ranked as (
-      select id, row_number() over (partition by ocid, supplier_id, lot_key order by published_at desc, release_id desc, id) as rn
-      from awards where ocid = any(${list})
+    with flagged as (
+      select a.id, not exists (
+        select 1 from awards b
+        where b.ocid = a.ocid and b.supplier_id = a.supplier_id and b.id <> a.id
+          and (b.published_at, b.release_id) > (a.published_at, a.release_id)
+          and (b.lot_key = a.lot_key or b.lots && a.lots)
+      ) as current
+      from awards a where a.ocid = any(${list})
     )
-    update awards a set is_current = (r.rn = 1) from ranked r where a.id = r.id and a.is_current is distinct from (r.rn = 1)
+    update awards a set is_current = f.current from flagged f where a.id = f.id and a.is_current is distinct from f.current
   `);
   await db.execute(sql`
     with groups as (
@@ -509,6 +517,21 @@ export async function recomputeProcurements(db: SqlExecutor, ocids: string[]): P
 /** Awards that count as wins: everything published except cancelled / unsuccessful ones. */
 export const WON_STATUSES_SQL = sql`('pending', 'active', 'terminated')`;
 
+/**
+ * SQL for "contracts": current, counted award rows rolled up per procurement (ocid), so a
+ * framework awarded in twenty lots is one contract, not twenty. The value is attributed to
+ * the supplier only when it is theirs alone: never for shared awards or framework ceilings,
+ * and a figure repeated on every lot is counted once.
+ * Expects `a` to be the awards alias; group by a.ocid (plus whatever else the caller needs).
+ */
+export const CONTRACT_VALUE_SQL = sql`
+  case
+    when bool_or(a.value_shared or a.is_framework or coalesce(a.currency, 'GBP') <> 'GBP') then null
+    when count(distinct a.value_amount) = 1 then max(a.value_amount)
+    else sum(a.value_amount)
+  end`;
+export const AWARD_DATE_SQL = sql`least(coalesce(a.awarded_at, a.published_at), a.published_at)`;
+
 export async function recomputeSupplierStats(db: SqlExecutor, supplierIds: string[]): Promise<void> {
   if (supplierIds.length === 0) return;
   await db.execute(sql`
@@ -522,14 +545,14 @@ export async function recomputeSupplierStats(db: SqlExecutor, supplierIds: strin
       select ids.id, agg.n, agg.total, agg.buyers, agg.first_at, agg.last_at
       from unnest(${textArrayParam(supplierIds)}) as ids(id)
       left join lateral (
-        select count(*) as n,
-          -- Never attribute shared or framework ceilings to a single supplier.
-          sum(a.value_amount) filter (where not a.value_shared and not a.is_framework and a.competition <> 'framework_setup' and coalesce(a.currency, 'GBP') = 'GBP' and a.value_amount < 1000000000) as total,
-          count(distinct a.buyer_id) as buyers,
-          min(least(coalesce(a.awarded_at, a.published_at), a.published_at)) as first_at,
-          max(least(coalesce(a.awarded_at, a.published_at), a.published_at)) as last_at
-        from awards a
-        where a.supplier_id = ids.id and a.is_current and a.effective_status in ${WON_STATUSES_SQL}
+        select count(*) as n, sum(c.value) filter (where c.value < 1000000000) as total, count(distinct c.buyer_id) as buyers,
+               min(c.first_at) as first_at, max(c.last_at) as last_at
+        from (
+          select a.ocid, max(a.buyer_id) as buyer_id, ${CONTRACT_VALUE_SQL} as value, min(${AWARD_DATE_SQL}) as first_at, max(${AWARD_DATE_SQL}) as last_at
+          from awards a
+          where a.supplier_id = ids.id and a.is_current and a.effective_status in ${WON_STATUSES_SQL}
+          group by a.ocid
+        ) c
       ) agg on true
     ) x
     where s.id = x.id and s.merged_into is null
@@ -547,16 +570,20 @@ export async function recomputeBuyerStats(db: SqlExecutor, buyerIds: string[]): 
       awards_count = coalesce(x.awards, 0),
       awards_value = coalesce(x.total, 0)
     from (
-      select ids.id, n.notices, n.last_at, a.awards, a.total
+      select ids.id, n.notices, n.last_at, c.awards, c.total
       from unnest(${textArrayParam(buyerIds)}) as ids(id)
       left join lateral (
         select count(distinct ocid) as notices, max(published_at) as last_at from notices where buyer_id = ids.id
       ) n on true
       left join lateral (
-        select count(*) as awards,
-          sum(value_amount) filter (where not value_shared and not is_framework and coalesce(currency, 'GBP') = 'GBP' and value_amount < 1000000000) as total
-        from awards where buyer_id = ids.id and is_current and effective_status in ${WON_STATUSES_SQL}
-      ) a on true
+        select count(*) as awards, sum(k.value) filter (where k.value < 1000000000) as total
+        from (
+          select a.ocid, a.supplier_id, ${CONTRACT_VALUE_SQL} as value
+          from awards a
+          where a.buyer_id = ids.id and a.is_current and a.effective_status in ${WON_STATUSES_SQL}
+          group by a.ocid, a.supplier_id
+        ) k
+      ) c on true
     ) x
     where b.id = x.id and b.merged_into is null
   `);

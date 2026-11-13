@@ -6,6 +6,7 @@ import {
   cleanName,
   hostOf,
   isPlaceholderSupplierName,
+  legalSuffix,
   normaliseCompanyNumber,
   normaliseName,
   postcodeArea,
@@ -48,7 +49,11 @@ export type MappedBuyer = {
 
 export type MappedSupplier = {
   partyId: string;
-  /** Strong identifiers first ("GB-COH:…", "GB-PPON:…", other registers); a lone "NAME:…" key when there is none. */
+  /**
+   * Strong identifiers first ("GB-COH:…", "GB-PPON:…", other registers), then "NAME:…" when
+   * the name can stand in for an identifier: always for registered company names (Ltd, PLC,
+   * LLP, CIC — unique at Companies House), otherwise only when nothing else is published.
+   */
   keys: string[];
   /** What the identity rests on in THIS release. */
   identityBasis: "coh" | "ppon" | "register" | "name";
@@ -161,6 +166,8 @@ export type MappedAward = {
   lotKey: string;
   lots: string[];
   supplierPartyId: string;
+  /** What identified the supplier in THIS notice: coh | ppon | register | name. */
+  supplierBasis: string;
   title: string;
   cpvMain: string | null;
   cpvCodes: string[];
@@ -390,7 +397,9 @@ export function mapSupplierParty(party: OcdsParty): MappedSupplier | null {
   if (ppon) keys.push(`GB-PPON:${ppon}`);
   keys.push(...registers);
   const identityBasis: MappedSupplier["identityBasis"] = coh ? "coh" : ppon ? "ppon" : registers.length > 0 ? "register" : "name";
-  if (keys.length === 0) keys.push(`NAME:${nameNorm}`);
+  const suffix = legalSuffix(name);
+  const registeredName = suffix === "ltd" || suffix === "plc" || suffix === "llp" || suffix === "cic";
+  if (keys.length === 0 || registeredName) keys.push(`NAME:${nameNorm}`);
   const legal = classifyLegalForm({ coh, name, otherSchemes: registers.map((key) => key.split(":")[0]!) });
   const scale = party.details?.scale === "sme" ? "sme" : party.details?.scale === "large" ? "large" : null;
   const facts = addressFacts(party);
@@ -604,6 +613,7 @@ export function mapRelease(release: OcdsRelease): MappedRelease | null {
           lotKey: lots.join(","),
           lots,
           supplierPartyId: supplier.partyId,
+          supplierBasis: supplier.identityBasis,
           title,
           cpvMain: codes[0] ?? null,
           cpvCodes: codes,

@@ -98,7 +98,10 @@ export function resolveEntities(records: readonly OrgRecord[], existing: Readonl
       if (!hits.includes(root)) hits.push(root);
     }
 
-    let target = hits.find((id) => compatible(ownExclusive, exclusive(id)));
+    // Prefer the entity that already holds an exclusive identifier (the company number):
+    // weaker rows fold into it, never the other way round.
+    const usable = hits.filter((id) => compatible(ownExclusive, exclusive(id)));
+    let target = usable.find((id) => exclusive(id).size > 0) ?? usable[0];
     if (!target) {
       target = stableId(options.idPrefix, keys[0]!);
       if (!created.has(target)) created.set(target, keys[0]!);

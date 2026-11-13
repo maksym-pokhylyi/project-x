@@ -31,9 +31,9 @@ export function cpvClass(code: string): string | null {
   return cpvStem(code).length >= 4 ? code.slice(0, 4) : null;
 }
 
-/** Prefixes of a code at depths 2..5 that the code actually specifies. */
+/** Every prefix the code actually specifies, from the division down to its full stem: "45261000" -> ["45", "452", "4526", "45261"]. */
 export function cpvPrefixes(code: string): string[] {
-  const depth = Math.min(5, cpvStem(code).length);
+  const depth = cpvStem(code).length;
   const out: string[] = [];
   for (let length = 2; length <= depth; length += 1) out.push(code.slice(0, length));
   return out;

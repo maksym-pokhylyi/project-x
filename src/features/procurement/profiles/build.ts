@@ -1,8 +1,10 @@
 import { sql } from "drizzle-orm";
 import { supplierProfiles } from "../../../db/schema/procurement";
 import { buildSupplierProfile, type ProfileAward } from "../domain/profile";
-import { bulkUpsert, chunk, iso, num, queryRows, str, strArray, textArrayParam, type SqlExecutor } from "../ingest/sql";
-import { WON_STATUSES_SQL } from "../ingest/upsert";
+import { bulkUpsert, chunk, iso, num, queryRows, str, textArrayParam, type SqlExecutor } from "../ingest/sql";
+import { AWARD_DATE_SQL, CONTRACT_VALUE_SQL, WON_STATUSES_SQL } from "../ingest/upsert";
+
+const splitList = (value: unknown): string[] => [...new Set(String(value ?? "").split(",").filter(Boolean))];
 
 /**
  * Rebuilds `supplier_profiles` for the given suppliers from their current awards.
@@ -18,11 +20,20 @@ export async function rebuildSupplierProfiles(db: SqlExecutor, supplierIds: read
       queryRows<Record<string, unknown>>(db, sql`select id, name, region from suppliers where id = any(${list}) and merged_into is null`),
       queryRows<Record<string, unknown>>(
         db,
+        // One input row per procurement (ocid): lots of one framework are one contract.
         sql`
-          select a.supplier_id, a.title, a.cpv_codes, a.regions, a.value_amount, a.currency, a.value_shared, a.is_framework, a.competition,
-                 least(coalesce(a.awarded_at, a.published_at), a.published_at) as award_date, a.buyer_id, b.name as buyer_name
+          select a.supplier_id, a.ocid,
+                 left(string_agg(distinct a.title, ' | '), 600) as title,
+                 string_agg(array_to_string(a.cpv_codes, ','), ',' order by a.published_at desc, a.id) as cpv_codes,
+                 string_agg(array_to_string(a.regions, ','), ',') as regions,
+                 ${CONTRACT_VALUE_SQL} as value_amount,
+                 min(a.competition) as competition,
+                 max(${AWARD_DATE_SQL}) as award_date,
+                 max(a.buyer_id) as buyer_id,
+                 max(b.name) as buyer_name
           from awards a left join buyers b on b.id = a.buyer_id
           where a.supplier_id = any(${list}) and a.is_current and a.effective_status in ${WON_STATUSES_SQL}
+          group by a.supplier_id, a.ocid
         `,
       ),
     ]);
@@ -32,12 +43,13 @@ export async function rebuildSupplierProfiles(db: SqlExecutor, supplierIds: read
     for (const row of awardRows) {
       const award: ProfileAward = {
         title: String(row.title ?? ""),
-        cpvCodes: strArray(row.cpv_codes),
-        regions: strArray(row.regions),
+        cpvCodes: splitList(row.cpv_codes),
+        regions: splitList(row.regions),
+        // Already attributable (shared values and framework ceilings arrive as null).
         valueAmount: num(row.value_amount),
-        currency: str(row.currency),
-        valueShared: row.value_shared === true,
-        isFramework: row.is_framework === true,
+        currency: "GBP",
+        valueShared: false,
+        isFramework: false,
         competition: String(row.competition ?? "unknown"),
         date: iso(row.award_date) ?? now.toISOString(),
         buyerId: str(row.buyer_id),
