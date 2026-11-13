@@ -1,4 +1,3 @@
-import "./bid-theme.css";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { BidAccessSummary } from "@/features/bids/access";
@@ -14,7 +13,7 @@ function Offer({ offer, children, primary, testId }: { offer: (typeof OFFERS)[ke
     <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-2 rounded-card border border-line bg-surface px-5 py-4" data-testid={testId}>
       <p className="flex flex-wrap items-baseline gap-x-2">
         <span className="text-15 font-semibold">{offer.name}</span>
-        <span className="bid-serif text-2xl leading-none font-semibold">{offer.price}</span>
+        <span className="font-serif text-2xl leading-none font-semibold">{offer.price}</span>
         <span className="text-13 text-ink-2">{offer.cadence}</span>
       </p>
       <p className="text-sm text-ink">{children}</p>
@@ -83,7 +82,7 @@ export function UpgradePanel({
 
   return (
     <section aria-labelledby="upgrade-h" className={cn("rounded-card bg-paper-deep px-5 py-5 sm:px-6", className)} data-testid="upgrade-panel" data-moment={moment}>
-      <h2 id="upgrade-h" className="bid-h3">
+      <h2 id="upgrade-h" className="text-15 font-semibold">
         {title}
       </h2>
       <p className="mt-1.5 max-w-[720px] text-15" data-testid="quota-reached">
@@ -92,7 +91,7 @@ export function UpgradePanel({
       {moment === "none_left" && onBidPlan && !fullBids.trial ? (
         <p className="mt-3 text-sm">
           <span className="font-semibold">Full bids</span> <span className="text-ink-2">· {month(new Date(fullBids.renewsAt.getTime() - 1))}</span>{" "}
-          <span className="bid-mono ml-2 text-13">
+          <span className="font-mono ml-2 text-13">
             {fullBids.used} of {fullBids.used + (fullBids.remaining ?? 0)} used
           </span>
         </p>
@@ -134,7 +133,7 @@ export function UpgradePanel({
         {moment === "none_left" && onBidPlan ? (
           <>Or wait until {renews}.</>
         ) : (
-          <Link href={PLANS_URL} className="bid-link text-ink">
+          <Link href={PLANS_URL} className="link text-ink">
             {moment === "locked" ? "Compare the plans" : "Compare the plans in full"}
           </Link>
         )}

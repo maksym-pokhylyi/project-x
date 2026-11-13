@@ -9,11 +9,12 @@ import { VERDICT_LABELS, type VerdictKey } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
 import { requireOrgForPage } from "@/server/session";
 import { ButtonLink } from "@/components/ui/button-link";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Bids" };
 export const dynamic = "force-dynamic";
 
-const VERDICT_PILL: Record<VerdictKey, string> = { looks_biddable: "bid-pill-met", biddable_with_gaps: "bid-pill-amber", likely_not_eligible: "bid-pill-gap", not_enough_information: "bid-pill-neutral" };
+const VERDICT_BADGE = { looks_biddable: "success", biddable_with_gaps: "warning", likely_not_eligible: "destructive", not_enough_information: "secondary" } as const satisfies Record<VerdictKey, string>;
 const day = (date: Date) => new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" }).format(date);
 const plural = (count: number, one: string, many = `${one}s`) => (count === 1 ? one : many);
 
@@ -55,7 +56,7 @@ function UsageLine({ access }: { access: BidAccessSummary }) {
   }
   return (
     <p className="text-sm" data-testid="usage-line">
-      <span className="bid-serif text-xl font-semibold">{lead}</span> <span>{rest}</span>
+      <span className="font-serif text-xl font-semibold">{lead}</span> <span>{rest}</span>
       {fullBids.rolledOver ? (
         <span className="text-ink-2">
           {" · "}
@@ -69,7 +70,7 @@ function UsageLine({ access }: { access: BidAccessSummary }) {
         </span>
       ) : null}
       {" · "}
-      <Link href={UPGRADE_URL} className="bid-link text-ink">
+      <Link href={UPGRADE_URL} className="link text-ink">
         Billing
       </Link>
     </p>
@@ -87,9 +88,9 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
   const now = new Date();
 
   return (
-    <div className="bid-scope flex flex-col">
+    <div className="text-15 text-ink flex flex-col">
       <div className=" flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
-        <h1 className="bid-h1">Bids</h1>
+        <h1 className="type-title [overflow-wrap:anywhere]">Bids</h1>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           <UsageLine access={access} />
           <ButtonLink href="/app/bids/new"  data-testid="new-bid">
@@ -99,28 +100,28 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
       </div>
 
       {visible.length === 0 ? (
-        <section className="bid-card mt-7 flex flex-col items-start gap-4 px-6 py-9 sm:px-9" data-testid="bids-empty">
-          <h2 className="bid-h2">No bids yet</h2>
+        <section className="rounded-card border border-line bg-surface mt-7 flex flex-col items-start gap-4 px-6 py-9 sm:px-9" data-testid="bids-empty">
+          <h2 className="type-section">No bids yet</h2>
           <p className="max-w-[620px] text-17 leading-[1.45]">Upload a tender pack and get every requirement quoted and cited, checked against your company, with a plain verdict.</p>
           <div className=" flex flex-wrap items-center gap-x-5 gap-y-3">
             <ButtonLink href="/app/bids/new">
               New bid check
             </ButtonLink>
-            <Link href="/sample-check" className="bid-link text-15 font-medium text-ink">
+            <Link href="/sample-check" className="link text-15 font-medium text-ink">
               See a sample check
             </Link>
           </div>
           <ol className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-15 text-ink-2">
             {["Upload the pack", "Read the check", "Draft and mark your answers"].map((step, index) => (
               <li key={step} className="flex items-center gap-2">
-                <span className="bid-mono flex size-6 items-center justify-center rounded-full border border-line-strong text-xs text-ink">{index + 1}</span>
+                <span className="font-mono flex size-6 items-center justify-center rounded-full border border-line-strong text-xs text-ink">{index + 1}</span>
                 {step}
               </li>
             ))}
           </ol>
         </section>
       ) : (
-        <div className="bid-card mt-7 overflow-hidden">
+        <div className="rounded-card border border-line bg-surface mt-7 overflow-hidden">
           <div className="hidden grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,0.9fr)] gap-x-6 border-b border-line px-6 py-3 text-13 font-semibold text-ink-2 min-[900px]:grid" aria-hidden>
             <span>Tender</span>
             <span>Deadline</span>
@@ -138,13 +139,13 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
                   key={bid.id}
                   className={cn(
                     "grid grid-cols-1 gap-x-6 gap-y-2 px-5 py-4 sm:px-6 min-[900px]:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,0.9fr)] min-[900px]:items-center",
-                    index > 0 ? "bid-rule" : "",
+                    index > 0 ? "border-t border-line" : "",
                   )}
                   data-testid="bid-row"
                 >
                   <div className="min-w-0">
                     <h2 className="text-15 leading-[1.35] font-semibold">
-                      <Link href={href} className="bid-link text-ink">
+                      <Link href={href} className="link text-ink">
                         {bid.title}
                       </Link>
                     </h2>
@@ -166,10 +167,10 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
                   </p>
                   <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
                     <span className={bid.status === "failed" ? "font-medium text-danger" : undefined}>{stageOf(bid)}</span>
-                    {bid.accessSource === "credit" ? <span className="bid-tag">Bid Pass</span> : null}
-                    {bid.accessLevel === "brief" && bid.status === "ready" ? <span className="bid-tag">Check only</span> : null}
+                    {bid.accessSource === "credit" ? <span className="rounded-chip border border-line-strong px-2 py-0.5 text-xs font-semibold whitespace-nowrap">Bid Pass</span> : null}
+                    {bid.accessLevel === "brief" && bid.status === "ready" ? <span className="rounded-chip border border-line-strong px-2 py-0.5 text-xs font-semibold whitespace-nowrap">Check only</span> : null}
                   </p>
-                  <p className="text-sm">{verdict ? <span className={cn("bid-pill", VERDICT_PILL[verdict])}>{VERDICT_LABELS[verdict]}</span> : <span className="text-ink-2">No verdict yet</span>}</p>
+                  <p className="text-sm">{verdict ? <Badge variant={VERDICT_BADGE[verdict]}>{VERDICT_LABELS[verdict]}</Badge> : <span className="text-ink-2">No verdict yet</span>}</p>
                   <p className="text-sm text-ink-2">{lastActivity(bid.updatedAt, now)}</p>
                 </li>
               );
@@ -180,7 +181,7 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
 
       <p className="mt-5 text-sm text-ink-2">
         A bid starts as a cited bid check. Drafts and marking are added as you work through it.{" "}
-        <Link href={showArchived ? "/app/bids" : "/app/bids?archived=1"} className="bid-link text-ink">
+        <Link href={showArchived ? "/app/bids" : "/app/bids?archived=1"} className="link text-ink">
           {showArchived ? "Hide archived bids" : "Show archived bids"}
         </Link>
       </p>

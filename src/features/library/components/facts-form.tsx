@@ -12,6 +12,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/forms/native-select";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 type AccreditationRow = { name: string; reference: string; expiresAt: string };
 
@@ -140,7 +141,7 @@ function Field({ id, label, hint, error, suggested, children, className }: { id:
     <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
       <label htmlFor={id} className="flex flex-wrap items-center gap-2 text-15 font-medium">
         {label}
-        {suggested ? <span className="bid-pill bid-pill-amber text-xs">Suggested — check</span> : null}
+        {suggested ? <Badge variant="warning">Suggested — check</Badge> : null}
       </label>
       {children}
       {error ? (
@@ -240,7 +241,7 @@ export function CompanyFactsForm({
           <p className="mt-1">Fields marked “Suggested” were read from your website by AI. Websites go out of date and AI misreads: check each one, correct what is wrong, then save.</p>
           {draftSource.notes.length > 0 ? (
             <details className="mt-2">
-              <summary className="bid-link inline-flex min-h-9 cursor-pointer items-center font-medium">Where each suggestion came from</summary>
+              <summary className="link inline-flex min-h-9 cursor-pointer items-center font-medium">Where each suggestion came from</summary>
               <ul className="mt-1 flex list-disc flex-col gap-0.5 pl-5 text-13">
                 {draftSource.notes.slice(0, 20).map((note) => (
                   <li key={note}>{note}</li>
@@ -265,9 +266,9 @@ export function CompanyFactsForm({
 
       <div className="flex flex-wrap items-start gap-6">
         <div className="flex min-w-0 flex-[1_1_380px] flex-col gap-6">
-          <fieldset className="bid-card flex flex-col gap-4 px-5 py-5 sm:px-6">
+          <fieldset className="rounded-card border border-line bg-surface flex flex-col gap-4 px-5 py-5 sm:px-6">
             <legend className="sr-only">Turnover</legend>
-            <h3 className="bid-h3" aria-hidden>
+            <h3 className="text-15 font-semibold" aria-hidden>
               Turnover
             </h3>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(min(180px,100%),1fr))] gap-4">
@@ -297,9 +298,9 @@ export function CompanyFactsForm({
             )}
           </fieldset>
 
-          <fieldset className="bid-card flex flex-col gap-4 px-5 py-5 sm:px-6">
+          <fieldset className="rounded-card border border-line bg-surface flex flex-col gap-4 px-5 py-5 sm:px-6">
             <legend className="sr-only">Insurance levels</legend>
-            <h3 className="bid-h3" aria-hidden>
+            <h3 className="text-15 font-semibold" aria-hidden>
               Insurance levels
             </h3>
             {insurance.map(([key, label]) => {
@@ -325,11 +326,11 @@ export function CompanyFactsForm({
           </fieldset>
         </div>
 
-        <fieldset className="bid-card min-w-0 flex-[1.4_1_460px] pb-5">
+        <fieldset className="rounded-card border border-line bg-surface min-w-0 flex-[1.4_1_460px] pb-5">
           <legend className="sr-only">Accreditations</legend>
-          <h3 className="bid-h3 flex flex-wrap items-center gap-2 px-5 pt-5 sm:px-6" aria-hidden>
+          <h3 className="text-15 font-semibold flex flex-wrap items-center gap-2 px-5 pt-5 sm:px-6" aria-hidden>
             Accreditations
-            {suggested.has("accreditations") ? <span className="bid-pill bid-pill-amber text-xs">Suggested — check</span> : null}
+            {suggested.has("accreditations") ? <Badge variant="warning">Suggested — check</Badge> : null}
           </h3>
           <div className="mt-4 hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_44px] gap-3 border-b border-line px-5 pb-2.5 text-xs font-semibold text-ink-2 sm:grid sm:px-6">
             <span>Accreditation</span>
@@ -377,9 +378,9 @@ export function CompanyFactsForm({
                         {state.label}
                       </span>
                     ) : state.kind === "expired" ? (
-                      <span className="bid-pill bid-pill-danger">
+                      <Badge variant="destructive">
                         <span aria-hidden>!</span>Expired
-                      </span>
+                      </Badge>
                     ) : (
                       <span className="font-normal text-ink-2">No date</span>
                     )}
@@ -411,8 +412,8 @@ export function CompanyFactsForm({
         </fieldset>
       </div>
 
-      <details className="bid-card px-5 py-4 sm:px-6" open={!confirmedAt || hasSuggestions || undefined}>
-        <summary className="bid-h3 cursor-pointer">Company details and where you work</summary>
+      <details className="rounded-card border border-line bg-surface px-5 py-4 sm:px-6" open={!confirmedAt || hasSuggestions || undefined}>
+        <summary className="text-15 font-semibold cursor-pointer">Company details and where you work</summary>
         <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(260px,100%),1fr))] gap-4">
           <Field id="legalName" label="Legal name" error={err("legalName")} suggested={suggested.has("legalName")}>
             <Input id="legalName"  value={form.legalName} onChange={(event) => set("legalName", event.target.value)} maxLength={160}/>
@@ -421,7 +422,7 @@ export function CompanyFactsForm({
             <Input id="tradingName"  value={form.tradingName} onChange={(event) => set("tradingName", event.target.value)} maxLength={160}/>
           </Field>
           <Field id="companyNumber" label="Companies House number" error={err("companyNumber")} suggested={suggested.has("companyNumber")} hint="8 characters, for example 01234567">
-            <Input id="companyNumber" className="bid-mono" value={form.companyNumber} onChange={(event) => set("companyNumber", event.target.value)} maxLength={10}/>
+            <Input id="companyNumber" className="font-mono" value={form.companyNumber} onChange={(event) => set("companyNumber", event.target.value)} maxLength={10}/>
           </Field>
           <Field id="website" label="Website" error={err("website")} hint="We can read it to suggest facts for the empty fields. You check and save them.">
             <div className="flex flex-wrap gap-2">

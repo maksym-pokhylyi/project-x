@@ -3,54 +3,58 @@
 import "./bid-theme.css";
 import { Archive, ArchiveRestore, ChevronDown, Download, Lock, MoreHorizontal, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Popover } from "radix-ui";
 import { useState, useTransition } from "react";
 import { deleteBidAction, setBidArchivedAction, unlockFullBidAction } from "@/features/bids/actions";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 /** "Export to Word": the downloads of one bid, as a menu next to the title. */
 export function ExportMenu({ bidId, canExportAnswers, answersReady, label = "Export to Word" }: { bidId: string; canExportAnswers: boolean; answersReady: number; label?: string }) {
   const base = `/api/bids/${bidId}/export`;
   return (
-    <Popover.Root>
-      <Popover.Trigger asChild>
-        <Button variant="outline" type="button"  data-testid="export-menu">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" type="button" data-testid="export-menu">
           <Download aria-hidden className="size-4" />
           {label}
           <ChevronDown aria-hidden className="size-3.5" />
         </Button>
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content align="end" sideOffset={6} collisionPadding={12} className="bid-pop z-50 w-[min(21rem,calc(100vw-1.5rem))] p-1.5 outline-none">
-          <a href={`${base}/brief`} className="bid-menu-item" data-testid="export-brief" download>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[min(21rem,calc(100vw-1.5rem))]">
+        <DropdownMenuItem asChild className="flex-col items-start gap-0.5">
+          <a href={`${base}/brief`} data-testid="export-brief" download>
             Bid check (Word)
-            <span className="text-xs font-normal text-ink-2">Verdict, key facts, requirements and questions, with sources</span>
+            <span className="text-xs text-ink-2">Verdict, key facts, requirements and questions, with sources</span>
           </a>
-          <a href={`${base}/requirements-docx`} className="bid-menu-item" data-testid="export-requirements-docx" download>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <a href={`${base}/requirements-docx`} data-testid="export-requirements-docx" download>
             Requirements checklist (Word)
           </a>
-          <a href={`${base}/requirements-csv`} className="bid-menu-item" data-testid="export-requirements-csv" download>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <a href={`${base}/requirements-csv`} data-testid="export-requirements-csv" download>
             Requirements checklist (CSV, for Excel)
           </a>
-          {canExportAnswers ? (
-            <a href={`${base}/answers`} className="bid-menu-item" data-testid="export-answers" download>
+        </DropdownMenuItem>
+        {canExportAnswers ? (
+          <DropdownMenuItem asChild className="flex-col items-start gap-0.5">
+            <a href={`${base}/answers`} data-testid="export-answers" download>
               Answers (Word)
-              <span className="text-xs font-normal text-ink-2">
-                {answersReady === 0 ? "No answers written yet" : `${answersReady} answer${answersReady === 1 ? "" : "s"} so far, with word counts and open gaps`}
-              </span>
+              <span className="text-xs text-ink-2">{answersReady === 0 ? "No answers written yet" : `${answersReady} answer${answersReady === 1 ? "" : "s"} so far, with word counts and open gaps`}</span>
             </a>
-          ) : (
-            <span className="bid-menu-item" aria-disabled="true">
-              <span className="inline-flex items-center gap-1.5">
-                <Lock aria-hidden className="size-3.5" />
-                Answers (Word)
-              </span>
-              <span className="text-xs font-normal">Needs a Bid Desk plan or a Bid Pass</span>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem disabled className="flex-col items-start gap-0.5">
+            <span className="inline-flex items-center gap-1.5">
+              <Lock aria-hidden className="size-3.5" />
+              Answers (Word)
             </span>
-          )}
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
+            <span className="text-xs">Needs a Bid Desk plan or a Bid Pass</span>
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -69,50 +73,43 @@ export function BidActions({ bidId, status }: { bidId: string; status: string })
     });
   if (status === "processing") return null;
   return (
-    <Popover.Root>
-      <Popover.Trigger asChild>
-        <Button variant="ghost" type="button" className="px-3" aria-label="More actions for this bid" data-testid="bid-more">
-          <MoreHorizontal aria-hidden className="size-5" />
-        </Button>
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content align="end" sideOffset={6} collisionPadding={12} className="bid-pop z-50 w-64 p-1.5 outline-none">
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" type="button" aria-label="More actions for this bid" data-testid="bid-more">
+            <MoreHorizontal aria-hidden className="size-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-64">
           {status === "archived" ? (
-            <Button variant="ghost" type="button" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" disabled={pending} onClick={() => run(() => setBidArchivedAction(bidId, false))}>
-              <span className="inline-flex items-center gap-2">
-                <ArchiveRestore aria-hidden className="size-4" />
-                Restore this bid
-              </span>
-            </Button>
+            <DropdownMenuItem disabled={pending} onSelect={() => run(() => setBidArchivedAction(bidId, false))}>
+              <ArchiveRestore aria-hidden className="size-4" />
+              Restore this bid
+            </DropdownMenuItem>
           ) : status === "ready" || status === "failed" ? (
-            <Button variant="ghost" type="button" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" disabled={pending} onClick={() => run(() => setBidArchivedAction(bidId, true))}>
-              <span className="inline-flex items-center gap-2">
-                <Archive aria-hidden className="size-4" />
-                Archive (read-only)
-              </span>
-            </Button>
+            <DropdownMenuItem disabled={pending} onSelect={() => run(() => setBidArchivedAction(bidId, true))}>
+              <Archive aria-hidden className="size-4" />
+              Archive (read-only)
+            </DropdownMenuItem>
           ) : null}
-          <Button variant="ghost"
-            type="button"
-            className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal text-danger"
+          <DropdownMenuItem
+            variant="destructive"
             disabled={pending}
-            onClick={() => {
+            onSelect={() => {
               if (window.confirm("Delete this bid, its files and all answers? This cannot be undone.")) run(() => deleteBidAction(bidId), () => router.push("/app/bids"));
             }}
           >
-            <span className="inline-flex items-center gap-2 text-danger">
-              <Trash2 aria-hidden className="size-4" />
-              Delete this bid
-            </span>
-          </Button>
-          {error ? (
-            <p role="alert" className="px-3 py-2 text-xs text-danger">
-              {error}
-            </p>
-          ) : null}
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
+            <Trash2 aria-hidden className="size-4" />
+            Delete this bid
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {error ? (
+        <p role="alert" className="basis-full text-xs text-danger">
+          {error}
+        </p>
+      ) : null}
+    </>
   );
 }
 

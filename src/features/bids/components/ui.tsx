@@ -5,6 +5,8 @@ import { STANDING_NOTICE } from "@/features/bids/constants";
 import type { CompanyStatus } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
 import { ButtonLink } from "@/components/ui/button-link";
+import { Badge } from "@/components/ui/badge";
+import { StatusPill as RequirementStatusPill } from "@/components/ui/status-pill";
 
 /**
  * Small presentational pieces shared by the bid desk and the library (no client state).
@@ -24,22 +26,22 @@ export function StandingNotice({ className }: { className?: string }) {
 }
 
 const TONES = {
-  success: "bid-pill-met",
-  danger: "bid-pill-danger",
-  warning: "bid-pill-amber",
-  info: "bid-pill-info",
-  neutral: "bid-pill-neutral",
-  brand: "bid-pill-brand",
+  success: "success",
+  danger: "destructive",
+  warning: "warning",
+  info: "info",
+  neutral: "secondary",
+  brand: "brand",
 } as const;
 
 export type Tone = keyof typeof TONES;
 
 export function Pill({ tone = "neutral", icon, children, className, title }: { tone?: Tone; icon?: ReactNode; children: ReactNode; className?: string; title?: string }) {
   return (
-    <span title={title} className={cn("bid-pill shrink-0", TONES[tone], className)}>
+    <Badge title={title} variant={TONES[tone]} className={cn("shrink-0", className)}>
       {icon}
       {children}
-    </span>
+    </Badge>
   );
 }
 
@@ -52,12 +54,21 @@ const STATUS: Record<CompanyStatus, { tone: Tone; icon: ReactNode; hint: string 
   verify: { tone: "warning", icon: <SearchCheck aria-hidden className="size-3.5" />, hint: "We could not find this wording in the pack. Check it in the tender documents before relying on it." },
 };
 
+/** The library's status pill with the bid desk's wording; "verify" (the wording was not found in the pack) has no library status and is a warning badge. */
 export function StatusPill({ status }: { status: CompanyStatus }) {
   const key = STATUS[status] ? status : "unknown";
+  if (key === "verify") {
+    return (
+      <Badge variant="warning" title={STATUS.verify.hint} className="shrink-0">
+        {STATUS.verify.icon}
+        {STATUS_LABELS.verify}
+      </Badge>
+    );
+  }
   return (
-    <Pill tone={STATUS[key].tone} icon={STATUS[key].icon} title={STATUS[key].hint}>
+    <RequirementStatusPill status={key === "unknown" ? "confirm" : key} title={STATUS[key].hint}>
       {STATUS_LABELS[key]}
-    </Pill>
+    </RequirementStatusPill>
   );
 }
 
@@ -135,9 +146,9 @@ export function SectionHeading({ title, count, children, lead }: { title: string
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
       <div className="flex min-w-0 flex-col gap-1">
-        <h2 className="bid-h2">
+        <h2 className="type-section">
           {title}
-          {count !== undefined ? <span className="bid-mono ml-3 text-sm font-normal text-ink-2 tabular-nums">{count}</span> : null}
+          {count !== undefined ? <span className="font-mono ml-3 text-sm font-normal text-ink-2 tabular-nums">{count}</span> : null}
         </h2>
         {lead ? <p className="text-sm text-ink-2">{lead}</p> : null}
       </div>

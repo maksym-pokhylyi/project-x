@@ -57,7 +57,7 @@ export function UserMenu({ name, email, workspaceName, plan, isAdmin }: { name: 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <IconButton shape="round" label={`Open account menu: ${name || email}`} data-testid="user-menu">
+        <IconButton shape="round" labelAsText label={`Open account menu: ${name || email}`} data-testid="user-menu">
           <UserInitial name={name} email={email} />
         </IconButton>
       </DropdownMenuTrigger>

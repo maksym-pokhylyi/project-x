@@ -357,9 +357,9 @@ the server, and only `pnpm build` catches it.
 In `src/components/ui/`: ActionList / ActionRow, Alert, Avatar, Badge, Breadcrumb, Button, ButtonLink, Card, Checkbox,
 ControlGroup, CopyField, DeadlineMarker (+ `timeLeft`), DetailList, Dialog, Disclosure (+ `size="sm"`), Dot, DropdownMenu
 (+ `variant="cta"`), DropZone, FileButton, FilterChip / FilterChipGroup, IconButton, icons, Input, Label, LockedList / LockedRow,
-MenuButton, MenuSheet, NativeSelect, NavLink, NoticeBand, Pagination, Popover, Progress, RadioGroup, ReferenceChip, ScoreBars,
-SegmentedToggle, Select, Separator, Skeleton / SkeletonRows, SourceMark, Spinner, Stat / StatRow, StatusPill, StepTracker,
-Switch, Table, Tabs (+ `TabsCount`), Textarea, Toaster (sonner), Tooltip (+ `TooltipText`), UpgradeBand, UsageBar.
+MenuButton, MenuSheet, NativeSelect, NavLink, NoticeBand, Pagination, Popover, Progress, RadioGroup, ReferenceChip (+ `ReferenceChipButton`, `ReferenceStateMark`),
+ScoreBars, SegmentedToggle, Select, Separator, Skeleton / SkeletonRows, SourceMark, Spinner, Stat / StatRow, StatusPill, StepTracker,
+Switch, Table, Tabs (+ `TabsCount`), Textarea, Toaster (sonner), ToggleButton, Tooltip (+ `TooltipText`), UpgradeBand, UsageBar.
 In `src/components/forms/`: Form, FormField, Field, FieldGroup, FieldHint, FieldError, FormError, FormRow, FormRowAction.
 
 Notes on the ones that differ from the shadcn originals:
@@ -377,6 +377,14 @@ Notes on the ones that differ from the shadcn originals:
 - `Disclosure`: `variant="inline"` for a secondary step inside a card or a table row — a link-styled summary with the chevron
   (the default stays the serif question of the FAQ).
 - `Progress`: `tone` = `brand` | `warning` | `danger`.
+- `ReferenceChip`: `state` = `verified` | `check` | `unverified` puts what our own check found for the quote in front of the
+  reference, as a mark whose shape differs as well as its colour (tick, amber dot, hollow dot) with the word for screen readers;
+  `quiet` drops the box (an underlined reference for fact cards and side lists). `ReferenceChipButton` is the chip as a button
+  (the trigger of the citation popover; it is named by the text it shows, so give it no `aria-label`); `ReferenceStateMark` is
+  the mark on its own, for a legend.
+- `ToggleButton`: a button that is on or off, always with `aria-pressed`. `variant="check"` is a small labelled tick ("I have
+  checked this" / "Confirmed by you"); `variant="marker"` is a numbered source marker in or beside running text, with
+  `tone="danger"` for a marker that matches no source. For a row of exclusive choices use FilterChip; for an action, Button.
 
 ### 8.3 App shell patterns
 

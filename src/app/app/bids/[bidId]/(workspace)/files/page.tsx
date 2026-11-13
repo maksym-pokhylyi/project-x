@@ -36,7 +36,7 @@ export default async function FilesPage({ params }: { params: Promise<{ bidId: s
         </Callout>
       ) : null}
 
-      <div className="bid-card overflow-hidden">
+      <div className="rounded-card border border-line bg-surface overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse text-sm">
             <thead>
@@ -54,11 +54,11 @@ export default async function FilesPage({ params }: { params: Promise<{ bidId: s
                   <tr key={file.id} data-testid="pack-file" data-read={file.read ? "true" : "false"}>
                     <td className={cn(cell, "pr-3 pl-6")}>
                       {file.read ? (
-                        <a href={`/api/bids/${bid.id}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="bid-mono bid-link-quiet text-13 break-all">
+                        <a href={`/api/bids/${bid.id}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="font-mono link text-13 break-all">
                           {file.name}
                         </a>
                       ) : (
-                        <span className="bid-mono text-13 break-all">{file.name}</span>
+                        <span className="font-mono text-13 break-all">{file.name}</span>
                       )}
                     </td>
                     <td className={cn(cell, "px-3 text-right whitespace-nowrap tabular-nums", file.read && file.analysed ? "" : "font-semibold text-danger")}>
@@ -82,8 +82,8 @@ export default async function FilesPage({ params }: { params: Promise<{ bidId: s
       </div>
 
       {stats ? (
-        <section aria-labelledby="how-h" className="bid-card flex flex-col gap-3 px-5 py-4 text-sm sm:px-6" data-testid="coverage-detail">
-          <h2 id="how-h" className="bid-h3">
+        <section aria-labelledby="how-h" className="rounded-card border border-line bg-surface flex flex-col gap-3 px-5 py-4 text-sm sm:px-6" data-testid="coverage-detail">
+          <h2 id="how-h" className="text-15 font-semibold">
             How the pack was read
           </h2>
           <p>
@@ -114,7 +114,7 @@ export default async function FilesPage({ params }: { params: Promise<{ bidId: s
             Two different AI models read the whole pack independently; questionnaires, response templates and clarification files get a reading of their own. Their findings are combined and every quote is checked by
             program, not by a model. Errors are far more often omissions than inventions — so skim the files for anything the check does not mention.
           </p>
-          {Object.keys(stats.models).length > 0 ? <p className="bid-mono text-xs text-ink-2">Models: {[...new Set(Object.values(stats.models).flatMap((value) => value.split(" + ")))].join(", ")}</p> : null}
+          {Object.keys(stats.models).length > 0 ? <p className="font-mono text-xs text-ink-2">Models: {[...new Set(Object.values(stats.models).flatMap((value) => value.split(" + ")))].join(", ")}</p> : null}
         </section>
       ) : null}
     </div>

@@ -20,13 +20,7 @@ const ALLOWED: Record<string, string> = {
   "features/bids/components/ui/file-input.tsx": "the one raw file input: always hidden, opened by a Button or a drop zone",
 };
 
-const KNOWN_DEBT = new Set([
-  // Bid desk patterns with their own toggle or chip button (source marker, citation chip, fact tick):
-  // they leave this list when the patterns move into src/components/ui.
-  "features/bids/components/answer-editor.tsx",
-  "features/bids/components/citation.tsx",
-  "features/bids/components/fact-confirm.tsx",
-]);
+const KNOWN_DEBT = new Set<string>([]);
 
 function sourceFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {

@@ -3,7 +3,7 @@ import { UnlockButton } from "@/features/bids/components/bid-actions";
 import { BriefView } from "@/features/bids/components/brief-view";
 import { PartialResults } from "@/features/bids/components/partial-results";
 import { ProcessingState } from "@/features/bids/components/processing-state";
-import { UpgradePanel } from "@/features/bids/components/upgrade-panel";
+import { UpgradePanel } from "@/features/bids/components/ui/upgrade-panel";
 import { factsConfirmed, loadBidPage } from "@/features/bids/server/page-data";
 import { getBidStatus } from "@/features/bids/server/status";
 import { coverageSummary, toPackFileItems, toQuestionItem, toRequirementItem } from "@/features/bids/view";

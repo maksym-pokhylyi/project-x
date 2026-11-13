@@ -13,7 +13,8 @@ import { addQuestionAction, deleteQuestionAction, updateQuestionAction } from "@
 import { effectiveWordLimit, wordLimitState } from "@/features/bids/answer-text";
 import { QUESTION_STATUS_LABELS, QUESTION_STATUSES, type Citation, type Provenance, type QuestionStatus } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
-import { CitationMark, type SourceLinks } from "./citation";
+import { CitationMark, type SourceLinks } from "./ui/citation-mark";
+import { Progress } from "@/components/ui/progress";
 
 export type QuestionItem = {
   id: string;
@@ -153,9 +154,7 @@ export function QuestionsView({
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
                       {question.weighting !== null ? (
                         <span className="inline-flex items-center gap-2" title="Weighting">
-                          <span aria-hidden className="h-1.5 w-20 overflow-hidden rounded-full bg-paper-deep">
-                            <span className="block h-full rounded-full bg-brand" style={{ width: `${Math.min(100, question.weighting)}%` }} />
-                          </span>
+                          <Progress aria-hidden value={Math.min(100, question.weighting)} className="w-20" />
                           <span className="font-medium tabular-nums">{question.weighting}%</span>
                         </span>
                       ) : (
@@ -168,7 +167,7 @@ export function QuestionsView({
                       {question.section ? <span className="text-ink-2">{question.section}</span> : null}
                       <CitationMark citation={question.citation} links={links} />
                       {(question.provenance?.notes ?? []).map((note) => (
-                        <span key={note} className="text-warning">
+                        <span key={note} className="text-accent-ink">
                           {note}
                         </span>
                       ))}
@@ -176,12 +175,12 @@ export function QuestionsView({
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
                       <StatusStepper status={question.status} />
                       {question.status !== "not_started" ? (
-                        <span className={cn("text-xs tabular-nums", limitState === "over" ? "font-medium text-danger" : limitState === "near" ? "text-warning" : "text-ink-2")}>
+                        <span className={cn("text-xs tabular-nums", limitState === "over" ? "font-medium text-danger" : limitState === "near" ? "text-accent-ink" : "text-ink-2")}>
                           {question.wordCount} words{limit ? ` of ${limit}` : ""}
                           {limitState === "over" ? " — over limit" : ""}
                         </span>
                       ) : null}
-                      {question.gaps > 0 ? <span className="text-xs font-medium text-warning">{question.gaps} evidence gap{question.gaps === 1 ? "" : "s"}</span> : null}
+                      {question.gaps > 0 ? <span className="text-xs font-medium text-accent-ink">{question.gaps} evidence gap{question.gaps === 1 ? "" : "s"}</span> : null}
                       {question.score !== null ? (
                         <span className="text-xs text-ink-2">
                           Marked {question.score}/{question.maxEvaluated}
