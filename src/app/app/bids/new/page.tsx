@@ -8,7 +8,7 @@ import { libraryDocs } from "@/db/schema";
 import { BreadcrumbTrail } from "@/components/app/breadcrumbs";
 import { getBidAccess, getFreeCheckUse, type BidAccessSummary } from "@/features/bids/access";
 import { NewBidForm, type ExistingFile } from "@/features/bids/components/new-bid-form";
-import { UpgradePanel } from "@/features/bids/components/upgrade-panel";
+import { UpgradePanel } from "@/features/bids/components/ui/upgrade-panel";
 import { getBid, listBidFiles } from "@/features/bids/server/bids";
 import { factsConfirmed } from "@/features/bids/server/page-data";
 import { lookupTender } from "@/features/bids/server/tender";

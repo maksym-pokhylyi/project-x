@@ -13,7 +13,7 @@ import { addQuestionAction, deleteQuestionAction, updateQuestionAction } from "@
 import { effectiveWordLimit, wordLimitState } from "@/features/bids/answer-text";
 import { QUESTION_STATUS_LABELS, QUESTION_STATUSES, type Citation, type Provenance, type QuestionStatus } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
-import { CitationMark, type SourceLinks } from "./citation";
+import { CitationMark, type SourceLinks } from "./ui/citation-mark";
 import { Progress } from "@/components/ui/progress";
 
 export type QuestionItem = {

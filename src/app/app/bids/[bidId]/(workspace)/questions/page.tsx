@@ -3,9 +3,10 @@ import { getBidAccess, getBidCapabilities } from "@/features/bids/access";
 import { UnlockButton } from "@/features/bids/components/bid-actions";
 import { QuestionsView } from "@/features/bids/components/questions-view";
 import { Callout, UpgradeNotice } from "@/features/bids/components/ui";
-import { UpgradePanel } from "@/features/bids/components/upgrade-panel";
+import { UpgradePanel } from "@/features/bids/components/ui/upgrade-panel";
 import { loadBidPage } from "@/features/bids/server/page-data";
 import { isScoredQuestion, toQuestionItem } from "@/features/bids/view";
+import { LockedQuestions } from "@/features/bids/components/ui/locked-questions";
 
 export const metadata: Metadata = { title: "Questions" };
 export const dynamic = "force-dynamic";
@@ -25,14 +26,7 @@ export default async function QuestionsPage({ params }: { params: Promise<{ bidI
           {scored.length} scored question{scored.length === 1 ? "" : "s"} found. Titles are shown; the matrix, drafts and marking are part of a full bid.
         </p>
         {scored.length > 0 ? (
-          <ol className="rounded-card border border-line bg-surface" data-testid="scored-questions-locked">
-            {scored.map((question, index) => (
-              <li key={question.id} className={`flex items-baseline gap-4 px-5 py-3 text-15 sm:px-6 ${index > 0 ? "border-t border-line" : ""}`}>
-                <span className="font-mono w-14 shrink-0 text-xs text-ink-2">{question.ref}</span>
-                <span className="min-w-0">{question.title ?? question.text}</span>
-              </li>
-            ))}
-          </ol>
+          <LockedQuestions items={scored.map((question) => ({ id: question.id, reference: question.ref, title: question.title ?? question.text }))} />
         ) : null}
         <UpgradePanel access={access} moment="locked">
           {canUnlock ? <UnlockButton bidId={bid.id} label={access.drafting ? "Use one of your full bids on this tender" : `Use a Bid Pass on this tender (${access.bidPasses} left)`} /> : null}

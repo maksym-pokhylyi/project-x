@@ -29,7 +29,7 @@ import {
   type RequirementKind,
 } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
-import { CitationMark, type SourceLinks } from "./citation";
+import { CitationMark, type SourceLinks } from "./ui/citation-mark";
 import { Pill, StatusPill } from "./ui";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { Checkbox } from "@/components/ui/checkbox";

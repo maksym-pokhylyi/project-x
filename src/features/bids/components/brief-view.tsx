@@ -17,13 +17,14 @@ import {
 } from "@/features/bids/types";
 import { displayRef, gateGroup, isGatingRequirement, isScoredQuestion, type CoverageSummary, type PackFileItem } from "@/features/bids/view";
 import { cn } from "@/lib/utils";
-import { CitationMark, SourceLegend, type SourceLinks } from "./citation";
+import { CitationMark, SourceLegend, type SourceLinks } from "./ui/citation-mark";
 import { GateList } from "./gate-list";
 import type { QuestionItem } from "./questions-view";
 import type { RequirementItem } from "./requirements-view";
 import { Callout, daysLeftLabel, formatDeadline } from "./ui";
 import { StackedBar } from "@/features/bids/components/ui/stacked-bar";
 import { Badge } from "@/components/ui/badge";
+import { LockedQuestions } from "@/features/bids/components/ui/locked-questions";
 
 /**
  * The cited bid check on one page, following the design handoff (Brief-1440 / Brief-390):
@@ -432,14 +433,7 @@ export function BriefView(props: BriefViewProps) {
               </p>
             </div>
             {scored.length > 0 && props.locked ? (
-              <ol className="rounded-card border border-line bg-surface" data-testid="scored-questions-locked">
-                {scored.map((question, index) => (
-                  <li key={question.id} className={cn("flex items-baseline gap-4 px-5 py-3 text-15 sm:px-6", index > 0 ? "border-t border-line" : "")}>
-                    <span className="font-mono w-14 shrink-0 text-xs text-ink-2">{question.ref}</span>
-                    <span className="min-w-0">{question.title ?? question.text}</span>
-                  </li>
-                ))}
-              </ol>
+              <LockedQuestions items={scored.map((question) => ({ id: question.id, reference: question.ref, title: question.title ?? question.text }))} />
             ) : scored.length > 0 ? (
               <div className="rounded-card border border-line bg-surface overflow-hidden">
                 <div className="overflow-x-auto">

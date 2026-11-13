@@ -3,7 +3,7 @@ import Link from "next/link";
 import { verificationState } from "@/features/bids/citation-state";
 import { displayRef, isScoredQuestion, type CoverageSummary, type PackFileItem } from "@/features/bids/view";
 import { cn } from "@/lib/utils";
-import { CitationMark, SourceLegend, type SourceLinks } from "./citation";
+import { CitationMark, SourceLegend, type SourceLinks } from "./ui/citation-mark";
 import type { QuestionItem } from "./questions-view";
 import type { RequirementItem } from "./requirements-view";
 import { StatusPill } from "./ui";

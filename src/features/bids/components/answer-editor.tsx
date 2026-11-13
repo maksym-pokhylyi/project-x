@@ -18,7 +18,7 @@ import { answerHash, findEvidenceGaps, findEvidenceMarkers, wordLimitState } fro
 import { countWords } from "@/features/bids/constants";
 import type { AnswerEvaluation, AnswerVersion, Citation, DraftMeta, QuestionStatus, ScoringDescriptor } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
-import { CitationMark, type SourceLinks } from "./citation";
+import { CitationMark, type SourceLinks } from "./ui/citation-mark";
 import { Callout, DeadlineChip, StandingNotice, UpgradeNotice } from "./ui";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";

@@ -1,4 +1,3 @@
-import "./bid-theme.css";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { BidAccessSummary } from "@/features/bids/access";

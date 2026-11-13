@@ -1,6 +1,5 @@
 "use client";
 
-import "./bid-theme.css";
 import { ExternalLink, X } from "lucide-react";
 import { Popover } from "radix-ui";
 import { VERIFICATION_LABELS, verificationState, type VerificationState } from "@/features/bids/citation-state";

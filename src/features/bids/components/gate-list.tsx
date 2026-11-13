@@ -6,7 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 import { updateRequirementAction } from "@/features/bids/actions";
 import { displayRef, gateGroup, type GateGroup } from "@/features/bids/view";
 import { verificationState } from "@/features/bids/citation-state";
-import { CitationMark, type SourceLinks } from "./citation";
+import { CitationMark, type SourceLinks } from "./ui/citation-mark";
 import type { RequirementItem } from "./requirements-view";
 import { StatusPill } from "./ui";
 import { Button } from "@/components/ui/button";
