@@ -17,6 +17,7 @@ export type ErrorCode =
   | "BILLING_NOT_CONFIGURED"
   | "AI_ORG_BUDGET_EXCEEDED"
   | "AI_GLOBAL_BUDGET_EXCEEDED"
+  | "AI_INPUT_TOO_LARGE"
   | "INTERNAL";
 
 export class AppError extends Error {

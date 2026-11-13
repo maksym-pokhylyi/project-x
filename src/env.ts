@@ -82,6 +82,8 @@ const serverSchema = z.object({
   AI_GATEWAY_API_KEY: optional(z.string()),
   /** Hard global ceiling for estimated AI spend per UTC day, in USD. 0 disables AI entirely. */
   AI_DAILY_BUDGET_USD: z.preprocess(emptyToUndefined, z.coerce.number().min(0).default(10)),
+  /** Daily pool shared by ALL free-plan workspaces, in USD. Default: 25% of AI_DAILY_BUDGET_USD. */
+  AI_FREE_DAILY_BUDGET_USD: optional(z.coerce.number().min(0)),
 
   // --- Dev tooling ---
   /** "1" exposes /dev/outbox on a production BUILD (used by e2e). Ignored when VERCEL_ENV=production. */

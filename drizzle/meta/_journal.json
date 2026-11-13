@@ -8,6 +8,13 @@
       "when": 1794565897631,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794572561203,
+      "tag": "0001_strong_pretty_boy",
+      "breakpoints": true
     }
   ]
 }
