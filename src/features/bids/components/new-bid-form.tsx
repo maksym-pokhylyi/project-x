@@ -243,23 +243,23 @@ export function NewBidForm({
         {noticeId ? (
           <div className="bid-card flex flex-wrap items-start gap-x-8 gap-y-4 px-5 py-5 sm:px-6" data-testid="tender-card">
             <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-2">
-              <p className="text-[17px] leading-[1.35] font-semibold">{tender?.title ?? "Linked to a tender notice"}</p>
-              <p className="text-[15px]">{tender?.buyerName ?? "The title, buyer and deadline will be read from the pack you upload."}</p>
+              <p className="text-17 leading-[1.35] font-semibold">{tender?.title ?? "Linked to a tender notice"}</p>
+              <p className="text-15">{tender?.buyerName ?? "The title, buyer and deadline will be read from the pack you upload."}</p>
               <p className="flex flex-wrap items-center gap-2">
                 <span className="bid-pill bid-pill-info text-xs">Tender notice</span>
-                <span className="bid-mono text-xs text-(--bid-muted)">{tender?.reference ?? noticeId}</span>
+                <span className="bid-mono text-xs text-ink-2">{tender?.reference ?? noticeId}</span>
               </p>
             </div>
             {closes && left ? (
               <div className="flex flex-col gap-0.5">
-                <span className="text-xs text-(--bid-muted)">Closes</span>
-                <span className="flex items-center gap-2 text-[17px] font-semibold tabular-nums">
-                  <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-(--bid-line-strong)" : left.urgent ? "bg-(--bid-danger)" : "bg-(--bid-amber)")} />
+                <span className="text-xs text-ink-2">Closes</span>
+                <span className="flex items-center gap-2 text-17 font-semibold tabular-nums">
+                  <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-paper-deep")} />
                   {new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" }).format(closes)}
                 </span>
-                <span className="flex items-center gap-2 text-[13px] text-(--bid-muted)">
+                <span className="flex items-center gap-2 text-13 text-ink-2">
                   {new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit" }).format(closes)}
-                  <span className="rounded bg-(--bid-amber-tint) px-1.5 py-px text-xs font-semibold text-(--bid-ink)">{left.label}</span>
+                  <span className="rounded bg-accent-tint px-1.5 py-px text-xs font-semibold text-ink">{left.label}</span>
                 </span>
               </div>
             ) : null}
@@ -269,7 +269,7 @@ export function NewBidForm({
           </div>
         ) : null}
         <div className="flex max-w-[560px] flex-col gap-1.5">
-          <label htmlFor="tender-link" className="text-[15px] font-medium">
+          <label htmlFor="tender-link" className="text-15 font-medium">
             {noticeId ? "Or paste a Find a Tender link" : "Paste a Find a Tender link (optional)"}
           </label>
           <div className="flex flex-wrap gap-2">
@@ -298,11 +298,11 @@ export function NewBidForm({
             ) : null}
           </div>
           {linkError ? (
-            <p role="alert" className="text-[13px] text-(--bid-danger)">
+            <p role="alert" className="text-13 text-danger">
               {linkError}
             </p>
           ) : (
-            <p id="tender-link-hint" className="text-[13px] text-(--bid-muted)">
+            <p id="tender-link-hint" className="text-13 text-ink-2">
               {noticeId ? "Replaces the tender above." : "You can skip this: the title, buyer and deadline are read from the pack."}
             </p>
           )}
@@ -316,7 +316,7 @@ export function NewBidForm({
         <h2 id="upload-h" className="bid-h2">
           2 · Upload the tender pack
         </h2>
-        {disabled ? <p className="text-[15px] text-(--bid-muted)">Upload opens once you have a bid to use.</p> : null}
+        {disabled ? <p className="text-15 text-ink-2">Upload opens once you have a bid to use.</p> : null}
         <div
           data-testid="dropzone"
           onDragOver={(event) => {
@@ -330,12 +330,12 @@ export function NewBidForm({
             void addFiles(Array.from(event.dataTransfer.files));
           }}
           className={cn(
-            "flex flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed px-6 py-8 text-center",
-            disabled ? "border-(--bid-line) bg-(--bid-paper-deep) opacity-70" : dragging ? "border-(--bid-brand) bg-(--bid-brand-tint)" : "border-(--bid-line-strong) bg-(--bid-surface)",
+            "flex flex-col items-center justify-center gap-3 rounded-card border border-dashed px-6 py-8 text-center",
+            disabled ? "border-line bg-paper-deep opacity-70" : dragging ? "border-brand bg-brand-tint" : "border-line-strong bg-surface",
           )}
         >
           <Upload aria-hidden className="size-6" strokeWidth={1.6} />
-          <p className="text-[17px] font-semibold">Drop the files here</p>
+          <p className="text-17 font-semibold">Drop the files here</p>
           <input
             ref={input}
             id="pack-files"
@@ -370,34 +370,34 @@ export function NewBidForm({
           <button type="button" className="bid-btn" disabled={disabled} onClick={() => input.current?.click()}>
             Choose files
           </button>
-          <p className="max-w-[560px] text-sm text-(--bid-muted)">PDF, Word, Excel, CSV, text or ZIP, up to 50 MB a file. Send everything the buyer sent, including appendices and clarifications.</p>
+          <p className="max-w-[560px] text-sm text-ink-2">PDF, Word, Excel, CSV, text or ZIP, up to 50 MB a file. Send everything the buyer sent, including appendices and clarifications.</p>
         </div>
 
         {rows.length > 0 ? (
           <div className="bid-card" data-testid="file-list">
-            <h3 className="px-5 py-4 text-[15px] font-semibold sm:px-6">
-              Files <span className="font-normal text-(--bid-muted)">· {rows.length} added</span>
+            <h3 className="px-5 py-4 text-15 font-semibold sm:px-6">
+              Files <span className="font-normal text-ink-2">· {rows.length} added</span>
             </h3>
             <ul aria-label="Files">
               {rows.map((row) => (
                 <li key={row.key} className="bid-rule flex flex-wrap items-center gap-x-6 gap-y-1.5 px-5 py-3 sm:px-6" data-file-status={row.status}>
-                  <span className={cn("bid-mono min-w-0 flex-[1_1_240px] text-[13px] [overflow-wrap:anywhere]", row.status === "skipped" ? "text-(--bid-muted)" : "")}>{row.name}</span>
-                  <span className="w-20 shrink-0 text-[13px] text-(--bid-muted) tabular-nums">{formatBytes(row.size)}</span>
-                  <span className="flex min-w-0 flex-[2_1_260px] flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px]">
+                  <span className={cn("bid-mono min-w-0 flex-[1_1_240px] text-13 [overflow-wrap:anywhere]", row.status === "skipped" ? "text-ink-2" : "")}>{row.name}</span>
+                  <span className="w-20 shrink-0 text-13 text-ink-2 tabular-nums">{formatBytes(row.size)}</span>
+                  <span className="flex min-w-0 flex-[2_1_260px] flex-wrap items-center gap-x-3 gap-y-1.5 text-13">
                     {row.status === "done" ? (
-                      <span className="inline-flex items-center gap-1.5 font-semibold text-(--bid-brand)">
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-brand">
                         <Check aria-hidden className="size-3.5" strokeWidth={2.6} />
                         Uploaded
                       </span>
                     ) : row.status === "uploading" ? (
                       <>
                         <span className="font-semibold tabular-nums">Uploading {row.progress}%</span>
-                        <span className="flex h-1 w-40 max-w-full rounded-full bg-(--bid-line)" role="progressbar" aria-valuenow={row.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Uploading ${row.name}`}>
-                          <span className="rounded-full bg-(--bid-ink) transition-[width]" style={{ width: `${row.progress}%` }} />
+                        <span className="flex h-1 w-40 max-w-full rounded-full bg-line" role="progressbar" aria-valuenow={row.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Uploading ${row.name}`}>
+                          <span className="rounded-full bg-ink transition-[width]" style={{ width: `${row.progress}%` }} />
                         </span>
                       </>
                     ) : row.status === "queued" ? (
-                      <span className="text-(--bid-muted)">Waiting</span>
+                      <span className="text-ink-2">Waiting</span>
                     ) : row.status === "skipped" ? (
                       <>
                         <span className="bid-pill bid-pill-info text-xs">No action needed</span>
@@ -405,7 +405,7 @@ export function NewBidForm({
                       </>
                     ) : (
                       <>
-                        <span role="alert" className="flex min-w-0 flex-[1_1_200px] items-start gap-2 text-(--bid-danger)">
+                        <span role="alert" className="flex min-w-0 flex-[1_1_200px] items-start gap-2 text-danger">
                           <span aria-hidden className="font-bold">
                             !
                           </span>
@@ -426,7 +426,7 @@ export function NewBidForm({
                   </span>
                   <button
                     type="button"
-                    className="-mr-2 flex size-11 shrink-0 items-center justify-center rounded text-(--bid-ink) hover:bg-(--bid-paper) disabled:opacity-40"
+                    className="-mr-2 flex size-11 shrink-0 items-center justify-center rounded text-ink hover:bg-paper disabled:opacity-40"
                     aria-label={`Remove ${row.name}`}
                     disabled={row.status === "uploading"}
                     onClick={() => void remove(row)}
@@ -440,17 +440,16 @@ export function NewBidForm({
         ) : null}
       </section>
 
-      <div className="flex flex-col gap-3 border-t border-(--bid-line) pt-7">
+      <div className="flex flex-col gap-3 border-t border-line pt-7">
         {formError ? (
-          <p role="alert" className="rounded-lg bg-(--bid-danger-tint) px-4 py-3 text-sm text-(--bid-danger)">
+          <p role="alert" className="rounded-card bg-danger-tint px-4 py-3 text-sm text-danger">
             {formError}
           </p>
         ) : null}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           <button
             type="button"
-            className={cn("bid-btn px-6 text-[17px]", disabled || reason ? "border-(--bid-paper-deep) bg-(--bid-paper-deep) text-(--bid-muted)" : "bid-btn-primary")}
-            style={{ minHeight: 48 }}
+            className={cn("bid-btn px-6 text-17", disabled || reason ? "border-paper-deep bg-paper-deep text-ink-2" : "bid-btn-primary")}
             onClick={() => void start()}
             disabled={disabled || starting || Boolean(reason)}
             data-testid="start-check"
@@ -459,11 +458,11 @@ export function NewBidForm({
             {starting ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
             {starting ? "Starting…" : "Start the check"}
           </button>
-          <Link href="/app/bids" className="bid-link text-[15px] font-medium" data-testid="save-later">
+          <Link href="/app/bids" className="bid-link text-15 font-medium" data-testid="save-later">
             Save and finish later
           </Link>
         </div>
-        <p id="start-reason" className="text-[15px]" data-testid="start-reason" aria-live="polite">
+        <p id="start-reason" className="text-15" data-testid="start-reason" aria-live="polite">
           {disabled ? "You have no bid checks left on your plan." : (reason ?? `${word(uploadedCount)} ${uploadedCount === 1 ? "file is" : "files are"} ready. Starting takes two to four minutes; you can leave the page.`)}
         </p>
       </div>

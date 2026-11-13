@@ -52,21 +52,21 @@ function UsageLine({ access }: { access: BidAccessSummary }) {
   }
   return (
     <p className="text-sm" data-testid="usage-line">
-      <span className="bid-serif text-[19px] font-semibold">{lead}</span> <span>{rest}</span>
+      <span className="bid-serif text-xl font-semibold">{lead}</span> <span>{rest}</span>
       {fullBids.rolledOver ? (
-        <span className="text-(--bid-muted)">
+        <span className="text-ink-2">
           {" · "}
           {fullBids.rolledOver.count} unused {plural(fullBids.rolledOver.count, "bid")} rolled over from {fullBids.rolledOver.fromLabel}: use {fullBids.rolledOver.count === 1 ? "it" : "them"} by {day(fullBids.rolledOver.useBy)}
         </span>
       ) : null}
       {access.bidPasses > 0 ? (
-        <span className="text-(--bid-muted)">
+        <span className="text-ink-2">
           {" · "}
           {access.bidPasses} Bid {plural(access.bidPasses, "Pass", "Passes")}
         </span>
       ) : null}
       {" · "}
-      <Link href={UPGRADE_URL} className="bid-link text-(--bid-ink)">
+      <Link href={UPGRADE_URL} className="bid-link text-ink">
         Billing
       </Link>
     </p>
@@ -98,19 +98,19 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
       {visible.length === 0 ? (
         <section className="bid-card mt-7 flex flex-col items-start gap-4 px-6 py-9 sm:px-9" data-testid="bids-empty">
           <h2 className="bid-h2">No bids yet</h2>
-          <p className="max-w-[620px] text-[17px] leading-[1.45]">Upload a tender pack and get every requirement quoted and cited, checked against your company, with a plain verdict.</p>
+          <p className="max-w-[620px] text-17 leading-[1.45]">Upload a tender pack and get every requirement quoted and cited, checked against your company, with a plain verdict.</p>
           <div className="bid-toolbar flex flex-wrap items-center gap-x-5 gap-y-3">
             <Link href="/app/bids/new" className="bid-btn bid-btn-primary">
               New bid check
             </Link>
-            <Link href="/sample-check" className="bid-link text-[15px] font-medium text-(--bid-ink)">
+            <Link href="/sample-check" className="bid-link text-15 font-medium text-ink">
               See a sample check
             </Link>
           </div>
-          <ol className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-[15px] text-(--bid-muted)">
+          <ol className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-15 text-ink-2">
             {["Upload the pack", "Read the check", "Draft and mark your answers"].map((step, index) => (
               <li key={step} className="flex items-center gap-2">
-                <span className="bid-mono flex size-6 items-center justify-center rounded-full border border-(--bid-line-strong) text-xs text-(--bid-ink)">{index + 1}</span>
+                <span className="bid-mono flex size-6 items-center justify-center rounded-full border border-line-strong text-xs text-ink">{index + 1}</span>
                 {step}
               </li>
             ))}
@@ -118,7 +118,7 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
         </section>
       ) : (
         <div className="bid-card mt-7 overflow-hidden">
-          <div className="hidden grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,0.9fr)] gap-x-6 border-b border-(--bid-line) px-6 py-3 text-[13px] font-semibold text-(--bid-muted) min-[900px]:grid" aria-hidden>
+          <div className="hidden grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,0.9fr)] gap-x-6 border-b border-line px-6 py-3 text-13 font-semibold text-ink-2 min-[900px]:grid" aria-hidden>
             <span>Tender</span>
             <span>Deadline</span>
             <span>Stage</span>
@@ -140,34 +140,34 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
                   data-testid="bid-row"
                 >
                   <div className="min-w-0">
-                    <h2 className="text-[15px] leading-[1.35] font-semibold">
-                      <Link href={href} className="bid-link text-(--bid-ink)">
+                    <h2 className="text-15 leading-[1.35] font-semibold">
+                      <Link href={href} className="bid-link text-ink">
                         {bid.title}
                       </Link>
                     </h2>
-                    <p className="mt-0.5 truncate text-sm text-(--bid-muted)">{bid.buyerName ?? "Buyer not read yet"}</p>
+                    <p className="mt-0.5 truncate text-sm text-ink-2">{bid.buyerName ?? "Buyer not read yet"}</p>
                   </div>
                   <p className="text-sm">
                     {bid.submissionDeadline && left ? (
                       left.past ? (
-                        <span className="text-(--bid-muted)">Closed {formatDeadline(bid.submissionDeadline, false)}</span>
+                        <span className="text-ink-2">Closed {formatDeadline(bid.submissionDeadline, false)}</span>
                       ) : (
                         <>
                           <span className="font-medium">{formatDeadline(bid.submissionDeadline, false)}</span>
-                          <span className={cn("ml-2 text-[13px]", left.urgent ? "font-semibold text-(--bid-amber-ink)" : "text-(--bid-muted)")}>{left.label}</span>
+                          <span className={cn("ml-2 text-13", left.urgent ? "font-semibold text-accent-ink" : "text-ink-2")}>{left.label}</span>
                         </>
                       )
                     ) : (
-                      <span className="text-(--bid-muted)">{bid.status === "ready" ? "Not read from the pack" : "—"}</span>
+                      <span className="text-ink-2">{bid.status === "ready" ? "Not read from the pack" : "—"}</span>
                     )}
                   </p>
                   <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-                    <span className={bid.status === "failed" ? "font-medium text-(--bid-danger)" : undefined}>{stageOf(bid)}</span>
+                    <span className={bid.status === "failed" ? "font-medium text-danger" : undefined}>{stageOf(bid)}</span>
                     {bid.accessSource === "credit" ? <span className="bid-tag">Bid Pass</span> : null}
                     {bid.accessLevel === "brief" && bid.status === "ready" ? <span className="bid-tag">Check only</span> : null}
                   </p>
-                  <p className="text-sm">{verdict ? <span className={cn("bid-pill", VERDICT_PILL[verdict])}>{VERDICT_LABELS[verdict]}</span> : <span className="text-(--bid-muted)">No verdict yet</span>}</p>
-                  <p className="text-sm text-(--bid-muted)">{lastActivity(bid.updatedAt, now)}</p>
+                  <p className="text-sm">{verdict ? <span className={cn("bid-pill", VERDICT_PILL[verdict])}>{VERDICT_LABELS[verdict]}</span> : <span className="text-ink-2">No verdict yet</span>}</p>
+                  <p className="text-sm text-ink-2">{lastActivity(bid.updatedAt, now)}</p>
                 </li>
               );
             })}
@@ -175,14 +175,14 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
         </div>
       )}
 
-      <p className="mt-5 text-sm text-(--bid-muted)">
+      <p className="mt-5 text-sm text-ink-2">
         A bid starts as a cited bid check. Drafts and marking are added as you work through it.{" "}
-        <Link href={showArchived ? "/app/bids" : "/app/bids?archived=1"} className="bid-link text-(--bid-ink)">
+        <Link href={showArchived ? "/app/bids" : "/app/bids?archived=1"} className="bid-link text-ink">
           {showArchived ? "Hide archived bids" : "Show archived bids"}
         </Link>
       </p>
-      <footer className="mt-10 rounded-[10px] bg-(--bid-paper-deep) px-5 py-4 text-[13px] text-(--bid-muted)">
-        <strong className="font-semibold text-(--bid-ink)">Where your files are kept.</strong> Your tender packs and company documents are stored in the EU (Frankfurt) and encrypted in transit and at rest. Only people in your workspace
+      <footer className="mt-10 rounded-card bg-paper-deep px-5 py-4 text-13 text-ink-2">
+        <strong className="font-semibold text-ink">Where your files are kept.</strong> Your tender packs and company documents are stored in the EU (Frankfurt) and encrypted in transit and at rest. Only people in your workspace
         can open them. They are never used to train AI models.
       </footer>
     </div>

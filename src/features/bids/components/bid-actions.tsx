@@ -23,7 +23,7 @@ export function ExportMenu({ bidId, canExportAnswers, answersReady, label = "Exp
         <Popover.Content align="end" sideOffset={6} collisionPadding={12} className="bid-pop z-50 w-[min(21rem,calc(100vw-1.5rem))] p-1.5 outline-none">
           <a href={`${base}/brief`} className="bid-menu-item" data-testid="export-brief" download>
             Bid check (Word)
-            <span className="text-xs font-normal text-(--bid-muted)">Verdict, key facts, requirements and questions, with sources</span>
+            <span className="text-xs font-normal text-ink-2">Verdict, key facts, requirements and questions, with sources</span>
           </a>
           <a href={`${base}/requirements-docx`} className="bid-menu-item" data-testid="export-requirements-docx" download>
             Requirements checklist (Word)
@@ -34,7 +34,7 @@ export function ExportMenu({ bidId, canExportAnswers, answersReady, label = "Exp
           {canExportAnswers ? (
             <a href={`${base}/answers`} className="bid-menu-item" data-testid="export-answers" download>
               Answers (Word)
-              <span className="text-xs font-normal text-(--bid-muted)">
+              <span className="text-xs font-normal text-ink-2">
                 {answersReady === 0 ? "No answers written yet" : `${answersReady} answer${answersReady === 1 ? "" : "s"} so far, with word counts and open gaps`}
               </span>
             </a>
@@ -93,19 +93,19 @@ export function BidActions({ bidId, status }: { bidId: string; status: string })
           ) : null}
           <button
             type="button"
-            className="bid-menu-item text-(--bid-danger)"
+            className="bid-menu-item text-danger"
             disabled={pending}
             onClick={() => {
               if (window.confirm("Delete this bid, its files and all answers? This cannot be undone.")) run(() => deleteBidAction(bidId), () => router.push("/app/bids"));
             }}
           >
-            <span className="inline-flex items-center gap-2 text-(--bid-danger)">
+            <span className="inline-flex items-center gap-2 text-danger">
               <Trash2 aria-hidden className="size-4" />
               Delete this bid
             </span>
           </button>
           {error ? (
-            <p role="alert" className="px-3 py-2 text-xs text-(--bid-danger)">
+            <p role="alert" className="px-3 py-2 text-xs text-danger">
               {error}
             </p>
           ) : null}
@@ -139,7 +139,7 @@ export function UnlockButton({ bidId, label }: { bidId: string; label: string })
         {pending ? "Unlocking…" : label}
       </button>
       {error ? (
-        <span role="alert" className="text-xs text-(--bid-danger)">
+        <span role="alert" className="text-xs text-danger">
           {error}
         </span>
       ) : null}

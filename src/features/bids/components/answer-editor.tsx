@@ -204,14 +204,14 @@ function navLine(item: EditorNavItem): { text: string; tone: "muted" | "danger" 
 }
 
 const PART_ICON = {
-  covered: <CircleCheck aria-hidden className="size-5 shrink-0 text-(--bid-brand)" strokeWidth={1.8} />,
+  covered: <CircleCheck aria-hidden className="size-5 shrink-0 text-brand" strokeWidth={1.8} />,
   partly: (
     <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" className="shrink-0">
-      <circle cx="10" cy="10" r="8" fill="none" stroke="var(--bid-info)" strokeWidth="1.8" />
-      <path d="M10 2a8 8 0 0 0 0 16z" fill="var(--bid-info)" />
+      <circle cx="10" cy="10" r="8" fill="none" stroke="var(--info)" strokeWidth="1.8" />
+      <path d="M10 2a8 8 0 0 0 0 16z" fill="var(--info)" />
     </svg>
   ),
-  missing: <CircleAlert aria-hidden className="size-5 shrink-0 text-(--bid-danger)" strokeWidth={1.8} />,
+  missing: <CircleAlert aria-hidden className="size-5 shrink-0 text-danger" strokeWidth={1.8} />,
 } as const;
 const PART_WORD = { covered: "Covered.", partly: "Partly covered.", missing: "Not answered." } as const;
 
@@ -313,10 +313,10 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
       </span>
       {question.limit ? (
         <>
-          <span aria-hidden className="flex h-1.5 w-[140px] max-w-[30vw] rounded-full bg-(--bid-line)">
-            <span style={{ width: `${Math.min(100, (words / question.limit) * 100)}%` }} className={cn("rounded-full", limitState === "over" ? "bg-(--bid-danger)" : "bg-(--bid-ink)")} />
+          <span aria-hidden className="flex h-1.5 w-[140px] max-w-[30vw] rounded-full bg-line">
+            <span style={{ width: `${Math.min(100, (words / question.limit) * 100)}%` }} className={cn("rounded-full", limitState === "over" ? "bg-danger" : "bg-ink")} />
           </span>
-          <span className={limitState === "over" ? "font-semibold text-(--bid-danger)" : "text-(--bid-muted)"}>
+          <span className={limitState === "over" ? "font-semibold text-danger" : "text-ink-2"}>
             {limitState === "over" ? `${(words - question.limit).toLocaleString("en-GB")} over` : `${(question.limit - words).toLocaleString("en-GB")} left`}
           </span>
         </>
@@ -327,7 +327,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
   const finalControl = (where: "header" | "bar") =>
     readOnly || !question.draftText ? null : question.status === "final" ? (
       <button type="button" className="bid-btn" disabled={busy !== null} onClick={() => setStatus("draft")} data-testid={where === "header" ? "reopen-answer" : "reopen-answer-bar"}>
-        <Check aria-hidden className="size-4 text-(--bid-brand)" strokeWidth={2.6} />
+        <Check aria-hidden className="size-4 text-brand" strokeWidth={2.6} />
         Final · reopen
       </button>
     ) : (
@@ -346,19 +346,19 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
   return (
     <div className="bid-scope bid-toolbar @container flex flex-col" data-testid="answer-editor">
       {/* --- Sub-header ------------------------------------------------------------------------ */}
-      <div className={cn("flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-b border-(--bid-line) pb-3", embedded ? "hidden" : "")}>
+      <div className={cn("flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-b border-line pb-3", embedded ? "hidden" : "")}>
         <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1">
-          <Link href={bid.briefHref} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-(--bid-ink) no-underline hover:text-(--bid-brand)">
+          <Link href={bid.briefHref} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-ink no-underline hover:text-brand">
             <ChevronLeft aria-hidden className="size-4" />
             {bid.briefLabel ?? "Bid brief"}
           </Link>
-          <span className="max-w-[470px] min-w-0 truncate text-[15px] font-semibold" title={bid.title}>
+          <span className="max-w-[470px] min-w-0 truncate text-15 font-semibold" title={bid.title}>
             {bid.title}
           </span>
           {bid.deadline ? <DeadlineChip deadline={new Date(bid.deadline)} /> : null}
         </div>
         <div className="bid-noprint flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="mr-1 text-[13px] text-(--bid-muted)" aria-live="polite" data-testid="save-state">
+          <span className="mr-1 text-13 text-ink-2" aria-live="polite" data-testid="save-state">
             {readOnly ? "" : busy === "save" ? "Saving…" : dirty ? "Unsaved changes" : savedAt ? `Saved at ${timeOf(savedAt)}` : question.draftText ? "Saved" : ""}
           </span>
           {bid.exportHref ? (
@@ -413,10 +413,10 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
           <span className="w-11" />
         )}
         <div className="min-w-0 text-center">
-          <p className="text-[15px] font-semibold">
+          <p className="text-15 font-semibold">
             Question {current + 1} of {nav.items.length}
           </p>
-          <p className="text-xs text-(--bid-muted)">{question.draftText ? `Draft ${draftNumber}` : "Not started"}</p>
+          <p className="text-xs text-ink-2">{question.draftText ? `Draft ${draftNumber}` : "Not started"}</p>
         </div>
         {nav.nextHref ? (
           <Link href={nav.nextHref} aria-label="Next question" className="bid-btn px-3">
@@ -432,22 +432,22 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
         <div className="order-3 flex min-w-0 flex-col gap-7 @[900px]:col-start-2 @[900px]:row-start-2 @[1180px]:col-start-1 @[1180px]:row-start-1">
           <nav aria-label="Questions" className={cn("hidden flex-col gap-2.5", embedded ? "" : "@[1180px]:flex")}>
             <h2 className="bid-h3">
-              Questions{nav.qualityWeight !== null ? <span className="font-normal text-(--bid-muted)"> · {nav.qualityWeight}% of marks</span> : null}
+              Questions{nav.qualityWeight !== null ? <span className="font-normal text-ink-2"> · {nav.qualityWeight}% of marks</span> : null}
             </h2>
             <ul className="flex flex-col gap-1">
               {nav.items.map((item) => {
                 const line = navLine(item);
                 const body = (
                   <>
-                    <span className="bid-mono text-xs text-(--bid-muted)">
+                    <span className="bid-mono text-xs text-ink-2">
                       {item.ref || "Question"}
                       {item.weighting !== null ? ` · ${item.weighting}%` : ""}
                     </span>
                     <span className="text-sm leading-[1.35] font-semibold">{item.title}</span>
-                    <span className={cn("text-xs tabular-nums", line.tone === "danger" ? "font-semibold text-(--bid-danger)" : line.tone === "info" ? "font-semibold text-(--bid-info)" : "text-(--bid-muted)")}>{line.text}</span>
+                    <span className={cn("text-xs tabular-nums", line.tone === "danger" ? "font-semibold text-danger" : line.tone === "info" ? "font-semibold text-info" : "text-ink-2")}>{line.text}</span>
                   </>
                 );
-                const className = cn("flex flex-col gap-0.5 rounded-lg border px-3.5 py-3 text-(--bid-ink) no-underline", item.id === question.id ? "border-(--bid-ink) bg-(--bid-surface)" : "border-transparent hover:border-(--bid-line)");
+                const className = cn("flex flex-col gap-0.5 rounded-card border px-3.5 py-3 text-ink no-underline", item.id === question.id ? "border-ink bg-surface" : "border-transparent hover:border-line");
                 return (
                   <li key={item.id}>
                     {item.href ? (
@@ -467,31 +467,31 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
             <h2 id="src-h" className="bid-h3">
               Sources in this answer
             </h2>
-            <p className="mt-0.5 text-xs text-(--bid-muted)">Your documents only. Select a marker to see what the source says.</p>
+            <p className="mt-0.5 text-xs text-ink-2">Your documents only. Select a marker to see what the source says.</p>
             {usedSources.length > 0 ? (
               <ol className="mt-2.5 flex flex-col">
                 {usedSources.map((source) => {
                   const open = selectedMarker === source.marker;
                   const times = uses(source.marker);
                   return (
-                    <li key={source.marker} id={`src-${source.marker}`} className="flex scroll-mt-24 gap-2.5 border-t border-(--bid-line) py-2.5">
+                    <li key={source.marker} id={`src-${source.marker}`} className="flex scroll-mt-24 gap-2.5 border-t border-line py-2.5">
                       <button type="button" className={cn("bid-marker ml-0 flex size-5 shrink-0 items-center justify-center p-0")} aria-pressed={open} aria-label={`Source ${numbers.get(source.marker)}`} onClick={() => setSelectedMarker(open ? null : source.marker)}>
                         {numbers.get(source.marker)}
                       </button>
                       <span className="flex min-w-0 flex-col text-xs">
                         <span className="bid-mono [overflow-wrap:anywhere]">{source.title}</span>
-                        <span className="text-(--bid-muted)">
+                        <span className="text-ink-2">
                           {source.detail}
                           {times > 1 ? `${source.detail ? " · " : ""}used ${times === 2 ? "twice" : `${times} times`}` : ""}
                         </span>
-                        {open && source.passage ? <blockquote className="bid-serif mt-2 rounded-md bg-(--bid-paper) px-3 py-2.5 text-sm leading-[1.45] whitespace-pre-line">{source.passage}</blockquote> : null}
+                        {open && source.passage ? <blockquote className="bid-serif mt-2 rounded-control bg-paper px-3 py-2.5 text-sm leading-[1.45] whitespace-pre-line">{source.passage}</blockquote> : null}
                       </span>
                     </li>
                   );
                 })}
               </ol>
             ) : (
-              <p className="mt-2.5 border-t border-(--bid-line) py-3 text-[13px]">{text.trim() ? "No source from your documents is cited in this text." : "Sources appear here once there is a draft."}</p>
+              <p className="mt-2.5 border-t border-line py-3 text-13">{text.trim() ? "No source from your documents is cited in this text." : "Sources appear here once there is a draft."}</p>
             )}
           </section>
         </div>
@@ -507,11 +507,11 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
               <span className="bid-tag">{question.limit ? `Limit ${question.limit.toLocaleString("en-GB")} words` : "No limit stated"}</span>
               {scaleRange ? <span className="bid-tag">{scaleKind === "pack" ? scaleRange : `${scaleRange} (typical scale)`}</span> : null}
             </div>
-            {question.title ? <p className="text-[15px] font-semibold">{question.title}</p> : null}
-            <p className="bid-serif text-[18px] leading-[1.4] whitespace-pre-line text-pretty sm:text-[20px]">“{question.text}”</p>
+            {question.title ? <p className="text-15 font-semibold">{question.title}</p> : null}
+            <p className="bid-serif text-lg leading-[1.4] whitespace-pre-line text-pretty sm:text-xl">“{question.text}”</p>
             {question.citation ? <CitationMark citation={question.citation} links={links} /> : <span className="bid-chip">Added by hand · no source in the pack</span>}
             {question.limitFromPages && question.limit ? (
-              <p className="text-xs text-(--bid-muted)">
+              <p className="text-xs text-ink-2">
                 {question.limitText ? `The buyer's limit is “${question.limitText}”. ` : ""}Converted at 450 words per A4 side (our assumption — check the buyer&rsquo;s font and margin rules).
               </p>
             ) : null}
@@ -519,7 +519,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
               <details className="w-full text-sm">
                 <summary className="bid-link inline-flex min-h-9 cursor-pointer items-center font-medium">What the buyer says, and how it is scored</summary>
                 {question.guidance ? <p className="mt-2 whitespace-pre-line">{question.guidance}</p> : null}
-                <p className="mt-3 text-[13px] text-(--bid-muted)">
+                <p className="mt-3 text-13 text-ink-2">
                   {scaleKind === "pack" ? "Scoring scale from the tender documents:" : "The pack publishes no scoring scale, so a typical public-sector 0 to 5 scale is used. Check the buyer's wording if they publish one later."}
                 </p>
                 <ol className="mt-2 flex flex-col gap-1.5">
@@ -541,23 +541,23 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
             <section aria-label="Evaluator's view, in short" className="bid-card flex flex-col gap-3 px-5 py-4 @[900px]:hidden" data-testid="evaluation-summary">
               <div className="flex items-baseline justify-between gap-3">
                 <h2 className="bid-h3">Evaluator&rsquo;s view</h2>
-                <a href="#eval-h" className="bid-link text-[13px] font-medium">
+                <a href="#eval-h" className="bid-link text-13 font-medium">
                   Full marking
                 </a>
               </div>
               <p className="flex items-baseline gap-2.5">
-                <span className="bid-serif text-[44px] leading-none font-semibold">{evaluation.score}</span>
-                <span className="text-[15px]">
+                <span className="bid-serif text-5xl leading-none font-semibold">{evaluation.score}</span>
+                <span className="text-15">
                   <span className="font-semibold">of {evaluation.maxScore}</span>
                   {evaluation.band ? ` · ${evaluation.band}` : ""}
                   {evaluationStale ? " · before your last changes" : ""}
                 </span>
               </p>
               {evaluation.improvements.length > 0 ? (
-                <ol className="flex flex-col border-t border-(--bid-line) pt-2 text-sm">
+                <ol className="flex flex-col border-t border-line pt-2 text-sm">
                   {evaluation.improvements.slice(0, 3).map((improvement, index) => (
                     <li key={index} className="flex gap-2.5 py-1.5">
-                      <span className="bid-mono w-4 shrink-0 text-[13px] text-(--bid-muted)">{index + 1}</span>
+                      <span className="bid-mono w-4 shrink-0 text-13 text-ink-2">{index + 1}</span>
                       <span className="font-medium">{improvement.suggestion}</span>
                     </li>
                   ))}
@@ -566,18 +566,18 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
             </section>
           ) : null}
 
-          <section aria-labelledby="draft-h" className={cn("bid-card", limitState === "over" ? "border-(--bid-danger)" : "")}>
-            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-(--bid-line) px-5 py-3 sm:px-7">
+          <section aria-labelledby="draft-h" className={cn("bid-card", limitState === "over" ? "border-danger" : "")}>
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-line px-5 py-3 sm:px-7">
               <h2 id="draft-h" className="bid-h3">
                 Draft answer
-                {question.draftText ? <span className="font-normal text-(--bid-muted)"> · draft {draftNumber}</span> : null}
-                {question.draftMeta && !question.draftMeta.editedAt && text ? <span className="font-normal text-(--bid-muted)"> · written by AI, check every claim</span> : null}
+                {question.draftText ? <span className="font-normal text-ink-2"> · draft {draftNumber}</span> : null}
+                {question.draftMeta && !question.draftMeta.editedAt && text ? <span className="font-normal text-ink-2"> · written by AI, check every claim</span> : null}
               </h2>
               {counter}
             </div>
 
             {!readOnly ? (
-              <div className="bid-noprint flex flex-wrap items-center gap-2 border-b border-(--bid-line) px-5 py-2.5 sm:px-7">
+              <div className="bid-noprint flex flex-wrap items-center gap-2 border-b border-line px-5 py-2.5 sm:px-7">
                 <button type="button" className={cn("bid-btn bid-btn-sm", question.draftText ? "" : "bid-btn-primary")} onClick={draft} disabled={busy !== null} data-testid="draft-button">
                   {busy === "draft" ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
                   {busy === "draft" ? "Drafting from your documents…" : question.draftText ? "Regenerate" : "Draft from my documents"}
@@ -604,7 +604,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
               </div>
             ) : null}
             {showInstructions && !readOnly ? (
-              <div className="flex flex-col gap-1.5 border-b border-(--bid-line) bg-(--bid-paper) px-5 py-3 sm:px-7">
+              <div className="flex flex-col gap-1.5 border-b border-line bg-paper px-5 py-3 sm:px-7">
                 <label htmlFor="draft-instructions" className="text-sm font-semibold">
                   Instructions for the next draft
                 </label>
@@ -617,17 +617,17 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                   maxLength={1500}
                   placeholder="e.g. Lead with the Leeds case study. Shorter sentences. Say more about mobilisation in the first four weeks."
                 />
-                <p className="text-xs text-(--bid-muted)">Instructions shape the writing; they cannot add facts. Anything not in your documents still becomes a gap to fill.</p>
+                <p className="text-xs text-ink-2">Instructions shape the writing; they cannot add facts. Anything not in your documents still becomes a gap to fill.</p>
               </div>
             ) : null}
             {error ? (
-              <p role="alert" className="border-b border-(--bid-line) bg-(--bid-danger-tint) px-5 py-2.5 text-sm text-(--bid-danger) sm:px-7">
+              <p role="alert" className="border-b border-line bg-danger-tint px-5 py-2.5 text-sm text-danger sm:px-7">
                 {error}
               </p>
             ) : null}
 
             {busy === "draft" || busy === "apply" ? (
-              <p className="flex items-center gap-2 px-5 py-12 text-sm text-(--bid-muted) sm:px-9" role="status">
+              <p className="flex items-center gap-2 px-5 py-12 text-sm text-ink-2 sm:px-9" role="status">
                 <Loader2 aria-hidden className="size-4 animate-spin" />
                 {busy === "apply" ? "Revising the answer — the current text is kept in History…" : "Writing a first draft from your documents, then checking its claims. This takes about a minute."}
               </p>
@@ -643,24 +643,24 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                   rows={18}
                   placeholder="Write your answer here, or use “Draft from my documents” to start from your evidence."
                 />
-                <p className="mt-1.5 text-xs text-(--bid-muted)">Source markers look like [E2] here; a gap looks like [EVIDENCE NEEDED: what is missing]. Saved when you leave the box.</p>
+                <p className="mt-1.5 text-xs text-ink-2">Source markers look like [E2] here; a gap looks like [EVIDENCE NEEDED: what is missing]. Saved when you leave the box.</p>
               </div>
             ) : text ? (
               <article aria-label="Draft answer" className="px-5 pt-6 pb-7 sm:px-9">
                 <DraftText text={text} meta={question.draftMeta} numbers={numbers} selected={selectedMarker} onSelect={selectMarker} />
               </article>
             ) : (
-              <p className="px-5 py-12 text-center text-sm text-(--bid-muted)">{readOnly ? "No answer has been written for this question." : "No answer yet. Draft one from your documents, or choose Edit and write it yourself."}</p>
+              <p className="px-5 py-12 text-center text-sm text-ink-2">{readOnly ? "No answer has been written for this question." : "No answer yet. Draft one from your documents, or choose Edit and write it yourself."}</p>
             )}
 
             {showHistory && question.versions.length > 0 ? (
-              <div className="border-t border-(--bid-line)" data-testid="answer-history">
+              <div className="border-t border-line" data-testid="answer-history">
                 <h3 className="px-5 pt-3 text-sm font-semibold sm:px-7">Earlier drafts</h3>
                 <ul className="flex flex-col">
                   {question.versions.map((version) => (
-                    <li key={version.id} className="flex flex-wrap items-start gap-3 border-t border-(--bid-line) px-5 py-2.5 first:border-t-0 sm:px-7">
+                    <li key={version.id} className="flex flex-wrap items-start gap-3 border-t border-line px-5 py-2.5 first:border-t-0 sm:px-7">
                       <div className="min-w-0 flex-[1_1_16rem]">
-                        <p className="text-xs text-(--bid-muted)">
+                        <p className="text-xs text-ink-2">
                           {version.source === "user" ? "Your text" : version.source === "ai_revision" ? "AI revision" : "AI draft"} · {version.wordCount} words · {dateTimeOf(version.createdAt)}
                           {version.note ? ` · ${version.note}` : ""}
                         </p>
@@ -682,31 +682,31 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
               </div>
             ) : null}
 
-            <div className="flex flex-wrap justify-between gap-x-6 gap-y-1 border-t border-(--bid-line) px-5 py-3 text-[13px] text-(--bid-muted) sm:px-7">
+            <div className="flex flex-wrap justify-between gap-x-6 gap-y-1 border-t border-line px-5 py-3 text-13 text-ink-2 sm:px-7">
               <span>Written only from your documents. A numbered marker shows where each claim comes from.</span>
-              <span>{limitState === "over" ? <span className="font-semibold text-(--bid-danger)">Over the limit: buyers commonly stop reading at it, or reject the answer.</span> : "Source markers are not counted as words."}</span>
+              <span>{limitState === "over" ? <span className="font-semibold text-danger">Over the limit: buyers commonly stop reading at it, or reject the answer.</span> : "Source markers are not counted as words."}</span>
             </div>
           </section>
-          {question.draftMeta?.trimmedToLimit && !question.draftMeta.editedAt ? <p className="text-[13px] text-(--bid-amber-ink)">The AI draft ran over the limit twice and was cut at the limit. Read the ending.</p> : null}
+          {question.draftMeta?.trimmedToLimit && !question.draftMeta.editedAt ? <p className="text-13 text-accent-ink">The AI draft ran over the limit twice and was cut at the limit. Read the ending.</p> : null}
         </div>
 
         {/* --- Right: the evaluator's view --------------------------------------------------- */}
         <aside aria-labelledby="eval-h" className="bid-card order-2 flex min-w-0 scroll-mt-24 flex-col px-5 pt-5 pb-5 @[900px]:col-start-2 @[900px]:row-start-1 @[1180px]:col-start-3" data-testid="evaluator-panel">
-          <h2 id="eval-h" className="bid-serif text-[22px] leading-[1.25] font-semibold">
+          <h2 id="eval-h" className="bid-serif text-2xl leading-[1.25] font-semibold">
             Evaluator&rsquo;s view
           </h2>
-          <p className="mt-1 text-[13px] text-(--bid-muted)">
+          <p className="mt-1 text-13 text-ink-2">
             {scaleKind === "pack" ? `Marked against ${buyer}'s own scoring scheme.` : "The pack publishes no scoring scale: marked against a typical public-sector 0 to 5 scale."}
             {evaluation ? ` Marked ${dateTimeOf(evaluation.evaluatedAt)}.` : ""}
           </p>
 
           {busy === "evaluate" ? (
-            <p role="status" className="mt-4 flex items-center gap-2 rounded-lg bg-(--bid-paper) px-4 py-6 text-sm text-(--bid-muted)">
+            <p role="status" className="mt-4 flex items-center gap-2 rounded-card bg-paper px-4 py-6 text-sm text-ink-2">
               <Loader2 aria-hidden className="size-4 animate-spin" /> Reading the answer as an evaluator would…
             </p>
           ) : evaluatorError ? (
-            <div role="alert" className="mt-4 rounded-lg bg-(--bid-danger-tint) px-4 py-4 text-sm">
-              <p className="font-semibold text-(--bid-danger)">The evaluator is unavailable</p>
+            <div role="alert" className="mt-4 rounded-card bg-danger-tint px-4 py-4 text-sm">
+              <p className="font-semibold text-danger">The evaluator is unavailable</p>
               <p className="mt-1">{evaluatorError} Your answer is saved; try marking it again in a moment.</p>
             </div>
           ) : evaluation ? (
@@ -716,11 +716,11 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                   The answer has changed since it was marked. Mark it again before relying on this.
                 </Callout>
               ) : null}
-              <div className="mt-4 flex flex-col rounded-lg bg-(--bid-paper) p-4">
-                <span className="text-xs text-(--bid-muted)">Marked{scaleKind === "pack" ? "" : " · on a typical 0 to 5 scale"}</span>
+              <div className="mt-4 flex flex-col rounded-card bg-paper p-4">
+                <span className="text-xs text-ink-2">Marked{scaleKind === "pack" ? "" : " · on a typical 0 to 5 scale"}</span>
                 <p className="flex items-baseline gap-2.5" data-testid="evaluation-score" aria-label={`Marked ${evaluation.score} of ${evaluation.maxScore}`}>
-                  <span className="bid-serif text-[56px] leading-[1.1] font-semibold tracking-[-0.02em]">{evaluation.score}</span>
-                  <span className="text-[15px]">
+                  <span className="bid-serif text-6xl leading-[1.1] font-semibold tracking-[-0.02em]">{evaluation.score}</span>
+                  <span className="text-15">
                     <span className="font-semibold">of {evaluation.maxScore}</span>
                     {evaluation.band ? ` · ${evaluation.band}` : ""}
                   </span>
@@ -728,25 +728,25 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                 {sortedScale && scoreIndex >= 0 && sortedScale.length <= 12 ? (
                   <div role="img" aria-label={`${evaluation.score} of ${evaluation.maxScore}`} className="mt-2 grid gap-1" style={{ gridTemplateColumns: `repeat(${sortedScale.length - 1}, minmax(0, 1fr))` }}>
                     {sortedScale.slice(1).map((row, index) => (
-                      <span key={row.score} className={cn("h-2 rounded", index < scoreIndex ? "bg-(--bid-brand)" : "bg-(--bid-line)")} />
+                      <span key={row.score} className={cn("h-2 rounded", index < scoreIndex ? "bg-brand" : "bg-line")} />
                     ))}
                   </div>
                 ) : null}
                 {scoreRow?.descriptor ? (
                   <>
-                    <blockquote className="bid-serif mt-3.5 text-[15px] leading-[1.45]">
+                    <blockquote className="bid-serif mt-3.5 text-15 leading-[1.45]">
                       “{scoreRow.label ? `${scoreRow.label}: ` : ""}
                       {scoreRow.descriptor}”
                     </blockquote>
                     {scaleKind === "pack" && scoreRow.citation ? <CitationMark citation={scoreRow.citation} links={links} variant="ref" short={false} className="mt-1.5 self-start" /> : null}
                   </>
                 ) : null}
-                <p className="mt-3 border-t border-(--bid-line) pt-3 text-[13px]">{evaluation.rationale}</p>
-                {evaluation.overWordLimit ? <p className="mt-2 text-[13px] font-semibold text-(--bid-danger)">This text was over the word limit when it was marked.</p> : null}
+                <p className="mt-3 border-t border-line pt-3 text-13">{evaluation.rationale}</p>
+                {evaluation.overWordLimit ? <p className="mt-2 text-13 font-semibold text-danger">This text was over the word limit when it was marked.</p> : null}
               </div>
 
               {(evaluation.parts?.length ?? 0) > 0 || evaluation.missingParts.length > 0 ? (
-                <section aria-labelledby="eval-parts" className="mt-5 border-t border-(--bid-line) pt-[18px]">
+                <section aria-labelledby="eval-parts" className="mt-5 border-t border-line pt-[18px]">
                   <h3 id="eval-parts" className="bid-h3">
                     What the question asks for
                   </h3>
@@ -756,7 +756,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                         {PART_ICON[part.status]}
                         <span className="flex flex-col">
                           <span className="text-sm font-semibold">{part.part}</span>
-                          <span className="text-[13px]">
+                          <span className="text-13">
                             {PART_WORD[part.status]} {part.note}
                           </span>
                         </span>
@@ -767,19 +767,19 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
               ) : null}
 
               {evaluation.improvements.length > 0 ? (
-                <section aria-labelledby="eval-fixes" className="mt-5 border-t border-(--bid-line) pt-[18px]">
+                <section aria-labelledby="eval-fixes" className="mt-5 border-t border-line pt-[18px]">
                   <h3 id="eval-fixes" className="bid-h3">
                     {nextRow ? `What ${/^[aeiou8]/i.test(nextRow.score) ? "an" : "a"} ${nextRow.score} needs` : "What would strengthen it further"}
                   </h3>
                   <ol className="mt-2.5 flex flex-col gap-3.5">
                     {evaluation.improvements.map((improvement, index) => (
                       <li key={index} className="flex gap-2.5" data-testid="improvement">
-                        <span className="bid-mono w-5 shrink-0 text-[13px] text-(--bid-muted)">{index + 1}</span>
+                        <span className="bid-mono w-5 shrink-0 text-13 text-ink-2">{index + 1}</span>
                         <span className="flex min-w-0 flex-col items-start gap-1">
                           <span className="text-sm font-semibold">{improvement.suggestion}</span>
-                          {improvement.rationale ? <span className="text-[13px]">{improvement.rationale}</span> : null}
+                          {improvement.rationale ? <span className="text-13">{improvement.rationale}</span> : null}
                           {improvement.needsEvidence ? (
-                            <span className="text-[13px] text-(--bid-amber-ink)">
+                            <span className="text-13 text-accent-ink">
                               Needs evidence your documents do not hold.{" "}
                               {gaps.length > 0 ? (
                                 <a href="#gap-1" className="bid-link font-medium">
@@ -789,10 +789,10 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                             </span>
                           ) : null}
                           {!readOnly ? (
-                            <label className="flex min-h-9 cursor-pointer items-center gap-2 text-[13px]">
+                            <label className="flex min-h-9 cursor-pointer items-center gap-2 text-13">
                               <input
                                 type="checkbox"
-                                className="size-4 accent-(--bid-brand)"
+                                className="size-4 accent-brand"
                                 checked={selectedFixes.includes(index)}
                                 onChange={(event) => setSelectedFixes((value) => (event.target.checked ? [...value, index] : value.filter((item) => item !== index)))}
                               />
@@ -814,21 +814,21 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                       >
                         {selectedFixes.length > 0 ? `Revise with ${selectedFixes.length} selected` : "Revise with all of these"}
                       </button>
-                      <span className="text-xs text-(--bid-muted)">Writes a new draft from your documents. The current text stays in History.</span>
+                      <span className="text-xs text-ink-2">Writes a new draft from your documents. The current text stays in History.</span>
                     </div>
                   ) : null}
                 </section>
               ) : null}
 
               {evaluation.strengths.length > 0 ? (
-                <section aria-labelledby="eval-credit" className="mt-5 border-t border-(--bid-line) pt-[18px]">
+                <section aria-labelledby="eval-credit" className="mt-5 border-t border-line pt-[18px]">
                   <h3 id="eval-credit" className="bid-h3">
                     An evaluator would credit
                   </h3>
-                  <ul className="mt-2.5 flex flex-col gap-2.5 text-[13px]">
+                  <ul className="mt-2.5 flex flex-col gap-2.5 text-13">
                     {evaluation.strengths.map((strength) => (
                       <li key={strength} className="flex gap-2.5">
-                        <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-(--bid-brand)" strokeWidth={2.4} />
+                        <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-brand" strokeWidth={2.4} />
                         <span>{strength}</span>
                       </li>
                     ))}
@@ -837,26 +837,26 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
               ) : null}
             </div>
           ) : (
-            <p className="mt-4 rounded-lg bg-(--bid-paper) px-4 py-5 text-sm">
+            <p className="mt-4 rounded-card bg-paper px-4 py-5 text-sm">
               {text.trim() ? "Not marked yet. Marking reads the answer strictly against the scoring scale and lists what would gain marks." : "Write or draft an answer, then mark it."}
             </p>
           )}
 
           {text.trim() ? (
-            <section aria-labelledby="eval-check" className="mt-5 border-t border-(--bid-line) pt-[18px]" data-testid="check-list">
+            <section aria-labelledby="eval-check" className="mt-5 border-t border-line pt-[18px]" data-testid="check-list">
               <h3 id="eval-check" className="bid-h3">
                 Check before you submit
               </h3>
-              <ul className="mt-2.5 flex flex-col gap-2.5 text-[13px]">
+              <ul className="mt-2.5 flex flex-col gap-2.5 text-13">
                 {flagged.map((flag, index) => (
                   <li key={`f${index}`} className="flex gap-2.5" data-testid="flagged-claim">
-                    <span aria-hidden className="w-4 shrink-0 text-center font-bold text-(--bid-danger)">!</span>
+                    <span aria-hidden className="w-4 shrink-0 text-center font-bold text-danger">!</span>
                     <span>{flag.claim === "Claims check" ? flag.reason : <>No source for: “{flag.claim}”. {flag.reason} Evidence it or take it out.</>}</span>
                   </li>
                 ))}
                 {gaps.length > 0 ? (
                   <li className="flex gap-2.5">
-                    <span aria-hidden className="w-4 shrink-0 text-center font-bold text-(--bid-danger)">!</span>
+                    <span aria-hidden className="w-4 shrink-0 text-center font-bold text-danger">!</span>
                     <span>
                       {countWord(gaps.length)} {gaps.length === 1 ? "gap" : "gaps"} to fill: {gaps.join("; ")}. Never submit a placeholder.{" "}
                       <a href="#gap-1" className="bid-link font-medium">
@@ -867,27 +867,27 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                 ) : null}
                 {!evaluation?.parts?.length && (question.draftMeta?.unansweredParts ?? []).length > 0 && !dirty ? (
                   <li className="flex gap-2.5">
-                    <span aria-hidden className="w-4 shrink-0 text-center font-bold text-(--bid-danger)">!</span>
+                    <span aria-hidden className="w-4 shrink-0 text-center font-bold text-danger">!</span>
                     <span>Not answered: {question.draftMeta!.unansweredParts.join("; ")}.</span>
                   </li>
                 ) : null}
                 {question.limit ? (
                   <li className="flex gap-2.5">
-                    <span aria-hidden className={cn("w-4 shrink-0 text-center font-bold", limitState === "over" ? "text-(--bid-danger)" : "text-(--bid-info)")}>{limitState === "over" ? "!" : "i"}</span>
+                    <span aria-hidden className={cn("w-4 shrink-0 text-center font-bold", limitState === "over" ? "text-danger" : "text-info")}>{limitState === "over" ? "!" : "i"}</span>
                     <span>{limitState === "over" ? `Over the limit by ${words - question.limit} words. Cut before you submit.` : `You have ${(question.limit - words).toLocaleString("en-GB")} words in hand.`}</span>
                   </li>
                 ) : null}
                 <li className="flex gap-2.5">
-                  <span aria-hidden className="w-4 shrink-0 text-center font-bold text-(--bid-info)">i</span>
+                  <span aria-hidden className="w-4 shrink-0 text-center font-bold text-info">i</span>
                   <span>The automatic claims check catches most unsupported statements, not all. Read every factual sentence against your own records.</span>
                 </li>
               </ul>
             </section>
           ) : null}
 
-          <div className="mt-[22px] flex flex-col gap-2.5 border-t border-(--bid-line) pt-[18px]">
+          <div className="mt-5 flex flex-col gap-2.5 border-t border-line pt-4">
             <span className="hidden @[900px]:block">{markControl("panel")}</span>
-            <p className="text-xs text-(--bid-muted)">
+            <p className="text-xs text-ink-2">
               A reading of the scoring scheme, not a forecast of {buyer === "the buyer" ? "the buyer’s" : `${buyer}’s`} decision. It marks against the published criteria only and is not legal advice.
             </p>
           </div>
@@ -896,7 +896,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
 
       {/* Small screens: the two main actions stay within reach. */}
       {!readOnly ? (
-        <div className="bid-noprint sticky bottom-0 z-10 -mx-4 mt-6 flex flex-col gap-2 border-t border-(--bid-line) bg-(--bid-surface) px-4 py-3 @[900px]:hidden">
+        <div className="bid-noprint sticky bottom-0 z-10 -mx-4 mt-6 flex flex-col gap-2 border-t border-line bg-surface px-4 py-3 @[900px]:hidden">
           {finalControl("bar")}
           {markControl("bar")}
         </div>

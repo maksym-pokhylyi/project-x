@@ -50,12 +50,12 @@ export default async function SampleCheckPage() {
   const usePack = packScale.length >= 2;
 
   return (
-    <div className="bg-(--bid-paper)" id="top">
-      <div className="bid-scope sticky top-0 z-20 border-b border-(--bid-line) bg-(--bid-surface)" data-testid="sample-cta-bar">
+    <div className="bg-paper" id="top">
+      <div className="bid-scope sticky top-0 z-20 border-b border-line bg-surface" data-testid="sample-cta-bar">
         <div className="bid-toolbar mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2.5 sm:px-8">
           <p className="text-sm">
             <span className="font-semibold">A sample check, built from a real public tender pack.</span>{" "}
-            <span className="text-(--bid-muted)">Company details are an example. Nothing here can be edited.</span>
+            <span className="text-ink-2">Company details are an example. Nothing here can be edited.</span>
           </p>
           <Link href={CTA_HREF} className="bid-btn bid-btn-primary">
             Get a free cited bid check
@@ -65,21 +65,21 @@ export default async function SampleCheckPage() {
       <div className="bid-scope mx-auto flex max-w-[1280px] flex-col px-4 pt-8 pb-16 sm:px-8" data-testid="sample-check">
         <header className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
           <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-2">
-            <p className="self-start rounded-[6px] bg-(--bid-brand-tint) px-3 py-1.5 text-sm font-semibold text-(--bid-brand)" data-testid="sample-band">
+            <p className="self-start rounded-control bg-brand-tint px-3 py-1.5 text-sm font-semibold text-brand" data-testid="sample-band">
               A sample check, built from a real public tender pack
             </p>
-            <p className="bid-mono text-xs text-(--bid-muted)">
+            <p className="bid-mono text-xs text-ink-2">
               Read-only · {sample.files.filter((file) => file.kind !== "zip").length} files as published by the buyer
             </p>
             <h1 className="bid-h1">{source.title}</h1>
-            <p className="text-[15px]">
-              {source.buyer} <span className="text-(--bid-muted)">· {bid.title}</span>
+            <p className="text-15">
+              {source.buyer} <span className="text-ink-2">· {bid.title}</span>
             </p>
             <p className="max-w-[760px] text-sm">
               This is a real check, produced by Bidfolio from the tender pack {source.buyer} published for this contract. Nothing about the tender has been edited. The bidder is <strong>the example company</strong>: a fictional
               firm whose company facts and documents were made up so that the check has something to compare the requirements with.
             </p>
-            <p className="text-[13px] text-(--bid-muted)" data-testid="sample-source">
+            <p className="text-13 text-ink-2" data-testid="sample-source">
               Source documents: published by {source.buyer} on{" "}
               <a href={source.documentsPage} target="_blank" rel="noopener noreferrer" className="bid-link">
                 {hostOf(source.documentsPage)}
@@ -90,7 +90,7 @@ export default async function SampleCheckPage() {
               </a>{" "}
               · retrieved {new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${source.retrieved}T12:00:00Z`))}. This tender has closed.
             </p>
-            <p className="text-[13px] text-(--bid-muted)" data-testid="sample-removal">
+            <p className="text-13 text-ink-2" data-testid="sample-removal">
               The tender documents belong to the buyer; we quote them to show how a check reads. Ask us to remove this sample:{" "}
               <a href="mailto:hello@bidfolio.co.uk" className="bid-link">
                 hello@bidfolio.co.uk
@@ -101,7 +101,7 @@ export default async function SampleCheckPage() {
           <Cta />
         </header>
 
-        <StandingNotice className="mt-6 border-t border-(--bid-line) pt-3" />
+        <StandingNotice className="mt-6 border-t border-line pt-3" />
 
         <div className="mt-7">
           <BriefView
@@ -130,7 +130,7 @@ export default async function SampleCheckPage() {
             <h2 id="all-req-h" className="bid-h2">
               Every requirement found
             </h2>
-            <p className="max-w-[760px] text-sm text-(--bid-muted)">
+            <p className="max-w-[760px] text-sm text-ink-2">
               All {requirements.length} requirements the check drew from the pack, in document order — pass-or-fail tests, forms to sign and submission rules. In your own workspace you can edit them, add your own and tick each one off
               once you have read it on the page.
             </p>
@@ -149,7 +149,7 @@ export default async function SampleCheckPage() {
               <h2 id="sample-answer" className="bid-h2 scroll-mt-24">
                 One drafted answer, with the evaluator&rsquo;s view
               </h2>
-              <p className="max-w-[760px] text-sm text-(--bid-muted)">
+              <p className="max-w-[760px] text-sm text-ink-2">
                 A first draft written only from the example company&rsquo;s (fictional) company facts and documents. Where they hold no evidence the draft leaves a gap instead of inventing a fact, and the marking says what an
                 evaluator would want to see.
                 {sample.draftedToWords && !question.wordLimit ? ` The pack sets no word limit for this question; the draft was written to ${sample.draftedToWords} words.` : ""}
@@ -189,9 +189,9 @@ export default async function SampleCheckPage() {
           </section>
         ) : null}
 
-        <section className="mt-16 flex flex-col items-start gap-4 rounded-xl bg-(--bid-brand-tint) px-5 py-7 sm:px-8">
-          <h2 className="bid-serif text-[26px] leading-[1.2] font-semibold sm:text-[30px]">Upload your own tender pack and get this for it.</h2>
-          <p className="max-w-[680px] text-[15px]">
+        <section className="mt-16 flex flex-col items-start gap-4 rounded-card bg-brand-tint px-5 py-7 sm:px-8">
+          <h2 className="bid-serif text-3xl leading-[1.2] font-semibold sm:text-3xl">Upload your own tender pack and get this for it.</h2>
+          <p className="max-w-[680px] text-15">
             Your first cited bid check is free: the verdict, every pass-or-fail requirement quoted from the pack with its page, the scored questions and the terms to read yourself. Drafting and marking are part of Bid Desk.
           </p>
           <Cta />

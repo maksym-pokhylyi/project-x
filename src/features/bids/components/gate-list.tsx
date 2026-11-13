@@ -41,13 +41,13 @@ function ConfirmControl({ bidId, item, label }: { bidId: string; item: Requireme
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger asChild>
-        <button type="button" className={label === "Confirm" ? "bid-btn bid-btn-sm mt-0.5" : "bid-link min-h-9 border-0 bg-transparent p-0 text-[13px] font-medium"} data-testid="gate-confirm">
+        <button type="button" className={label === "Confirm" ? "bid-btn bid-btn-sm mt-0.5" : "bid-link min-h-9 border-0 bg-transparent p-0 text-13 font-medium"} data-testid="gate-confirm">
           {label}
         </button>
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content align="start" sideOffset={6} collisionPadding={12} className="bid-pop z-50 w-[min(20rem,calc(100vw-1.5rem))] p-1.5 outline-none">
-          <p className="px-3 pt-2 pb-1 text-[13px] text-(--bid-muted)">Read the requirement on the page first. Your answer is recorded as set by you.</p>
+          <p className="px-3 pt-2 pb-1 text-13 text-ink-2">Read the requirement on the page first. Your answer is recorded as set by you.</p>
           <button type="button" className="bid-menu-item" disabled={pending} onClick={() => set("met")} data-testid="gate-confirm-met">
             We meet this
           </button>
@@ -55,7 +55,7 @@ function ConfirmControl({ bidId, item, label }: { bidId: string; item: Requireme
             We do not meet this yet
           </button>
           {error ? (
-            <p role="alert" className="px-3 py-2 text-xs text-(--bid-danger)">
+            <p role="alert" className="px-3 py-2 text-xs text-danger">
               {error}
             </p>
           ) : null}
@@ -119,7 +119,7 @@ export function GateList({
         ))}
       </div>
       {visible.length === 0 ? (
-        <p className="bid-rule px-4 py-6 text-sm text-(--bid-muted) sm:px-6">{items.length === 0 ? "No pass-or-fail requirements were found in the pack. Read the instructions to tenderers yourself." : "None in this group."}</p>
+        <p className="bid-rule px-4 py-6 text-sm text-ink-2 sm:px-6">{items.length === 0 ? "No pass-or-fail requirements were found in the pack. Read the instructions to tenderers yourself." : "None in this group."}</p>
       ) : (
         <ul className="flex flex-col">
           {visible.map((item) => {
@@ -128,22 +128,22 @@ export function GateList({
             const quoted = Boolean(item.citation?.quote) && state !== "unverified";
             return (
               <li key={item.id} id={`req-${item.ref}`} data-testid="gate-row" data-group={group} className="bid-rule flex scroll-mt-24 flex-wrap items-start gap-x-6 gap-y-3 px-4 py-[18px] sm:px-6">
-                <span className="bid-mono w-full shrink-0 pt-1 text-[13px] font-medium sm:w-14">{displayRef(item.ref)}</span>
+                <span className="bid-mono w-full shrink-0 pt-1 text-13 font-medium sm:w-14">{displayRef(item.ref)}</span>
                 <div className="flex min-w-0 flex-[1_1_380px] flex-col items-start gap-2.5">
-                  {quoted ? <p className="bid-quote">“{item.citation!.quote}”</p> : <p className="text-[15px] leading-[1.5]">{item.text}</p>}
+                  {quoted ? <p className="bid-quote">“{item.citation!.quote}”</p> : <p className="text-15 leading-[1.5]">{item.text}</p>}
                   {quoted && item.threshold ? (
-                    <p className="text-[13px] text-(--bid-muted)">
-                      Level we read: <span className="font-semibold text-(--bid-ink)">{item.threshold}</span>
+                    <p className="text-13 text-ink-2">
+                      Level we read: <span className="font-semibold text-ink">{item.threshold}</span>
                     </p>
                   ) : !quoted ? (
-                    <p className="text-[13px] text-(--bid-danger)">Our summary — this wording was not found in the pack text. Check the documents before relying on it.</p>
+                    <p className="text-13 text-danger">Our summary — this wording was not found in the pack text. Check the documents before relying on it.</p>
                   ) : null}
                   {item.citation ? <CitationMark citation={item.citation} links={links} /> : <span className="bid-chip" data-state-kind="unverified">No source given · Unverified</span>}
-                  {item.provenance?.notes?.length ? <p className="text-[13px] text-(--bid-amber-ink)">{item.provenance.notes[0]}</p> : null}
+                  {item.provenance?.notes?.length ? <p className="text-13 text-accent-ink">{item.provenance.notes[0]}</p> : null}
                 </div>
                 <div className="flex min-w-0 flex-[0_1_300px] flex-col items-start gap-1.5">
                   <StatusPill status={item.companyStatus} />
-                  <p className="text-[13px] leading-[1.5]">
+                  <p className="text-13 leading-[1.5]">
                     {item.companyNote ??
                       (item.statusByUser
                         ? group === "met"
@@ -154,9 +154,9 @@ export function GateList({
                           : "Not compared with your company yet.")}
                   </p>
                   {item.statusByUser ? (
-                    <span className="bid-mono text-xs text-(--bid-muted)">Yours: set by you</span>
+                    <span className="bid-mono text-xs text-ink-2">Yours: set by you</span>
                   ) : group !== "confirm" && item.companyNote ? (
-                    <span className="bid-mono text-xs text-(--bid-muted)">Yours: company facts (confirmed)</span>
+                    <span className="bid-mono text-xs text-ink-2">Yours: company facts (confirmed)</span>
                   ) : null}
                   {readOnly ? null : group === "gap" && !item.statusByUser && libraryHref ? (
                     <Link href={libraryHref} className="bid-btn bid-btn-sm mt-0.5">

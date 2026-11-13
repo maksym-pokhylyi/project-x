@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils";
 /** The standing notice required on the brief and the editor. */
 export function StandingNotice({ className }: { className?: string }) {
   return (
-    <p role="note" className={cn("flex items-start gap-2 text-[13px] leading-5 text-(--bid-muted)", className)}>
-      <Info aria-hidden className="mt-[3px] size-3.5 shrink-0" />
+    <p role="note" className={cn("flex items-start gap-2 text-13 leading-5 text-ink-2", className)}>
+      <Info aria-hidden className="mt-0.5 size-3.5 shrink-0" />
       <span>{STANDING_NOTICE}</span>
     </p>
   );
@@ -81,12 +81,12 @@ export function UpgradeNotice({
     <section
       aria-label="Upgrade"
       data-testid="upgrade-notice"
-      className={cn("flex flex-col gap-3 rounded-[10px] bg-(--bid-brand-tint) px-5 py-4 sm:flex-row sm:items-center sm:justify-between", className)}
+      className={cn("flex flex-col gap-3 rounded-card bg-brand-tint px-5 py-4 sm:flex-row sm:items-center sm:justify-between", className)}
     >
       <div className="flex min-w-0 gap-3">
-        <Lock aria-hidden className="mt-0.5 size-4 shrink-0 text-(--bid-brand)" />
+        <Lock aria-hidden className="mt-0.5 size-4 shrink-0 text-brand" />
         <div className="min-w-0">
-          <h3 className="text-[15px] font-semibold">{title}</h3>
+          <h3 className="text-15 font-semibold">{title}</h3>
           <div className="mt-0.5 text-sm">{children}</div>
         </div>
       </div>
@@ -101,26 +101,26 @@ export function UpgradeNotice({
 }
 
 const CALLOUT: Record<Tone, string> = {
-  success: "bg-(--bid-brand-tint)",
-  brand: "bg-(--bid-brand-tint)",
-  danger: "bg-(--bid-danger-tint)",
-  warning: "bg-(--bid-amber-tint)",
-  info: "bg-(--bid-info-tint)",
-  neutral: "bg-(--bid-paper-deep)",
+  success: "bg-brand-tint",
+  brand: "bg-brand-tint",
+  danger: "bg-danger-tint",
+  warning: "bg-accent-tint",
+  info: "bg-info-tint",
+  neutral: "bg-paper-deep",
 };
 const CALLOUT_ICON: Record<Tone, string> = {
-  success: "text-(--bid-brand)",
-  brand: "text-(--bid-brand)",
-  danger: "text-(--bid-danger)",
-  warning: "text-(--bid-amber-ink)",
-  info: "text-(--bid-info)",
-  neutral: "text-(--bid-muted)",
+  success: "text-brand",
+  brand: "text-brand",
+  danger: "text-danger",
+  warning: "text-accent-ink",
+  info: "text-info",
+  neutral: "text-ink-2",
 };
 
 export function Callout({ tone = "neutral", title, children, className, action }: { tone?: Tone; title?: string; children: ReactNode; className?: string; action?: ReactNode }) {
   const Icon = tone === "danger" || tone === "warning" ? AlertTriangle : Info;
   return (
-    <div role={tone === "danger" ? "alert" : "status"} className={cn("flex flex-wrap items-start gap-x-3 gap-y-2 rounded-[10px] px-4 py-3 text-sm text-(--bid-ink)", CALLOUT[tone], className)}>
+    <div role={tone === "danger" ? "alert" : "status"} className={cn("flex flex-wrap items-start gap-x-3 gap-y-2 rounded-card px-4 py-3 text-sm text-ink", CALLOUT[tone], className)}>
       <Icon aria-hidden className={cn("mt-0.5 size-4 shrink-0", CALLOUT_ICON[tone])} />
       <div className="min-w-0 flex-1 basis-60">
         {title ? <p className="font-semibold">{title}</p> : null}
@@ -137,9 +137,9 @@ export function SectionHeading({ title, count, children, lead }: { title: string
       <div className="flex min-w-0 flex-col gap-1">
         <h2 className="bid-h2">
           {title}
-          {count !== undefined ? <span className="bid-mono ml-3 text-sm font-normal text-(--bid-muted) tabular-nums">{count}</span> : null}
+          {count !== undefined ? <span className="bid-mono ml-3 text-sm font-normal text-ink-2 tabular-nums">{count}</span> : null}
         </h2>
-        {lead ? <p className="text-sm text-(--bid-muted)">{lead}</p> : null}
+        {lead ? <p className="text-sm text-ink-2">{lead}</p> : null}
       </div>
       {children}
     </div>
@@ -172,15 +172,15 @@ export function daysLeftLabel(deadline: Date, now: Date = new Date()): { label: 
  * screen readers). Amber is a marker colour only: the text stays ink.
  */
 export function DeadlineChip({ deadline, now = new Date(), className, prefix = "Closes" }: { deadline: Date | null; now?: Date; className?: string; prefix?: string }) {
-  if (!deadline) return <span className={cn("text-sm text-(--bid-muted)", className)}>No deadline read</span>;
+  if (!deadline) return <span className={cn("text-sm text-ink-2", className)}>No deadline read</span>;
   const left = daysLeftLabel(deadline, now);
   return (
     <span className={cn("inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium tabular-nums", className)}>
-      <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-(--bid-line-strong)" : left.urgent ? "bg-(--bid-danger)" : "bg-(--bid-amber)")} />
+      <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-paper-deep")} />
       <span className={left.past ? "line-through" : undefined}>
         {prefix} {formatDeadline(deadline)}
       </span>
-      <span className={cn("rounded px-1.5 py-px text-xs font-semibold", left.past ? "bg-(--bid-paper-deep)" : left.urgent ? "bg-(--bid-danger-tint) text-(--bid-danger)" : "bg-(--bid-amber-tint)")}>{left.label}</span>
+      <span className={cn("rounded px-1.5 py-px text-xs font-semibold", left.past ? "bg-paper-deep" : left.urgent ? "bg-danger-tint text-danger" : "bg-accent-tint")}>{left.label}</span>
     </span>
   );
 }

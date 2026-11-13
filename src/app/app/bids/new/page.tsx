@@ -90,7 +90,7 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
     <div className="bid-scope flex flex-col">
       <BreadcrumbTrail items={[{ label: "Bids", href: "/app/bids" }, { label: "New bid check" }]} />
       <h1 className="bid-h1">New bid check</h1>
-      <p className="mt-2 max-w-[760px] text-[17px] leading-[1.45]">Upload the tender pack as the buyer sent it. You get every requirement quoted and cited, checked against your company, with a plain verdict.</p>
+      <p className="mt-2 max-w-[760px] text-17 leading-[1.45]">Upload the tender pack as the buyer sent it. You get every requirement quoted and cited, checked against your company, with a plain verdict.</p>
 
 
       <div className="mt-9 flex flex-wrap items-start gap-x-8 gap-y-10">
@@ -110,7 +110,7 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
             <h2 id="get-h" className="bid-h3">
               What you get
             </h2>
-            <ul className="mt-3 flex flex-col gap-3 text-[15px]">
+            <ul className="mt-3 flex flex-col gap-3 text-15">
               {[
                 <>Every requirement quoted word for word, with file and page</>,
                 <>
@@ -124,12 +124,12 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
                 full ? <>The scored questions, drafts and marking, as part of this full bid</> : <>The scored questions listed. Drafting and marking need Bid Desk or a Bid Pass.</>,
               ].map((item, index) => (
                 <li key={index} className="flex gap-2.5">
-                  <Check aria-hidden className="mt-1 size-4 shrink-0 text-(--bid-brand)" strokeWidth={2.4} />
+                  <Check aria-hidden className="mt-1 size-4 shrink-0 text-brand" strokeWidth={2.4} />
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-4 border-t border-(--bid-line) pt-3 text-[13px]">
+            <p className="mt-4 border-t border-line pt-3 text-13">
               <Link href="/sample-check" className="bid-link font-medium">
                 See a sample check
               </Link>{" "}
@@ -139,28 +139,28 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
 
           {plan ? (
             <section aria-label="What this uses" className="bid-card flex flex-col gap-2.5 px-5 py-5" data-testid="allowance-note">
-              <span className="text-xs text-(--bid-muted)">{plan.plan}</span>
-              <p className="text-[15px]">
+              <span className="text-xs text-ink-2">{plan.plan}</span>
+              <p className="text-15">
                 <span className="font-semibold">{plan.lead}</span> {plan.rest}
               </p>
               {plan.segments > 0 ? (
                 <div role="img" aria-label={`${Math.min(plan.filled, plan.segments)} of ${plan.segments} used with this check`} className="grid gap-1" style={{ gridTemplateColumns: `repeat(${plan.segments}, minmax(0, 1fr))` }}>
                   {Array.from({ length: plan.segments }, (_, index) => (
-                    <span key={index} className={`h-1.5 rounded-[3px] ${index < plan.filled ? "bg-(--bid-ink)" : "bg-(--bid-line)"}`} />
+                    <span key={index} className={`h-1.5 rounded-chip ${index < plan.filled ? "bg-ink" : "bg-line"}`} />
                   ))}
                 </div>
               ) : null}
             </section>
           ) : null}
 
-          <p className="flex gap-2.5 px-1 text-[13px] text-(--bid-muted)">
+          <p className="flex gap-2.5 px-1 text-13 text-ink-2">
             <Lock aria-hidden className="mt-0.5 size-3.5 shrink-0" />
             Stored in the EU (Frankfurt), encrypted in transit and at rest, never used to train AI models.
           </p>
         </aside>
       </div>
 
-      <footer className="mt-16 rounded-[10px] bg-(--bid-paper-deep) px-5 py-4 text-[13px] text-(--bid-muted)">
+      <footer className="mt-16 rounded-card bg-paper-deep px-5 py-4 text-13 text-ink-2">
         A bid check is built from the documents you upload. It is an aid to reading the pack, not a substitute for it. Bidfolio is an independent service and is not affiliated with the buyer or the UK Government.
       </footer>
     </div>

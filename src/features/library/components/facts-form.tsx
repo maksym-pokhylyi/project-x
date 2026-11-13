@@ -133,17 +133,17 @@ function expiryState(date: string, now: number): { kind: "valid" | "soon" | "exp
 function Field({ id, label, hint, error, suggested, children, className }: { id: string; label: string; hint?: string; error?: string; suggested?: boolean; children: ReactNode; className?: string }) {
   return (
     <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
-      <label htmlFor={id} className="flex flex-wrap items-center gap-2 text-[15px] font-medium">
+      <label htmlFor={id} className="flex flex-wrap items-center gap-2 text-15 font-medium">
         {label}
-        {suggested ? <span className="bid-pill bid-pill-amber text-[11px]">Suggested — check</span> : null}
+        {suggested ? <span className="bid-pill bid-pill-amber text-xs">Suggested — check</span> : null}
       </label>
       {children}
       {error ? (
-        <p role="alert" className="text-[13px] font-medium text-(--bid-danger)">
+        <p role="alert" className="text-13 font-medium text-danger">
           {error}
         </p>
       ) : hint ? (
-        <p className="text-[13px] text-(--bid-muted)">{hint}</p>
+        <p className="text-13 text-ink-2">{hint}</p>
       ) : null}
     </div>
   );
@@ -230,13 +230,13 @@ export function CompanyFactsForm({
       }}
     >
       {hasSuggestions && draftSource ? (
-        <div className="rounded-[10px] bg-(--bid-amber-tint) px-5 py-4 text-sm" data-testid="facts-draft-banner">
+        <div className="rounded-card bg-accent-tint px-5 py-4 text-sm" data-testid="facts-draft-banner">
           <p className="font-semibold">Filled in from {new URL(draftSource.url).hostname} — nothing is saved until you save</p>
           <p className="mt-1">Fields marked “Suggested” were read from your website by AI. Websites go out of date and AI misreads: check each one, correct what is wrong, then save.</p>
           {draftSource.notes.length > 0 ? (
             <details className="mt-2">
               <summary className="bid-link inline-flex min-h-9 cursor-pointer items-center font-medium">Where each suggestion came from</summary>
-              <ul className="mt-1 flex list-disc flex-col gap-0.5 pl-5 text-[13px]">
+              <ul className="mt-1 flex list-disc flex-col gap-0.5 pl-5 text-13">
                 {draftSource.notes.slice(0, 20).map((note) => (
                   <li key={note}>{note}</li>
                 ))}
@@ -277,7 +277,7 @@ export function CompanyFactsForm({
               </Field>
             </div>
             {form.turnoverLatest.trim() ? (
-              <p className="text-[13px] text-(--bid-muted)">From your filed accounts. You can type 3.9m or 3,900,000.</p>
+              <p className="text-13 text-ink-2">From your filed accounts. You can type 3.9m or 3,900,000.</p>
             ) : (
               <Field id="turnoverBand" label="Or choose a range" error={err("turnoverBand")} suggested={suggested.has("turnoverBand")} hint="An exact figure settles more turnover tests than a range.">
                 <select id="turnoverBand" className="bid-input" value={form.turnoverBand} onChange={(event) => set("turnoverBand", event.target.value)}>
@@ -311,12 +311,12 @@ export function CompanyFactsForm({
                     hint={state.kind === "expired" ? undefined : state.kind === "soon" ? state.label : undefined}
                   >
                     <input id={`${key}Expires`} className="bid-input" type="date" value={form[`${key}Expires`]} onChange={(event) => set(`${key}Expires`, event.target.value)} />
-                    {state.kind === "expired" && form[key].trim() ? <p className="text-[13px] font-semibold text-(--bid-danger)">Ended {state.days} days ago. Checks ask you to confirm it was renewed.</p> : null}
+                    {state.kind === "expired" && form[key].trim() ? <p className="text-13 font-semibold text-danger">Ended {state.days} days ago. Checks ask you to confirm it was renewed.</p> : null}
                   </Field>
                 </div>
               );
             })}
-            <p className="text-[13px] text-(--bid-muted)">Leave blank what you do not hold. Levels are compared with each tender by arithmetic, not by AI.</p>
+            <p className="text-13 text-ink-2">Leave blank what you do not hold. Levels are compared with each tender by arithmetic, not by AI.</p>
           </fieldset>
         </div>
 
@@ -324,21 +324,21 @@ export function CompanyFactsForm({
           <legend className="sr-only">Accreditations</legend>
           <h3 className="bid-h3 flex flex-wrap items-center gap-2 px-5 pt-5 sm:px-6" aria-hidden>
             Accreditations
-            {suggested.has("accreditations") ? <span className="bid-pill bid-pill-amber text-[11px]">Suggested — check</span> : null}
+            {suggested.has("accreditations") ? <span className="bid-pill bid-pill-amber text-xs">Suggested — check</span> : null}
           </h3>
-          <div className="mt-4 hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_44px] gap-3 border-b border-(--bid-line) px-5 pb-2.5 text-xs font-semibold text-(--bid-muted) sm:grid sm:px-6">
+          <div className="mt-4 hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_44px] gap-3 border-b border-line px-5 pb-2.5 text-xs font-semibold text-ink-2 sm:grid sm:px-6">
             <span>Accreditation</span>
             <span>Expires</span>
             <span>Status</span>
             <span />
           </div>
           {form.accreditations.length === 0 ? (
-            <p className="border-b border-(--bid-line) px-5 py-4 text-sm text-(--bid-muted) sm:px-6">None recorded. A requirement is only shown as met when the named certificate is here and in date.</p>
+            <p className="border-b border-line px-5 py-4 text-sm text-ink-2 sm:px-6">None recorded. A requirement is only shown as met when the named certificate is here and in date.</p>
           ) : null}
           {form.accreditations.map((row, index) => {
             const state = expiryState(row.expiresAt, now);
             return (
-              <div key={index} className="border-b border-(--bid-line) px-5 py-3 sm:px-6" data-testid="accreditation-row" data-expiry={state.kind}>
+              <div key={index} className="border-b border-line px-5 py-3 sm:px-6" data-testid="accreditation-row" data-expiry={state.kind}>
                 <div className="grid grid-cols-1 items-center gap-3 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_44px]">
                   <div className="flex flex-col gap-1">
                     <label htmlFor={`accreditation-name-${index}`} className="sr-only">
@@ -352,7 +352,7 @@ export function CompanyFactsForm({
                       maxLength={120}
                       onChange={(event) => setAccreditation(index, { name: event.target.value })}
                     />
-                    {err(`accreditations.${index}.name`) ? <p className="text-[13px] text-(--bid-danger)">{err(`accreditations.${index}.name`)}</p> : null}
+                    {err(`accreditations.${index}.name`) ? <p className="text-13 text-danger">{err(`accreditations.${index}.name`)}</p> : null}
                   </div>
                   <div>
                     <label htmlFor={`accreditation-expiry-${index}`} className="sr-only">
@@ -360,15 +360,15 @@ export function CompanyFactsForm({
                     </label>
                     <input id={`accreditation-expiry-${index}`} className="bid-input" type="date" value={row.expiresAt} onChange={(event) => setAccreditation(index, { expiresAt: event.target.value })} />
                   </div>
-                  <span className="text-[13px] font-semibold">
+                  <span className="text-13 font-semibold">
                     {state.kind === "valid" ? (
-                      <span className="inline-flex items-center gap-1.5 text-(--bid-brand)">
+                      <span className="inline-flex items-center gap-1.5 text-brand">
                         <Check aria-hidden className="size-3.5" strokeWidth={2.6} />
                         Valid
                       </span>
                     ) : state.kind === "soon" ? (
-                      <span className="inline-flex items-center gap-2 text-(--bid-amber-ink)">
-                        <span aria-hidden className="size-2 rounded-full bg-(--bid-amber)" />
+                      <span className="inline-flex items-center gap-2 text-accent-ink">
+                        <span aria-hidden className="size-2 rounded-full bg-paper-deep" />
                         {state.label}
                       </span>
                     ) : state.kind === "expired" ? (
@@ -376,18 +376,18 @@ export function CompanyFactsForm({
                         <span aria-hidden>!</span>Expired
                       </span>
                     ) : (
-                      <span className="font-normal text-(--bid-muted)">No date</span>
+                      <span className="font-normal text-ink-2">No date</span>
                     )}
                   </span>
-                  <button type="button" className="flex size-11 items-center justify-center rounded hover:bg-(--bid-paper)" aria-label={`Remove ${row.name || "accreditation"}`} onClick={() => set("accreditations", form.accreditations.filter((_, i) => i !== index))}>
+                  <button type="button" className="flex size-11 items-center justify-center rounded hover:bg-paper" aria-label={`Remove ${row.name || "accreditation"}`} onClick={() => set("accreditations", form.accreditations.filter((_, i) => i !== index))}>
                     <X aria-hidden className="size-4" />
                   </button>
                 </div>
                 {state.kind === "expired" ? (
-                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg bg-(--bid-danger-tint) px-4 py-3 text-sm">
-                    <CircleAlert aria-hidden className="size-5 shrink-0 text-(--bid-danger)" strokeWidth={1.8} />
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-card bg-danger-tint px-4 py-3 text-sm">
+                    <CircleAlert aria-hidden className="size-5 shrink-0 text-danger" strokeWidth={1.8} />
                     <p className="min-w-0 flex-[1_1_220px]">
-                      <span className="font-semibold text-(--bid-danger)">Expired {state.days} days ago.</span> Checks treat it as not held until you enter the renewed date.
+                      <span className="font-semibold text-danger">Expired {state.days} days ago.</span> Checks treat it as not held until you enter the renewed date.
                     </p>
                     <a href="#documents" className="bid-btn bid-btn-sm">
                       Upload renewal
@@ -449,7 +449,7 @@ export function CompanyFactsForm({
       </details>
 
       {message ? (
-        <p role={message.tone === "error" ? "alert" : "status"} className={cn("rounded-lg px-4 py-3 text-sm", message.tone === "error" ? "bg-(--bid-danger-tint) text-(--bid-danger)" : "bg-(--bid-brand-tint)")}>
+        <p role={message.tone === "error" ? "alert" : "status"} className={cn("rounded-card px-4 py-3 text-sm", message.tone === "error" ? "bg-danger-tint text-danger" : "bg-brand-tint")}>
           {message.text}
         </p>
       ) : null}
@@ -459,7 +459,7 @@ export function CompanyFactsForm({
           {saving ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
           {saving ? "Saving…" : "Save changes"}
         </button>
-        <p className="text-sm text-(--bid-muted)" data-testid="facts-status" data-confirmed={confirmedAt ? "true" : "false"}>
+        <p className="text-sm text-ink-2" data-testid="facts-status" data-confirmed={confirmedAt ? "true" : "false"}>
           {dirty || hasSuggestions
             ? "Unsaved changes. Saving confirms these facts are true today; checks and drafts will rely on them."
             : confirmedAt

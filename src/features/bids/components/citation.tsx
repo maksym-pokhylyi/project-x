@@ -95,15 +95,15 @@ export function citationLabel(citation: Citation, short = false): string {
 
 /** Tick = verified, amber dot = check, hollow dot = unverified (shape and colour both differ). */
 function StateGlyph({ state }: { state: VerificationState }) {
-  if (state === "verified") return <Check aria-hidden className="size-3 shrink-0 text-(--bid-brand)" strokeWidth={2.6} />;
-  if (state === "check") return <span aria-hidden className="size-[7px] shrink-0 rounded-full bg-(--bid-amber)" />;
-  return <span aria-hidden className="size-[7px] shrink-0 rounded-full border-[1.5px] border-(--bid-muted)" />;
+  if (state === "verified") return <Check aria-hidden className="size-3 shrink-0 text-brand" strokeWidth={2.6} />;
+  if (state === "check") return <span aria-hidden className="size-[7px] shrink-0 rounded-full bg-paper-deep" />;
+  return <span aria-hidden className="size-[7px] shrink-0 rounded-full border-[1.5px] border-ink-2" />;
 }
 
 /** The key to the three marks, shown above any list of cited items. */
 export function SourceLegend({ className }: { className?: string }) {
   return (
-    <p className={cn("flex flex-wrap gap-x-6 gap-y-1 text-[13px] text-(--bid-muted)", className)} data-testid="source-legend">
+    <p className={cn("flex flex-wrap gap-x-6 gap-y-1 text-13 text-ink-2", className)} data-testid="source-legend">
       <span className="inline-flex items-center gap-1.5">
         <StateGlyph state="verified" />
         Verified: matches the file word for word
@@ -176,17 +176,17 @@ export function CitationMark({
               <StateGlyph state={state} />
               {STATE_HEADING[state]}
             </p>
-            <Popover.Close aria-label="Close" className="-mt-1 -mr-1 flex size-8 items-center justify-center rounded text-(--bid-muted) hover:bg-(--bid-paper)">
+            <Popover.Close aria-label="Close" className="-mt-1 -mr-1 flex size-8 items-center justify-center rounded text-ink-2 hover:bg-paper">
               <X aria-hidden className="size-4" />
             </Popover.Close>
           </div>
           {citation.quote ? (
-            <blockquote className="bid-serif mt-3 max-h-56 overflow-y-auto rounded-md bg-(--bid-paper) px-3 py-2.5 text-[15px] leading-[1.45] whitespace-pre-wrap">“{citation.quote}”</blockquote>
+            <blockquote className="bid-serif mt-3 max-h-56 overflow-y-auto rounded-control bg-paper px-3 py-2.5 text-15 leading-[1.45] whitespace-pre-wrap">“{citation.quote}”</blockquote>
           ) : (
-            <p className="mt-3 text-(--bid-muted)">No quote was given for this item.</p>
+            <p className="mt-3 text-ink-2">No quote was given for this item.</p>
           )}
-          <p className="bid-mono mt-2 text-xs break-words text-(--bid-muted)">{citationLabel(citation)}</p>
-          {note ? <p className={cn("mt-2 text-[13px]", state === "verified" ? "text-(--bid-muted)" : "")}>{note}</p> : null}
+          <p className="bid-mono mt-2 text-xs break-words text-ink-2">{citationLabel(citation)}</p>
+          {note ? <p className={cn("mt-2 text-13", state === "verified" ? "text-ink-2" : "")}>{note}</p> : null}
           {source ? (
             <a href={source.href} target="_blank" rel="noopener noreferrer" className="bid-link mt-3 inline-flex min-h-9 items-center gap-1.5 text-sm font-medium">
               <ExternalLink aria-hidden className="size-3.5" />

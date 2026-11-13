@@ -37,14 +37,14 @@ export default async function BidLayout({ children, params }: { children: ReactN
 
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
         <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-2">
-          <p className="bid-mono text-xs text-(--bid-muted)" data-testid="bid-meta">
+          <p className="bid-mono text-xs text-ink-2" data-testid="bid-meta">
             Bid check
             {done && bid.readyAt ? ` · built ${builtAt(bid.readyAt)}` : bid.status === "processing" ? " · being built now" : bid.status === "failed" ? " · stopped before it finished" : ""}
             {coverage.read > 0 ? ` · ${coverage.headline}` : ""}
             {coverage.read > 0 ? (
               <>
                 {" · "}
-                <Link href={`${base}/files`} className="bid-link text-(--bid-ink)">
+                <Link href={`${base}/files`} className="bid-link text-ink">
                   Coverage
                 </Link>
               </>
@@ -53,12 +53,12 @@ export default async function BidLayout({ children, params }: { children: ReactN
           <h1 className="bid-h1" data-testid="bid-title">
             {bid.title}
           </h1>
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px]">
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-15">
             <span>{bid.buyerName ?? "Buyer not read yet"}</span>
             {bid.reference ? (
               <>
-                <span className="text-(--bid-muted)">· Reference</span>
-                <span className="bid-mono text-[13px] text-(--bid-muted)">{bid.reference}</span>
+                <span className="text-ink-2">· Reference</span>
+                <span className="bid-mono text-13 text-ink-2">{bid.reference}</span>
               </>
             ) : null}
             {bid.status === "archived" ? <span className="bid-tag">Archived — read-only</span> : null}
@@ -95,7 +95,7 @@ export default async function BidLayout({ children, params }: { children: ReactN
 
       <div className="mt-7">{children}</div>
 
-      <footer className="mt-16 rounded-[10px] bg-(--bid-paper-deep) px-5 py-4 text-[13px] text-(--bid-muted)">
+      <footer className="mt-16 rounded-card bg-paper-deep px-5 py-4 text-13 text-ink-2">
         This check is built from the documents you uploaded. It is an aid to reading the pack, not a substitute for it. Bidfolio is independent of the buyer and of GOV.UK.
       </footer>
     </div>
