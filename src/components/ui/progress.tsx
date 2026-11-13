@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 const tones = {
   brand: "bg-brand",
-  success: "bg-success",
+  success: "bg-brand",
   warning: "bg-accent",
   danger: "bg-danger",
 } as const

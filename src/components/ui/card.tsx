@@ -2,8 +2,8 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 /*
- * Card: white surface, hairline border, 8 px radius. Borders do the work — pass
- * `raised` only when a card must sit above its neighbours (e.g. the recommended plan).
+ * Card: white surface, hairline edge, 10 px radius, no shadow. Borders do the work — pass
+ * `raised` only when a card must sit above its neighbours.
  */
 function Card({ className, raised = false, ...props }: React.ComponentProps<"div"> & { raised?: boolean }) {
   return (
@@ -28,9 +28,12 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-/** UI heading inside a card: Inter 600, 16/24. Page and section titles use the display serif. */
+/**
+ * Heading of a card: display serif, 20/26, 600 ("Is this your company?"). For a utility card
+ * (a file list, a filter panel) add `font-sans text-base`.
+ */
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="card-title" className={cn("text-base leading-6 font-semibold text-ink", className)} {...props} />
+  return <div data-slot="card-title" className={cn("font-display text-xl font-semibold text-ink", className)} {...props} />
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {

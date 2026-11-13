@@ -1,10 +1,11 @@
 import * as React from "react"
-import { Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 /*
  * Disclosure built on the native <details>/<summary>: works without JavaScript, is findable
  * with in-page search, and prints open. Used for FAQs and "show more" sections.
+ * As in the artboards: a serif question on a hairline, a chevron that turns over, and the
+ * answer in ink at reading width.
  * Give several in a row the same `name` to make them an exclusive accordion.
  */
 function DisclosureGroup({ className, ...props }: React.ComponentProps<"div">) {
@@ -19,11 +20,17 @@ function Disclosure({
 }: Omit<React.ComponentProps<"details">, "children"> & { summary: React.ReactNode; children: React.ReactNode }) {
   return (
     <details data-slot="disclosure" className={cn("group", className)} {...props}>
-      <summary className="flex min-h-14 items-center justify-between gap-4 rounded-sm py-3 text-base font-medium text-ink transition-colors hover:text-brand">
+      <summary className="flex items-center justify-between gap-5 rounded-sm py-4 font-display text-lg leading-6 font-semibold text-ink transition-colors hover:text-brand sm:py-5 sm:text-xl sm:leading-[1.625rem]">
         <span className="text-pretty">{summary}</span>
-        <Plus aria-hidden className="size-5 shrink-0 text-ink-2 transition-transform duration-150 ease-out group-open:rotate-45" />
+        <svg
+          viewBox="0 0 16 16"
+          aria-hidden
+          className="size-[1.125rem] shrink-0 fill-none stroke-current stroke-[1.8] transition-transform duration-150 ease-out [stroke-linecap:round] [stroke-linejoin:round] group-open:rotate-180"
+        >
+          <path d="M3.5 6l4.5 4.5L12.5 6" />
+        </svg>
       </summary>
-      <div className="max-w-reading pr-9 pb-5 text-base text-ink-2 [&>*+*]:mt-3">{children}</div>
+      <div className="type-reading max-w-[42.5rem] pb-6 text-ink sm:pr-10 [&>*+*]:mt-3">{children}</div>
     </details>
   )
 }

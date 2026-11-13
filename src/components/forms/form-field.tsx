@@ -44,7 +44,7 @@ export function FormField({
   const id = `field-${name}`;
   const describedBy = [error ? `${id}-error` : null, hint ? `${id}-hint` : null].filter(Boolean).join(" ") || undefined;
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="flex items-baseline justify-between gap-2">
         <Label htmlFor={id}>{label}</Label>
         {trailing}
@@ -60,7 +60,7 @@ export function FormField({
 export function FormError({ message }: { message?: string | null }) {
   if (!message) return null;
   return (
-    <p role="alert" className="flex items-start gap-2 rounded-control border border-danger/25 bg-danger-tint px-3 py-2.5 text-sm text-ink">
+    <p role="alert" className="flex items-start gap-2.5 rounded-control bg-danger-tint px-3.5 py-3 text-sm text-ink">
       <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-danger" />
       <span>{message}</span>
     </p>

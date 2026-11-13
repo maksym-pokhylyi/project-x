@@ -4,23 +4,24 @@ import { CircleAlert, CircleCheck, Info, TriangleAlert } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 /*
- * Alert / callout. Tinted background, hairline in the same hue, icon + words (never colour
- * alone). The icon follows the variant; pass `icon={<Custom />}` to replace it or
- * `icon={false}` to leave it out.
+ * Alert / callout, as the "Gap: no evidence found" box in the artboards: a tinted panel with
+ * a 6 px radius and no outline, a 20 px icon, a title in the hue of the state and the text
+ * in ink. Icon + words, never colour alone. The icon follows the variant; pass
+ * `icon={<Custom />}` to replace it or `icon={false}` to leave it out.
  *
  * `role` defaults to "alert", which interrupts screen readers. For information that is not
  * urgent pass role="status" (polite) or role="note".
  */
 const alertVariants = cva(
-  "relative grid w-full grid-cols-[1rem_1fr] items-start gap-x-3 gap-y-1 rounded-card border px-4 py-3 text-sm text-ink data-[icon=none]:grid-cols-1 [&>svg]:size-4 [&>svg]:translate-y-0.5",
+  "relative grid w-full grid-cols-[1.25rem_1fr] items-start gap-x-3 gap-y-1 rounded-control border border-transparent px-4 py-3.5 text-sm text-ink data-[icon=none]:grid-cols-1 [&>svg]:size-5",
   {
     variants: {
       variant: {
         default: "border-line bg-surface [&>svg]:text-ink-2",
-        info: "border-info/20 bg-info-tint [&>svg]:text-info",
-        success: "border-success/20 bg-success-tint [&>svg]:text-success",
-        warning: "border-accent/25 bg-accent-tint [&>svg]:text-accent-ink",
-        destructive: "border-danger/20 bg-danger-tint [&>svg]:text-danger",
+        info: "bg-info-tint [&_[data-slot=alert-title]]:text-info [&>svg]:text-info",
+        success: "bg-success-tint [&_[data-slot=alert-title]]:text-brand [&>svg]:text-brand",
+        warning: "bg-accent-tint [&_[data-slot=alert-title]]:text-accent-ink [&>svg]:text-accent",
+        destructive: "bg-danger-tint [&_[data-slot=alert-title]]:text-danger [&>svg]:text-danger",
       },
     },
     defaultVariants: {
@@ -54,7 +55,7 @@ function Alert({
       className={cn(alertVariants({ variant }), className)}
       {...props}
     >
-      {icon === false ? null : (icon ?? <DefaultIcon aria-hidden />)}
+      {icon === false ? null : (icon ?? <DefaultIcon aria-hidden strokeWidth={1.8} />)}
       {children}
     </div>
   )
@@ -64,7 +65,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-title"
-      className={cn("col-start-2 min-h-5 leading-5 font-semibold in-data-[icon=none]:col-start-1", className)}
+      className={cn("col-start-2 min-h-5 text-15 leading-5 font-semibold in-data-[icon=none]:col-start-1", className)}
       {...props}
     />
   )
@@ -74,7 +75,7 @@ function AlertDescription({ className, ...props }: React.ComponentProps<"div">) 
   return (
     <div
       data-slot="alert-description"
-      className={cn("col-start-2 grid justify-items-start gap-1 text-sm text-ink in-data-[icon=none]:col-start-1 [&_p]:leading-5", className)}
+      className={cn("col-start-2 grid justify-items-start gap-1 text-sm text-ink in-data-[icon=none]:col-start-1 [&_p]:leading-[1.3125rem]", className)}
       {...props}
     />
   )

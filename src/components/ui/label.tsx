@@ -9,7 +9,7 @@ function Label({ className, ...props }: React.ComponentProps<typeof LabelPrimiti
     <LabelPrimitive.Root
       data-slot="label"
       className={cn(
-        "flex items-center gap-2 text-sm leading-5 font-medium text-ink select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-60 peer-disabled:cursor-not-allowed peer-disabled:opacity-60",
+        "flex items-center gap-2 text-sm leading-5 font-semibold text-ink select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-60 peer-disabled:cursor-not-allowed peer-disabled:opacity-60",
         className
       )}
       {...props}

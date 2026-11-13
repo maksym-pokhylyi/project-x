@@ -16,7 +16,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       gap={8}
       icons={{
-        success: <CircleCheck className="size-4 text-success" />,
+        success: <CircleCheck className="size-4 text-brand" />,
         info: <Info className="size-4 text-info" />,
         warning: <TriangleAlert className="size-4 text-accent-ink" />,
         error: <CircleAlert className="size-4 text-danger" />,
@@ -28,7 +28,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           title: "font-medium! text-ink!",
           description: "text-ink-2!",
           actionButton: "rounded-control! bg-brand! text-white! font-medium!",
-          cancelButton: "rounded-control! bg-surface-sunken! text-ink! font-medium!",
+          cancelButton: "rounded-control! bg-paper-deep! text-ink! font-medium!",
           closeButton: "border-line! bg-surface! text-ink-2! hover:text-ink!",
         },
       }}

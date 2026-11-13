@@ -14,7 +14,7 @@ const menuSurface =
   "z-50 min-w-[10rem] overflow-x-hidden overflow-y-auto rounded-card border border-line bg-surface p-1 text-ink shadow-overlay duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1"
 
 const menuItem =
-  "relative flex min-h-10 cursor-default items-center gap-2 rounded-control px-2.5 py-2 text-sm -outline-offset-2 select-none focus:bg-surface-sunken data-[disabled]:pointer-events-none data-[disabled]:opacity-50 md:min-h-9 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-ink-2"
+  "relative flex min-h-10 cursor-default items-center gap-2 rounded-control px-2.5 py-2 text-sm -outline-offset-2 select-none focus:bg-paper-deep data-[disabled]:pointer-events-none data-[disabled]:opacity-50 md:min-h-9 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-ink-2"
 
 function DropdownMenu({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />
@@ -135,7 +135,7 @@ function DropdownMenuSeparator({ className, ...props }: React.ComponentProps<typ
 }
 
 function DropdownMenuShortcut({ className, ...props }: React.ComponentProps<"span">) {
-  return <span data-slot="dropdown-menu-shortcut" className={cn("ml-auto font-mono text-xs text-ink-3", className)} {...props} />
+  return <span data-slot="dropdown-menu-shortcut" className={cn("ml-auto font-mono text-xs text-ink-2", className)} {...props} />
 }
 
 function DropdownMenuSub({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Sub>) {
@@ -154,7 +154,7 @@ function DropdownMenuSubTrigger({
     <DropdownMenuPrimitive.SubTrigger
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
-      className={cn(menuItem, "data-[inset]:pl-8 data-[state=open]:bg-surface-sunken", className)}
+      className={cn(menuItem, "data-[inset]:pl-8 data-[state=open]:bg-paper-deep", className)}
       {...props}
     >
       {children}

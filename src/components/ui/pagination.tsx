@@ -61,7 +61,7 @@ function PaginationNext({ className, ...props }: PaginationLinkProps) {
 
 function PaginationEllipsis({ className, ...props }: React.ComponentProps<"span">) {
   return (
-    <span aria-hidden data-slot="pagination-ellipsis" className={cn("grid size-10 place-items-center text-ink-3", className)} {...props}>
+    <span aria-hidden data-slot="pagination-ellipsis" className={cn("grid size-10 place-items-center text-ink-2", className)} {...props}>
       <MoreHorizontal className="size-4" />
     </span>
   )

@@ -4,10 +4,12 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 /*
- * Data table (DESIGN.md §5): sticky header on a sunken band, no zebra, row hover brand-tint,
- * numeric columns right-aligned with tabular figures (`numeric` on TableHead / TableCell).
- * Wrap in a bordered card with `<Table framed>` or place inside your own container.
- * To make the header stick, give the container a max height (e.g. className="max-h-[32rem]").
+ * Data table, as on the supplier page: a white card with a hairline edge; small muted column
+ * heads (12 px, 600) with no fill; 14 px rows separated by hairlines, top-aligned; no zebra;
+ * row hover brand-tint. Numeric columns are right-aligned (`numeric` on TableHead / TableCell)
+ * and every table uses tabular figures.
+ * Wrap in a card with `<Table framed>` or place inside your own container. To make the header
+ * stick, give the container a max height (e.g. containerClassName="max-h-[32rem]").
  */
 function Table({
   className,
@@ -20,7 +22,7 @@ function Table({
       data-slot="table-container"
       className={cn("relative w-full overflow-auto", framed && "rounded-card border border-line bg-surface", containerClassName)}
     >
-      <table data-slot="table" className={cn("w-full caption-bottom border-separate border-spacing-0 text-sm", className)} {...props} />
+      <table data-slot="table" className={cn("w-full caption-bottom border-separate border-spacing-0 text-sm tabular-nums", className)} {...props} />
     </div>
   )
 }
@@ -35,11 +37,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
 
 function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   return (
-    <tfoot
-      data-slot="table-footer"
-      className={cn("bg-surface-sunken font-medium [&_td]:border-t [&_td]:border-b-0 [&_td]:border-line", className)}
-      {...props}
-    />
+    <tfoot data-slot="table-footer" className={cn("font-semibold [&_td]:border-t [&_td]:border-b-0 [&_td]:border-line", className)} {...props} />
   )
 }
 
@@ -48,7 +46,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "transition-colors duration-100 [tbody>&]:hover:bg-brand-tint/60 has-aria-expanded:bg-brand-tint/60 data-[state=selected]:bg-brand-tint",
+        "transition-colors duration-100 [tbody>&]:hover:bg-brand-tint/50 has-aria-expanded:bg-brand-tint/50 data-[state=selected]:bg-brand-tint",
         className
       )}
       {...props}
@@ -62,7 +60,7 @@ function TableHead({ className, numeric = false, ...props }: React.ComponentProp
       data-slot="table-head"
       scope="col"
       className={cn(
-        "h-10 border-b border-line bg-surface-sunken px-4 text-left align-middle text-13 font-medium whitespace-nowrap text-ink-2 [&:has([role=checkbox])]:pr-0",
+        "border-b border-line bg-surface px-4 py-3 text-left align-bottom text-xs leading-[1.125rem] font-semibold whitespace-nowrap text-ink-2 first:pl-6 last:pr-6 [&:has([role=checkbox])]:pr-0",
         numeric && "text-right",
         className
       )}
@@ -76,8 +74,8 @@ function TableCell({ className, numeric = false, ...props }: React.ComponentProp
     <td
       data-slot="table-cell"
       className={cn(
-        "border-b border-line px-4 py-3 align-middle [&:has([role=checkbox])]:pr-0",
-        numeric && "text-right tabular-nums whitespace-nowrap",
+        "border-b border-line px-4 py-3.5 align-top first:pl-6 last:pr-6 [&:has([role=checkbox])]:pr-0",
+        numeric && "text-right whitespace-nowrap",
         className
       )}
       {...props}
@@ -86,7 +84,7 @@ function TableCell({ className, numeric = false, ...props }: React.ComponentProp
 }
 
 function TableCaption({ className, ...props }: React.ComponentProps<"caption">) {
-  return <caption data-slot="table-caption" className={cn("mt-3 px-4 pb-3 text-left text-13 text-ink-2", className)} {...props} />
+  return <caption data-slot="table-caption" className={cn("mt-3 px-6 pb-3 text-left text-13 text-ink-2", className)} {...props} />
 }
 
 export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption }

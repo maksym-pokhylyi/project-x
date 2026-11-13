@@ -8,12 +8,11 @@ import { extendTailwindMerge } from "tailwind-merge";
 const twMerge = extendTailwindMerge({
   extend: {
     theme: {
-      text: ["13"],
+      text: ["13", "15", "17"],
       font: ["display"],
-      radius: ["control", "card", "modal"],
-      shadow: ["raised", "overlay"],
-      container: ["content", "reading"],
-      tracking: ["eyebrow"],
+      radius: ["chip", "control", "card", "modal"],
+      shadow: ["raised", "overlay", "float"],
+      container: ["content", "app", "reading"],
     },
   },
 });

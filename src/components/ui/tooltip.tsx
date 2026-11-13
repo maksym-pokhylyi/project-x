@@ -33,7 +33,7 @@ function TooltipContent({ className, sideOffset = 6, children, ...props }: React
         sideOffset={sideOffset}
         collisionPadding={8}
         className={cn(
-          "z-50 w-fit max-w-64 origin-(--radix-tooltip-content-transform-origin) rounded-control bg-ink px-2 py-1 text-xs leading-4 font-medium text-pretty text-paper duration-100 animate-in fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
+          "z-50 w-fit max-w-64 origin-(--radix-tooltip-content-transform-origin) rounded-chip bg-ink px-2 py-1 text-xs leading-4 font-medium text-pretty text-paper duration-100 animate-in fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
           className
         )}
         {...props}

@@ -7,7 +7,7 @@ export function NativeSelect({ className, ...props }: ComponentProps<"select">) 
   return (
     <select
       data-slot="native-select"
-      className={cn(controlClasses, "select-chevron h-10 w-auto cursor-pointer appearance-none pr-9", className)}
+      className={cn(controlClasses, "select-chevron h-11 w-auto cursor-pointer appearance-none pr-9", className)}
       {...props}
     />
   );
