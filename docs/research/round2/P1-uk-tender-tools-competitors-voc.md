@@ -24,3 +24,13 @@ Labels: **FACT** = read today on the cited page. **INFERENCE** = my reasoning. *
 - UK Business Forums threads read: https://www.ukbusinessforums.co.uk/threads/does-anyone-know-how-to-bid-for-contracts.429259/ and https://www.ukbusinessforums.co.uk/threads/tender-quote-for-local-authority-works.413972/ (quotes to follow).
 
 (Full report follows when research completes.)
+
+## Voice-of-customer and demand facts collected so far (v0 notes)
+
+- FSB, "Signed, Sealed, Delivered" (Dec 2025), via https://www.fmj.co.uk/bids-from-small-firms-keep-disappearing-into-a-black-hole-says-fsb/ and https://www.smeweb.com/small-businesses-involved-in-public-sector-procurement-plagued-by-late-payment-and-lack-of-feedback-on-unsuccessful-bids/ : 30% of small firms bid for council contracts in three years, 9% for UK Government contracts; 31% won nothing; a bid takes five days on average; 5% get comprehensive feedback; 62% find it difficult to find suitable contracts; 43% cite unreasonable eligibility requirements; 35% resubmit the same information each time.
+- BCC/Tussell SME Procurement Tracker 2026 (https://www.tussell.com/gov/blog/sme-procurement-tracker-2026): £45.2bn direct spend with SMEs in 2025, 21%; local government £29.1bn and 34%; 137,191 SME suppliers invoiced the public sector (77% of suppliers).
+- Open Contracting Partnership, one-year review of Procurement Act data (https://www.open-contracting.org/2026/03/03/the-uk-procurement-act-one-year-on-what-does-the-data-tell-us/): direct procedures about 41% of procedures; SMEs and VCSEs 67% of bids by February 2026; average 3.8–4.7 bids per procedure; 58% of suppliers in below-threshold contracts have no declared identifier.
+- AutogenAI survey of 511 bid professionals (vendor): 87.4 hours per tender response; 35% writing, 30% understanding documents, 35% checking compliance (https://autogenai.com/uk/blog/new-research-exposes-ai-access-gap-in-bid-writing-92-want-it-just-one-third-have-it/).
+- Bid Solutions survey of 500 UK companies (67% SMEs): 25% report a win rate of 0–20%, 56% below 40% (https://dev.to/bid_solution/pushing-beyond-the-status-quo-bid-solutions-1ncl).
+- SwiftBid per-bid prices: £149 / £349 / £749 (https://swiftbid.pages.dev/pricing). IT Jobs Watch: median contract bid-writer day rate £500 in the six months to 13 Nov 2026, from 5 quoted rates (https://www.itjobswatch.co.uk/contracts/uk/bid%20writer.do).
+- PPN 017 (Feb 2025) lets contracting authorities ask suppliers to disclose AI use in tenders (https://www.gov.uk/government/publications/ppn-017-improving-transparency-of-ai-use-in-procurement/ppn-017-improving-transparency-of-ai-use-in-procurement-html).
