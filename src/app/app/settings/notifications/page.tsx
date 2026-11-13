@@ -33,7 +33,7 @@ export default async function NotificationSettingsPage() {
     {
       key: "deadlineReminders",
       label: "Deadline reminders",
-      description: "At 08:00, UK time, 7 days and 2 days before a tender you saved closes. One email a day at most.",
+      description: "At 08:00, UK time, 7 days and 2 days before a tender you saved, or a bid you are working on, closes. One email a day at most.",
     },
     {
       key: "productEmails",

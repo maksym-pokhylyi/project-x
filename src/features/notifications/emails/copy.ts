@@ -132,7 +132,7 @@ export function reminderHeadline(items: ReadonlyArray<{ daysLeft: number }>): st
 
 export const PORTAL_NOTE = "Bids go in through the buyer’s own portal. Leave time to upload.";
 
-export const REMINDER_REASON = "You get deadline reminders for tenders you have saved, 7 days and 2 days before each one closes.";
+export const REMINDER_REASON = "You get deadline reminders for tenders you have saved and bids you are working on, 7 days and 2 days before each one closes.";
 
 // ---------------------------------------------------------------------------
 // Annual-renewal reminder (docs/design/handoff/EmailRenewal-640.dc.html)

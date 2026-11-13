@@ -5,6 +5,7 @@ vi.mock("next/headers", () => import("../helpers/next-headers"));
 vi.mock("next/cache", () => ({ revalidatePath: () => undefined, unstable_cache: (fn: unknown) => fn }));
 
 import { db } from "@/db";
+import { bids } from "@/db/schema";
 import { notificationsConfig } from "@/features/notifications/config";
 import { bidsDeadlineSource, buildReminder, deadlineSources, registerDeadlineSource } from "@/features/notifications/content/reminders";
 import { reminderRanges, runFanout } from "@/features/notifications/fanout";
@@ -105,7 +106,7 @@ describe("the e-mail", () => {
       expect(text.includes("Leeds City Council"), "buyer").toBe(true);
       expect(text.includes("Closes Thu 26 Nov 2026, 12:00 noon"), "moment").toBe(true);
       expect(text.includes("Bids go in through the buyer’s own portal. Leave time to upload."), "portal note").toBe(true);
-      expect(text.includes("You get deadline reminders for tenders you have saved, 7 days and 2 days before each one closes."), "reason").toBe(true);
+      expect(text.includes("You get deadline reminders for tenders you have saved and bids you are working on, 7 days and 2 days before each one closes."), "reason").toBe(true);
       expect(text.includes("Reply to this email if anything looks wrong."), "sign-off").toBe(true);
       // Factual: no countdown language, no encouragement, nothing that implies a win.
       expect(/hurry|don.t miss|last chance|act now|!|win\b/i.test(text), "urgency").toBe(false);
@@ -198,11 +199,56 @@ describe("once per member, tender and offset", () => {
   });
 });
 
-describe("the seam for bids in progress", () => {
-  it("is empty until the bids module fills it", async () => {
+describe("bids in progress", () => {
+  const addBid = async (workspace: Workspace, values: { title: string; closes: string; noticeId?: string; status?: string; buyerName?: string | null }) => {
+    const [row] = await db
+      .insert(bids)
+      .values({ organizationId: workspace.organizationId, title: values.title, buyerName: values.buyerName ?? "Leeds City Council", status: values.status ?? "ready", submissionDeadline: at(values.closes), noticeId: values.noticeId ?? null })
+      .returning({ id: bids.id });
+    return row!.id;
+  };
+
+  it("come from the bids module's own list: a saved tender that is also a bid is one line, linked to the bid", async () => {
     expect(deadlineSources().map((source) => source.name)).toEqual(["radar", "bids"]);
-    expect(await bidsDeadlineSource.list(await a.ctx(), new Date())).toEqual([]);
-    expect(await bidsDeadlineSource.organizations([])).toEqual([]);
+    const tuesday = eight("2026-11-24");
+    const linked = await addBid(a, { title: "School kitchen refurbishments, Phase 2", closes: "2026-11-26T12:00:00Z", noticeId: tender });
+    const standalone = await addBid(a, { title: "Housing repairs framework", closes: "2026-12-01T17:00:00Z", buyerName: "City of York Council" });
+    await addBid(a, { title: "Archived bid", closes: "2026-11-26T12:00:00Z", status: "archived" });
+    // Another workspace is bidding too; its bid is its own business.
+    const other = await createWorkspace({ name: "Other Workspace" });
+    await addBid(other, { title: "Confidential rival bid", closes: "2026-11-26T15:00:00Z" });
+
+    const content = (await buildReminder(await a.ctx(tuesday), tuesday))!;
+    expect(content.items.map((item) => [item.key, item.daysLeft, item.title])).toEqual([
+      [tender, 2, "School kitchen refurbishments, Phase 2"],
+      [`bids:${standalone}`, 7, "Housing repairs framework"],
+    ]);
+    // The fan-out visits both workspaces, each for its own deadlines.
+    expect(await runFanout({ kind: "reminder", period: "2026-11-24" }, { now: tuesday })).toEqual({ status: "done", enqueued: 2 });
+    expect(await send("reminder", "2026-11-24", of(a), tuesday)).toBe("sent");
+    expect(await send("reminder", "2026-11-24", of(other), tuesday)).toBe("sent");
+
+    const [email] = await scheduledEmails(a.owner.email);
+    expect(email!.subject).toBe("Closes in 2 days: School kitchen refurbishments, Phase 2 (+1 more)");
+    const links = urlsIn(email!.html).filter((url) => !url.includes("/email/mark"));
+    // The tender's line goes to the bid and keeps the link to the official notice; the second bid has its own page.
+    expect(links).toEqual([
+      `http://localhost:3000/app/bids/${linked}`,
+      expect.stringMatching(/^https:\/\/www\.find-tender\.service\.gov\.uk\/Notice\//),
+      `http://localhost:3000/app/bids/${standalone}`,
+      "http://localhost:3000/app/settings/notifications",
+    ]);
+    const body = plainText(email!.html);
+    expect((body.match(/Open the bid/g) ?? []).length).toBe(2);
+    expect(body.includes("Closes in 7 days: Tue 1 Dec 2026, 17:00"), "the bid's own closing time").toBe(true);
+    expect(/Archived bid|Confidential rival bid/.test(`${email!.html} ${email!.text}`), "an archived bid or another workspace's bid").toBe(false);
+    // The other workspace hears about its own bid, and only that.
+    const [theirs] = await scheduledEmails(other.owner.email);
+    expect(theirs!.subject).toBe("Closes in 2 days: Confidential rival bid");
+    expect(/School kitchen|Housing repairs/.test(`${theirs!.html} ${theirs!.text}`), "workspace A's deadlines in B's e-mail").toBe(false);
+    // Once per tender and offset, whichever source it came from: the saved tender is not announced again on its own.
+    await db.delete(bids);
+    expect(await buildReminder(await a.ctx(tuesday), tuesday)).toBeNull();
   });
 
   it("a registered source adds its deadlines; a tender in two sources is mentioned once, with the bid's link", async () => {
@@ -230,8 +276,13 @@ describe("the seam for bids in progress", () => {
     expect(singleBody.includes("This tender closes in 7 days."), "headline").toBe(true);
     expect(singleBody.includes("Where your bid stands"), "progress heading").toBe(true);
     expect(singleBody.includes("4 of 6 answers drafted and marked") && singleBody.includes("2 gaps: no evidence found"), "progress lines").toBe(true);
-    expect(urlsIn(single!.html).filter((url) => !url.includes("/email/mark"))).toEqual(["http://localhost:3000/app/bids/bid_1", "http://localhost:3000/app/settings/notifications"]);
-    expect(single!.text.includes("Where your bid stands:\n- 4 of 6 answers drafted and marked\n- 2 gaps: no evidence found\nOpen the bid: http://localhost:3000/app/bids/bid_1"), "text version").toBe(true);
+    // The link goes to the bid; the link to the official notice is kept from the saved tender.
+    expect(urlsIn(single!.html).filter((url) => !url.includes("/email/mark"))).toEqual([
+      "http://localhost:3000/app/bids/bid_1",
+      expect.stringMatching(/^https:\/\/www\.find-tender\.service\.gov\.uk\/Notice\//),
+      "http://localhost:3000/app/settings/notifications",
+    ]);
+    expect(single!.text.includes("Where your bid stands:\n- 4 of 6 answers drafted and marked\n- 2 gaps: no evidence found\nOpen the bid: http://localhost:3000/app/bids/bid_1\nNotice on Find a Tender: https://www.find-tender.service.gov.uk/Notice/"), "text version").toBe(true);
 
     // Tuesday the 24th: that bid closes in 2 days and the other one in 7.
     const content = (await buildReminder(await a.ctx(tuesday), tuesday))!;

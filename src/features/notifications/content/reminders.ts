@@ -1,7 +1,8 @@
 import "server-only";
-import { sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
-import type { NotificationItemRef } from "@/db/schema";
+import { bids, type NotificationItemRef } from "@/db/schema";
+import { listBidDeadlines } from "@/features/bids/server/deadlines";
 import { getSavedTenders } from "@/features/procurement/radar/data";
 import type { OrgContext } from "@/server/session";
 import { notificationsConfig } from "../config";
@@ -15,14 +16,16 @@ import { isOpenTender } from "./radar";
  *
  * WHERE DEADLINES COME FROM — the seam for other modules
  * A `DeadlineSource` lists the open deadlines of a workspace. Two are registered:
- *   - saved tenders (the radar's Saved list), implemented below;
- *   - bids in progress — `bidsDeadlineSource`, which returns nothing until the bids module
- *     is merged. To plug it in, either fill in its two functions, or call
- *     `registerDeadlineSource({ name: "bids", … })` from the bids module (same name replaces).
- *     A bid can bring the lines of the artboard's "Where your bid stands" list (`progress`),
- *     its own page (`url`) and link label ("Open the bid").
+ *   - saved tenders (the radar's Saved list);
+ *   - bids in progress (`listBidDeadlines()` of the bids module: every bid that is not
+ *     archived and whose pack gave one undisputed closing time).
+ * Another module adds its own with `registerDeadlineSource({ name, organizations, list })`;
+ * registering under an existing name replaces that source. A source can bring the lines of
+ * the artboard's "Where your bid stands" list (`progress`), its own page (`url`) and link
+ * label ("Open the bid").
  * A tender present in two sources (saved AND being bid for) is mentioned once: sources are
- * de-duplicated on `ocid`, the later source winning (its link goes to the bid).
+ * de-duplicated on `ocid`, the later source winning (its link goes to the bid; the link to
+ * the official notice is kept from whichever source has it).
  *
  * WHICH DAYS — calendar days in UK time between today and the closing date, so "closes in
  * 2 days" is sent on Tuesday for a Thursday deadline whatever the hour, and stays right
@@ -82,19 +85,45 @@ export const savedTendersSource: DeadlineSource = {
   },
 };
 
+const OCID = /^ocds-[a-z0-9]+-[A-Za-z0-9]+$/;
+
 /**
- * Bids in progress. EMPTY ON PURPOSE: the bids module lives in another branch. At merge,
- * return the workspace's open bids here (ref = bid id, ocid = the linked tender if any,
- * url = the bid's page, openLabel = "Open the bid", progress = where it stands) — nothing
- * else in this module needs to change.
+ * Bids in progress, as the bids module defines them for reminders (`listBidDeadlines`: not
+ * archived, one undisputed closing time read from the pack, still ahead). A bid started from
+ * a tender on the radar carries that tender's ocid, so a tender that is saved AND being bid
+ * for is one line, with the link going to the bid.
  */
 export const bidsDeadlineSource: DeadlineSource = {
   name: "bids",
-  async organizations() {
-    return [];
+  async organizations(ranges) {
+    if (ranges.length === 0) return [];
+    const inRange = sql.join(
+      ranges.map((range) => sql`(b.submission_deadline >= ${range.from.toISOString()}::timestamptz and b.submission_deadline < ${range.to.toISOString()}::timestamptz)`),
+      sql` or `,
+    );
+    const rows = await db.execute<{ organization_id: string }>(sql`
+      select distinct b.organization_id from bids b where b.status <> 'archived' and (${inRange})
+    `);
+    return rows.map((row) => row.organization_id);
   },
-  async list() {
-    return [];
+  async list(ctx, now) {
+    const deadlines = await listBidDeadlines(ctx.organization.id, now);
+    if (deadlines.length === 0) return [];
+    const links = await db
+      .select({ id: bids.id, noticeId: bids.noticeId })
+      .from(bids)
+      .where(and(eq(bids.organizationId, ctx.organization.id), inArray(bids.id, deadlines.map((deadline) => deadline.bidId))));
+    const tenderOf = new Map(links.map((link) => [link.id, link.noticeId && OCID.test(link.noticeId) ? link.noticeId : null]));
+    return deadlines.map((deadline) => ({
+      ref: deadline.bidId,
+      ocid: tenderOf.get(deadline.bidId) ?? null,
+      title: deadline.title,
+      buyer: deadline.buyerName,
+      deadlineAt: deadline.closesAt,
+      url: deadline.href,
+      openLabel: "Open the bid",
+      noticeUrl: null,
+    }));
   },
 };
 
@@ -140,7 +169,7 @@ export async function listDeadlines(ctx: OrgContext, now: Date): Promise<Array<D
     for (const item of await source.list(ctx, now)) {
       if (item.deadlineAt.getTime() <= now.getTime()) continue;
       const key = item.ocid ?? `${source.name}:${item.ref}`;
-      byKey.set(key, { ...item, key });
+      byKey.set(key, { ...item, noticeUrl: item.noticeUrl ?? byKey.get(key)?.noticeUrl ?? null, key });
     }
   }
   return [...byKey.values()].sort((a, b) => a.deadlineAt.getTime() - b.deadlineAt.getTime() || a.key.localeCompare(b.key));

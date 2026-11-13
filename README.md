@@ -654,8 +654,8 @@ changes.
 | --- | --- | --- | --- |
 | Weekly digest | Mondays 07:30 | Members of a workspace with a radar | Strong matches that are new since the member's last e-mail (5 shown, the rest counted), rivals' contracts new to the 12-month "ending soon" window (3 shown), saved tenders closing within 14 days. On a capped plan only what the radar shows, plus one line about the rest |
 | Daily alert | Working days 07:30 | The same, on plans with daily alerts (`notificationAccess()`: every paid plan until the catalogue has `radar.alerts`) | New strong matches since the last digest or alert (8 shown). On Mondays the digest stands in for it |
-| Deadline reminder | Daily 08:00 | Members of a workspace that saved the tender | Tenders closing in exactly 7 or 2 calendar days: one e-mail a day for all of them, each (member, tender, offset) once |
-| Annual-renewal reminder | Daily 08:00 | Workspace owners | A yearly subscription renews in 6 to 8 days (active, not cancelled or paused): date, price when Paddle told us, how to pause or cancel. Once per paid period |
+| Deadline reminder | Daily 08:00 | Members of the workspace | Saved tenders and bids in progress (`listBidDeadlines()`) closing in exactly 7 or 2 calendar days: one e-mail a day for all of them, each (member, tender, offset) once |
+| Annual-renewal reminder | Daily 08:00 | Workspace owners | A yearly subscription renews in 6 to 8 days (active, no cancellation or pause, done or scheduled): date, price and payment method when Paddle told us, how to pause or cancel. Once per paid period |
 
 Nothing new means no e-mail: the week is logged as `skipped_empty` and the next e-mail
 starts from there. Every e-mail goes to verified addresses of current members only.
@@ -702,10 +702,11 @@ resume; the next e-mail covers everything since the last one that went out.
 
 **For other modules** (`src/features/notifications/index.ts`):
 `setDigestPreference(userId, organizationId, on)` for the sign-up form's tick box;
-`registerDeadlineSource()` to add deadlines of bids in progress to the reminders;
-`wantsNotification(userId, organizationId, "product")` and `unsubscribeLinks()` for
-"your bid check is ready" e-mails; `selectDigestMatches()` is the one place e-mails choose
-matches (strong ones only).
+`registerDeadlineSource()` to add another source of deadlines to the reminders (saved
+tenders and bids in progress are built in); `wantsNotification(userId, organizationId,
+"product")` and `unsubscribeLinks()` for e-mails another module sends about something the
+member asked for (the bid desk's "your bid check is ready" already uses both);
+`selectDigestMatches()` is the one place e-mails choose matches (strong ones only).
 
 **Tests.** `tests/notifications/*` run with `pnpm test`; the journey (claim → Monday tick →
 digest in the outbox → click → unsubscribe → next Monday) with
