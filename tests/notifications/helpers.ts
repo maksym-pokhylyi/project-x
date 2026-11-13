@@ -1,6 +1,6 @@
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { emailOutbox, events, jobs, members, notificationLog, sessions, subscriptions, users } from "@/db/schema";
+import { emailOutbox, events, jobs, members, notificationLog, sessions, subscriptions, users, type PaymentMethodSummary } from "@/db/schema";
 import type { ScheduledKind } from "@/features/notifications/config";
 import { sendNotification, type SendOutcome } from "@/features/notifications/deliver";
 import { loadMemberContext } from "@/features/notifications/recipients";
@@ -130,7 +130,19 @@ export async function addWorkspaceMember(workspace: Workspace, options: { name?:
   return user;
 }
 
-export type PlanOptions = { planKey?: "starter" | "pro" | "business"; interval?: "month" | "year"; status?: string; periodEnd?: Date; periodStart?: Date; raw?: unknown; cancelAt?: Date | null; pausedAt?: Date | null; canceledAt?: Date | null };
+export type PlanOptions = {
+  planKey?: "starter" | "pro" | "business";
+  interval?: "month" | "year";
+  status?: string;
+  periodEnd?: Date;
+  periodStart?: Date;
+  raw?: unknown;
+  cancelAt?: Date | null;
+  pauseAt?: Date | null;
+  pausedAt?: Date | null;
+  canceledAt?: Date | null;
+  paymentMethod?: PaymentMethodSummary | null;
+};
 
 /** Puts a workspace on a paid plan (a subscriptions row as the Paddle webhooks would leave it). */
 export async function setPlan(organizationId: string, options: PlanOptions = {}): Promise<void> {
@@ -142,6 +154,8 @@ export async function setPlan(organizationId: string, options: PlanOptions = {})
     currentPeriodStart: options.periodStart ?? new Date(periodEnd.getTime() - 365 * DAY),
     currentPeriodEnd: periodEnd,
     cancelAt: options.cancelAt ?? null,
+    pauseAt: options.pauseAt ?? null,
+    paymentMethod: options.paymentMethod ?? null,
     pausedAt: options.pausedAt ?? null,
     canceledAt: options.canceledAt ?? null,
     raw: options.raw ?? null,

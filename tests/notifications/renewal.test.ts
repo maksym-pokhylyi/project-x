@@ -5,14 +5,14 @@ vi.mock("next/headers", () => import("../helpers/next-headers"));
 vi.mock("next/cache", () => ({ revalidatePath: () => undefined, unstable_cache: (fn: unknown) => fn }));
 
 import { db } from "@/db";
-import { subscriptions } from "@/db/schema";
+import { organizations, subscriptions } from "@/db/schema";
 import { notificationsConfig } from "@/features/notifications/config";
-import { listRenewalsDue, renewalDue, renewalPeriodKey, renewalPrice, type RenewalSubscription } from "@/features/notifications/content/renewal";
+import { listRenewalsDue, renewalDue, renewalPaidWith, renewalPeriodKey, renewalPrice, type RenewalSubscription } from "@/features/notifications/content/renewal";
 import { runFanout } from "@/features/notifications/fanout";
 import { updateNotificationPrefs } from "@/features/notifications/prefs";
 import { unsubscribe } from "@/features/notifications/unsubscribe";
 import { resetDatabase } from "../helpers/db";
-import { addWorkspaceMember, createWorkspace, eventsNamed, jobsOfType, logRows, plainText, scheduledEmails, send, setPlan, urlsIn, type Workspace } from "./helpers";
+import { addWorkspaceMember, createWorkspace, eventsNamed, jobsOfType, logRows, plainText, scheduledEmails, send, setPlan, urlsIn, type PlanOptions, type Workspace } from "./helpers";
 
 /**
  * The annual-renewal reminder: yearly subscriptions about to renew (6 to 8 days ahead),
@@ -41,8 +41,10 @@ const base: RenewalSubscription = {
   quantity: 1,
   currentPeriodEnd: PERIOD_END,
   cancelAt: null,
+  pauseAt: null,
   canceledAt: null,
   pausedAt: null,
+  paymentMethod: { type: "card", cardBrand: "visa", last4: "4242", expiryMonth: 1, expiryYear: 2028 },
   raw: paddleRaw(),
 };
 const before = (ms: number) => new Date(PERIOD_END.getTime() - ms);
@@ -66,6 +68,7 @@ describe("which subscriptions are about to renew (pure)", () => {
     expect(renewalDue({ ...base, billingInterval: null }, now)).toBe(false);
     for (const status of ["trialing", "past_due", "paused", "canceled", "unknown"]) expect(renewalDue({ ...base, status }, now)).toBe(false);
     expect(renewalDue({ ...base, cancelAt: PERIOD_END }, now)).toBe(false); // cancellation scheduled
+    expect(renewalDue({ ...base, pauseAt: PERIOD_END }, now)).toBe(false); // pause scheduled
     expect(renewalDue({ ...base, canceledAt: before(30 * DAY) }, now)).toBe(false);
     expect(renewalDue({ ...base, pausedAt: before(30 * DAY) }, now)).toBe(false);
     expect(renewalDue({ ...base, currentPeriodEnd: null }, now)).toBe(false);
@@ -93,6 +96,12 @@ describe("which subscriptions are about to renew (pure)", () => {
     expect(renewalPrice({ ...base, raw: null })).toBeNull();
     expect(renewalPrice({ ...base, raw: paddleRaw({ items: [] }) })).toBeNull();
     expect(renewalPrice({ ...base, raw: paddleRaw({ items: [{ price: { id: "other", unit_price: { amount: "abc", currency_code: "GBP" } } }] }) })).toBeNull();
+    // "Paid with": the non-sensitive summary only, re-validated; nothing when no payment told us.
+    expect(renewalPaidWith(base)).toBe("Visa ending 4242");
+    expect(renewalPaidWith({ paymentMethod: { type: "paypal", cardBrand: null, last4: null, expiryMonth: null, expiryYear: null } })).toBe("PayPal");
+    expect(renewalPaidWith({ paymentMethod: null })).toBeNull();
+    expect(renewalPaidWith({ paymentMethod: { type: "card", cardBrand: "visa", last4: "4242 1111 2222 3333", holder: "J PIKE" } })).toBe("Visa");
+    expect(renewalPaidWith({ paymentMethod: "Visa ending 4242 <script>" })).toBeNull();
     // Two items: only the one the subscription's price id names counts.
     const twoItems = paddleRaw({ items: [{ quantity: 1, price: { id: "pri_addon", unit_price: { amount: "5000", currency_code: "GBP" } } }, { quantity: 1, price: { id: "pri_test_pro_annual", unit_price: { amount: "149000", currency_code: "GBP" } } }] });
     expect(renewalPrice({ ...base, raw: twoItems })).toBe("£1,490");
@@ -103,7 +112,7 @@ describe("which subscriptions are about to renew (pure)", () => {
 describe("the reminder", () => {
   let a: Workspace;
   const of = (workspace: Workspace, user = workspace.owner) => ({ organizationId: workspace.organizationId, userId: user.id });
-  const yearly = (overrides: Parameters<typeof setPlan>[1] = {}) => ({ planKey: "pro" as const, interval: "year" as const, periodEnd: PERIOD_END, raw: paddleRaw(), ...overrides });
+  const yearly = (overrides: Parameters<typeof setPlan>[1] = {}) => ({ planKey: "pro" as const, interval: "year" as const, periodEnd: PERIOD_END, raw: paddleRaw(), paymentMethod: base.paymentMethod as PlanOptions["paymentMethod"], ...overrides });
 
   beforeEach(async () => {
     await resetDatabase();
@@ -149,7 +158,9 @@ describe("the reminder", () => {
       // The 14-day refund covers a first payment only: it has no place in a renewal notice.
       expect(/refund|14[- ]day|money back/i.test(text), "refund wording").toBe(false);
     }
-    expect(email!.text.includes("Plan: Bid Desk, annual\nPrice: £1,490 a year, excluding VAT. VAT is added where it applies.\nRenews on: 27 Nov 2026\nWorkspace: Joanne's workspace"), "facts in the text version").toBe(true);
+    // The facts, as on the artboard. (The automatic "Joanne's workspace" is not worth a row.)
+    expect(email!.text.includes("Plan: Bid Desk, annual\nPrice: £1,490 a year, excluding VAT. VAT is added where it applies.\nRenews on: 27 Nov 2026\nPaid with: Visa ending 4242\n\n"), "facts in the text version").toBe(true);
+    expect(/Workspace/.test(body), "a row for the automatic workspace name").toBe(false);
     // One link, to Billing. A billing notice has no unsubscribe link in its footer, but mail clients get the header.
     expect(urlsIn(email!.html).filter((url) => !url.includes("/email/mark"))).toEqual(["http://localhost:3000/app/settings/billing"]);
     expect(email!.headers).toMatchObject({ "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" });
@@ -157,13 +168,16 @@ describe("the reminder", () => {
     expect(await logRows({ kind: "renewal" })).toEqual([expect.objectContaining({ status: "sent", periodKey: PERIOD, itemCount: 1 })]);
   });
 
-  it("leaves the amount out when it is not known", async () => {
-    await setPlan(a.organizationId, yearly({ raw: null }));
+  it("leaves out what it does not know, and names the workspace when that says something", async () => {
+    await setPlan(a.organizationId, yearly({ raw: null, paymentMethod: null }));
+    // A workspace somebody named (not the automatic "Joanne's workspace").
+    await db.update(organizations).set({ name: "Aldermoor & Pike", metadata: null }).where(eq(organizations.id, a.organizationId));
     expect(await send("renewal", PERIOD, of(a), eight("2026-11-20"))).toBe("sent");
     const [email] = await scheduledEmails(a.owner.email);
     const body = plainText(email!.html);
     expect(body.includes("Your Bid Desk annual plan renews on 27 Nov 2026."), "headline without a price").toBe(true);
-    expect(/£|Price/.test(body), "an invented amount").toBe(false);
+    expect(/£|Price|Paid with/.test(body), "an invented amount or payment method").toBe(false);
+    expect(email!.text.includes("Plan: Bid Desk, annual\nRenews on: 27 Nov 2026\nWorkspace: Aldermoor & Pike\n"), "facts").toBe(true);
   });
 
   it("goes once per paid period, even if the daily run comes round again or was missed", async () => {
@@ -212,7 +226,9 @@ describe("the reminder", () => {
     await runFanout({ kind: "renewal", period: "2026-11-20" }, { now: friday });
     await db.update(subscriptions).set({ cancelAt: PERIOD_END }).where(eq(subscriptions.organizationId, a.organizationId));
     expect(await send("renewal", PERIOD, of(a), friday)).toBe("not_eligible");
-    await db.update(subscriptions).set({ cancelAt: null, status: "paused", pausedAt: friday }).where(eq(subscriptions.organizationId, a.organizationId));
+    await db.update(subscriptions).set({ cancelAt: null, pauseAt: PERIOD_END }).where(eq(subscriptions.organizationId, a.organizationId));
+    expect(await send("renewal", PERIOD, of(a), friday)).toBe("not_eligible"); // a pause scheduled for the end of the period
+    await db.update(subscriptions).set({ pauseAt: null, status: "paused", pausedAt: friday }).where(eq(subscriptions.organizationId, a.organizationId));
     expect(await send("renewal", PERIOD, of(a), friday)).toBe("not_eligible");
     expect(await scheduledEmails()).toEqual([]);
     expect(await logRows()).toEqual([]);

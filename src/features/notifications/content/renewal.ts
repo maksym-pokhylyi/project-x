@@ -4,6 +4,7 @@ import { PLANS, isPlanKey } from "@/config/plans";
 import { db } from "@/db";
 import { subscriptions } from "@/db/schema";
 import { formatDate } from "@/features/procurement/domain/format";
+import { describePaymentMethod, normalizePaymentMethod } from "@/lib/billing/payment-method";
 import type { OrgContext } from "@/server/session";
 import { notificationsConfig } from "../config";
 import { londonDayKey } from "../time";
@@ -12,15 +13,18 @@ import { londonDayKey } from "../time";
  * The annual-renewal reminder: one e-mail to each owner, about seven days before a yearly
  * subscription renews.
  *
- * What the `subscriptions` table gives us, and what it does not (reported to the lead):
- *  - billing_interval ("year") and current_period_end exist: the end of the paid period IS
- *    the renewal moment for an active subscription, and is what Settings → Billing shows;
- *  - there is no column for Paddle's `next_billed_at`, for a scheduled PAUSE (only a
- *    scheduled cancellation has `cancel_at`), or for the amount. All three are inside
- *    `raw`, the last subscription entity Paddle sent. `raw` is read here ONLY to hold a
- *    reminder back (a scheduled pause or cancellation, no next billing date) and to quote
- *    the price the subscription is on; it never causes a reminder that the columns alone
- *    would not.
+ * What the `subscriptions` table gives us, and what it does not:
+ *  - billing_interval ("year") and current_period_end: the end of the paid period IS the
+ *    renewal moment for an active subscription, and is what Settings → Billing shows;
+ *  - cancel_at / pause_at (a change scheduled for the end of the period), canceled_at and
+ *    paused_at: any of them means the plan will not renew, so there is nothing to announce;
+ *  - payment_method: the non-sensitive summary ("Visa ending 4242") shown as "Paid with";
+ *  - there is NO column for the amount of the next payment. The price the subscription is
+ *    on is read from `raw`, the last subscription entity Paddle sent; when it is not there
+ *    (or a discount applies) the e-mail gives the date without an amount rather than quote
+ *    the catalogue price, which a subscription on an older price would not be charged.
+ *    `raw` is otherwise read only to hold a reminder BACK (no next billing date, a scheduled
+ *    change the columns have not caught up with): it never causes one.
  */
 export type RenewalSubscription = {
   organizationId: string;
@@ -31,8 +35,12 @@ export type RenewalSubscription = {
   quantity: number;
   currentPeriodEnd: Date | null;
   cancelAt: Date | null;
+  /** A pause scheduled for the end of the period. */
+  pauseAt: Date | null;
   canceledAt: Date | null;
   pausedAt: Date | null;
+  /** PaymentMethodSummary as stored; validated again before it is shown. */
+  paymentMethod: unknown;
   raw: unknown;
 };
 
@@ -54,7 +62,7 @@ const asRaw = (raw: unknown): PaddleRaw | null => (raw && typeof raw === "object
  */
 export function renewalDue(subscription: RenewalSubscription, now: Date): boolean {
   if (subscription.status !== "active" || subscription.billingInterval !== "year") return false;
-  if (subscription.cancelAt || subscription.canceledAt || subscription.pausedAt || !subscription.currentPeriodEnd) return false;
+  if (subscription.cancelAt || subscription.pauseAt || subscription.canceledAt || subscription.pausedAt || !subscription.currentPeriodEnd) return false;
   const raw = asRaw(subscription.raw);
   if (raw) {
     const scheduled = raw.scheduled_change?.action;
@@ -96,6 +104,12 @@ export function renewalPrice(subscription: RenewalSubscription): string | null {
   }
 }
 
+/** "Visa ending 4242" — only the non-sensitive summary the Billing page shows; null when there is none. */
+export function renewalPaidWith(subscription: Pick<RenewalSubscription, "paymentMethod">): string | null {
+  const method = normalizePaymentMethod(subscription.paymentMethod);
+  return method ? describePaymentMethod(method) : null;
+}
+
 const columns = {
   organizationId: subscriptions.organizationId,
   status: subscriptions.status,
@@ -105,8 +119,10 @@ const columns = {
   quantity: subscriptions.quantity,
   currentPeriodEnd: subscriptions.currentPeriodEnd,
   cancelAt: subscriptions.cancelAt,
+  pauseAt: subscriptions.pauseAt,
   canceledAt: subscriptions.canceledAt,
   pausedAt: subscriptions.pausedAt,
+  paymentMethod: subscriptions.paymentMethod,
   raw: subscriptions.raw,
 };
 
@@ -134,6 +150,10 @@ export type RenewalContent = {
   renewsAt: Date;
   /** "£1,490"; null when not stored. */
   price: string | null;
+  /** "Visa ending 4242"; null when no payment has told us. */
+  paidWith: string | null;
+  /** The automatic "Joanne's workspace": its name says nothing the reader does not know. */
+  personalWorkspace: boolean;
 };
 
 /** The reminder for the workspace in `ctx`, re-checked against the subscription as it is now. Null when it no longer applies. */
@@ -149,5 +169,7 @@ export async function buildRenewal(ctx: OrgContext, now: Date, options: { everyt
     renewsOn: formatDate(row.currentPeriodEnd) ?? "",
     renewsAt: row.currentPeriodEnd,
     price: renewalPrice(row),
+    paidWith: renewalPaidWith(row),
+    personalWorkspace: ctx.organization.isPersonal,
   };
 }

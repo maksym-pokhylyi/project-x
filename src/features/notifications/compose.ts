@@ -149,7 +149,9 @@ export function composeRenewalEmail(content: RenewalContent, context: ComposeCon
       { label: "Plan", value: `${content.planName}, annual` },
       ...(content.price ? [{ label: "Price", value: `${content.price} a year, excluding VAT. VAT is added where it applies.` }] : []),
       { label: "Renews on", value: content.renewsOn },
-      { label: "Workspace", value: content.workspace },
+      ...(content.paidWith ? [{ label: "Paid with", value: content.paidWith }] : []),
+      // Which plan this is about, for someone who owns more than one workspace.
+      ...(content.personalWorkspace ? [] : [{ label: "Workspace", value: content.workspace }]),
     ],
     body: RENEWAL_BODY,
     billingUrl: billingUrl(),
