@@ -9,8 +9,8 @@ import AdminLayout from "@/app/admin/layout";
 import AdminCampaignPage from "@/app/admin/outreach/campaigns/[id]/page";
 import { POST as campaignExportRoute } from "@/app/admin/outreach/campaigns/[id]/export/route";
 import AdminOutreachPage from "@/app/admin/outreach/page";
-import { POST as suppressionsExportRoute } from "@/app/admin/outreach/suppressions/export/route";
-import AdminSuppressionsPage from "@/app/admin/outreach/suppressions/page";
+import { POST as suppressionsExportRoute } from "@/app/admin/suppressions/export/route";
+import AdminSuppressionsPage from "@/app/admin/suppressions/page";
 import AdminOverviewPage from "@/app/admin/page";
 import { db } from "@/db";
 import { dataRequests, subscriptions, suppressions, users } from "@/db/schema";
@@ -94,7 +94,7 @@ const downloads = (): Record<string, () => Promise<Response>> => ({
     campaignExportRoute(new Request(`${ORIGIN}/admin/outreach/campaigns/${campaignId}/export`, { method: "POST", headers: { origin: ORIGIN }, body: new URLSearchParams({ letter: "first" }) }), {
       params: Promise.resolve({ id: campaignId }),
     }),
-  suppressionsCsv: () => suppressionsExportRoute(new Request(`${ORIGIN}/admin/outreach/suppressions/export`, { method: "POST", headers: { origin: ORIGIN } }), undefined),
+  suppressionsCsv: () => suppressionsExportRoute(new Request(`${ORIGIN}/admin/suppressions/export`, { method: "POST", headers: { origin: ORIGIN } }), undefined),
 });
 
 /** The pages themselves: each one checks the founder before it reads anything. */
@@ -205,8 +205,8 @@ describe("outreach: founder only", () => {
       expect([200, 303], name).toContain(response.status);
     }
     for (const [name, post] of Object.entries(forms())) {
-      // Whatever the form answers (a notice, or a reason), it answers on an outreach page.
-      expect((await post()).url, name).toMatch(/^\/admin\/outreach/);
+      // Whatever the form answers (a notice, or a reason), it answers on one of the tool's own pages.
+      expect((await post()).url, name).toMatch(/^\/admin\/(outreach|suppressions)\b/);
     }
     for (const [name, render] of Object.entries(pages())) {
       expect(await outcome(render), name).toBe("ALLOWED");

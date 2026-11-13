@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { devices, expect, test, type BrowserContext, type Page } from "@playwright/test";
 import { site } from "../src/config/site";
 import { parseCsv } from "../src/features/outreach/domain/csv";
+import { expectAlignedControls } from "./control-heights";
 
 /**
  * The outreach journey on seeded FICTIONAL data (e2e/outreach.global-setup.ts):
@@ -33,6 +34,21 @@ let adminContext: BrowserContext;
 let admin: Page;
 let campaignUrl = "";
 let acme: Letter;
+/** Content-Security-Policy violations reported by any page with scripts switched on. */
+const cspViolations: string[] = [];
+
+/** A browser context that reports CSP violations: these pages run under the per-request nonce policy. */
+async function watchedContext(browser: import("@playwright/test").Browser): Promise<BrowserContext> {
+  const context = await browser.newContext({ ...devices["Desktop Chrome"] });
+  await context.exposeFunction("__reportCspViolation", (violation: string) => void cspViolations.push(violation));
+  await context.addInitScript(() => {
+    document.addEventListener("securitypolicyviolation", (event) => {
+      const report = (window as unknown as { __reportCspViolation: (violation: string) => void }).__reportCspViolation;
+      report(`${location.pathname}: ${event.violatedDirective} blocked ${event.blockedURI}`);
+    });
+  });
+  return context;
+}
 
 async function expectNoHorizontalScroll(page: Page) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -46,7 +62,7 @@ async function recipient(browser: import("@playwright/test").Browser): Promise<{
 }
 
 test.beforeAll(async ({ browser }) => {
-  adminContext = await browser.newContext({ ...devices["Desktop Chrome"] });
+  adminContext = await watchedContext(browser);
   admin = await adminContext.newPage();
 });
 test.afterAll(async () => {
@@ -54,14 +70,14 @@ test.afterAll(async () => {
 });
 
 test("the outreach pages are for the founder only", async ({ page }) => {
-  for (const path of ["/admin/outreach", "/admin/outreach/suppressions", "/admin/outreach/campaigns/00000000-0000-4000-8000-000000000000"]) {
+  for (const path of ["/admin/outreach", "/admin/suppressions", "/admin/outreach/campaigns/00000000-0000-4000-8000-000000000000"]) {
     await page.goto(path);
     await expect(page, path).toHaveURL(/\/sign-in\?redirect=/);
   }
   // A download is not a page either: no session, no file. (The proxy sends a signed-out
   // request for /admin to the sign-in page; the handler itself answers 401, see tests/outreach/access.test.ts.)
   const origin = new URL(page.url()).origin;
-  for (const path of ["/admin/outreach/suppressions/export", "/admin/outreach/campaigns/00000000-0000-4000-8000-000000000000/export"]) {
+  for (const path of ["/admin/suppressions/export", "/admin/outreach/campaigns/00000000-0000-4000-8000-000000000000/export"]) {
     const response = await page.request.post(path, { headers: { origin }, maxRedirects: 0 });
     expect([302, 303, 307, 308, 401], path).toContain(response.status());
     expect(response.headers()["content-type"] ?? "", path).not.toContain("text/csv");
@@ -133,6 +149,7 @@ test("builds a segment: who would be listed, who is left out and why — and not
   // A prospect's address is in the exported file only: never on the page.
   expect(await admin.content()).not.toMatch(SEEDED_ADDRESS);
   await expectNoHorizontalScroll(admin);
+  await expectAlignedControls(admin, "outreach builder");
 
   // Looking stored nothing.
   await admin.goto("/admin/outreach");
@@ -189,6 +206,9 @@ test("creates a campaign and exports the letters as CSV", async () => {
 
 test("marks the batch as sent: the record of first contact", async () => {
   await admin.goto(campaignUrl);
+  // A campaign is part of Outreach: the admin bar says so, and the trail above the title leads back.
+  await expect(admin.getByRole("navigation", { name: "Admin" }).locator('[aria-current="page"]')).toHaveText("Outreach");
+  await expect(admin.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "Outreach" })).toHaveAttribute("href", "/admin/outreach");
   await admin.getByLabel("How many, in list order").fill("3");
   await admin.getByTestId("mark-first-exported").click();
   await expect(admin.getByTestId("flash-notice")).toContainText("3 companies marked as sent.");
@@ -196,6 +216,7 @@ test("marks the batch as sent: the record of first contact", async () => {
   await expect(admin.getByTestId("funnel-sent")).toContainText("3");
   await expect(admin.getByTestId("funnel-verdict")).toContainText("Too few e-mails to judge: 3 sent");
   await expectNoHorizontalScroll(admin);
+  await expectAlignedControls(admin, "campaign");
 });
 
 test("a recipient opens the personal link, then the opt-out link: looking changes nothing", async ({ browser }) => {
@@ -220,7 +241,7 @@ test("a recipient opens the personal link, then the opt-out link: looking change
   await context.close();
 
   // Three looks later nothing is on the list, and the company is still "sent".
-  await admin.goto("/admin/outreach/suppressions");
+  await admin.goto("/admin/suppressions");
   await expect(admin.getByTestId("suppression-counts")).toContainText("0 on the list");
   await admin.goto(campaignUrl);
   await expect(admin.locator('[data-testid="prospect-row"][data-status="sent"]')).toHaveCount(3);
@@ -254,7 +275,7 @@ test("the recipient opts out with one button, without JavaScript", async ({ brow
 });
 
 test("the opt-out page fits a phone and a tablet", async ({ browser }) => {
-  const context = await browser.newContext({ ...devices["Desktop Chrome"] });
+  const context = await watchedContext(browser);
   const page = await context.newPage();
   for (const width of [360, 768, 1280]) {
     await page.setViewportSize({ width, height: 780 });
@@ -264,11 +285,20 @@ test("the opt-out page fits a phone and a tablet", async ({ browser }) => {
       await expectNoHorizontalScroll(page);
     }
   }
+  // "Where you are" is marked by the shared navigation link, and neither link is this page.
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link")).toHaveCount(2);
+  await expect(page.locator('nav[aria-label="Main"] [aria-current="page"]')).toHaveCount(0);
   await context.close();
 });
 
 test("the address is on the suppression list, the campaign shows the opt-out and the visit", async () => {
-  await admin.goto("/admin/outreach/suppressions");
+  await admin.goto("/admin/suppressions");
+  // The admin bar marks where we are: Suppressions, and only that.
+  const current = admin.getByRole("navigation", { name: "Admin" }).locator('[aria-current="page"]');
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveText("Suppressions");
+  // The search field and its button are one row of one height.
+  expect(await expectAlignedControls(admin, "suppressions")).toBeGreaterThan(0);
   await expect(admin.getByTestId("suppression-counts")).toContainText("2 on the list");
   const address = admin.getByTestId("suppression-row").filter({ hasText: "tenders@acmegrounds.example" });
   await expect(address).toContainText("Opted out");
@@ -333,7 +363,7 @@ test("the form without a link answers every address in the same way", async ({ b
   await expect(page.getByText("Enter the email address in full")).toBeVisible();
   await context.close();
 
-  await admin.goto("/admin/outreach/suppressions?q=brightway");
+  await admin.goto("/admin/suppressions?q=brightway");
   await expect(admin.getByTestId("suppression-row")).toHaveCount(1);
   await expect(admin.getByTestId("suppression-row")).toContainText("Opt-out form");
   await admin.goto(campaignUrl);
@@ -349,4 +379,8 @@ test("the app sent no e-mail to anyone on the list", async () => {
   expect(recipients.length).toBeGreaterThan(0);
   expect(new Set(recipients)).toEqual(new Set([founder.email]));
   expect(await admin.content()).not.toMatch(SEEDED_ADDRESS);
+});
+
+test("no page of the journey broke the Content-Security-Policy", async () => {
+  expect(cspViolations).toEqual([]);
 });

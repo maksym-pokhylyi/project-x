@@ -64,7 +64,7 @@ export default async function AdminOutreachPage({ searchParams }: { searchParams
         title="Outreach"
         description="Build a list of companies that recently won a public contract, export the letters and send them yourself. Nothing here sends e-mail."
         actions={
-          <ButtonLink href="/admin/outreach/suppressions" variant="outline">
+          <ButtonLink href="/admin/suppressions" variant="outline">
             Suppressions
           </ButtonLink>
         }

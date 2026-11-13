@@ -5,6 +5,7 @@ import { NativeSelect } from "@/components/forms/native-select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Disclosure } from "@/components/ui/disclosure";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -12,7 +13,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { addSuppressionAction, importBouncesAction, removeSuppressionAction, resolveDataRequestAction } from "@/features/outreach/actions";
 import { Flash, one, type SearchParams } from "@/features/outreach/components/flash";
-import { DisclosureChevron as Chevron, OutreachCrumbs } from "@/features/outreach/components/panels";
 import { SUPPRESSION_REASON_LABELS, SUPPRESSION_REASONS } from "@/features/outreach/domain/suppression";
 import { listDataRequests } from "@/features/outreach/server/data-requests";
 import { listSuppressions } from "@/features/outreach/server/suppressions";
@@ -37,27 +37,24 @@ export default async function AdminSuppressionsPage({ searchParams }: { searchPa
   const query = one(params.q).slice(0, 120);
   const page = Number(one(params.page)) || 1;
   const [list, requests] = await Promise.all([listSuppressions({ query, page }), listDataRequests()]);
-  const pageHref = (target: number) => `/admin/outreach/suppressions?${new URLSearchParams({ ...(query ? { q: query } : {}), page: String(target) }).toString()}`;
+  const pageHref = (target: number) => `/admin/suppressions?${new URLSearchParams({ ...(query ? { q: query } : {}), page: String(target) }).toString()}`;
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex flex-col gap-3.5">
-        <OutreachCrumbs current="Suppressions" />
-        <PageHeader
-          title="Suppressions"
-          description="The do-not-contact list. An address or domain on it is never listed and never exported. It is kept for as long as we send e-mail and is never emptied: it is what stops us writing to someone again."
-          meta={
-            <span className="flex flex-wrap gap-2" data-testid="suppression-counts">
-              <Badge variant="secondary">{number(list.total)} on the list</Badge>
-              {SUPPRESSION_REASONS.filter((reason) => (list.byReason[reason] ?? 0) > 0).map((reason) => (
-                <Badge key={reason} variant="outline">
-                  {SUPPRESSION_REASON_LABELS[reason]}: {number(list.byReason[reason] ?? 0)}
-                </Badge>
-              ))}
-            </span>
-          }
-        />
-      </div>
+      <PageHeader
+        title="Suppressions"
+        description="The do-not-contact list. An address or domain on it is never listed and never exported. It is kept for as long as we send e-mail and is never emptied: it is what stops us writing to someone again."
+        meta={
+          <span className="flex flex-wrap gap-2" data-testid="suppression-counts">
+            <Badge variant="secondary">{number(list.total)} on the list</Badge>
+            {SUPPRESSION_REASONS.filter((reason) => (list.byReason[reason] ?? 0) > 0).map((reason) => (
+              <Badge key={reason} variant="outline">
+                {SUPPRESSION_REASON_LABELS[reason]}: {number(list.byReason[reason] ?? 0)}
+              </Badge>
+            ))}
+          </span>
+        }
+      />
 
       <Flash params={params} />
 
@@ -106,10 +103,10 @@ export default async function AdminSuppressionsPage({ searchParams }: { searchPa
             <form action={importBouncesAction} className="flex flex-col gap-5" data-testid="import-bounces-form">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="bounce-list">Addresses</Label>
-                <Textarea id="bounce-list" name="list" rows={4} placeholder="one address per line" autoComplete="off" />
+                <Textarea id="bounce-list" name="list" rows={4} maxLength={400_000} placeholder="one address per line" autoComplete="off" />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="bounce-file">Or a file (CSV or text, up to 1 MB)</Label>
+                <Label htmlFor="bounce-file">Or a file (CSV or text, up to 500 KB)</Label>
                 <Input id="bounce-file" name="file" type="file" accept=".csv,.txt,text/csv,text/plain" />
               </div>
               <div>
@@ -126,7 +123,7 @@ export default async function AdminSuppressionsPage({ searchParams }: { searchPa
         title="The list"
         description={query ? `${number(list.matching)} of ${number(list.total)} ${list.total === 1 ? "entry matches" : "entries match"} “${query}”.` : undefined}
         action={
-          <form method="post" action="/admin/outreach/suppressions/export">
+          <form method="post" action="/admin/suppressions/export">
             <Button type="submit" variant="outline" data-testid="export-suppressions">
               Export CSV
             </Button>
@@ -177,12 +174,8 @@ export default async function AdminSuppressionsPage({ searchParams }: { searchPa
                     <TableCell>{SOURCES[row.source] ?? row.source}</TableCell>
                     <TableCell className="whitespace-nowrap">{when(row.createdAt)}</TableCell>
                     <TableCell className="w-72">
-                      <details className="group">
-                        <summary className="link inline-flex min-h-6 items-center gap-1 rounded-sm">
-                          Remove
-                          <Chevron />
-                        </summary>
-                        <form action={removeSuppressionAction} className="mt-3 flex flex-col gap-2" data-testid="remove-suppression-form">
+                      <Disclosure variant="inline" summary="Remove">
+                        <form action={removeSuppressionAction} className="flex flex-col gap-2" data-testid="remove-suppression-form">
                           <input type="hidden" name="id" value={row.id} />
                           <Label htmlFor={`confirm-${row.id}`}>Type the {row.kind === "domain" ? "domain" : "address"} to confirm</Label>
                           <Input id={`confirm-${row.id}`} name="confirmation" required autoComplete="off" aria-describedby={`confirm-${row.id}-hint`} />
@@ -193,7 +186,7 @@ export default async function AdminSuppressionsPage({ searchParams }: { searchPa
                             </Button>
                           </div>
                         </form>
-                      </details>
+                      </Disclosure>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -220,78 +213,71 @@ export default async function AdminSuppressionsPage({ searchParams }: { searchPa
         ) : null}
       </PageSection>
 
-      <section id="requests" aria-labelledby="requests-title" className="flex scroll-mt-6 flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h2 id="requests-title" className="type-section text-ink">
-            Correction and removal requests
-          </h2>
-          <p className="max-w-[42.5rem] text-sm text-ink-2">
-            From the request form on “About the data”, which the opt-out page links to. Act on each within five working days and reply to the sender yourself. Hiding a page marks the company as
-            removed: no page, no search result, no outreach. Erasing contact details deletes the address everywhere except this list.
-          </p>
-        </div>
-        {requests.open.length === 0 ? (
-          <div data-testid="requests-empty">
-            <EmptyState title="No open requests" description="A request sent from the public site appears here until you close it." />
-          </div>
-        ) : (
-          <ul className="flex flex-col gap-4" data-testid="request-list">
-            {requests.open.map((request) => (
-              <li key={request.id} data-testid="request-row">
-                <Card className="gap-3 py-5">
-                  <CardHeader>
-                    <CardTitle className="font-sans text-base">
-                      {REQUEST_KINDS[request.kind] ?? request.kind}
-                      {request.organisationName ? ` · ${request.organisationName}` : ""}
-                    </CardTitle>
-                    <CardDescription>Received {when(request.createdAt)}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex flex-col gap-3">
-                    <p className="text-sm whitespace-pre-wrap text-ink [overflow-wrap:anywhere]">{request.message}</p>
-                    <p className="text-13 text-ink-2 [overflow-wrap:anywhere]">
-                      Reply to {request.requesterEmail}
-                      {request.pageUrl ? ` · ${request.pageUrl}` : ""}
-                    </p>
-                    <form action={resolveDataRequestAction} className="flex flex-wrap gap-2.5">
-                      <input type="hidden" name="id" value={request.id} />
-                      {request.supplierSlug ? (
-                        <Button type="submit" name="action" value="hide_page" variant="outline">
-                          Hide the company page
+      {/* The overview links here (#requests); the offset keeps the heading clear of the sticky bar. */}
+      <div id="requests" className="scroll-mt-20">
+        <PageSection
+          title="Correction and removal requests"
+          description="From the request form on “About the data”, which the opt-out page links to. Act on each within five working days and reply to the sender yourself. Hiding a page marks the company as removed: no page, no search result, no outreach. Erasing contact details deletes the address everywhere except this list."
+        >
+          {requests.open.length === 0 ? (
+            <div data-testid="requests-empty">
+              <EmptyState title="No open requests" description="A request sent from the public site appears here until you close it." />
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-4" data-testid="request-list">
+              {requests.open.map((request) => (
+                <li key={request.id} data-testid="request-row">
+                  <Card className="gap-3 py-5">
+                    <CardHeader>
+                      <CardTitle className="font-sans text-base">
+                        {REQUEST_KINDS[request.kind] ?? request.kind}
+                        {request.organisationName ? ` · ${request.organisationName}` : ""}
+                      </CardTitle>
+                      <CardDescription>Received {when(request.createdAt)}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-3">
+                      <p className="text-sm whitespace-pre-wrap text-ink [overflow-wrap:anywhere]">{request.message}</p>
+                      <p className="text-13 text-ink-2 [overflow-wrap:anywhere]">
+                        Reply to {request.requesterEmail}
+                        {request.pageUrl ? ` · ${request.pageUrl}` : ""}
+                      </p>
+                      <form action={resolveDataRequestAction} className="flex flex-wrap gap-2.5">
+                        <input type="hidden" name="id" value={request.id} />
+                        {request.supplierSlug ? (
+                          <Button type="submit" name="action" value="hide_page" variant="outline">
+                            Hide the company page
+                          </Button>
+                        ) : null}
+                        <Button type="submit" name="action" value="erase_contact" variant="outline">
+                          Erase this address’s contact details
                         </Button>
-                      ) : null}
-                      <Button type="submit" name="action" value="erase_contact" variant="outline">
-                        Erase this address’s contact details
-                      </Button>
-                      <Button type="submit" name="action" value="done">
-                        Close as done
-                      </Button>
-                      <Button type="submit" name="action" value="rejected" variant="ghost">
-                        Close as rejected
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              </li>
-            ))}
-          </ul>
-        )}
-        {requests.closed.length > 0 ? (
-          <details className="group text-sm">
-            <summary className="link inline-flex min-h-11 items-center gap-1 rounded-sm">
-              Recently closed ({requests.closed.length})
-              <Chevron />
-            </summary>
-            <ul className="mt-1 flex flex-col gap-1 text-ink-2">
-              {requests.closed.map((request) => (
-                <li key={request.id}>
-                  {request.resolvedAt ? when(request.resolvedAt) : "—"} · {request.status} · {REQUEST_KINDS[request.kind] ?? request.kind}
-                  {request.organisationName ? ` · ${request.organisationName}` : ""}
+                        <Button type="submit" name="action" value="done">
+                          Close as done
+                        </Button>
+                        <Button type="submit" name="action" value="rejected" variant="ghost">
+                          Close as rejected
+                        </Button>
+                      </form>
+                    </CardContent>
+                  </Card>
                 </li>
               ))}
             </ul>
-          </details>
-        ) : null}
-      </section>
+          )}
+          {requests.closed.length > 0 ? (
+            <Disclosure variant="inline" summary={`Recently closed (${requests.closed.length})`}>
+              <ul className="flex flex-col gap-1 text-ink-2">
+                {requests.closed.map((request) => (
+                  <li key={request.id}>
+                    {request.resolvedAt ? when(request.resolvedAt) : "—"} · {request.status} · {REQUEST_KINDS[request.kind] ?? request.kind}
+                    {request.organisationName ? ` · ${request.organisationName}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </Disclosure>
+          ) : null}
+        </PageSection>
+      </div>
     </div>
   );
 }

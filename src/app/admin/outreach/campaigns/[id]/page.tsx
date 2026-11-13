@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Disclosure } from "@/components/ui/disclosure";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,7 +19,7 @@ import { RETENTION_DAYS } from "@/config/retention";
 import type { ProspectStatus } from "@/db/schema";
 import { clearSentAction, discardCampaignAction, markSentAction } from "@/features/outreach/actions";
 import { Flash, one, type SearchParams } from "@/features/outreach/components/flash";
-import { DisclosureChevron, ExclusionSummary, FunnelPanel, OutreachCrumbs } from "@/features/outreach/components/panels";
+import { ExclusionSummary, FunnelPanel, OutreachCrumbs } from "@/features/outreach/components/panels";
 import { LETTER_TEMPLATES } from "@/features/outreach/domain/letter";
 import { SUPPRESSION_REASON_LABELS } from "@/features/outreach/domain/suppression";
 import { getCampaign, getProspectLetter, LETTER_KIND_LABELS, LETTER_KINDS, type CampaignDetail, type ProspectRow } from "@/features/outreach/server/campaigns";
@@ -192,18 +193,14 @@ export default async function AdminCampaignPage({ params, searchParams }: { para
                   Mark ticked rows as sent
                 </Button>
               </div>
-              <details className="group text-sm">
-                <summary className="link inline-flex min-h-6 items-center gap-1 rounded-sm">
-                  Marked the wrong rows, or the wrong day?
-                  <DisclosureChevron />
-                </summary>
-                <div className="mt-3 flex flex-col items-start gap-3">
-                  <p className="text-ink-2">Tick those rows in the table and clear their date. They can then be marked again. The correction is logged.</p>
+              <Disclosure variant="inline" summary="Marked the wrong rows, or the wrong day?">
+                <p className="text-ink-2">Tick those rows in the table and clear their date. They can then be marked again. The correction is logged.</p>
+                <div>
                   <Button type="submit" formAction={clearSentAction} formNoValidate variant="outline" data-testid="clear-sent">
                     Clear the sent date of ticked rows
                   </Button>
                 </div>
-              </details>
+              </Disclosure>
             </form>
           </CardContent>
         </Card>

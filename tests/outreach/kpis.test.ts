@@ -86,15 +86,19 @@ describe("founder KPIs", () => {
     expect(shown.mrr).toMatch(/^MRR £0\.00 /);
     expect(shown.paying).toBe("Paying workspaces 0 No paid plans yet · 0 past due · 0 trialing");
     expect(shown.jobs).toBe("Job queue 0 pending 0 failed in 24 hours · 0 running");
-    expect(shown.ingestion).toBe("Data ingestion never No successful run recorded Open");
-    expect(shown.outreach).toMatch(/^Outreach 0 sent 0 opened their page · 0 claimed · (—|0) bid checks · 0 opted out Open$/);
-    expect(shown.suppressions).toMatch(/^Do-not-contact list 0 /);
-    expect(shown["data-requests"]).toBe("Correction and removal requests 0 open Nothing waiting Open");
+    expect(shown.ingestion).toBe("Data ingestion never No successful run recorded Open ingestion");
+    expect(shown.outreach).toMatch(/^Outreach 0 sent 0 opened their page · 0 claimed · (—|0) bid checks · 0 opted out Open outreach$/);
+    expect(shown.suppressions).toBe("Do-not-contact list 0 Addresses and domains that are never listed or exported Open the list");
+    expect(shown["data-requests"]).toBe("Correction and removal requests 0 open Nothing waiting Open the requests");
     if (!(await bidDeskInstalled())) {
       expect(shown.activated).toBe("Activated workspaces — First bid check built — the bid desk is not installed here yet");
       expect(shown["bid-pass"]).toBe("Bid Pass sales — The bid desk is not installed here yet");
     }
-    for (const href of ["/admin/ingestion", "/admin/outreach", "/admin/outreach/suppressions", "/admin/outreach/suppressions#requests"]) expect(html).toContain(`href="${href}"`);
+    // Each link says where it goes, and looks like a link (the design system's `link`).
+    for (const href of ["/admin/ingestion", "/admin/outreach", "/admin/suppressions", "/admin/suppressions#requests"]) {
+      const anchor = new RegExp(`<a ([^>]*href="${href}"[^>]*)>Open [a-z ]+</a>`).exec(html);
+      expect(anchor?.[1], href).toContain('class="link"');
+    }
   });
 
   it("counts accounts, workspaces and claimed companies, in total and in the last 7 and 30 days", async () => {
@@ -191,7 +195,7 @@ describe("founder KPIs", () => {
     const shown = cells(renderToStaticMarkup(await AdminOverviewPage()));
     expect(shown["ai-spend"]).toMatch(/^AI spend today \$0\.25 of \$1\.00 a day \(25%\) · 7 days \$0\.75 · 30 days \$1\.75 · estimated$/);
     expect(shown.jobs).toMatch(/^Job queue 2 pending 1 failed in 24 hours · 1 running · oldest due 2 hours ago$/);
-    expect(shown.ingestion).toMatch(/^Data ingestion \d+ minutes ago Last run reported an error Open$/);
+    expect(shown.ingestion).toMatch(/^Data ingestion \d+ minutes ago Last run reported an error Open ingestion$/);
     expect(JSON.stringify(shown)).not.toContain("429"); // the page says that there was an error, not what a remote server said
   });
 
@@ -207,7 +211,7 @@ describe("founder KPIs", () => {
     const html = renderToStaticMarkup(await AdminOverviewPage());
     const shown = cells(html);
     expect(shown.suppressions).toMatch(/^Do-not-contact list 1 /);
-    expect(shown["data-requests"]).toBe("Correction and removal requests 2 open Oldest received 3 days ago. Act within five working days. Open");
+    expect(shown["data-requests"]).toBe("Correction and removal requests 2 open Oldest received 3 days ago. Act within five working days. Open the requests");
     // Numbers only: no address from the list or from a request reaches the overview.
     expect(html).not.toMatch(/acmegrounds|company\.example/);
   });

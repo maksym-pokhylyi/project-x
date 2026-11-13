@@ -33,15 +33,17 @@ function ago(date: Date | null, now: Date): string {
  * over its label, then one muted line of context. The cells share one white card and are
  * divided by hairlines (the grid's 1 px gaps).
  */
-function Stat({ label, value, hint, href, linkLabel = "Open", testId }: { label: string; value: string; hint?: string; href?: string; linkLabel?: string; testId?: string }) {
+function Stat({ label, value, hint, link, testId }: { label: string; value: string; hint?: string; link?: { href: string; label: string }; testId?: string }) {
   return (
     <div className="flex flex-col gap-1 bg-surface px-5 py-4" data-testid="admin-stat" data-kpi={testId}>
       <dt className="order-2 text-sm font-semibold text-ink">{label}</dt>
       <dd className="type-figure order-1 text-3xl text-ink">{value}</dd>
       {hint ? <dd className="order-3 text-13 text-ink-2">{hint}</dd> : null}
-      {href ? (
+      {link ? (
         <dd className="order-4 text-13">
-          <Link href={href}>{linkLabel}</Link>
+          <Link href={link.href} className="link">
+            {link.label}
+          </Link>
         </dd>
       ) : null}
     </div>
@@ -118,22 +120,28 @@ export default async function AdminOverviewPage() {
             label="Data ingestion"
             value={ago(kpis.ingestion.lastSuccessAt, now)}
             hint={kpis.ingestion.lastError ? "Last run reported an error" : kpis.ingestion.lastSuccessAt ? `Last successful run ${when(kpis.ingestion.lastSuccessAt)}` : "No successful run recorded"}
-            href="/admin/ingestion"
+            link={{ href: "/admin/ingestion", label: "Open ingestion" }}
           />
           <Stat
             testId="outreach"
             label="Outreach"
             value={`${count(funnel.sent)} sent`}
             hint={`${count(funnel.visited)} opened their page · ${count(funnel.claimed)} claimed · ${funnel.bidChecks === null ? DASH : count(funnel.bidChecks)} bid checks · ${count(funnel.optedOut)} opted out`}
-            href="/admin/outreach"
+            link={{ href: "/admin/outreach", label: "Open outreach" }}
           />
-          <Stat testId="suppressions" label="Do-not-contact list" value={count(funnel.suppressions)} hint="Addresses and domains that are never listed or exported" href="/admin/outreach/suppressions" />
+          <Stat
+            testId="suppressions"
+            label="Do-not-contact list"
+            value={count(funnel.suppressions)}
+            hint="Addresses and domains that are never listed or exported"
+            link={{ href: "/admin/suppressions", label: "Open the list" }}
+          />
           <Stat
             testId="data-requests"
             label="Correction and removal requests"
             value={`${count(funnel.openDataRequests)} open`}
             hint={funnel.openDataRequests > 0 ? `Oldest received ${ago(funnel.oldestDataRequestAt, now)}. Act within five working days.` : "Nothing waiting"}
-            href="/admin/outreach/suppressions#requests"
+            link={{ href: "/admin/suppressions#requests", label: "Open the requests" }}
           />
         </dl>
       </section>

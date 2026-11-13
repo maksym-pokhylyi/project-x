@@ -26,7 +26,7 @@ import { addSuppression, importBounceList, removeSuppression } from "./server/su
  */
 
 const OUTREACH = "/admin/outreach";
-const SUPPRESSIONS = "/admin/outreach/suppressions";
+const SUPPRESSIONS = "/admin/suppressions";
 
 function text(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -175,7 +175,12 @@ export async function addSuppressionAction(formData: FormData): Promise<void> {
   redirect(withParams(SUPPRESSIONS, { notice: result.data.created ? "added" : "already", n: result.data.prospectsAffected || undefined }));
 }
 
-const MAX_UPLOAD_BYTES = 1_000_000;
+/**
+ * A Server Action receives at most 1 MB in all (Next.js' default, deliberately not raised):
+ * the file is kept well under it so that a list that is too long gets this message, not a
+ * failed request. One import takes 5,000 addresses anyway.
+ */
+const MAX_UPLOAD_BYTES = 500_000;
 
 /** Imports a bounce list: pasted text and/or an uploaded CSV or text file. */
 export async function importBouncesAction(formData: FormData): Promise<void> {
@@ -183,7 +188,7 @@ export async function importBouncesAction(formData: FormData): Promise<void> {
     const parts = [text(formData, "list")];
     const file = formData.get("file");
     if (file instanceof File && file.size > 0) {
-      parseInput(z.number().max(MAX_UPLOAD_BYTES, "That file is larger than 1 MB. Import it in parts."), file.size);
+      parseInput(z.number().max(MAX_UPLOAD_BYTES, "That file is larger than 500 KB. Import it in parts."), file.size);
       parts.push(await file.text());
     }
     return importBounceList(parts.join("\n"));

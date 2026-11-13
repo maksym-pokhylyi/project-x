@@ -8,6 +8,7 @@
  *   … scripts/outreach-preview.ts --named --any-size --batch 400 --min 25000 --max 500000
  *   … scripts/outreach-preview.ts --now 2026-09-25        # as if run on that day
  *
+ * `--named` is refused, as in the app, until a UK representative is set in src/config/site.ts.
  * Uses DATABASE_URL from the environment / .env.local.
  */
 import { loadEnv } from "./load-env.mjs";

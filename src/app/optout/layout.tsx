@@ -1,11 +1,9 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/logo";
+import { NavLink } from "@/components/ui/nav-link";
 import { site } from "@/config/site";
 import { operatorFooterLine } from "@/features/outreach/config";
 import { INDEPENDENCE_STATEMENT, OGL_ATTRIBUTION } from "@/features/procurement/config";
-
-const navLink = "link-quiet inline-flex min-h-11 items-center rounded-sm text-15 font-medium max-md:underline max-md:decoration-brand max-md:underline-offset-[3px]";
 
 /**
  * Shell of the opt-out page, as in the "Unsubscribed" artboard (docs/design/handoff,
@@ -20,12 +18,12 @@ export default function OptOutLayout({ children }: { children: ReactNode }) {
         <div className="container-content flex min-h-14 flex-wrap items-center justify-between gap-x-8 gap-y-1 md:min-h-[4.5rem]">
           <Logo />
           <nav aria-label="Main" className="flex flex-wrap items-center gap-x-5 md:gap-x-8">
-            <Link href="/" className={navLink}>
+            <NavLink href="/" variant="header">
               What is {site.name}?
-            </Link>
-            <Link href="/sign-in" className={navLink}>
+            </NavLink>
+            <NavLink href="/sign-in" variant="header">
               Sign in
-            </Link>
+            </NavLink>
           </nav>
         </div>
       </header>
@@ -36,7 +34,7 @@ export default function OptOutLayout({ children }: { children: ReactNode }) {
 
       <footer className="flex-1 bg-paper-deep" data-testid="optout-operator">
         <div className="container-content pt-8 pb-9">
-          <p className="max-w-[61.25rem] text-13 leading-[1.6] text-ink-2">
+          <p className="max-w-[61.25rem] text-13 text-ink-2">
             {operatorFooterLine()} · Payments are processed by Paddle. · {OGL_ATTRIBUTION} · {INDEPENDENCE_STATEMENT}
           </p>
         </div>

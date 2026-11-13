@@ -10,7 +10,7 @@ vi.mock("@/config/site", async () => (await import("./mocks/site")).siteModule(t
 import AdminLayout from "@/app/admin/layout";
 import AdminCampaignPage from "@/app/admin/outreach/campaigns/[id]/page";
 import AdminOutreachPage from "@/app/admin/outreach/page";
-import AdminSuppressionsPage from "@/app/admin/outreach/suppressions/page";
+import AdminSuppressionsPage from "@/app/admin/suppressions/page";
 import { db } from "@/db";
 import { dataRequests } from "@/db/schema";
 import { createCampaign } from "@/features/outreach/server/builder";
@@ -57,7 +57,7 @@ describe("outreach pages", () => {
       ["Overview", "/admin"],
       ["Organizations", "/admin/organizations"],
       ["Outreach", "/admin/outreach"],
-      ["Suppressions", "/admin/outreach/suppressions"],
+      ["Suppressions", "/admin/suppressions"],
       ["Ingestion", "/admin/ingestion"],
     ]);
   });

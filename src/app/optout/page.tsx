@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { FieldError, FormError } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { site } from "@/config/site";
@@ -11,7 +12,6 @@ import { outreachConfig, outreachSender, requestFormHref } from "@/features/outr
 import { confirmOptOutAction, optOutByAddressAction } from "@/features/outreach/optout-actions";
 import { getOptOutView } from "@/features/outreach/server/optout";
 import { OGL_URL } from "@/features/procurement/config";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Stop emails",
@@ -34,20 +34,25 @@ const EMAIL_ERROR = "Enter the email address in full, for example info@yourcompa
 function Tick() {
   return (
     <div aria-hidden className="grid size-10 place-items-center rounded-full bg-brand-tint sm:size-11">
-      <svg viewBox="0 0 16 16" className="size-5 fill-none stroke-brand stroke-[1.8] [stroke-linecap:round] [stroke-linejoin:round] sm:size-[1.375rem]">
+      <svg viewBox="0 0 16 16" className="size-5 fill-none stroke-brand stroke-[1.8] [stroke-linecap:round] [stroke-linejoin:round] sm:size-5.5">
         <path d="M3 8.5l3.2 3.2L13 4.8" />
       </svg>
     </div>
   );
 }
 
-function Panel({ id, title, className, children }: { id: string; title: string; className?: string; children: ReactNode }) {
+/** One of the two cards of the artboard: a serif heading over its content. */
+function Panel({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <section aria-labelledby={id} className={cn("flex flex-col rounded-card border border-line bg-surface p-5 sm:p-7", className)}>
-      <h2 id={id} className="text-[1.375rem] leading-[1.25] text-ink">
-        {title}
-      </h2>
-      {children}
+    <section aria-labelledby={id}>
+      <Card className="gap-3">
+        <CardHeader>
+          <CardTitle>
+            <h2 id={id}>{title}</h2>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>{children}</CardContent>
+      </Card>
     </section>
   );
 }
@@ -64,7 +69,7 @@ function WhatWeHold({ company, pagePath }: { company?: string; pagePath?: string
     <>
       <div className="mt-5 sm:mt-7" data-testid="optout-held">
         <Panel id="hold" title="What we hold">
-          <ul className="mt-3 flex flex-col text-15 leading-[1.55] text-ink sm:mt-3.5">
+          <ul className="flex flex-col text-15 text-ink">
             <li className={row}>
               {company ? `The page about ${company} is` : "A company’s page here is"} built from contract notices published on Find a Tender under the{" "}
               <a href={OGL_URL} rel="license noopener">
@@ -89,9 +94,8 @@ function WhatWeHold({ company, pagePath }: { company?: string; pagePath?: string
       </div>
 
       <div className="mt-3 sm:mt-4" data-testid="optout-remove">
-        {/* On a phone the last line is the 44 px "Or write to…" row, so the panel needs less room under it. */}
-        <Panel id="remove" title="Have it removed" className={contact ? "max-sm:pb-2" : undefined}>
-          <p className="mt-2 text-15 leading-[1.55] text-ink">
+        <Panel id="remove" title="Have it removed">
+          <p className="text-15 text-ink">
             Ask us to hide {company ? `the page about ${company}` : "your company’s page"} or to delete the contact address. We review every request and reply by email within five working days.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1">

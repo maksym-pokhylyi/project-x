@@ -14,19 +14,7 @@ import type { OutreachResults } from "../server/results";
 const docLink = (path: string) => `${outreachConfig.docs.base}${path}`;
 const number = (value: number) => value.toLocaleString("en-GB");
 
-/**
- * The chevron of a small disclosure (<details className="group">): the design system draws
- * summary markers itself, so a summary without one would not look like a control.
- */
-export function DisclosureChevron() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden className="size-3.5 shrink-0 fill-none stroke-current stroke-[1.8] transition-transform duration-150 ease-out [stroke-linecap:round] [stroke-linejoin:round] group-open:rotate-180">
-      <path d="M3.5 6l4.5 4.5L12.5 6" />
-    </svg>
-  );
-}
-
-/** Where a page of the outreach tool sits: "Outreach / Suppressions". */
+/** Where a page under the outreach section sits: "Outreach / Week one". */
 export function OutreachCrumbs({ current }: { current: string }) {
   return (
     <Breadcrumb>

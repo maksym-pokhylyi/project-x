@@ -5,7 +5,7 @@ vi.mock("next/headers", () => import("../helpers/next-headers"));
 vi.mock("next/navigation", async () => (await import("./mocks/next")).navigation);
 vi.mock("next/cache", async () => (await import("./mocks/next")).cache);
 
-import { POST as exportRoute } from "@/app/admin/outreach/suppressions/export/route";
+import { POST as exportRoute } from "@/app/admin/suppressions/export/route";
 import { db } from "@/db";
 import { dataRequests, outreachAudit, outreachProspects, suppliers, suppressions } from "@/db/schema";
 import { addSuppressionAction, importBouncesAction, removeSuppressionAction, resolveDataRequestAction } from "@/features/outreach/actions";
@@ -244,7 +244,7 @@ describe("suppression list", () => {
       expect(logged).toMatchObject({ actorId: founder.id, count: 2 });
       expect(JSON.stringify(logged)).not.toContain("@");
 
-      const request = (origin: string) => exportRoute(new Request(`${ORIGIN}/admin/outreach/suppressions/export`, { method: "POST", headers: { origin } }), undefined);
+      const request = (origin: string) => exportRoute(new Request(`${ORIGIN}/admin/suppressions/export`, { method: "POST", headers: { origin } }), undefined);
       const response = await request(ORIGIN);
       expect(response.status).toBe(200);
       expect(response.headers.get("content-type")).toBe("text/csv; charset=utf-8");
@@ -276,7 +276,7 @@ describe("suppression list", () => {
     it("add, import and remove answer with a notice on the page", async () => {
       await campaignInThreeStates();
       const added = await submit(addSuppressionAction, { target: "tenders@acmegrounds.example", reason: "optout", note: "" });
-      expect(added.path).toBe("/admin/outreach/suppressions");
+      expect(added.path).toBe("/admin/suppressions");
       expect(Object.fromEntries(added.params)).toEqual({ notice: "added", n: "1" });
       expect(Object.fromEntries((await submit(addSuppressionAction, { target: "tenders@acmegrounds.example", reason: "optout" })).params)).toEqual({ notice: "already" });
       const invalid = await submit(addSuppressionAction, { target: "nonsense", reason: "optout" });
@@ -287,8 +287,8 @@ describe("suppression list", () => {
       const file = new File(["recipient\r\nfile-bounce@bulk.example\r\noffice@elmcare.example\r\n"], "bounces.csv", { type: "text/csv" });
       const imported = await submit(importBouncesAction, { list: "pasted-bounce@bulk.example\noffice@elmcare.example", file });
       expect(Object.fromEntries(imported.params)).toEqual({ notice: "imported", n: "3" });
-      const tooLarge = new File(["x".repeat(1_000_001)], "huge.txt", { type: "text/plain" });
-      expect(readFlashError(Object.fromEntries((await submit(importBouncesAction, { list: "", file: tooLarge })).params))).toBe("That file is larger than 1 MB. Import it in parts.");
+      const tooLarge = new File(["x".repeat(500_001)], "huge.txt", { type: "text/plain" });
+      expect(readFlashError(Object.fromEntries((await submit(importBouncesAction, { list: "", file: tooLarge })).params))).toBe("That file is larger than 500 KB. Import it in parts.");
       expect(readFlashError(Object.fromEntries((await submit(importBouncesAction, { list: "" })).params))).toContain("No e-mail addresses found");
 
       const [entry] = await db.select().from(suppressions).where(eq(suppressions.email, "tenders@acmegrounds.example"));
@@ -322,7 +322,7 @@ describe("suppression list", () => {
       await seed(FIVE_ELIGIBLE);
       const id = await request({});
       const sent = await submit(resolveDataRequestAction, { id, action: "hide_page" });
-      expect(sent.url).toBe("/admin/outreach/suppressions?notice=page_hidden#requests");
+      expect(sent.url).toBe("/admin/suppressions?notice=page_hidden#requests");
       expect(revalidated).toContain("tag:procurement"); // public pages are rebuilt now, not when their cache expires
 
       const [acme] = await db.select().from(suppliers).where(eq(suppliers.name, "Acme Grounds Ltd"));

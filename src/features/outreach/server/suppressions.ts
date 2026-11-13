@@ -13,7 +13,7 @@ import { recordOutreachAudit } from "./audit";
 import { addEmailSuppressions, addSuppressionEntry, unstampContacts } from "./suppression-store";
 
 /**
- * The founder's side of the suppression list (/admin/outreach/suppressions).
+ * The founder's side of the suppression list (/admin/suppressions).
  * Cross-tenant by design: every function starts with requireAdmin().
  */
 
