@@ -1,0 +1,176 @@
+{
+ "buyerID": [],
+ "id": "083823-2026",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "date": "2026-09-04T11:23:10+01:00",
+ "initiationType": "tender",
+ "ocid": "ocds-h6vhtk-06466c",
+ "parties": [
+  {
+   "name": "Cheshire West and Chester Council",
+   "id": "GB-PPON-PCJB-2814-BHZP",
+   "identifier": {
+    "scheme": "GB-PPON",
+    "id": "PCJB-2814-BHZP"
+   },
+   "address": {
+    "streetAddress": "The Portal, Wellington Road",
+    "locality": "Ellesmere Port",
+    "postalCode": "CH65 0BA",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD63"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@cheshirewestandchester.gov.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicAuthoritySubCentralGovernment",
+      "description": "Public authority - sub-central government"
+     }
+    ]
+   }
+  },
+  {
+   "name": "INPOST UK LIMITED",
+   "id": "GB-COH-08090698",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "08090698"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PNQP-2841-JLZR"
+    }
+   ],
+   "address": {
+    "streetAddress": "23-25 Moray House, Great Titchfield Street",
+    "locality": "London",
+    "postalCode": "W1W 7PA",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI32"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@inpost.co.uk"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "http://www.inpost.co.uk",
+    "scale": "large",
+    "vcse": false
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-PPON-PCJB-2814-BHZP",
+  "name": "Cheshire West and Chester Council"
+ },
+ "tender": {
+  "id": "DN805578",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Parcel Lockers",
+  "description": "Cheshire West and Chester Borough Council is inviting proposals from appropriately experienced organisations to supply, install, and manage a network of battery-operated parcel lockers within the borough. Providers are required to offer the Council a fixed level of income.",
+  "status": "complete",
+  "procurementMethod": "open",
+  "procurementMethodDetails": "Below threshold - open competition",
+  "specialRegime": [
+   "concession"
+  ],
+  "lots": [
+   {
+    "id": "1",
+    "status": "complete",
+    "description": null
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "status": "active",
+   "mainProcurementCategory": "services",
+   "suppliers": [
+    {
+     "id": "GB-COH-08090698",
+     "name": "INPOST UK LIMITED"
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "additionalClassifications": [
+      {
+       "scheme": "CPV",
+       "id": "63121100",
+       "description": "Storage services"
+      }
+     ],
+     "deliveryAddresses": [
+      {
+       "region": "UKD6",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      }
+     ],
+     "relatedLot": "1"
+    }
+   ],
+   "relatedLots": [
+    "1"
+   ]
+  }
+ ],
+ "contracts": [
+  {
+   "id": "1",
+   "awardID": "1",
+   "status": "active",
+   "period": {
+    "startDate": "2026-09-04T00:00:00+01:00",
+    "endDate": "2031-09-03T23:59:59+01:00",
+    "maxExtentDate": "2036-09-03T23:59:59+01:00"
+   },
+   "hasRenewal": true,
+   "renewal": {
+    "description": "2x 24 months and 1 x 12 months optional extensions"
+   },
+   "value": {
+    "amountGross": 0,
+    "amount": 0,
+    "currency": "GBP"
+   },
+   "aboveThreshold": false,
+   "dateSigned": "2026-09-04T00:00:00+01:00",
+   "statusDetails": null,
+   "documents": [
+    {
+     "id": "083823-2026",
+     "documentType": "contractNotice",
+     "noticeType": "UK7",
+     "description": "Contract details notice on Find a Tender",
+     "url": "https://www.find-tender.service.gov.uk/Notice/083823-2026",
+     "datePublished": "2026-09-04T11:23:10+01:00",
+     "format": "text/html"
+    }
+   ]
+  }
+ ],
+ "language": "en"
+}

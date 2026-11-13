@@ -380,8 +380,11 @@ function keywordHits(keywords: readonly string[], title: string): string[] {
   const haystack = ` ${tokenise(title).map(stem).join(" ")} `;
   const hits: string[] = [];
   for (const keyword of keywords) {
-    const needle = tokenise(keyword).map(stem).join(" ");
-    if (needle.length >= 3 && haystack.includes(` ${needle} `) && !hits.includes(needle)) hits.push(needle);
+    const tokens = tokenise(keyword);
+    const needle = tokens.map(stem).join(" ");
+    const original = tokens.join(" ");
+    // Matching is on stems; what we report is the keyword as the profile spells it.
+    if (needle.length >= 3 && haystack.includes(` ${needle} `) && !hits.includes(original)) hits.push(original);
   }
   // A pair and its parts are one hit, not three.
   return hits.filter((hit) => !hits.some((other) => other !== hit && other.includes(" ") && ` ${other} `.includes(` ${hit} `)));

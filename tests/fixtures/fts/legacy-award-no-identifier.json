@@ -1,0 +1,189 @@
+{
+ "ocid": "ocds-h6vhtk-06f744",
+ "id": "086065-2026",
+ "date": "2026-09-10T16:06:10+01:00",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "description": "This is a Provider Selection Regime (PSR) intention to award notice. The awarding of this contract is subject to the Health Care Services (Provider Selection Regime) Regulations 2023. For the avoidance of doubt, the provisions of the Public Contract Regulations 2015/Procurement Act 2023 do not apply to this award. The standstill period begins on the day after the publication of this notice. Representations by providers must be made to decision makers, in writing to redacted@example.org by 22 September 2026.<br/><br/>This contract has not yet formally been awarded; this notice serves as an intention to award under the PSR.<br/><br/>Decision Makers: <br/>The Trust's Finance and Performance Committee approved the decision to award via Option C on 03/09/2026.<br/><br/>No Conflicts of Interest have been declared by the Individuals making the decision. <br/><br/>The basis for awarding awarding this proposed Contract was in accordance with the PSR Regulations and included (a) The Authority satisfying itself that the considerable change threshold was not met and (b) The Authority satisfying itself that the existing provider is satisfying its existing contract and will likely satisfy the proposed contract to a sufficient standard.   <br/><br/>The decision was supported based on performance assessed against the PSR Key Criteria: <br/><br/>Key Criteria 1: Quality and Innovation (Weighting 45%)<br/>Key Criteria 2: Value (Weighting 25%)<br/>Key Criteria 3: Integration, Collaboration and Service Sustainability (10%)<br/>Key Criteria 4: Improving Access, Reducing Health Inequalities and Facilitating Choice (Weighting 10)<br/>Key Criteria 5: Social Value (Weighting 10%)<br/><br/>Weightings were allocated based on the relative importance against the requirements of the service provision and were stipulated by the Care Group.",
+ "initiationType": "tender",
+ "tender": {
+  "id": "MED6231",
+  "legalBasis": {
+   "id": "32014L0024",
+   "scheme": "CELEX"
+  },
+  "title": "GP Services for Enhanced Primary Care Services (EhPC)",
+  "status": "complete",
+  "classification": {
+   "scheme": "CPV",
+   "id": "85100000",
+   "description": "Health services"
+  },
+  "mainProcurementCategory": "services",
+  "description": "Provision of Enhanced Primary Care Services GP Support",
+  "lots": [
+   {
+    "id": "1",
+    "description": "This contract is for the provision of Enhanced Primary Care Services GP Support.<br/><br/>The Trust is intending to award a contract to an existing provider following the Direct Award Process C. <br/><br/>The approximate lifetime value of the contract is £803,497.50.<br/><br/>The contract duration is expected to be from 1 October 2026 to 31 March 2027 - There is a 2-month extension option permitted within the contract.",
+    "awardCriteria": {
+     "criteria": [
+      {
+       "type": "price"
+      }
+     ]
+    },
+    "hasOptions": true,
+    "options": {
+     "description": "This contract includes a 2-month option to extend."
+    },
+    "status": "cancelled"
+   }
+  ],
+  "items": [
+   {
+    "id": "1",
+    "deliveryAddresses": [
+     {
+      "region": "UKG23"
+     }
+    ],
+    "relatedLot": "1"
+   }
+  ],
+  "procurementMethod": "limited",
+  "procurementMethodDetails": "Award procedure without prior publication of a call for competition",
+  "procurementMethodRationaleClassifications": [
+   {
+    "scheme": "TED_PT_AWARD_CONTRACT_WITHOUT_CALL",
+    "id": "D_OUTSIDE_SCOPE",
+    "description": "The procurement falls outside the scope of application of the directive"
+   }
+  ],
+  "procurementMethodRationale": "The awarding of this contract is subject to the Health Care Services (Provider Selection Regime) Regulations 2023. For the avoidance of doubt, the provisions of the Public Contracts Regulations 2015/Procurement Act 2023 do not apply to this award. The standstill period begins on the day after the publication of this notice. Representations by providers must be made to the relevant authority by 22 September 2026. This contract has not yet formally been awarded; this notice serves as an intention to award under the PSR"
+ },
+ "awards": [
+  {
+   "id": "086065-2026-1",
+   "relatedLots": [
+    "1"
+   ],
+   "status": "active",
+   "suppliers": [
+    {
+     "id": "GB-FTS-186587",
+     "name": "NORTH STAFFORDSHIRE GP FEDERATION LIMITED"
+    }
+   ]
+  }
+ ],
+ "parties": [
+  {
+   "name": "University Hospitals of North Midlands NHS Trust",
+   "id": "GB-FTS-129332",
+   "identifier": {
+    "legalName": "University Hospitals of North Midlands NHS Trust"
+   },
+   "address": {
+    "streetAddress": "Royal Stoke University Hospial, Newcastle Road",
+    "locality": "Stoke on Trent",
+    "region": "UKG",
+    "postalCode": "ST4 6QG",
+    "countryName": "United Kingdom"
+   },
+   "contactPoint": {
+    "name": "Redacted Name",
+    "email": "firstname.lastname@uhnm.nhs.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "url": "https://www.uhnm.nhs.uk/",
+    "buyerProfile": "https://www.uhnm.nhs.uk/",
+    "classifications": [
+     {
+      "scheme": "TED_CA_TYPE",
+      "id": "BODY_PUBLIC",
+      "description": "Body governed by public law"
+     },
+     {
+      "scheme": "COFOG",
+      "id": "07",
+      "description": "Health"
+     }
+    ]
+   }
+  },
+  {
+   "name": "NORTH STAFFORDSHIRE GP FEDERATION LIMITED",
+   "id": "GB-FTS-186587",
+   "identifier": {
+    "legalName": "NORTH STAFFORDSHIRE GP FEDERATION LIMITED",
+    "id": "09685712"
+   },
+   "address": {
+    "streetAddress": "511 Etruria Road",
+    "locality": "Stoke-On-Trent",
+    "region": "UKG2",
+    "postalCode": "ST4 6HT",
+    "countryName": "United Kingdom"
+   },
+   "contactPoint": {
+    "telephone": "+44 0000 000000",
+    "email": "firstname.lastname@staffs.nhs.uk"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "https://www.nsgpfed.org.uk",
+    "scale": "sme"
+   }
+  },
+  {
+   "name": "Independent patient choice and procurement panel",
+   "id": "GB-FTS-133554",
+   "identifier": {
+    "legalName": "Independent patient choice and procurement panel"
+   },
+   "address": {
+    "streetAddress": "Wellington House",
+    "locality": "London",
+    "postalCode": "SE1 8UG",
+    "countryName": "United Kingdom"
+   },
+   "roles": [
+    "reviewBody"
+   ]
+  }
+ ],
+ "buyer": {
+  "id": "GB-FTS-129332",
+  "name": "University Hospitals of North Midlands NHS Trust"
+ },
+ "contracts": [
+  {
+   "id": "086065-2026-1",
+   "awardID": "086065-2026-1",
+   "status": "active",
+   "value": {
+    "amount": 803497.5,
+    "currency": "GBP"
+   },
+   "dateSigned": "2026-09-03T00:00:00+01:00"
+  }
+ ],
+ "bids": {
+  "statistics": [
+   {
+    "id": "1",
+    "measure": "bids",
+    "relatedLot": "1",
+    "value": 1
+   }
+  ]
+ },
+ "language": "en"
+}

@@ -1,0 +1,172 @@
+{
+ "ocid": "ocds-h6vhtk-06f74b",
+ "buyerID": [],
+ "id": "086075-2026",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "date": "2026-09-10T16:14:12+01:00",
+ "initiationType": "tender",
+ "parties": [
+  {
+   "name": "Rutland County Council",
+   "id": "GB-PPON-PMQJ-3429-NZWQ",
+   "identifier": {
+    "scheme": "GB-PPON",
+    "id": "PMQJ-3429-NZWQ"
+   },
+   "address": {
+    "streetAddress": "Catmos House",
+    "locality": "Oakham",
+    "postalCode": "LE15 6HP",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKF22"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@rutland.gov.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicAuthoritySubCentralGovernment",
+      "description": "Public authority - sub-central government"
+     }
+    ]
+   }
+  },
+  {
+   "name": "ELMS LANDSCAPING DESIGN LIMITED",
+   "id": "GB-COH-10058132",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "10058132"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PYNR-7123-HCMD"
+    }
+   ],
+   "address": {
+    "streetAddress": "26 Alsthorpe Road",
+    "locality": "Oakham",
+    "postalCode": "LE15 6FD",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKF22"
+   },
+   "contactPoint": {
+    "email": "example.person@gmail.com"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-PPON-PMQJ-3429-NZWQ",
+  "name": "Rutland County Council"
+ },
+ "tender": {
+  "id": "DN829138",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "THE PROVISION OF REGULAR LANDSCAPING MAINTENANCE OF OAKHAM CASTLE GROUNDS, CATMOSE COTTAGE GARDEN & WING MAZE IN RUTLAND",
+  "description": "Regular Landscape Maintenance Contract covering three historically and culturally significant sites: Oakham Castle Grounds; Catmose Cottage Garden; and Wing Maze. All three locations play an important role in Rutland's heritage and community life, hosting a wide range of events and services throughout the year.",
+  "status": "complete",
+  "procurementMethod": "direct",
+  "procurementMethodDetails": "Below threshold - without competition",
+  "lots": [
+   {
+    "id": "1",
+    "status": "complete",
+    "description": null
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "status": "active",
+   "mainProcurementCategory": "services",
+   "suppliers": [
+    {
+     "id": "GB-COH-10058132",
+     "name": "ELMS LANDSCAPING DESIGN LIMITED"
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "additionalClassifications": [
+      {
+       "scheme": "CPV",
+       "id": "77314000",
+       "description": "Grounds maintenance services"
+      }
+     ],
+     "deliveryAddresses": [
+      {
+       "region": "UKF22",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      }
+     ],
+     "relatedLot": "1"
+    }
+   ],
+   "relatedLots": [
+    "1"
+   ]
+  }
+ ],
+ "contracts": [
+  {
+   "id": "1",
+   "awardID": "1",
+   "status": "active",
+   "period": {
+    "startDate": "2026-11-05T00:00:00Z",
+    "endDate": "2029-11-04T23:59:59Z",
+    "maxExtentDate": "2030-11-04T23:59:59Z"
+   },
+   "hasRenewal": true,
+   "renewal": {
+    "description": "One year extension allowed for."
+   },
+   "value": {
+    "amountGross": 49360.08,
+    "amount": 41133.4,
+    "currency": "GBP"
+   },
+   "aboveThreshold": false,
+   "dateSigned": "2026-08-25T00:00:00+01:00",
+   "statusDetails": null,
+   "documents": [
+    {
+     "id": "086075-2026",
+     "documentType": "contractNotice",
+     "noticeType": "UK7",
+     "description": "Contract details notice on Find a Tender",
+     "url": "https://www.find-tender.service.gov.uk/Notice/086075-2026",
+     "datePublished": "2026-09-10T16:14:12+01:00",
+     "format": "text/html"
+    }
+   ]
+  }
+ ],
+ "language": "en"
+}

@@ -1,0 +1,178 @@
+{
+ "buyerID": [],
+ "id": "086116-2026",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "date": "2026-09-10T16:45:06+01:00",
+ "initiationType": "tender",
+ "ocid": "ocds-h6vhtk-069a4e",
+ "parties": [
+  {
+   "name": "University Centre Somerset College Group",
+   "id": "GB-PPON-PHJQ-3398-CTLP",
+   "identifier": {
+    "scheme": "GB-PPON",
+    "id": "PHJQ-3398-CTLP"
+   },
+   "address": {
+    "streetAddress": "Bath Road",
+    "locality": "Somerset",
+    "postalCode": "TA6 4PZ",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKK23"
+   },
+   "contactPoint": {
+    "name": "Redacted Name",
+    "email": "firstname.lastname@btc.ac.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "url": "http://www.btc.ac.uk",
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicUndertaking",
+      "description": "Public undertaking"
+     }
+    ]
+   }
+  },
+  {
+   "name": "Biffa Waste Services Ltd",
+   "id": "GB-PPON-PRQC-5121-CMBL",
+   "identifier": {
+    "scheme": "GB-PPON",
+    "id": "PRQC-5121-CMBL"
+   },
+   "address": {
+    "streetAddress": "Coronation Road, Cressex",
+    "locality": "High Wycombe",
+    "postalCode": "HP12 3TZ",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKJ13"
+   },
+   "contactPoint": {
+    "name": "Redacted Name",
+    "email": "bid.management@biffa.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "http://www.biffa.co.uk",
+    "scale": "large",
+    "vcse": false,
+    "publicServiceMissionOrganization": false,
+    "shelteredWorkshop": false
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-PPON-PHJQ-3398-CTLP",
+  "name": "University Centre Somerset College Group"
+ },
+ "tender": {
+  "id": "CA17841",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Waste Management Services",
+  "description": "UCS College Group is seeking to appoint a contractor who can provide a reliable, efficient, auditable and cost-effective waste collection, disposal and recycling service across all of its sites which complies with all current legislation and all legislation currently published in statute but not yet in force. \nThe duration of the contract is for a 4-year period from 1st August 2026 to 31st July 2030 with no extensions. ",
+  "status": "complete",
+  "procurementMethod": "open",
+  "procurementMethodDetails": "Open procedure",
+  "lots": [
+   {
+    "id": "1",
+    "status": "complete",
+    "description": null
+   }
+  ],
+  "documents": [
+   {
+    "id": "conflictOfInterest",
+    "documentType": "conflictOfInterest",
+    "description": "Not published"
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "status": "active",
+   "mainProcurementCategory": "services",
+   "suppliers": [
+    {
+     "id": "GB-PPON-PRQC-5121-CMBL",
+     "name": "Biffa Waste Services Ltd"
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "additionalClassifications": [
+      {
+       "scheme": "CPV",
+       "id": "90500000",
+       "description": "Refuse and waste related services"
+      }
+     ],
+     "deliveryAddresses": [
+      {
+       "region": "UK",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      }
+     ],
+     "relatedLot": "1"
+    }
+   ],
+   "relatedLots": [
+    "1"
+   ]
+  }
+ ],
+ "contracts": [
+  {
+   "id": "1",
+   "awardID": "1",
+   "title": "Waste Management Services",
+   "status": "active",
+   "period": {
+    "startDate": "2026-09-03T00:00:00+01:00",
+    "endDate": "2030-07-31T23:59:59+01:00"
+   },
+   "value": {
+    "amountGross": 406212.0,
+    "amount": 338510.0,
+    "currency": "GBP"
+   },
+   "aboveThreshold": true,
+   "dateSigned": "2026-09-03T00:00:00+01:00",
+   "noAgreedMetricsRationale": "noAgreedMetricsRationale",
+   "statusDetails": null,
+   "documents": [
+    {
+     "id": "086116-2026",
+     "documentType": "contractNotice",
+     "noticeType": "UK7",
+     "description": "Contract details notice on Find a Tender",
+     "url": "https://www.find-tender.service.gov.uk/Notice/086116-2026",
+     "datePublished": "2026-09-10T16:45:06+01:00",
+     "format": "text/html"
+    }
+   ]
+  }
+ ],
+ "language": "en"
+}

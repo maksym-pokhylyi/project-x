@@ -1,0 +1,153 @@
+{
+ "ocid": "ocds-h6vhtk-06f77b",
+ "id": "086159-2026",
+ "tag": [
+  "planning"
+ ],
+ "date": "2026-09-10T19:32:16+01:00",
+ "initiationType": "tender",
+ "parties": [
+  {
+   "name": "UK Atomic Energy Authority",
+   "id": "GB-PPON-PLJV-1169-JTDD",
+   "identifier": {
+    "scheme": "GB-PPON",
+    "id": "PLJV-1169-JTDD"
+   },
+   "address": {
+    "streetAddress": "Culham Science Centre",
+    "locality": "Oxfordshire",
+    "postalCode": "OX14 3DB",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKJ14"
+   },
+   "contactPoint": {
+    "name": "Redacted Name",
+    "email": "firstname.lastname@ukaea.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "url": "https://www.gov.uk/government/organisations/uk-atomic-energy-authority",
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicAuthoritySubCentralGovernment",
+      "description": "Public authority - sub-central government"
+     }
+    ]
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-PPON-PLJV-1169-JTDD",
+  "name": "UK Atomic Energy Authority"
+ },
+ "planning": {
+  "milestones": [
+   {
+    "id": "engagement",
+    "type": "engagement",
+    "description": "https://uk.eu-supply.com/app/rfq/rwlentrance_s.asp?PID=109009&TID=100114064&B=",
+    "dueDate": "2026-09-15T23:59:59+01:00",
+    "status": "scheduled"
+   }
+  ],
+  "documents": [
+   {
+    "id": "086159-2026",
+    "documentType": "marketEngagementNotice",
+    "noticeType": "UK2",
+    "description": "Preliminary market engagement notice on Find a Tender",
+    "url": "https://www.find-tender.service.gov.uk/Notice/086159-2026",
+    "datePublished": "2026-09-10T19:32:16+01:00",
+    "format": "text/html"
+   }
+  ]
+ },
+ "tender": {
+  "id": "T-079BH-26",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Supply of 33Kv HV Cable",
+  "description": "UKAEA is undertaking refurbishment works to the J5 electrical infrastructure to support the ongoing operation and reliability of the Culham Campus power distribution network. As part of these works, new 33 kV high-voltage cables are required to replace existing assets and support the future electrical capacity requirements of the site.",
+  "items": [
+   {
+    "id": "LOT-0000",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "31321300",
+      "description": "High-voltage cable"
+     },
+     {
+      "scheme": "CPV",
+      "id": "31224400",
+      "description": "Connection cables"
+     },
+     {
+      "scheme": "CPV",
+      "id": "31300000",
+      "description": "Insulated wire and cable"
+     },
+     {
+      "scheme": "CPV",
+      "id": "31320000",
+      "description": "Power distribution cables"
+     },
+     {
+      "scheme": "CPV",
+      "id": "44320000",
+      "description": "Cable and related products"
+     },
+     {
+      "scheme": "CPV",
+      "id": "44321000",
+      "description": "Cable"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKJ14",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     }
+    ],
+    "relatedLot": "LOT-0000"
+   }
+  ],
+  "value": {
+   "amountGross": 250000,
+   "amount": 250000,
+   "currency": "GBP"
+  },
+  "mainProcurementCategory": "goods",
+  "aboveThreshold": true,
+  "lots": [
+   {
+    "id": "LOT-0000",
+    "suitability": {
+     "sme": true,
+     "vcse": true
+    },
+    "contractPeriod": {
+     "startDate": "2026-10-26T00:00:00Z",
+     "endDate": "2026-12-31T23:59:59Z"
+    },
+    "description": null,
+    "status": "planning"
+   }
+  ],
+  "communication": {
+   "futureNoticeDate": "2026-09-15T23:59:59+01:00"
+  },
+  "status": "planning"
+ },
+ "language": "en"
+}

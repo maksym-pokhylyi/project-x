@@ -1,0 +1,108 @@
+{
+ "id": "086155-2026",
+ "tag": [
+  "tenderCancellation"
+ ],
+ "date": "2026-09-10T18:57:29+01:00",
+ "initiationType": "tender",
+ "ocid": "ocds-h6vhtk-06e0a9",
+ "parties": [
+  {
+   "name": "NATIONAL GRID UK LIMITED",
+   "id": "GB-COH-04508773",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "04508773"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PGTR-4481-CJPQ"
+    }
+   ],
+   "address": {
+    "streetAddress": "1-3 Strand",
+    "locality": "London",
+    "postalCode": "WC2N 5EH",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI32"
+   },
+   "contactPoint": {
+    "name": "Redacted Name",
+    "email": "firstname.lastname@nationalgrid.co.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "privateUtility",
+      "description": "Private utility"
+     }
+    ]
+   }
+  }
+ ],
+ "tender": {
+  "id": "WS1245025457",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Framework for Traffic Management for NGED and NGET",
+  "status": "cancelled",
+  "lots": [
+   {
+    "id": "1",
+    "status": "cancelled"
+   },
+   {
+    "id": "2",
+    "status": "cancelled"
+   },
+   {
+    "id": "3",
+    "status": "cancelled"
+   },
+   {
+    "id": "4",
+    "status": "cancelled"
+   },
+   {
+    "id": "5",
+    "status": "cancelled"
+   }
+  ],
+  "documents": [
+   {
+    "id": "086155-2026",
+    "documentType": "tenderCancellationNotice",
+    "noticeType": "UK12",
+    "description": "Procurement termination notice on Find a Tender",
+    "url": "https://www.find-tender.service.gov.uk/Notice/086155-2026",
+    "datePublished": "2026-09-10T18:57:29+01:00",
+    "format": "text/html"
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "status": "cancelled",
+   "statusDetails": "National Grid have identified some errors in the UK 4 Tender Notice (dated 4 Sept 2026) relating to this Tender Event. To rectify this a new UK 4 shall be issued on 11 Sept 2026.",
+   "finalStatusDate": "2026-09-10T00:00:00+01:00",
+   "relatedLots": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ]
+  }
+ ],
+ "language": "en"
+}
