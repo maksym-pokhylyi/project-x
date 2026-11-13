@@ -220,7 +220,7 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
                   <tr key={doc.id} data-testid="library-doc" data-status={doc.status}>
                     <td className={cn(cell, "max-w-[420px] pr-3 pl-6")}>
                       <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <a href={`/api/library/${doc.id}/file`} target="_blank" rel="noopener noreferrer" className="font-mono link-quiet text-13 [overflow-wrap:anywhere]">
+                        <a href={`/api/library/${doc.id}/file`} target="_blank" rel="noopener noreferrer" className="font-mono link text-13 [overflow-wrap:anywhere]">
                           {doc.fileName}
                         </a>
                         {doc.expiresAt ? (
@@ -240,7 +240,7 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
                         </span>
                       ) : (
                         <details className="mt-1 text-13">
-                          <summary className="link-quiet inline-flex min-h-8 cursor-pointer items-center text-ink-2">What it says, and its dates</summary>
+                          <summary className="link inline-flex min-h-8 cursor-pointer items-center text-ink-2">What it says, and its dates</summary>
                           {doc.summary ? <p className="mt-1">{doc.summary}</p> : null}
                           {doc.error ? <p className="mt-1 text-accent-ink">{doc.error}</p> : null}
                           {doc.facts.length > 0 ? (

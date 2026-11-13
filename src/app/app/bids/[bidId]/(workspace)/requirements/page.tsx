@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { RequirementsView } from "@/features/bids/components/requirements-view";
-import { Callout, StandingNotice } from "@/features/bids/components/ui";
+import { Callout } from "@/features/bids/components/ui";
 import { factsConfirmed, loadBidPage } from "@/features/bids/server/page-data";
 import { toRequirementItem } from "@/features/bids/view";
 
@@ -16,7 +16,6 @@ export default async function RequirementsPage({ params }: { params: Promise<{ b
   const processing = bid.status === "processing";
   return (
     <div className="space-y-5">
-      <StandingNotice />
       {processing ? <Callout>The pack is still being read. Requirements appear here as they are found; you can edit them once the check is ready.</Callout> : null}
       {bid.status === "failed" ? <Callout tone="warning">The analysis stopped before it finished, so this list may be incomplete. Retry from the Brief tab.</Callout> : null}
       <RequirementsView

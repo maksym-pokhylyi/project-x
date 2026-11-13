@@ -93,7 +93,7 @@ function RefLinks({ items }: { items: RequirementItem[] }) {
       {shown.map((item, index) => (
         <span key={item.id}>
           {index > 0 ? ", " : ""}
-          <a href={`#req-${item.ref}`} className="font-mono link-quiet text-13">
+          <a href={`#req-${item.ref}`} className="font-mono link text-13">
             {displayRef(item.ref)}
           </a>
         </span>
@@ -381,7 +381,7 @@ export function BriefView(props: BriefViewProps) {
         {basePath ? (
           <>
             {" · "}
-            <Link href={`${basePath}/files`} className="link-quiet">
+            <Link href={`${basePath}/files`} className="link">
               what was read
             </Link>
           </>
@@ -564,7 +564,7 @@ export function BriefView(props: BriefViewProps) {
                 return (
                   <li key={file.id} className="flex min-h-10 items-center justify-between gap-3 border-t border-line">
                     {href ? (
-                      <a href={href} target="_blank" rel="noopener noreferrer" className="font-mono link-quiet min-w-0 truncate" title={file.name}>
+                      <a href={href} target="_blank" rel="noopener noreferrer" className="font-mono link min-w-0 truncate" title={file.name}>
                         {file.name}
                       </a>
                     ) : (

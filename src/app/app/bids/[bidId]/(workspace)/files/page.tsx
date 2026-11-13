@@ -54,7 +54,7 @@ export default async function FilesPage({ params }: { params: Promise<{ bidId: s
                   <tr key={file.id} data-testid="pack-file" data-read={file.read ? "true" : "false"}>
                     <td className={cn(cell, "pr-3 pl-6")}>
                       {file.read ? (
-                        <a href={`/api/bids/${bid.id}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="font-mono link-quiet text-13 break-all">
+                        <a href={`/api/bids/${bid.id}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="font-mono link text-13 break-all">
                           {file.name}
                         </a>
                       ) : (

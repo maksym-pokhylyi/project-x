@@ -158,7 +158,7 @@ export function PartialResults({
             {files.map((file) => (
               <li key={file.id} className="flex min-h-10 items-center justify-between gap-3 border-t border-line">
                 {file.read ? (
-                  <a href={`/api/bids/${bidId}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="font-mono link-quiet min-w-0 truncate" title={file.name}>
+                  <a href={`/api/bids/${bidId}/files/${file.id}`} target="_blank" rel="noopener noreferrer" className="font-mono link min-w-0 truncate" title={file.name}>
                     {file.name}
                   </a>
                 ) : (
