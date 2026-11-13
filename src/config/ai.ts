@@ -92,7 +92,7 @@ export const AI_BUDGET_POLICY = {
    * one UTC day. Stops one workspace from burning a month of allowance — or the shared
    * daily pool — in an afternoon.
    */
-  dailyShareOfMonthly: { free: 0.2, paid: 0.5 },
+  dailyShareOfMonthly: { free: 0.5, paid: 0.5 },
   /** No single workspace may take more than this share of AI_DAILY_BUDGET_USD in a day. */
   maxShareOfGlobalDaily: 0.5,
   /**

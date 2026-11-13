@@ -2,9 +2,10 @@ import { APICallError } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AI_MAX_INPUT_TOKENS, AI_RATE_LIMIT, estimateInputTokens, worstCaseCostUsd } from "@/config/ai";
+import { AI_BUDGET_POLICY, AI_MAX_INPUT_TOKENS, AI_RATE_LIMIT, estimateInputTokens, worstCaseCostUsd } from "@/config/ai";
 import { PLANS } from "@/config/plans";
 import { db } from "@/db";
+import { env } from "@/env";
 import { aiUsage, organizations, subscriptions } from "@/db/schema";
 import {
   AiBudgetExceededError,
@@ -24,7 +25,8 @@ import { resetDatabase } from "./helpers/db";
 /**
  * F-03 — AI budgets are hard limits: concurrency-safe (reserve before spending), failed
  * calls are not free, and free workspaces cannot drain the pool paying customers use.
- * Test environment: AI_DAILY_BUDGET_USD = 1.
+ * Every amount below is derived from the plan catalogue, AI_BUDGET_POLICY and the test
+ * environment (AI_DAILY_BUDGET_USD), so the numbers in those can change without this file.
  */
 const FREE = "org_budget_free";
 const PAID = "org_budget_paid";
@@ -60,6 +62,12 @@ const reserve = (organizationId: string, reserveUsd: number, now = NOW) =>
 
 const rowsOf = (organizationId: string) => db.select().from(aiUsage).where(eq(aiUsage.organizationId, organizationId));
 
+const usd = (value: number) => Math.round(value * 1_000_000) / 1_000_000;
+/** The global day in this environment. */
+const GLOBAL = env.AI_DAILY_BUDGET_USD;
+/** The four ceilings of a workspace, as the wrapper derives them. */
+const limitsOf = async (organizationId: string) => aiBudgetLimits(await getOrgEntitlements(organizationId));
+
 describe("AI budgets (F-03)", () => {
   beforeEach(async () => {
     await resetDatabase();
@@ -68,16 +76,19 @@ describe("AI budgets (F-03)", () => {
   });
 
   it("derives four ceilings from the plan and the environment", async () => {
+    const policy = AI_BUDGET_POLICY;
+    // A workspace's day: its share of the monthly allowance, never more than its share of the global day.
+    const daily = (monthly: number, share: number) => usd(Math.min(monthly * share, GLOBAL * policy.maxShareOfGlobalDaily));
     expect(aiBudgetLimits(await getOrgEntitlements(FREE))).toEqual({
-      organizationMonthlyUsd: PLANS.free.limits.aiMonthlyBudgetUsd, // 0.50
-      organizationDailyUsd: 0.1, // 20% of the monthly allowance
-      globalDailyUsd: 1,
-      freePoolDailyUsd: 0.25, // 25% of the global day
+      organizationMonthlyUsd: PLANS.free.limits.aiMonthlyBudgetUsd,
+      organizationDailyUsd: daily(PLANS.free.limits.aiMonthlyBudgetUsd, policy.dailyShareOfMonthly.free),
+      globalDailyUsd: GLOBAL,
+      freePoolDailyUsd: usd(Math.min(env.AI_FREE_DAILY_BUDGET_USD ?? GLOBAL * policy.freePoolShareOfGlobalDaily, GLOBAL)),
     });
     expect(aiBudgetLimits(await getOrgEntitlements(PAID))).toEqual({
-      organizationMonthlyUsd: 25,
-      organizationDailyUsd: 0.5, // 50% of monthly would be 12.50; capped at half the global day
-      globalDailyUsd: 1,
+      organizationMonthlyUsd: PLANS.pro.limits.aiMonthlyBudgetUsd,
+      organizationDailyUsd: daily(PLANS.pro.limits.aiMonthlyBudgetUsd, policy.dailyShareOfMonthly.paid),
+      globalDailyUsd: GLOBAL,
       freePoolDailyUsd: null,
     });
   });
@@ -86,7 +97,8 @@ describe("AI budgets (F-03)", () => {
     it("40 parallel calls cannot overspend: only what fits is admitted, the rest never reach the provider", async () => {
       const { instance, doGenerate } = model({ delayMs: 60 });
       const perCallWorstCase = worstCaseCostUsd("mock/test-model", estimateInputTokens(2), 1024);
-      const admitted = Math.floor(0.5 / perCallWorstCase); // PAID's daily ceiling
+      const ceiling = (await limitsOf(PAID)).organizationDailyUsd;
+      const admitted = Math.floor(ceiling / perCallWorstCase);
       expect(admitted).toBeGreaterThan(1);
       expect(admitted).toBeLessThan(40);
 
@@ -102,7 +114,7 @@ describe("AI budgets (F-03)", () => {
       // At least what fits at once; a few more may be admitted after early calls settle to their
       // (lower) real cost — but never all 40, and never beyond the ceiling.
       expect(succeeded).toBeGreaterThanOrEqual(admitted);
-      expect(succeeded).toBeLessThanOrEqual(Math.floor(0.5 / 0.035));
+      expect(succeeded).toBeLessThanOrEqual(Math.floor(ceiling / 0.035));
       expect(doGenerate).toHaveBeenCalledTimes(succeeded);
       expect(refused).toHaveLength(40 - succeeded);
       expect(refused.length).toBeGreaterThan(20);
@@ -110,7 +122,7 @@ describe("AI budgets (F-03)", () => {
 
       // Held (reserved + settled) spend never exceeded the ceiling, and what remains is the real cost.
       expect(peakHeld).toBeGreaterThan(0);
-      expect(peakHeld).toBeLessThanOrEqual(0.5 + 1e-9);
+      expect(peakHeld).toBeLessThanOrEqual(ceiling + 1e-9);
       expect(await getAiSpendUsd(startOfUtcDay(new Date()), PAID)).toBeCloseTo(succeeded * 0.035, 6);
       const rows = await rowsOf(PAID);
       expect(rows).toHaveLength(succeeded);
@@ -120,12 +132,12 @@ describe("AI budgets (F-03)", () => {
     it("parallel reservations across workspaces respect the global daily budget", async () => {
       for (let index = 0; index < 6; index += 1) await createOrg(`org_budget_many_${index}`, "business");
       const results = await Promise.allSettled(
-        Array.from({ length: 30 }, (_, index) => reserve(`org_budget_many_${index % 6}`, 0.1)),
+        Array.from({ length: 30 }, (_, index) => reserve(`org_budget_many_${index % 6}`, usd(GLOBAL / 10))),
       );
-      expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(10); // 10 × 0.10 = the 1 USD global day
+      expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(10); // ten tenths of the global day
       const refused = results.filter((result): result is PromiseRejectedResult => result.status === "rejected");
       expect(refused.every((result) => (result.reason as AiBudgetExceededError).code === "AI_GLOBAL_BUDGET_EXCEEDED")).toBe(true);
-      expect(await getAiSpendUsd(startOfUtcDay(NOW))).toBeCloseTo(1, 6);
+      expect(await getAiSpendUsd(startOfUtcDay(NOW))).toBeCloseTo(GLOBAL, 6);
     });
   });
 
@@ -138,8 +150,10 @@ describe("AI budgets (F-03)", () => {
       const rows = await rowsOf(PAID);
       const charged = rows.reduce((sum, row) => sum + row.costUsd, 0);
       expect(rows.every((row) => row.status === "error")).toBe(true);
-      expect(charged).toBeGreaterThan(0.4);
-      expect(charged).toBeLessThanOrEqual(0.5);
+      // The failures filled the workspace's day to within one call of its ceiling, and no further.
+      const ceiling = (await limitsOf(PAID)).organizationDailyUsd;
+      expect(charged).toBeGreaterThan(ceiling - worstCaseCostUsd("mock/test-model", estimateInputTokens(2), 1024));
+      expect(charged).toBeLessThanOrEqual(ceiling);
       // Aborting just before completion no longer buys unlimited attempts.
       expect(doGenerate.mock.calls.length).toBeLessThan(25);
       expect(doGenerate.mock.calls.length).toBe(rows.length);
@@ -181,43 +195,53 @@ describe("AI budgets (F-03)", () => {
 
   describe("ceilings", () => {
     it("workspace monthly budget: refuses a call that would cross it, even though today is quiet", async () => {
-      await spend(FREE, 0.46, new Date(Date.UTC(2026, 10, 3)));
+      const monthly = (await limitsOf(FREE)).organizationMonthlyUsd;
+      const spentEarlier = usd(monthly - 0.04);
+      await spend(FREE, spentEarlier, new Date(Date.UTC(2026, 10, 3)));
       const error = await reserve(FREE, 0.05).catch((caught: unknown) => caught);
-      expect(error).toMatchObject({ code: "AI_ORG_BUDGET_EXCEEDED", status: 402, details: { period: "month", limitUsd: 0.5, spentUsd: 0.46 } });
+      expect(error).toMatchObject({ code: "AI_ORG_BUDGET_EXCEEDED", status: 402, details: { period: "month", limitUsd: monthly, spentUsd: spentEarlier } });
       await expect(reserve(FREE, 0.04)).resolves.toMatchObject({ reservedUsd: 0.04, planKey: "free" });
     });
 
     it("workspace daily ceiling, derived from the plan", async () => {
-      await reserve(FREE, 0.06);
-      const error = await reserve(FREE, 0.05).catch((caught: unknown) => caught);
-      expect(error).toMatchObject({ code: "AI_ORG_BUDGET_EXCEEDED", details: { period: "day", limitUsd: 0.1 } });
+      const limits = await limitsOf(FREE);
+      // As much as fits today: the workspace's own day, or the shared free pool where that is smaller.
+      const first = Math.min(limits.organizationDailyUsd, limits.freePoolDailyUsd ?? Number.POSITIVE_INFINITY);
+      await reserve(FREE, first);
+      const error = await reserve(FREE, usd(limits.organizationDailyUsd - first + 0.01)).catch((caught: unknown) => caught);
+      expect(error).toMatchObject({ code: "AI_ORG_BUDGET_EXCEEDED", details: { period: "day", limitUsd: limits.organizationDailyUsd } });
       // The next UTC day starts fresh (still inside the monthly budget).
-      await expect(reserve(FREE, 0.05, new Date(NOW.getTime() + 24 * 60 * 60 * 1000))).resolves.toBeTruthy();
+      await expect(reserve(FREE, 0.01, new Date(NOW.getTime() + 24 * 60 * 60 * 1000))).resolves.toBeTruthy();
     });
 
     it("free workspaces share one pool and cannot exhaust the global budget for paying customers", async () => {
       // An abuser creates many free workspaces and maxes each one out.
+      const pool = (await limitsOf(FREE)).freePoolDailyUsd!;
+      const fifth = usd(pool / 5);
       let admitted = 0;
       for (let index = 0; index < 20; index += 1) {
         await createOrg(`org_budget_farm_${index}`);
-        for (const amount of [0.05, 0.05]) {
+        for (const amount of [fifth, fifth]) {
           if (await reserve(`org_budget_farm_${index}`, amount).then(() => true, () => false)) admitted += 1;
         }
       }
-      expect(admitted).toBe(5); // 5 × 0.05 = the 0.25 USD free pool, however many workspaces exist
+      expect(admitted).toBe(5); // five fifths of the free pool, however many workspaces exist
       const blocked = await reserve(FREE, 0.01).catch((caught: unknown) => caught);
       expect(blocked).toMatchObject({ code: "AI_GLOBAL_BUDGET_EXCEEDED", status: 503 });
       expect((blocked as AiBudgetExceededError).details).not.toHaveProperty("spentUsd");
 
       // Paying customers still have the rest of the day's budget.
-      await expect(reserve(PAID, 0.5)).resolves.toBeTruthy();
-      expect(await getAiSpendUsd(startOfUtcDay(NOW))).toBeCloseTo(0.75, 6);
+      const paidDay = Math.min((await limitsOf(PAID)).organizationDailyUsd, usd(GLOBAL - pool));
+      await expect(reserve(PAID, paidDay)).resolves.toBeTruthy();
+      expect(await getAiSpendUsd(startOfUtcDay(NOW))).toBeCloseTo(pool + paidDay, 6);
     });
 
     it("a workspace that upgrades stops drawing from the free pool", async () => {
-      await spend(PAID, 0.25, NOW, "free"); // earlier today, on the free plan: the free pool is now full
+      const pool = (await limitsOf(FREE)).freePoolDailyUsd!;
+      await spend(PAID, pool, NOW, "free"); // earlier today, on the free plan: the free pool is now full
       await expect(reserve(FREE, 0.01)).rejects.toMatchObject({ code: "AI_GLOBAL_BUDGET_EXCEEDED" });
-      await expect(reserve(PAID, 0.2)).resolves.toMatchObject({ planKey: "pro" });
+      const left = Math.min((await limitsOf(PAID)).organizationDailyUsd, GLOBAL) - pool;
+      await expect(reserve(PAID, usd(left * 0.8))).resolves.toMatchObject({ planKey: "pro" });
     });
   });
 
