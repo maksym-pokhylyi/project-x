@@ -49,6 +49,15 @@ export type EventMap = {
   radar_viewed: { tab: string; source: "supplier" | "manual" | "none" };
   tender_saved: { ocid: string };
   tender_dismissed: { ocid: string };
+
+  // Bid desk (names as in SPEC §7)
+  bid_created: { source: "upload" | "notice"; allowance: string };
+  pack_uploaded: { files: number; bytes: number };
+  brief_ready: { requirements: number; pass_fail: number; questions: number; citations_verified: number; citations_total: number; seconds: number };
+  brief_viewed: { status: string };
+  question_drafted: { mode: "draft" | "regenerate" | "apply_suggestions"; words: number; gaps: number };
+  answer_evaluated: { scale: "pack" | "default"; score: string; max: string };
+  export_done: { kind: "answers_docx" | "brief_docx" | "requirements_docx" | "requirements_csv" };
 };
 
 export type EventName = keyof EventMap;

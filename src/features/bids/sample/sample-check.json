@@ -1,0 +1,4610 @@
+{
+ "exportedAt": "2026-11-13T13:41:43.231Z",
+ "source": {
+  "buyer": "Blyth Town Council",
+  "title": "Bus Shelter Improvement Initiative",
+  "noticeUrl": "https://www.contractsfinder.service.gov.uk/Notice/292c22b9-54ba-43d4-8a60-356127861f20",
+  "documentsPage": "https://www.blythtowncouncil.gov.uk/procurement",
+  "retrieved": "2026-11-13",
+  "files": [
+   {
+    "name": "01_invitation-to-tender.docx",
+    "url": "https://www.blythtowncouncil.gov.uk/widescopecms/resources/invitation-to-tender.docx"
+   },
+   {
+    "name": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "url": "https://www.blythtowncouncil.gov.uk/widescopecms/resources/appendix-a-specification-and-scope-of-work-1.pdf"
+   },
+   {
+    "name": "03_appendix-b-site-and-location-information-1.pdf",
+    "url": "https://www.blythtowncouncil.gov.uk/widescopecms/resources/appendix-b-site-and-location-information-1.pdf"
+   },
+   {
+    "name": "04_appendix-c-quality-methodology-1.docx",
+    "url": "https://www.blythtowncouncil.gov.uk/widescopecms/resources/appendix-c-quality-methodology-1.docx"
+   },
+   {
+    "name": "05_appendix-d-health-and-safety.docx",
+    "url": "https://www.blythtowncouncil.gov.uk/widescopecms/resources/appendix-d-health-and-safety.docx"
+   },
+   {
+    "name": "06_appendix-e-pricing-schedule.docx",
+    "url": "https://www.blythtowncouncil.gov.uk/widescopecms/resources/appendix-e-pricing-schedule.docx"
+   },
+   {
+    "name": "07_appendix-f-evaluation-of-quotations.pdf",
+    "url": "https://www.blythtowncouncil.gov.uk/widescopecms/resources/appendix-f-evaluation-of-quotations.pdf"
+   }
+  ]
+ },
+ "bidder": {
+  "name": "Example Facilities Ltd",
+  "fictional": true,
+  "facts": {
+   "notes": null,
+   "regions": [
+    "North East England"
+   ],
+   "sectors": [
+    "Local government",
+    "Street furniture"
+   ],
+   "policies": [
+    "Health and Safety Policy",
+    "Environmental Policy",
+    "Equality and Diversity Policy"
+   ],
+   "employees": 18,
+   "insurance": {
+    "publicLiability": {
+     "amountGbp": 5000000,
+     "expiresAt": "2027-06-30"
+    },
+    "employersLiability": {
+     "amountGbp": 10000000,
+     "expiresAt": "2027-06-30"
+    },
+    "professionalIndemnity": {
+     "amountGbp": 1000000,
+     "expiresAt": "2027-06-30"
+    }
+   },
+   "legalName": "Example Facilities Ltd",
+   "turnoverBand": "1m_2m",
+   "yearsTrading": 12,
+   "companyNumber": "01234567",
+   "accreditations": [
+    {
+     "name": "ISO 9001:2015",
+     "expiresAt": "2027-09-30",
+     "reference": "FS 000000"
+    },
+    {
+     "name": "CHAS",
+     "expiresAt": "2027-03-31",
+     "reference": null
+    }
+   ]
+  },
+  "libraryDocuments": 0
+ },
+ "bid": {
+  "title": "Replacement and installation of ten bus shelters at locations across Blyth, Northumberland",
+  "buyerName": "Blyth Town Council",
+  "reference": null,
+  "submissionDeadline": "2026-10-18T22:59:00.000Z",
+  "keyDates": [
+   {
+    "time": null,
+    "event": "Issue of tender document and Schedule of Works",
+    "dateIso": "2026-09-28",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "Issue of tender document and Schedule of Works | 28 September 2026",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   },
+   {
+    "time": null,
+    "event": "Closing date for questions relating to Tender and requests for a site visit",
+    "dateIso": "2026-10-11",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "Closing date for questions relating to Tender and requests for a site visit | 11 October 2026",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   },
+   {
+    "time": null,
+    "event": "Responses to questions provided to Tenderers",
+    "dateIso": "2026-10-16",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "Responses to questions provided to Tenderers | 16 October 2026",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   },
+   {
+    "time": null,
+    "event": "Closing date for return of Tenders",
+    "dateIso": "2026-10-18",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "Closing date for return of Tenders | Midnight 18 October 2026",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   },
+   {
+    "time": "00:00",
+    "event": "Closing date for return of Tenders",
+    "dateIso": "2026-10-18",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "Closing date for return of Tenders | Midnight 18 October 2026",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   },
+   {
+    "time": null,
+    "event": "Assessment of Tenders",
+    "dateIso": "2026-10-19",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "Assessment of Tenders | Week commencing 19 October 2026",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   },
+   {
+    "time": null,
+    "event": "References / verification (if applicable)",
+    "dateIso": "2026-10-19",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "References / verification (if applicable) | Week commencing 19 October 2026",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   },
+   {
+    "time": null,
+    "event": "Decision / contract award",
+    "dateIso": "2026-10-26",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "Decision / contract award | 26 October2026",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   },
+   {
+    "time": null,
+    "event": "Contract commencement",
+    "dateIso": "2026-10-26",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "Contract commencement | 26 October 2026",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   },
+   {
+    "time": null,
+    "event": "Contract completion",
+    "dateIso": "2027-02-28",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "Contract completion | 28 February 2027",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   },
+   {
+    "time": null,
+    "event": "Invoices paid",
+    "dateIso": "2027-03-15",
+    "citation": {
+     "loc": "s3",
+     "page": null,
+     "match": "exact",
+     "quote": "Invoices paid | 15 March 2027",
+     "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+     "fileName": "01_invitation-to-tender.docx",
+     "verified": true
+    }
+   }
+  ],
+  "brief": {
+   "summary": {
+    "lots": {
+     "note": null,
+     "value": "The Council requires the tenderer to bid for all areas of work identified in the Schedule of Works unless the tender documents expressly identify separate lots.",
+     "status": "stated",
+     "citation": {
+      "loc": "s1",
+      "page": null,
+      "match": "exact",
+      "quote": "The Council requires the tenderer to bid for all areas of work identified in the Schedule of Works unless the tender documents expressly identify separate lots.",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "normalized": "Single lot, tenderers must bid for all areas of work."
+    },
+    "buyer": {
+     "note": null,
+     "value": "Blyth Town Council",
+     "status": "stated",
+     "citation": {
+      "loc": "s1",
+      "page": null,
+      "match": "exact",
+      "quote": "Blyth Town Council",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "normalized": "Blyth Town Council"
+    },
+    "title": {
+     "note": null,
+     "value": "replacement and installation of ten bus shelters at locations across Blyth, Northumberland.",
+     "status": "stated",
+     "citation": {
+      "loc": "s1",
+      "page": null,
+      "match": "exact",
+      "quote": "replacement and installation of ten bus shelters at locations across Blyth, Northumberland.",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "normalized": "Replacement and installation of ten bus shelters"
+    },
+    "reference": {
+     "note": null,
+     "value": null,
+     "status": "not_stated",
+     "citation": null,
+     "normalized": null
+    },
+    "extensions": {
+     "note": null,
+     "value": null,
+     "status": "not_stated",
+     "citation": null,
+     "normalized": null
+    },
+    "contract_start": {
+     "note": null,
+     "value": "26 October 2026",
+     "status": "stated",
+     "citation": {
+      "loc": "s3",
+      "page": null,
+      "match": "exact",
+      "quote": "Contract commencement | 26 October 2026",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "normalized": "2026-10-26"
+    },
+    "procedure_type": {
+     "note": null,
+     "value": "INVITATION TO TENDER",
+     "status": "stated",
+     "citation": {
+      "loc": "s1",
+      "page": null,
+      "match": "exact",
+      "quote": "INVITATION TO TENDER",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "normalized": "Invitation to Tender"
+    },
+    "estimated_value": {
+     "note": null,
+     "value": null,
+     "status": "not_stated",
+     "citation": null,
+     "normalized": null
+    },
+    "tender_validity": {
+     "note": null,
+     "value": null,
+     "status": "not_stated",
+     "citation": null,
+     "normalized": null
+    },
+    "contract_duration": {
+     "note": "Two readings of the pack disagree: “4 months and 3 days” and “Contract start: 26 October 2026; Contract completion: 28 February 2027”. Check the documents.",
+     "value": "4 months and 3 days",
+     "status": "conflicting",
+     "citation": {
+      "loc": "s3",
+      "page": null,
+      "match": "exact",
+      "quote": "Contract commencement | 26 October 2026\nContract completion | 28 February 2027",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "normalized": "P4M3D",
+     "alternatives": [
+      {
+       "value": "Contract start: 26 October 2026; Contract completion: 28 February 2027",
+       "citation": {
+        "loc": "s2",
+        "page": null,
+        "match": "exact",
+        "quote": "Contract commencement | 26 October 2026\nContract completion | 28 February 2027",
+        "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+        "fileName": "01_invitation-to-tender.docx",
+        "verified": true
+       },
+       "normalized": "start: 2026-10-26; end: 2027-02-28"
+      }
+     ]
+    },
+    "submission_method": {
+     "note": null,
+     "value": "by email to tenders@blythtowncouncil.gov.uk",
+     "status": "stated",
+     "citation": {
+      "loc": "s3",
+      "page": null,
+      "match": "exact",
+      "quote": "Tenders must be submitted by email to tenders@blythtowncouncil.gov.uk",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "normalized": "Email"
+    },
+    "submission_deadline": {
+     "note": "Midnight on 18 October 2026 implies the very end of that day. Time component not specified in 24h format, hence only date.",
+     "value": "Midnight 18 October 2026",
+     "status": "stated",
+     "citation": {
+      "loc": "s3",
+      "page": null,
+      "match": "exact",
+      "quote": "Closing date for return of Tenders | Midnight 18 October 2026",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "normalized": "2026-10-18"
+    },
+    "clarification_deadline": {
+     "note": null,
+     "value": "11 October 2026",
+     "status": "stated",
+     "citation": {
+      "loc": "s3",
+      "page": null,
+      "match": "exact",
+      "quote": "Closing date for questions relating to Tender and requests for a site visit | 11 October 2026",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "normalized": "2026-10-11"
+    }
+   },
+   "overview": "Blyth Town Council is seeking a contractor for the replacement and installation of ten bus shelters across Blyth, Northumberland. The project involves removal of existing shelters, site preparation, supply and installation of new shelters, and associated ancillary works. The works must be completed by 28 February 2027 and include one living roof shelter.",
+   "redFlags": [
+    {
+     "type": "contradiction_in_documents",
+     "citation": null,
+     "severity": "high",
+     "description": "Two readings of the pack disagree on: contract duration. Check these against the documents before relying on them."
+    },
+    {
+     "type": "insurance_level",
+     "citation": {
+      "loc": "s2",
+      "page": null,
+      "match": "exact",
+      "quote": "The minimum public liability requirement for this tender is £5 million unless the tender documents state otherwise.",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "severity": "medium",
+     "description": "Minimum public liability requirement is £5 million. This is a high level of cover that could be a barrier for some smaller suppliers."
+    },
+    {
+     "type": "timescale",
+     "citation": {
+      "loc": "s3",
+      "page": null,
+      "match": "exact",
+      "quote": "Decision / contract award | 26 October2026\nContract commencement | 26 October 2026",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "severity": "medium",
+     "description": "The contract commencement date and contract award date are the same (26 October 2026), allowing no time between award and start for mobilisation or contract finalisation."
+    },
+    {
+     "type": "pricing_risk",
+     "citation": {
+      "loc": "s1",
+      "page": null,
+      "match": "exact",
+      "quote": "Tenderers must satisfy themselves that the information provided is sufficient to prepare a complete and fixed-price tender.",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "severity": "medium",
+     "description": "Tender is required to be a 'fixed-price tender', but also to identify any proposed departures to Terms & Conditions, and any contract variation may affect the contract sum. This creates potential for conflict and price re-negotiation or risk."
+    },
+    {
+     "type": "pricing_risk",
+     "citation": {
+      "loc": "s2",
+      "page": null,
+      "match": "exact",
+      "quote": "The contractor shall tender a completion price in accordance with the pricing information and Schedule of Works.",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "severity": "medium",
+     "description": "Tender is required to be a 'fixed-price tender' and 'The contractor shall tender a completion price'. This puts all price variation risk on the contractor."
+    },
+    {
+     "type": "payment_terms",
+     "citation": {
+      "loc": "s3",
+      "page": null,
+      "match": "exact",
+      "quote": "Invoices paid | 15 March 2027",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "severity": "medium",
+     "description": "Although it mentions 'statutory payment requirements include payment of valid and undisputed invoices within 30 days' for Procurement Act 2023, the timetable states 'Invoices paid | 15 March 2027'. This implies a single payment after completion, rather than interim payments, but the Tender Form states 'I agree that the contract sum may be paid by interim payments where provided for in the contract'. This creates an ambiguity regarding payment frequency."
+    },
+    {
+     "type": "contradiction_in_documents",
+     "citation": {
+      "loc": "s5",
+      "page": null,
+      "match": "exact",
+      "quote": "I agree that the contract sum may be paid by interim payments where provided for in the contract and subject to the Council's payment procedures and applicable statutory requirements.",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "severity": "medium",
+     "description": "The Tender Form mentions interim payments, but the Key Dates schedule suggests a single payment date after contract completion. This needs clarification."
+    },
+    {
+     "type": "other",
+     "citation": {
+      "loc": "p1",
+      "page": 1,
+      "match": "exact",
+      "quote": "The contractor should advise on a suitable site from these four locations, with consideration to the effects of coastal winds, birds and other site-specific concerns, and considering the other potential sites.",
+      "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+      "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+      "verified": true
+     },
+     "severity": "medium",
+     "description": "Contractor must propose the suitable site for the living roof from 4 identified options, providing justification considering coastal winds, birds, and other site-specific concerns. This requires specific expertise and risk assessment in the bid."
+    },
+    {
+     "type": "other",
+     "citation": {
+      "loc": "p9",
+      "page": 9,
+      "match": "exact",
+      "quote": "As there is no shelter currently on the site, the utilities are not known and require investigation.",
+      "fileId": "45a59721-3a35-4d14-9c2a-2695f7141266",
+      "fileName": "03_appendix-b-site-and-location-information-1.pdf",
+      "verified": true
+     },
+     "severity": "medium",
+     "description": "For sites where no shelter currently exists (04 Tynedale Drive, 05 Regent Street), utilities are unknown and require investigation by the contractor. This adds an element of risk and potential for unforeseen costs/delays."
+    },
+    {
+     "type": "other",
+     "citation": {
+      "loc": "p2",
+      "page": 2,
+      "match": "exact",
+      "quote": "Directly in front of the shelter is a busy road between a roundabout and a railway level crossing.",
+      "fileId": "45a59721-3a35-4d14-9c2a-2695f7141266",
+      "fileName": "03_appendix-b-site-and-location-information-1.pdf",
+      "verified": true
+     },
+     "severity": "low",
+     "description": "Some sites involve working on a busy road or narrow footpaths, requiring careful traffic and pedestrian management plans."
+    },
+    {
+     "type": "other",
+     "citation": {
+      "loc": "p1",
+      "page": 1,
+      "match": "exact",
+      "quote": "Metal mesh and side panels to be returned to Town Council for re-use.",
+      "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+      "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+      "verified": true
+     },
+     "severity": "low",
+     "description": "Metal mesh and side panels from existing shelters to be returned to Town Council for re-use. This requires careful handling and transport logistics, which must be factored into the bid."
+    }
+   ],
+   "unknowns": [
+    {
+     "item": "Exact time for clarification deadline (11 October 2026)",
+     "whyItMatters": "Bidders need to know the precise cut-off time for submitting questions."
+    },
+    {
+     "item": "Whether a site visit is offered",
+     "whyItMatters": "The pack mentions 'Tenderers may request an accompanied site visit where offered by the Council' but doesn't explicitly state if it is offered or how to book."
+    },
+    {
+     "item": "Scoring scale for evaluation criteria",
+     "whyItMatters": "Bidders need to understand how their responses will be scored against each criterion to best tailor their submission."
+    },
+    {
+     "item": "Minimum thresholds for evaluation criteria",
+     "whyItMatters": "Bidders need to know if there are any pass/fail thresholds for specific criteria that could lead to disqualification."
+    },
+    {
+     "item": "Specific scoring methodology for price",
+     "whyItMatters": "Bidders need to understand how their tendered price will be compared and scored against other bids."
+    },
+    {
+     "item": "Tender validity period",
+     "whyItMatters": "The period for which the tendered price and conditions must remain binding."
+    }
+   ],
+   "generatedAt": "2026-11-13T13:34:40.269Z",
+   "documentsToReturn": [
+    {
+     "name": "Tender Form - Company Details",
+     "citation": {
+      "loc": "s4",
+      "page": null,
+      "match": "exact",
+      "quote": "Company Details\nName of Company in whose name business is to be transacted |\nRegistered Address |\nPrincipal Contact |\nTelephone – mobile number preferred |\nEmail address |\nPlease indicate membership of any professional or trade bodies |\nPlease indicate how many years this company has traded |\nCompany number (if relevant) |\nStaffing levels | Permanent | Casual",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "mandatory": true,
+     "formatNote": null
+    },
+    {
+     "name": "Tender Form - Legal Information and Professional Conduct",
+     "citation": {
+      "loc": "s4",
+      "page": null,
+      "match": "exact",
+      "quote": "Legal Information and Professional Conduct\nWhat is the legal status of your organisation (e.g. sole trader, private limited company, partnership etc) |\nVAT Registration Number |\nIf this is a partnership please supply the full names of all partners on a separate sheet if necessary |\nHas your organisation been convicted (or has any outstanding actions) of a criminal nature relating to the conduct of its business or profession? / If yes please provide details on a separate sheet | Yes/No\nHas your organisation failed to fulfil its obligations relating to the payment of contributions or taxes under the law of any part of the United Kingdom. / If yes please provide details on a separate sheet | Yes/No\nHas your organisation had a contract cancelled, or not renewed, for failure to perform to the terms of that contract? / If yes please provide details on a separate sheet | Yes/No\nBy Law (RIDDOR), you must report certain injuries, diseases and dangerous occurences to the Health and Safety Executive. Has your organisation had to make any such reports under RIDDOR in the past five years? / If yes please provide details on a separate sheet | Yes/No\nIn the past five years have you or your organisation, or any of your employees, been served with a prohibition or improvement notice, or been convicted of any offence in law, enforced by the Health and Safety Executive, Local Authority, Police or the Department of Transport? / If yes please provide details on a separate sheet | Yes/No",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "mandatory": true,
+     "formatNote": "Provide details on a separate sheet if questions answered 'Yes'."
+    },
+    {
+     "name": "Tender Form - Financial Details",
+     "citation": {
+      "loc": "s4",
+      "page": null,
+      "match": "fuzzy",
+      "quote": "Financial Details\nPlease indicate the annual turnover of your organisation over the last three years, where requested.\n£ | Year:\n£ | Year:\n£ | Year:\nPlease provide details of your bankers. They may be, should you be shortlisted, required to provide you with a reference |",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "mandatory": true,
+     "formatNote": null
+    },
+    {
+     "name": "Tender Form - Health and Safety",
+     "citation": {
+      "loc": "s4",
+      "page": null,
+      "match": "exact",
+      "quote": "Health and Safety\nAll applicants undertaking works under this tender must satisfy the Town Council of their competence regarding Health and Safety. Any requirements will be proportionate to the nature and value of the works.\nPlease provide details of your current Health and Safety arrangements and any relevant certificates pertinent to this tender, together with the name of the person responsible for health and safety in your organisation.",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "mandatory": true,
+     "formatNote": null
+    },
+    {
+     "name": "Tender Form - Insurances",
+     "citation": {
+      "loc": "s5",
+      "page": null,
+      "match": "exact",
+      "quote": "Insurances\nPlease provide details of your organisation's insurance protection in relation to employer's liability and public liability.\nPolicy | Insurer | Value £\nEmployer’s Liability |  |\nPublic Liability |  |",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "mandatory": true,
+     "formatNote": "Provide details of Employer's Liability and Public Liability."
+    },
+    {
+     "name": "Current insurance certificates",
+     "citation": {
+      "loc": "s5",
+      "page": null,
+      "match": "exact",
+      "quote": "Please enclose current insurance certificates where requested in the tender documents.",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "mandatory": false,
+     "formatNote": "Where requested in the tender documents."
+    },
+    {
+     "name": "References",
+     "citation": {
+      "loc": "s5",
+      "page": null,
+      "match": "exact",
+      "quote": "References\nPlease provide two relevant references for comparable work carried out in the past three years, unless the tender documents state otherwise.",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "mandatory": true,
+     "formatNote": "Two references for comparable work carried out in the past three years. Must include contact name, phone & email, full postal address, brief description of works, value, and date, plus confirmation that referee is aware."
+    },
+    {
+     "name": "Tender and Price Contract (Signed)",
+     "citation": {
+      "loc": "s5",
+      "page": null,
+      "match": "exact",
+      "quote": "I confirm that the organisation named in this Tender Form has considered the requirements of this Invitation to Tender and the Schedule of Works and that the information provided in this tender is complete and accurate to the best of my knowledge.\nI agree to comply with the tender documents and, if awarded the contract, to enter into the proposed contract on the terms stated in the tender documents, subject to any agreed amendments.\nTo carry out the works detailed in the Schedule of Works, the company named in the Tender Form will charge:\n£ ……………..\nI anticipate commencing the necessary works on ……………………. in order to achieve the completion date stated in the Tender Timetable / Contract Particulars. I anticipate being on site for …….. weeks.\nI agree that the contract sum may be paid by interim payments where provided for in the contract and subject to the Council's payment procedures and applicable statutory requirements.\nAny contract variation, whether affecting the contract sum or not, shall be agreed and authorised in accordance with the contract's change control provisions and the Council's current governance arrangements before the relevant addition, deletion or change is carried out.\nProcurement Act 2023 note: The Council will apply the procurement regime appropriate to the estimated whole-life contract value and the nature of the procurement. Where applicable, statutory notices, transparency requirements, standstill requirements and contract award processes will be followed.\nSignature ………………………………………………. Date\nName ………………………………………………..",
+      "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+      "fileName": "01_invitation-to-tender.docx",
+      "verified": true
+     },
+     "mandatory": true,
+     "formatNote": "Includes proposed start date, anticipated time on site, signature, name, and date."
+    },
+    {
+     "name": "Appendix C - Quality and Methodology",
+     "citation": {
+      "loc": "s1",
+      "page": null,
+      "match": "exact",
+      "quote": "Contract: Bus Shelter Replacement – 10 Sites\nContractor: __________________________________________\nContact: _____________________________________________Date: ________________________________________________\n1. METHODOLOGY\nBriefly describe how you propose to carry out the works, including:\n- Site surveys and pre-start checks\n- Removal of existing shelters\n- Site preparation and groundworks\n- Installation of new shelters\n- Resurfacing and making good\n- Cleaning and completion\nContractor Response:\n2. PROGRAMME\nProvide your proposed programme for completing the works.\nOverall contract duration: _________________________________\nProposed start date: ______________________________________\nProposed completion date: _________________________________\nNumber of sites worked on simultaneously: _________________\nBrief description of proposed sequence:\nProgramme attached: Yes / No\n3. SITE MANAGEMENT\nDescribe how you will manage the works on site, including:\n- Site supervision\n- Public safety\n- Site security\n- Deliveries and storage\n- Communication with the Council\n- Keeping sites clean and safe\nContractor Response:\n4. TRAFFIC & PEDESTRIAN MANAGEMENT\nExplain how you will safely manage pedestrians, traffic and access while the works are being carried out.\nContractor Response:\nTraffic Management Plan attached: Yes / No\n5. QUALITY CONTROL\nDescribe how you will ensure the works and materials meet the specification and are completed to the required standard.\nInclude how you will check:\n- Shelter installation\n- Foundations and fixings\n- Levels and accessibility\n- Roof/drainage\n- Surfacing\n- Seating\n- Vandal resistance\n- Finishes\n- Final installation\nContractor Response:\n6. ECOLOGICAL IMPACT\nDescribe your proposed approach to minimising the environmental impact of the bus shelter replacement works e.g. Recycled/recyclable materials, carbon/environmental considerations, waste disposal\n7. SUB-CONTRACTORS & SUPPLIERS\nList any subcontractors or key suppliers you propose to use.\n7. LIVING ROOF\nSites 04 Tynedale Drive, 07 Briardale Road Field and 08 Links Road, 09 Broadway are potential locations for the living-roof shelter.\nProposed Site\nSite: _________________________________________________\nReason for Selection\nBriefly explain why you consider this to be the most suitable location, including consideration of coastal winds, birds, exposure, maintenance and site conditions.\nProposed Living Roof\nManufacturer / system: ______________________________________\nMaintenance requirements: ___________________________________\nExpected lifespan: __________________________________________\n8. SITE-SPECIFIC ISSUES\nIdentify any particular risks, constraints or issues you have identified at the ten locations and explain how you propose to address them.\nSite | Issue / Risk | Proposed Solution\n01 |  |\n02 |  |\n03 |  |\n04 |  |\n05 |  |\n06 |  |\n07 |  |\n08 |  |\n09 |  |\n10 |  |\n9. DEFECTS & COMPLETION\nDescribe your procedure for:\n- Identifying defects\n- Rectifying defects\n- Final inspection\n- Cleaning the sites\n- Removing waste and temporary works\n- Handover to the Council\nContractor Response:\nWarranty and Maintenance\nWith your tender submission please submit details of Warranties, and maintenance information, including details of availability of parts and time frame for delivery.\nHandover Information\nConfirm what information will be provided on completion:\n☐ Product information\n☐ Warranties and Maintenance information\n☐ As-built information\n☐ Test/inspection records\n☐ Waste documentation\n☐ Completion photographs\n☐ Other: ______________________________________\n10. ASSUMPTIONS / EXCLUSIONS\nPlease identify any assumptions, exclusions or qualifications to your proposal.\n11. CONTRACTOR CONFIRMATION\nWe confirm that the above information represents our proposed approach to delivering the works in accordance with the contract specification.\nName: _________________________________________________\nPosition: ______________________________________________\nCompany: ______________________________________________\nSignature: _____________________________________________\nDate: _________________________________________________",
+      "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+      "fileName": "04_appendix-c-quality-methodology-1.docx",
+      "verified": true
+     },
+     "mandatory": true,
+     "formatNote": "Complete all sections including Methodology, Programme, Site Management, Traffic & Pedestrian Management, Quality Control, Ecological Impact, Sub-contractors & Suppliers, Living Roof, Site-Specific Issues, Defects & Completion, Warranty and Maintenance details, Handover Information, Assumptions/Exclusions."
+    },
+    {
+     "name": "Appendix D - Health and Safety",
+     "citation": {
+      "loc": "s1",
+      "page": null,
+      "match": "exact",
+      "quote": "Health & Safety Question / Requirement | Response\n1. Written Health & Safety Policy / Do you have a written Health and Safety Policy? How often is it reviewed and updated? |\n2. Name of the Person Responsible for Health and Safety |\n3. Monitoring and Improving Health & Safety Performance / How do you monitor and improve your Health and Safety performance? |\n4. Risk Assessments and Method Statements / Please confirm that appropriate risk assessments and, where applicable, method statements will be prepared for the works before they commence. / ☐ Yes ☐ No ☐ Not applicable to the works |\nExamples of Risk Assessments / It is acceptable to attach as sperate documents. |\nWorking on or Adjacent to the Highway / Please provide examples demonstrating due regard to managing risks to operatives, pedestrians, road users and other members of the public when working on or adjacent to the highway. |\nSafe Transportation, Unloading, Lifting and Installation / How will the shelter structure and other components be safely transported, unloaded, lifted and installed? |\nMaintaining a Safe and Secure Work Area / How will you keep the work area safe and secure while works are in progress and, where necessary, outside working hours? |\nManagement of Existing Bus Stops / How will you manage Health and Safety where works affect an existing bus stop, including arrangements for maintaining safe pedestrian access and managing passengers while the existing shelter is removed or the new shelter is installed? |\n5. Competence, Training and Qualifications / What training do your employees receive to ensure they are competent in Health and Safety practices associated with working adjacent to a highway? |\n6. Subcontractors / How do you ensure that subcontractors comply with your Health and Safety standards? |\n7. Legal and Professional Conduct / Please confirm how your organisation ensures that all works are carried out in accordance with applicable legislation, regulations, standards and professional requirements, and that employees and subcontractors conduct themselves professionally at all times. |\n8. Declaration / I confirm that the information provided in this form is accurate and complete to the best of my knowledge. I understand that the Council may request further information or clarification where necessary to assess the applicant's Health and Safety competence. |",
+      "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+      "fileName": "05_appendix-d-health-and-safety.docx",
+      "verified": true
+     },
+     "mandatory": true,
+     "formatNote": "Complete all sections regarding Health & Safety Policy, Responsible Person, Performance Monitoring, Risk Assessments & Method Statements (with examples), Competence & Training, Subcontractors, Legal & Professional Conduct, and sign the declaration."
+    },
+    {
+     "name": "Appendix E - Pricing Schedule",
+     "citation": {
+      "loc": "s1",
+      "page": null,
+      "match": "exact",
+      "quote": "Bus Shelter Replacement – 10 Sites\nContractor: __________________________________________\nCompany: _____________________________________________\nDate: ________________________________________________\n1. MAIN CONTRACT PRICE\nThe Contractor shall provide a fully inclusive price for each site.\nThe price shall include all labour, materials, plant, transport, removal and disposal, foundations, installation, traffic and pedestrian management, resurfacing/making good where specified, cleaning and completion in accordance with the tender specification.\nSite | Location | Description | Tender Price\n01 | Black Diamond | 4-bay shelter | £\n02 | Black Diamond South | 4-bay shelter | £\n03 | Plessey Road / 12th Avenue | 3-bay cantilever shelter | £\n04 | Tynedale Drive | 4-bay shelter | £\n05 | Regent Street | 3-bay cantilever shelter | £\n06 | Cowpen Road Crematorium | 3-bay shelter | £\n07 | Briardale Road Field | 3-bay shelter | £\n08 | Links Road | 3-bay shelter | £\n09 | Broadway | 3-bay shelter | £\n10 | Plessey Road / Blyth RCC | 3-bay cantilever shelter | £\n |  | TOTAL – MAIN CONTRACT EXCL. VAT | £\n2. LIVING ROOF – ALTERNATIVE PRICES\nOne of the ten shelters will incorporate a living roof.\nThe Contractor shall provide a separate price for the living roof at each potential location.\nSite | Location | Living Roof Price\n04 | Tynedale Drive | £\n07 | Briardale Road Field | £\n08 | Links Road | £\n09 | Broadway | £\nContractor's recommended location for the living roof:\nReason for recommendation:\nThe living roof price shall include all necessary materials, structural requirements, planting, drainage, installation and initial establishment.\n3. OPTIONAL ITEMS\nThe following items should be priced separately and will only be instructed if required.\nItem | Description | Price\n1 | Shelter lighting | £\n2 | Solar lighting | £\n3 | Additional seating | £\n4 | Other proposed additional feature | £\n4. COMPLETION & HANDOVER\nThe following shall be included within the main tender price:\n- Final cleaning\n- Removal of waste and temporary works\n- Making good\n- Final inspection\n- Defect rectification\n- Handover information\n- Product warranties\n- Maintenance information\n5. ASSUMPTIONS / EXCLUSIONS\nPlease identify any assumptions, exclusions or qualifications to your tender price.\nRef | Details\n1 |\n2 |\n3 |\n4 |\nIf no exclusions or qualifications apply, please state \"NONE\".\n6. TENDER SUMMARY\nTotal Tender Price – Excluding VAT: £____________________\nVAT: £____________________\nTotal Tender Price – Including VAT: £____________________\nLiving Roof – Additional Price: £____________________\nContractor: ___________________________________________\nName: ________________________________________________\nPosition: _____________________________________________\nSignature: ____________________________________________\nDate: ________________________________________________",
+      "fileId": "7d7e2a05-aad1-4e28-b184-f0a74ff92c60",
+      "fileName": "06_appendix-e-pricing-schedule.docx",
+      "verified": true
+     },
+     "mandatory": true,
+     "formatNote": "Complete Main Contract Price for each site, Living Roof Alternative Prices for potential locations (including recommendation and reason), Optional Items, Assumptions/Exclusions, and Tender Summary. Must be signed."
+    }
+   ]
+  },
+  "verdict": {
+   "counts": {
+    "gap": 0,
+    "met": 4,
+    "gating": 18,
+    "verify": 1,
+    "unknown": 52,
+    "passFail": 12,
+    "requirements": 57
+   },
+   "reasons": [
+    "To check: Any actual or potential conflict of interest must be declared to the Council immediately.",
+    "To check: Tenders must be submitted in full by the required closing date and time using the stated submission method.",
+    "To check: Provide the information requested in the Tender Form and, where applicable, copies of appropriate insurance,…",
+    "To check: Any material false or misleading information knowingly provided may result in the tender being rejected.",
+    "3 of 18 pass/fail or mandatory eligibility requirements look met."
+   ],
+   "verdict": "biddable_with_gaps",
+   "generatedAt": "2026-11-13T13:41:14.006Z",
+   "notAssessed": [
+    "Conflicts of interest and connected persons",
+    "Whether you have the capacity to deliver alongside your current work",
+    "Price competitiveness and whether the budget is workable for you",
+    "What your referees will say",
+    "Declarations that need legal judgement (exclusion grounds, convictions, tax)",
+    "Anything in documents that were not uploaded (portal messages, later clarifications)"
+   ],
+   "factsConfirmed": true
+  },
+  "evaluationModel": {
+   "criteria": [
+    {
+     "name": "Ecological impact",
+     "parent": null,
+     "weight": 5,
+     "citation": {
+      "loc": "p1",
+      "page": 1,
+      "match": "exact",
+      "quote": "Ecological impact 5% Recycled/recyclable materials,\ncarbon/environmental considerations,\nwaste disposal.",
+      "fileId": "7fd7dd1a-12e7-4315-b29e-a777c4decaed",
+      "fileName": "07_appendix-f-evaluation-of-quotations.pdf",
+      "verified": true
+     },
+     "whatIsAssessed": "Recycled/recyclable materials, carbon/environmental considerations, waste disposal."
+    },
+    {
+     "name": "Warranty, maintenance and aftercare",
+     "parent": null,
+     "weight": 10,
+     "citation": {
+      "loc": "p1",
+      "page": 1,
+      "match": "exact",
+      "quote": "Warranty, maintenance\nand aftercare\n10% Length and scope of warranty, response\ntimes, availability of parts, timeframe for\ndelivery, cost of parts and delivery, ongoing advice and support, spares\nprocess (parts numbers, process, photos\nrequired), ease of repair.",
+      "fileId": "7fd7dd1a-12e7-4315-b29e-a777c4decaed",
+      "fileName": "07_appendix-f-evaluation-of-quotations.pdf",
+      "verified": true
+     },
+     "whatIsAssessed": "Length and scope of warranty, response times, availability of parts, timeframe for delivery, cost of parts and delivery, ongoing advice and support, spares process (parts numbers, process, photos required), ease of repair."
+    },
+    {
+     "name": "Installation and delivery",
+     "parent": null,
+     "weight": 10,
+     "citation": {
+      "loc": "p1",
+      "page": 1,
+      "match": "exact",
+      "quote": "Installation and delivery 10% Lead time, ability to meet council’s\nrequired dates, installation method, traffic\nmanagement included within project\ncosts, traffic management appropriate for\neach site, management of disruption, site\nreinstatement.",
+      "fileId": "7fd7dd1a-12e7-4315-b29e-a777c4decaed",
+      "fileName": "07_appendix-f-evaluation-of-quotations.pdf",
+      "verified": true
+     },
+     "whatIsAssessed": "Lead time, ability to meet council’s required dates, installation method, traffic management included within project costs, traffic management appropriate for each site, management of disruption, site reinstatement."
+    },
+    {
+     "name": "Health & Safety",
+     "parent": null,
+     "weight": 5,
+     "citation": {
+      "loc": "p1",
+      "page": 1,
+      "match": "exact",
+      "quote": "Health & Safety 5% Reference to appropriate accreditations\nand certifications for the company and\nindividuals associated with the project,\nmembership of professional bodies, RAMS, insurances, competence and\ntraining of installers, traffic/pedestrian\nmanagement, working adjacent to\nhighways, excavation/foundation works,\nplant and lifting operations, site security,\nprotection of the public, and how risks will\nbe managed and monitored during\ninstallation. Legal and professional\nconduct.",
+      "fileId": "7fd7dd1a-12e7-4315-b29e-a777c4decaed",
+      "fileName": "07_appendix-f-evaluation-of-quotations.pdf",
+      "verified": true
+     },
+     "whatIsAssessed": "Reference to appropriate accreditations and certifications for the company and individuals associated with the project, membership of professional bodies, RAMS, insurances, competence and training of installers, traffic/pedestrian management, working adjacent to highways, excavation/foundation works, plant and lifting operations, site security, protection of the public, and how risks will be managed and monitored during installation. Legal and professional conduct."
+    },
+    {
+     "name": "References",
+     "parent": null,
+     "weight": 20,
+     "citation": {
+      "loc": "p1",
+      "page": 1,
+      "match": "exact",
+      "quote": "References 20% For comparable work carried out in the\npast 3 years.",
+      "fileId": "7fd7dd1a-12e7-4315-b29e-a777c4decaed",
+      "fileName": "07_appendix-f-evaluation-of-quotations.pdf",
+      "verified": true
+     },
+     "whatIsAssessed": "For comparable work carried out in the past 3 years."
+    },
+    {
+     "name": "Price and value",
+     "parent": null,
+     "weight": 20,
+     "citation": {
+      "loc": "p1",
+      "page": 1,
+      "match": "exact",
+      "quote": "Price and value 20% Total purchase price (including delivery,\ninstallation, fixings, traffic management),\nany additional charges, financial checks\n(where permitted and proportionate).",
+      "fileId": "7fd7dd1a-12e7-4315-b29e-a777c4decaed",
+      "fileName": "07_appendix-f-evaluation-of-quotations.pdf",
+      "verified": true
+     },
+     "whatIsAssessed": "Total purchase price (including delivery, installation, fixings, traffic management), any additional charges, financial checks (where permitted and proportionate)."
+    },
+    {
+     "name": "Social value",
+     "parent": null,
+     "weight": 10,
+     "citation": {
+      "loc": "p1",
+      "page": 1,
+      "match": "exact",
+      "quote": "Social value 10% Local supply chain, local employment, UK-\nbased, project-specific additions around\nthemes of greener transport and\npollinator-friendly planting focusing on\ncommunity engagement.",
+      "fileId": "7fd7dd1a-12e7-4315-b29e-a777c4decaed",
+      "fileName": "07_appendix-f-evaluation-of-quotations.pdf",
+      "verified": true
+     },
+     "whatIsAssessed": "Local supply chain, local employment, UK-based, project-specific additions around themes of greener transport and pollinator-friendly planting focusing on community engagement."
+    },
+    {
+     "name": "Quality and materials",
+     "parent": null,
+     "weight": 20,
+     "citation": {
+      "loc": "p1",
+      "page": 1,
+      "match": "exact",
+      "quote": "Quality and materials 20% Construction quality, materials, durability,\ncorrosion resistance, glazing/panels,\nroof/drainage, seating, finish, vandal\nresistance, expected lifespan and\ncompliance with council’s specification",
+      "fileId": "7fd7dd1a-12e7-4315-b29e-a777c4decaed",
+      "fileName": "07_appendix-f-evaluation-of-quotations.pdf",
+      "verified": true
+     },
+     "whatIsAssessed": "Construction quality, materials, durability, corrosion resistance, glazing/panels, roof/drainage, seating, finish, vandal resistance, expected lifespan and compliance with council’s specification"
+    }
+   ],
+   "priceWeight": 20,
+   "weightsNote": "Quality is assessed across multiple criteria, but does not have a single combined weight. The individual criteria sum up to 100% (5% Ecological impact + 10% Warranty + 10% Installation and delivery + 5% Health & Safety + 20% References + 20% Price and value + 10% Social value + 20% Quality and materials = 100%).",
+   "scoringScale": [],
+   "qualityWeight": null,
+   "minimumThresholds": [],
+   "socialValueWeight": 10,
+   "priceScoringMethod": {
+    "note": null,
+    "value": null,
+    "status": "not_stated",
+    "citation": null,
+    "normalized": null
+   }
+  },
+  "packStats": {
+   "chars": 51125,
+   "files": 7,
+   "pages": 41,
+   "usage": {
+    "calls": 11,
+    "costUsd": 0.160981,
+    "inputTokens": 108766,
+    "outputTokens": 56877
+   },
+   "models": {
+    "company": "google/gemini-2.5-flash",
+    "recheck": "openai/gpt-5-mini",
+    "overview": "google/gemini-2.5-flash + openai/gpt-5-mini",
+    "documents": "openai/gpt-5-mini",
+    "questions": "google/gemini-2.5-flash + openai/gpt-5-mini",
+    "requirements": "google/gemini-2.5-flash + openai/gpt-5-mini"
+   },
+   "tokens": 14999,
+   "coverage": {
+    "files": [
+     {
+      "name": "01_invitation-to-tender.docx",
+      "note": null,
+      "items": 79,
+      "pages": 5,
+      "status": "read",
+      "tokens": 4677
+     },
+     {
+      "name": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+      "note": null,
+      "items": 16,
+      "pages": 7,
+      "status": "read",
+      "tokens": 2884
+     },
+     {
+      "name": "03_appendix-b-site-and-location-information-1.pdf",
+      "note": null,
+      "items": 2,
+      "pages": 24,
+      "status": "read",
+      "tokens": 3440
+     },
+     {
+      "name": "04_appendix-c-quality-methodology-1.docx",
+      "note": null,
+      "items": 18,
+      "pages": 2,
+      "status": "read",
+      "tokens": 1168
+     },
+     {
+      "name": "05_appendix-d-health-and-safety.docx",
+      "note": null,
+      "items": 23,
+      "pages": 1,
+      "status": "read",
+      "tokens": 719
+     },
+     {
+      "name": "06_appendix-e-pricing-schedule.docx",
+      "note": null,
+      "items": 8,
+      "pages": 1,
+      "status": "read",
+      "tokens": 804
+     },
+     {
+      "name": "07_appendix-f-evaluation-of-quotations.pdf",
+      "note": null,
+      "items": 9,
+      "pages": 1,
+      "status": "read",
+      "tokens": 513
+     }
+    ],
+    "passes": [
+     "primary brief",
+     "second reading of key facts",
+     "requirements (first model)",
+     "requirements (second model)",
+     "questions (first model)",
+     "questions (second model)",
+     "questionnaire: 05_appendix-d-health-and-safety.docx",
+     "response template: 04_appendix-c-quality-methodology-1.docx",
+     "what did we miss"
+    ],
+    "silentFiles": [],
+    "failedPasses": []
+   },
+   "warnings": [],
+   "citations": {
+    "total": 155,
+    "verified": 154
+   },
+   "failedFiles": [],
+   "lowTextFiles": [],
+   "excludedFiles": [],
+   "durationSeconds": 109,
+   "transcribedPages": 0
+  },
+  "readyAt": "2026-11-13T13:35:47.809Z"
+ },
+ "files": [
+  {
+   "id": "00faf497-459c-4692-b207-542144ba5b58",
+   "parentFileId": null,
+   "name": "01_invitation-to-tender.docx",
+   "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+   "kind": "docx",
+   "size": 100456,
+   "pages": 5,
+   "extractionStatus": "done",
+   "lowText": false,
+   "transcribedPages": 0,
+   "charCount": 16837,
+   "tokenCount": 4677,
+   "includedInAnalysis": true,
+   "error": null,
+   "sortOrder": 10
+  },
+  {
+   "id": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+   "parentFileId": null,
+   "name": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+   "mime": "application/pdf",
+   "kind": "pdf",
+   "size": 125344,
+   "pages": 7,
+   "extractionStatus": "done",
+   "lowText": false,
+   "transcribedPages": 0,
+   "charCount": 10379,
+   "tokenCount": 2884,
+   "includedInAnalysis": true,
+   "error": null,
+   "sortOrder": 20
+  },
+  {
+   "id": "45a59721-3a35-4d14-9c2a-2695f7141266",
+   "parentFileId": null,
+   "name": "03_appendix-b-site-and-location-information-1.pdf",
+   "mime": "application/pdf",
+   "kind": "pdf",
+   "size": 1840378,
+   "pages": 24,
+   "extractionStatus": "done",
+   "lowText": false,
+   "transcribedPages": 0,
+   "charCount": 12382,
+   "tokenCount": 3440,
+   "includedInAnalysis": true,
+   "error": null,
+   "sortOrder": 30
+  },
+  {
+   "id": "e24cb390-af34-470a-86f9-b333678d64f2",
+   "parentFileId": null,
+   "name": "04_appendix-c-quality-methodology-1.docx",
+   "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+   "kind": "docx",
+   "size": 28789,
+   "pages": 2,
+   "extractionStatus": "done",
+   "lowText": false,
+   "transcribedPages": 0,
+   "charCount": 4202,
+   "tokenCount": 1168,
+   "includedInAnalysis": true,
+   "error": null,
+   "sortOrder": 40
+  },
+  {
+   "id": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+   "parentFileId": null,
+   "name": "05_appendix-d-health-and-safety.docx",
+   "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+   "kind": "docx",
+   "size": 21256,
+   "pages": 1,
+   "extractionStatus": "done",
+   "lowText": false,
+   "transcribedPages": 0,
+   "charCount": 2586,
+   "tokenCount": 719,
+   "includedInAnalysis": true,
+   "error": null,
+   "sortOrder": 50
+  },
+  {
+   "id": "7d7e2a05-aad1-4e28-b184-f0a74ff92c60",
+   "parentFileId": null,
+   "name": "06_appendix-e-pricing-schedule.docx",
+   "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+   "kind": "docx",
+   "size": 28658,
+   "pages": 1,
+   "extractionStatus": "done",
+   "lowText": false,
+   "transcribedPages": 0,
+   "charCount": 2893,
+   "tokenCount": 804,
+   "includedInAnalysis": true,
+   "error": null,
+   "sortOrder": 60
+  },
+  {
+   "id": "7fd7dd1a-12e7-4315-b29e-a777c4decaed",
+   "parentFileId": null,
+   "name": "07_appendix-f-evaluation-of-quotations.pdf",
+   "mime": "application/pdf",
+   "kind": "pdf",
+   "size": 45729,
+   "pages": 1,
+   "extractionStatus": "done",
+   "lowText": false,
+   "transcribedPages": 0,
+   "charCount": 1846,
+   "tokenCount": 513,
+   "includedInAnalysis": true,
+   "error": null,
+   "sortOrder": 70
+  }
+ ],
+ "requirements": [
+  {
+   "ref": "R1",
+   "category": "submission",
+   "text": "The tenderer must bid for all areas of work identified in the Schedule of Works, unless separate lots are expressly identified.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Submission of a complete tender covering all works.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "The Council requires the tenderer to bid for all areas of work identified in the Schedule of Works unless the tender documents expressly identify separate lots.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover the company's bidding strategy.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 10
+  },
+  {
+   "ref": "R2",
+   "category": "legal",
+   "text": "Tenderers must not seek to influence any Councillor, officer or other person involved in the procurement outside the stated tender process.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Tenderers must not seek to influence any Councillor, officer or other person involved in the procurement outside the stated tender process.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover the company's conduct during the tender process.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 20
+  },
+  {
+   "ref": "R3",
+   "category": "legal",
+   "text": "Any actual or potential conflict of interest must be declared to the Council immediately.",
+   "threshold": null,
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": "Declaration of any conflict of interest.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Any actual or potential conflict of interest must be declared to the Council immediately.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover declarations of conflict of interest.",
+   "provenance": {
+    "notes": [
+     "One reading marks this pass/fail, another only mandatory — check the wording."
+    ],
+    "passes": [
+     "primary",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 30
+  },
+  {
+   "ref": "R4",
+   "category": "insurance",
+   "text": "The contractor must hold public liability cover.",
+   "threshold": "£5 million",
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": "Copies of required insurance and public liability cover, specifically current insurance certificates where requested.",
+   "citation": {
+    "loc": "s2",
+    "page": null,
+    "match": "exact",
+    "quote": "The minimum public liability requirement for this tender is £5 million unless the tender documents state otherwise.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "met",
+   "companyNote": "You hold £5m public liability cover; the tender asks for £5m.",
+   "provenance": {
+    "notes": [
+     "One reading marks this pass/fail, another only mandatory — check the wording."
+    ],
+    "passes": [
+     "primary",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 40
+  },
+  {
+   "ref": "R5",
+   "category": "policy",
+   "text": "The contractor must comply with all applicable Health and Safety legislation and requirements relevant to the works.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Evidence of competence, policies, risk assessments and method statements where required.",
+   "citation": {
+    "loc": "s2",
+    "page": null,
+    "match": "exact",
+    "quote": "The contractor will comply with all applicable Health and Safety legislation and requirements relevant to the works and shall provide evidence of competence, policies, risk assessments and method statements where required.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts indicate a Health and Safety Policy but do not explicitly state compliance with all applicable legislation and requirements.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 50
+  },
+  {
+   "ref": "R6",
+   "category": "policy",
+   "text": "The contractor must hold a relevant written Health and Safety Policy where legally required.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Details of current Health and Safety arrangements and any relevant certificates.",
+   "citation": {
+    "loc": "s2",
+    "page": null,
+    "match": "exact",
+    "quote": "The contractor will hold in place a relevant written Health and Safety Policy where legally required and shall complete suitable risk assessments and method statements for the tasks to be undertaken.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "met",
+   "companyNote": "The company has a Health and Safety Policy.",
+   "provenance": {
+    "passes": [
+     "primary",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 60
+  },
+  {
+   "ref": "R7",
+   "category": "policy",
+   "text": "The contractor must complete suitable risk assessments and method statements for the tasks to be undertaken.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Copies of risk assessments and method statements where required.",
+   "citation": {
+    "loc": "s2",
+    "page": null,
+    "match": "exact",
+    "quote": "The contractor will hold in place a relevant written Health and Safety Policy where legally required and shall complete suitable risk assessments and method statements for the tasks to be undertaken.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover the completion of risk assessments and method statements.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 70
+  },
+  {
+   "ref": "R8",
+   "category": "policy",
+   "text": "The contractor must comply with all applicable waste, environmental and transport requirements.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": null,
+   "citation": {
+    "loc": "s2",
+    "page": null,
+    "match": "exact",
+    "quote": "The contractor shall comply with all applicable waste, environmental and transport requirements and shall ensure that waste is stored, transported and disposed of lawfully.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts indicate an Environmental Policy but do not explicitly state compliance with all applicable waste, environmental, and transport requirements.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 80
+  },
+  {
+   "ref": "R9",
+   "category": "other",
+   "text": "The contractor must be legally authorised and competent to perform all aspects of the work tendered for.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": null,
+   "citation": {
+    "loc": "s3",
+    "page": null,
+    "match": "exact",
+    "quote": "The contractor shall be legally authorised and competent to perform all aspects of the work tendered for.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not confirm the legal authorization and competence for all aspects of the tendered work.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 90
+  },
+  {
+   "ref": "R10",
+   "category": "other",
+   "text": "The contractor must own or have legal access to the appropriate equipment, resources and competent personnel required to undertake the work tendered for.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": null,
+   "citation": {
+    "loc": "s3",
+    "page": null,
+    "match": "exact",
+    "quote": "The contractor shall own or have legal access to the appropriate equipment, resources and competent personnel required to undertake the work tendered for.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover the ownership or access to appropriate equipment, resources, and competent personnel.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 100
+  },
+  {
+   "ref": "R11",
+   "category": "policy",
+   "text": "The contractor must ensure that all waste is managed and disposed of in accordance with legal requirements.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": null,
+   "citation": {
+    "loc": "s3",
+    "page": null,
+    "match": "exact",
+    "quote": "The contractor must ensure that all waste is managed and disposed of in accordance with legal requirements.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts indicate an Environmental Policy but do not explicitly state that all waste is managed and disposed of in accordance with legal requirements.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 110
+  },
+  {
+   "ref": "R12",
+   "category": "submission",
+   "text": "Tenders must be submitted in full by the required closing date and time using the stated submission method.",
+   "threshold": null,
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": "Full tender submission via email to tenders@blythtowncouncil.gov.uk.",
+   "citation": {
+    "loc": "s3",
+    "page": null,
+    "match": "exact",
+    "quote": "Tenders must be submitted in full by the required closing date and time using the submission method stated in the Tender Timetable. Late tenders will only be accepted where permitted by the tender documents and applicable procurement rules.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover the submission of tenders.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 120
+  },
+  {
+   "ref": "R13",
+   "category": "submission",
+   "text": "Submit the tender by email to tenders@blythtowncouncil.gov.uk.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Tender submission sent to tenders@blythtowncouncil.gov.uk as stated; any submission receipts if applicable.",
+   "citation": {
+    "loc": "s3",
+    "page": null,
+    "match": "exact",
+    "quote": "Tenders must be submitted by email to tenders@blythtowncouncil.gov.uk and must remain confidential until the stated opening/evaluation process.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover the method of tender submission.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 130
+  },
+  {
+   "ref": "R14",
+   "category": "submission",
+   "text": "Late tenders will only be accepted where permitted by the tender documents and applicable procurement rules.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "No late submission unless express permission documented; if late, provide documentary evidence of permission or applicable rule.",
+   "citation": {
+    "loc": "s3",
+    "page": null,
+    "match": "exact",
+    "quote": "Late tenders will only be accepted where permitted by the tender documents and applicable procurement rules.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover the policy on late tenders.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 140
+  },
+  {
+   "ref": "R15",
+   "category": "submission",
+   "text": "State proposed start date and programme in the tender in accordance with the Schedule of Works and Tender Timetable.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Completed Tender Form fields for proposed start date and programme and submitted programme document (Appendix C as applicable).",
+   "citation": {
+    "loc": "s3",
+    "page": null,
+    "match": "exact",
+    "quote": "The tenderer shall state its proposed start date and programme in accordance with the requirements set out in the Schedule of Works and Tender Timetable.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover proposed start dates or programmes.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 150
+  },
+  {
+   "ref": "R16",
+   "category": "submission",
+   "text": "Provide the information requested in the Tender Form and, where applicable, copies of appropriate insurance, licences, risk assessments and method statements.",
+   "threshold": null,
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": "Completed Tender Form and attached supporting documents (insurance, licences, RAMS) as applicable.",
+   "citation": {
+    "loc": "s3",
+    "page": null,
+    "match": "exact",
+    "quote": "The contractor must provide the information requested in the Tender Form and, where applicable, copies of appropriate insurance, licences, risk assessments, method statements and other evidence required by the tender documents.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover the provision of specific information requested in a Tender Form or copies of insurance, licenses, risk assessments, and method statements.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 160
+  },
+  {
+   "ref": "R17",
+   "category": "legal",
+   "text": "Any material false or misleading information knowingly provided may result in the tender being rejected.",
+   "threshold": null,
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Any material false or misleading information knowingly provided may result in the tender being rejected or, where discovered after award, may constitute a breach of contract or other applicable requirement.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover the provision of information during the tender process.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 170
+  },
+  {
+   "ref": "R18",
+   "category": "legal",
+   "text": "Tenderers must declare if their organisation has been convicted (or has any outstanding actions) of a criminal nature relating to the conduct of its business or profession.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Yes/No answer in the Tender Form, with details on a separate sheet if yes.",
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Has your organisation been convicted (or has any outstanding actions) of a criminal nature relating to the conduct of its business or profession? / If yes please provide details on a separate sheet | Yes/No",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not contain declarations regarding criminal convictions.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 180
+  },
+  {
+   "ref": "R19",
+   "category": "legal",
+   "text": "Tenderers must declare if their organisation has failed to fulfil its obligations relating to the payment of contributions or taxes under the law of any part of the United Kingdom.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Yes/No answer in the Tender Form, with details on a separate sheet if yes.",
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Has your organisation failed to fulfil its obligations relating to the payment of contributions or taxes under the law of any part of the United Kingdom. / If yes please provide details on a separate sheet | Yes/No",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not contain declarations regarding tax obligations.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 190
+  },
+  {
+   "ref": "R20",
+   "category": "legal",
+   "text": "Tenderers must declare if their organisation has had a contract cancelled, or not renewed, for failure to perform to the terms of that contract.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Yes/No answer in the Tender Form, with details on a separate sheet if yes.",
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Has your organisation had a contract cancelled, or not renewed, for failure to perform to the terms of that contract? / If yes please provide details on a separate sheet | Yes/No",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not contain declarations regarding contract cancellations.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 200
+  },
+  {
+   "ref": "R21",
+   "category": "legal",
+   "text": "Tenderers must declare if their organisation has had to make any reports under RIDDOR in the past five years.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Yes/No answer in the Tender Form, with details on a separate sheet if yes.",
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "By Law (RIDDOR), you must report certain injuries, diseases and dangerous occurences to the Health and Safety Executive. Has your organisation had to make any such reports under RIDDOR in the past five years? / If yes please provide details on a separate sheet | Yes/No",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not contain declarations regarding RIDDOR reports.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 210
+  },
+  {
+   "ref": "R22",
+   "category": "legal",
+   "text": "Tenderers must declare if they, their organisation, or any employees, have been served with a prohibition or improvement notice, or been convicted of any offence in law enforced by relevant authorities in the past five years.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Yes/No answer in the Tender Form, with details on a separate sheet if yes.",
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "In the past five years have you or your organisation, or any of your employees, been served with a prohibition or improvement notice, or been convicted of any offence in law, enforced by the Health and Safety Executive, Local Authority, Police or the Department of Transport? / If yes please provide details on a separate sheet | Yes/No",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not contain declarations regarding prohibition or improvement notices or convictions.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 220
+  },
+  {
+   "ref": "R23",
+   "category": "financial",
+   "text": "Tenderers must indicate the annual turnover of their organisation over the last three years.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Three years of annual turnover figures in the Tender Form.",
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Please indicate the annual turnover of your organisation over the last three years, where requested.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts provide a turnover band but not the annual turnover for the last three years.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 230
+  },
+  {
+   "ref": "R24",
+   "category": "financial",
+   "text": "Tenderers must provide details of their bankers.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Banker details in the Tender Form.",
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Please provide details of your bankers. They may be, should you be shortlisted, required to provide you with a reference",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover details of the company's bankers.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 240
+  },
+  {
+   "ref": "R25",
+   "category": "legal",
+   "text": "Provide declarations concerning criminal convictions, tax obligations, contract cancellations, RIDDOR reports and HSE notices as requested in the Tender Form.",
+   "threshold": null,
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": "Completed legal information fields with supporting details if any answers are 'Yes'.",
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Has your organisation been convicted (or has any outstanding actions) of a criminal nature relating to the conduct of its business or profession? / If yes please provide details on a separate sheet | Yes/No\nHas your organisation failed to fulfil its obligations relating to the payment of contributions or taxes under the law of any part of the United Kingdom. / If yes please provide details on a separate sheet | Yes/No\nHas your organisation had a contract cancelled, or not renewed, for failure to perform to the terms of that contract? / If yes please provide details on a separate sheet | Yes/No\nBy Law (RIDDOR), you must report certain injuries... Has your organisation had to make any such reports under RIDDOR in the past five years? / If yes please provide details on a separate sheet | Yes/No",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not contain the requested declarations.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 250
+  },
+  {
+   "ref": "R26",
+   "category": "insurance",
+   "text": "Tenderers must provide details of their organisation's employer's liability insurance.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Policy, insurer, and value of employer's liability insurance in the Tender Form.",
+   "citation": {
+    "loc": "s5",
+    "page": null,
+    "match": "exact",
+    "quote": "Please provide details of your organisation's insurance protection in relation to employer's liability and public liability.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "met",
+   "companyNote": "You hold £10m employers' liability cover. The tender asks for details, not a set level — have the certificate ready.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 260
+  },
+  {
+   "ref": "R27",
+   "category": "experience",
+   "text": "Tenderers must provide two relevant references for comparable work carried out in the past three years.",
+   "threshold": "2 references within the last 3 years",
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": "Contact name, phone & email, postal address, brief description of works, value, and date for two referees.",
+   "citation": {
+    "loc": "s5",
+    "page": null,
+    "match": "exact",
+    "quote": "Please provide two relevant references for comparable work carried out in the past three years, unless the tender documents state otherwise.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not include information about references.",
+   "provenance": {
+    "notes": [
+     "One reading marks this pass/fail, another only mandatory — check the wording."
+    ],
+    "passes": [
+     "primary",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 270
+  },
+  {
+   "ref": "R28",
+   "category": "submission",
+   "text": "Tenderers must agree that, if awarded the contract, they will enter into the proposed contract on the terms stated, subject to any agreed amendments.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Signature on the Tender Form.",
+   "citation": {
+    "loc": "s5",
+    "page": null,
+    "match": "exact",
+    "quote": "I agree to comply with the tender documents and, if awarded the contract, to enter into the proposed contract on the terms stated in the tender documents, subject to any agreed amendments.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover agreements to contract terms.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 280
+  },
+  {
+   "ref": "R29",
+   "category": "insurance",
+   "text": "Provide details and certificates of employer's liability and public liability insurance.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Completed insurance table and current insurance certificates for Employer’s Liability and Public Liability.",
+   "citation": {
+    "loc": "s5",
+    "page": null,
+    "match": "exact",
+    "quote": "Please provide details of your organisation's insurance protection in relation to employer's liability and public liability.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "met",
+   "companyNote": "You hold £5m public liability and £10m employers' liability cover. The tender asks for details, not a set level — have the certificates ready.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 290
+  },
+  {
+   "ref": "R30",
+   "category": "technical",
+   "text": "One of the ten bus shelters must feature a living roof.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Proposal for a living roof at one of the identified sites.",
+   "citation": {
+    "loc": "p1",
+    "page": 1,
+    "match": "exact",
+    "quote": "One of the bus shelters should feature a living roof.",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 300
+  },
+  {
+   "ref": "R31",
+   "category": "technical",
+   "text": "The contractor must advise on a suitable site for the living bus shelter from sites 04, 07, 08, and 09, considering coastal winds, birds and site-specific concerns.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Proposed site and justification in Appendix C and E.",
+   "citation": {
+    "loc": "p1",
+    "page": 1,
+    "match": "exact",
+    "quote": "The contractor should advise on a suitable site from these four locations, with consideration to the effects of coastal winds, birds and other site-specific concerns, and considering the other potential sites.",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 310
+  },
+  {
+   "ref": "R32",
+   "category": "technical",
+   "text": "Metal mesh and side panels from removed shelters must be returned to the Town Council for re-use.",
+   "threshold": null,
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": "Commitment within methodology.",
+   "citation": {
+    "loc": "p1",
+    "page": 1,
+    "match": "exact",
+    "quote": "Metal mesh and side panels to be returned to Town Council for re-use.",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "notes": [
+     "One reading marks this pass/fail, another only mandatory — check the wording."
+    ],
+    "passes": [
+     "primary",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 320
+  },
+  {
+   "ref": "R33",
+   "category": "technical",
+   "text": "Confirm site conditions and dimensions at each location as part of pre-start/site assessment.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Statement or survey report confirming site conditions and dimensions for each site; pre-start/site assessment documentation.",
+   "citation": {
+    "loc": "p1",
+    "page": 1,
+    "match": "exact",
+    "quote": "Confirm site conditions and dimensions at each location.",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 330
+  },
+  {
+   "ref": "R34",
+   "category": "technical",
+   "text": "Leave bus stop poles in situ (bus stop poles are not part of the works).",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Tender acknowledgement that bus stop poles will be left in situ and exclusion from scope noted in programme/method.",
+   "citation": {
+    "loc": "p1",
+    "page": 1,
+    "match": "exact",
+    "quote": "Bus stop poles are not part of this work and should be left in situ (owned by Northumberland County Council).",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 340
+  },
+  {
+   "ref": "R35",
+   "category": "technical",
+   "text": "New bus shelters must be durable, vandal-resistant and weather-resistant, suitable for public highway use, with regard to the coastal location.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Description of materials and quality control measures.",
+   "citation": {
+    "loc": "p2",
+    "page": 2,
+    "match": "exact",
+    "quote": "Supply durable, vandal-resistant and weather-resistant shelters suitable for public highway use, with regard to the coastal location.",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 350
+  },
+  {
+   "ref": "R36",
+   "category": "technical",
+   "text": "New bus shelters must provide seating as a minimum requirement, avoiding perch seating unless it is the only suitable option.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Description of seating arrangements in the proposed shelters.",
+   "citation": {
+    "loc": "p2",
+    "page": 2,
+    "match": "exact",
+    "quote": "Provide seating as a minimum requirement; perch seating to be avoided unless it is the only suitable option.",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 360
+  },
+  {
+   "ref": "R37",
+   "category": "technical",
+   "text": "New bus shelters must provide accessible arrangements suitable for a range of users.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Description of accessible features.",
+   "citation": {
+    "loc": "p2",
+    "page": 2,
+    "match": "exact",
+    "quote": "Provide accessible arrangements suitable for a range of users.",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 370
+  },
+  {
+   "ref": "R38",
+   "category": "technical",
+   "text": "New bus shelters must comply with relevant legislation, standards and guidance.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Confirmation of compliance.",
+   "citation": {
+    "loc": "p2",
+    "page": 2,
+    "match": "exact",
+    "quote": "Ensure the shelter complies with relevant legislation, standards and guidance.",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 380
+  },
+  {
+   "ref": "R39",
+   "category": "technical",
+   "text": "Bus shelter roofs must be Perspex for all sites.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Confirmation of Perspex roof specification for all shelters.",
+   "citation": {
+    "loc": "p3",
+    "page": 3,
+    "match": "exact",
+    "quote": "Perspex roof",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 390
+  },
+  {
+   "ref": "R40",
+   "category": "technical",
+   "text": "All shelters must have RAL 5003 powder coating.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Confirmation of RAL 5003 powder coating specification for all shelters.",
+   "citation": {
+    "loc": "p3",
+    "page": 3,
+    "match": "exact",
+    "quote": "RAL 5003 powder coating",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 400
+  },
+  {
+   "ref": "R41",
+   "category": "technical",
+   "text": "All shelters must include wheelchair and mobility scooter space.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Confirmation of inclusion of wheelchair and mobility scooter space.",
+   "citation": {
+    "loc": "p3",
+    "page": 3,
+    "match": "exact",
+    "quote": "Wheelchair and mobility scooter space.",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 410
+  },
+  {
+   "ref": "R42",
+   "category": "technical",
+   "text": "All shelters must include appropriate seating and standing areas.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Confirmation of inclusion of appropriate seating and standing areas.",
+   "citation": {
+    "loc": "p3",
+    "page": 3,
+    "match": "exact",
+    "quote": "Appropriate seating and standing areas",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "This is a technical requirement not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 420
+  },
+  {
+   "ref": "R43",
+   "category": "submission",
+   "text": "The tender must include a proposed overall contract duration, start date, completion date, number of sites worked on simultaneously, and a brief description of the proposed sequence.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Completion of the Programme section in Appendix C.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Provide your proposed programme for completing the works. Overall contract duration: _________________________________ Proposed start date: ______________________________________ Proposed completion date: _________________________________ Number of sites worked on simultaneously: _________________ Brief description of proposed sequence:",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover proposed contract duration, start/completion dates, or work sequencing.",
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 430
+  },
+  {
+   "ref": "R44",
+   "category": "submission",
+   "text": "Provide details of warranties, maintenance information and availability of parts with the tender submission.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Warranties and maintenance information including parts availability and time frames attached to tender.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "With your tender submission please submit details of Warranties, and maintenance information, including details of availability of parts and time frame for delivery.",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover details of warranties, maintenance information, or parts availability.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 440
+  },
+  {
+   "ref": "R45",
+   "category": "policy",
+   "text": "The tender must confirm that appropriate risk assessments and method statements will be prepared for the works before they commence.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Confirmation by checking 'Yes' in Appendix D.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Please confirm that appropriate risk assessments and, where applicable, method statements will be prepared for the works before they commence. / ☐ Yes ☐ No ☐ Not applicable to the works",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not confirm that appropriate risk assessments and method statements will be prepared.",
+   "provenance": {
+    "passes": [
+     "primary",
+     "second",
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 450
+  },
+  {
+   "ref": "R46",
+   "category": "policy",
+   "text": "Provide evidence of competence regarding Health & Safety, including examples of working on or adjacent to the highway and how risks will be managed.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Examples/records demonstrating highway work competence, traffic management plans and previous project evidence.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Working on or Adjacent to the Highway / Please provide examples demonstrating due regard to managing risks to operatives, pedestrians, road users and other members of the public when working on or adjacent to the highway.",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not provide examples demonstrating due regard to managing risks when working on or adjacent to the highway.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 460
+  },
+  {
+   "ref": "R47",
+   "category": "accreditation",
+   "text": "Provide evidence of competence/training and how subcontractors will be made to comply with your Health & Safety standards.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Training records, competence statements and subcontractor management/assurance procedures.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "fuzzy",
+    "quote": "Competence, Training and Qualifications / What training do your employees receive to ensure they are competent in Health and Safety practices associated with working adjacent to a highway?\n\nSubcontractors / How do you ensure that subcontractors comply with your Health and Safety standards?",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not cover evidence of competence/training or how subcontractors will comply with H&S standards.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 470
+  },
+  {
+   "ref": "R48",
+   "category": "policy",
+   "text": "All applicants undertaking works under this tender must satisfy Blyth Town Council of their competence regarding Health and Safety.",
+   "threshold": null,
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "All applicants undertaking works under this tender must satisfy Blyth Town Council of their competence regarding Health and Safety.",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts indicate a Health and Safety Policy but do not explicitly state that the company will satisfy the council of its competence regarding Health and Safety.",
+   "provenance": {
+    "passes": [
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 480
+  },
+  {
+   "ref": "R49",
+   "category": "technical",
+   "text": "Provide examples demonstrating due regard to managing risks to operatives, pedestrians, road users and other members of the public when working on or adjacent to the highway.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Examples/demonstrations regarding working on or adjacent to the highway.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Working on or Adjacent to the Highway / Please provide examples demonstrating due regard to managing risks to operatives, pedestrians, road users and other members of the public when working on or adjacent to the highway.",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not provide examples demonstrating due regard to managing risks when working on or adjacent to the highway.",
+   "provenance": {
+    "passes": [
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 490
+  },
+  {
+   "ref": "R50",
+   "category": "legal",
+   "text": "Please confirm how your organisation ensures that all works are carried out in accordance with applicable legislation, regulations, standards and professional requirements, and that employees and subcontractors conduct themselves professionally at all times.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Explanation of legal/professional compliance and conduct arrangements.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Legal and Professional Conduct / Please confirm how your organisation ensures that all works are carried out in accordance with applicable legislation, regulations, standards and professional requirements, and that employees and subcontractors conduct themselves professionally at all times.",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The company facts do not confirm how the organization ensures all works comply with legislation, regulations, standards, and professional requirements, or that employees and subcontractors conduct themselves professionally.",
+   "provenance": {
+    "passes": [
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 500
+  },
+  {
+   "ref": "R51",
+   "category": "legal",
+   "text": "Declaration that the information provided in this form is accurate and complete to the best of the signatory's knowledge, and acknowledgement that the Council may request further information or clarification.",
+   "threshold": null,
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": "Signed confirmation/declaration.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Declaration / I confirm that the information provided in this form is accurate and complete to the best of my knowledge. I understand that the Council may request further information or clarification where necessary to assess the applicant's Health and Safety competence.",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The requirement is a declaration about the information provided in the tender form, which is not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 510
+  },
+  {
+   "ref": "R52",
+   "category": "technical",
+   "text": "Provide a fully inclusive price for each site covering labour, materials, plant, transport, removal and disposal, foundations, installation, traffic management, resurfacing/making good, cleaning and completion.",
+   "threshold": null,
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": "Completed Pricing Schedule with separate fully inclusive price for each of the 10 sites and total excluding VAT.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "The Contractor shall provide a fully inclusive price for each site.\n\nThe price shall include all labour, materials, plant, transport, removal and disposal, foundations, installation, traffic and pedestrian management, resurfacing/making good where specified, cleaning and completion in accordance with the tender specification.",
+    "fileId": "7d7e2a05-aad1-4e28-b184-f0a74ff92c60",
+    "fileName": "06_appendix-e-pricing-schedule.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The requirement is a technical instruction on how to price services, which is not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 520
+  },
+  {
+   "ref": "R53",
+   "category": "technical",
+   "text": "Provide separate living roof prices for each of the four potential living-roof locations and recommend a site.",
+   "threshold": null,
+   "kind": "pass_fail",
+   "isPassFail": true,
+   "evidenceToProvide": "Completed living roof separate price entries for sites 04, 07, 08 and 09 and stated recommended location with reason.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "relocated",
+    "quote": "The Contractor shall provide a separate price for the living roof at each potential location.\n\nSite | Location | Living Roof Price\n04 | Tynedale Drive | £\n07 | Briardale Road Field | £\n08 | Links Road | £\n09 | Broadway | £\n\nContractor's recommended location for the living roof:",
+    "fileId": "7d7e2a05-aad1-4e28-b184-f0a74ff92c60",
+    "fileName": "06_appendix-e-pricing-schedule.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The requirement is a technical instruction on how to price specific items and make recommendations for the tender, which is not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 530
+  },
+  {
+   "ref": "R54",
+   "category": "submission",
+   "text": "Price optional items separately (shelter lighting, solar lighting, additional seating, other features).",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Separate priced entries for each listed optional item in the Pricing Schedule.",
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "relocated",
+    "quote": "The following items should be priced separately and will only be instructed if required.\n\nItem | Description | Price\n1 | Shelter lighting | £\n2 | Solar lighting | £\n3 | Additional seating | £\n4 | Other proposed additional feature | £",
+    "fileId": "7d7e2a05-aad1-4e28-b184-f0a74ff92c60",
+    "fileName": "06_appendix-e-pricing-schedule.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The requirement is a submission instruction on how to price optional items, which is not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 540
+  },
+  {
+   "ref": "R55",
+   "category": "accreditation",
+   "text": "Provide references to appropriate accreditations and certifications, RAMS, insurances and competence for Health & Safety assessment.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "Copies or details of certifications/memberships, RAMS, evidence of installer competence and relevant training records.",
+   "citation": {
+    "loc": "p1",
+    "page": 1,
+    "match": "exact",
+    "quote": "Reference to appropriate accreditations and certifications for the company and individuals associated with the project, membership of professional bodies, RAMS, insurances, competence and training of installers,",
+    "fileId": "7fd7dd1a-12e7-4315-b29e-a777c4decaed",
+    "fileName": "07_appendix-f-evaluation-of-quotations.pdf",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The requirement asks to provide references to accreditations, insurances, etc., which is an action within the tender submission and not covered by the company's pre-existing facts.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 550
+  },
+  {
+   "ref": "R56",
+   "category": "other",
+   "text": "Confirm assumptions and exclusions to the tender proposal where relevant.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": "List of assumptions/exclusions in the Pricing Schedule or Appendix C; if none, state 'NONE'.",
+   "citation": {
+    "loc": "s5",
+    "page": null,
+    "match": "not_found",
+    "quote": "Please identify any assumptions, exclusions or qualifications to your tender price.\n\nIf no exclusions or qualifications apply, please state \"NONE\".",
+    "fileId": "7d7e2a05-aad1-4e28-b184-f0a74ff92c60",
+    "fileName": "06_appendix-e-pricing-schedule.docx",
+    "verified": false
+   },
+   "companyStatus": "verify",
+   "companyNote": "We could not find this requirement's quote in the tender documents. Check the documents before relying on it.",
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 560
+  },
+  {
+   "ref": "R57",
+   "category": "submission",
+   "text": "Tenders must remain confidential until the stated opening/evaluation process. Where an electronic tender system is used, the system's secure submission arrangements will apply.",
+   "threshold": null,
+   "kind": "mandatory",
+   "isPassFail": false,
+   "evidenceToProvide": null,
+   "citation": {
+    "loc": "s2",
+    "page": null,
+    "match": "exact",
+    "quote": "6.1 Tenders must be submitted by email to tenders@blythtowncouncil.gov.uk and must remain confidential until the stated opening/evaluation process. Where an electronic tender system is used, the system's secure submission arrangements will apply.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "companyStatus": "unknown",
+   "companyNote": "The requirement pertains to the confidentiality of tender submissions, which is not covered by the company facts.",
+   "provenance": {
+    "passes": [
+     "recheck"
+    ]
+   },
+   "source": "ai_recheck",
+   "sortOrder": 570
+  }
+ ],
+ "questions": [
+  {
+   "ref": "Membership",
+   "title": "Professional or trade bodies membership",
+   "text": "Please indicate membership of any professional or trade bodies",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Please indicate membership of any professional or trade bodies",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 10,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Trading Years",
+   "title": "Years company has traded",
+   "text": "Please indicate how many years this company has traded",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Please indicate how many years this company has traded",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 20,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Legal Status",
+   "title": "Legal status of your organisation",
+   "text": "What is the legal status of your organisation (e.g. sole trader, private limited company, partnership etc)",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "What is the legal status of your organisation (e.g. sole trader, private limited company, partnership etc)",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 30,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Partnership Names",
+   "title": "Partners' full names (if partnership)",
+   "text": "If this is a partnership please supply the full names of all partners on a separate sheet if necessary",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": "separate sheet if necessary",
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "If this is a partnership please supply the full names of all partners on a separate sheet if necessary",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 40,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Criminal Convictions",
+   "title": "Criminal convictions related to business",
+   "text": "Has your organisation been convicted (or has any outstanding actions) of a criminal nature relating to the conduct of its business or profession? / If yes please provide details on a separate sheet",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": "separate sheet",
+   "guidance": null,
+   "scored": "pass_fail",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Has your organisation been convicted (or has any outstanding actions) of a criminal nature relating to the conduct of its business or profession? / If yes please provide details on a separate sheet",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 50,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Tax/Contributions Obligations",
+   "title": "Failure to fulfil tax/contributions obligations",
+   "text": "Has your organisation failed to fulfil its obligations relating to the payment of contributions or taxes under the law of any part of the United Kingdom. / If yes please provide details on a separate sheet",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": "separate sheet",
+   "guidance": null,
+   "scored": "pass_fail",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Has your organisation failed to fulfil its obligations relating to the payment of contributions or taxes under the law of any part of the United Kingdom. / If yes please provide details on a separate sheet",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 60,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Contract Cancellation/Non-renewal",
+   "title": "Contract cancellation/non-renewal for performance failure",
+   "text": "Has your organisation had a contract cancelled, or not renewed, for failure to perform to the terms of that contract? / If yes please provide details on a separate sheet",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": "separate sheet",
+   "guidance": null,
+   "scored": "pass_fail",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Has your organisation had a contract cancelled, or not renewed, for failure to perform to the terms of that contract? / If yes please provide details on a separate sheet",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 70,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "RIDDOR Reports",
+   "title": "RIDDOR reports in past five years",
+   "text": "By Law (RIDDOR), you must report certain injuries, diseases and dangerous occurences to the Health and Safety Executive. Has your organisation had to make any such reports under RIDDOR in the past five years? / If yes please provide details on a separate sheet",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": "separate sheet",
+   "guidance": null,
+   "scored": "pass_fail",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "By Law (RIDDOR), you must report certain injuries, diseases and dangerous occurences to the Health and Safety Executive. Has your organisation had to make any such reports under RIDDOR in the past five years? / If yes please provide details on a separate sheet",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 80,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HSE/LA/Police/DoT Notices/Convictions",
+   "title": "HSE/LA/Police/DoT notices or convictions in past five years",
+   "text": "In the past five years have you or your organisation, or any of your employees, been served with a prohibition or improvement notice, or been convicted of any offence in law, enforced by the Health and Safety Executive, Local Authority, Police or the Department of Transport? / If yes please provide details on a separate sheet",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": "separate sheet",
+   "guidance": null,
+   "scored": "pass_fail",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "In the past five years have you or your organisation, or any of your employees, been served with a prohibition or improvement notice, or been convicted of any offence in law, enforced by the Health and Safety Executive, Local Authority, Police or the Department of Transport? / If yes please provide details on a separate sheet",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 90,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Annual Turnover",
+   "title": "Annual turnover for the last three years",
+   "text": "Please indicate the annual turnover of your organisation over the last three years, where requested.",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Please indicate the annual turnover of your organisation over the last three years, where requested.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 100,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Bankers Details",
+   "title": "Details of bankers",
+   "text": "Please provide details of your bankers. They may be, should you be shortlisted, required to provide you with a reference",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Please provide details of your bankers. They may be, should you be shortlisted, required to provide you with a reference",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 110,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Health & Safety Arrangements",
+   "title": "Current Health and Safety arrangements",
+   "text": "Please provide details of your current Health and Safety arrangements and any relevant certificates pertinent to this tender, together with the name of the person responsible for health and safety in your organisation.",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "The Council will assess this information in accordance with the published procurement procedure.",
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s4",
+    "page": null,
+    "match": "exact",
+    "quote": "Please provide details of your current Health and Safety arrangements and any relevant certificates pertinent to this tender, together with the name of the person responsible for health and safety in your organisation.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 120,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Reference 1 Details",
+   "title": "Reference 1 for comparable work",
+   "text": "Provide details for Reference 1, including contact name, phone & email, full postal address, brief description of works, their value and date, and confirmation that the referee is aware and authorisation to contact them.\n\nSub-parts:\n- Contact name\n- Contact phone & email\n- Full postal Address\n- Brief description of works, their value and the date the work was carried out\n- Please confirm this referee is aware and that you authorise the Council to contact the referee at the Council’s discretion",
+   "section": "References",
+   "weighting": 20,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "For comparable work carried out in the past three years, unless the tender documents state otherwise. The Council may verify references as part of the published evaluation or due-diligence process.",
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s5",
+    "page": null,
+    "match": "exact",
+    "quote": "Reference 1\nContact name |\nContact phone & email |\nFull postal Address |\nBrief description of works, their value and the date the work was carried out |\nPlease confirm this referee is aware and that you authorise the Council to contact the referee at the Council’s discretion |",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 130,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Proposed Start Date",
+   "title": "Proposed start date",
+   "text": "I anticipate commencing the necessary works on …………………….",
+   "section": "Programme/Programme",
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "in order to achieve the completion date stated in the Tender Timetable / Contract Particulars.",
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s5",
+    "page": null,
+    "match": "exact",
+    "quote": "I anticipate commencing the necessary works on ……………………. in order to achieve the completion date stated in the Tender Timetable / Contract Particulars.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 140,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Anticipated On-site Weeks",
+   "title": "Anticipated weeks on site",
+   "text": "I anticipate being on site for …….. weeks.",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s5",
+    "page": null,
+    "match": "exact",
+    "quote": "I anticipate being on site for …….. weeks.",
+    "fileId": "00faf497-459c-4692-b207-542144ba5b58",
+    "fileName": "01_invitation-to-tender.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 150,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "A_prestart",
+   "title": "Pre-start and site assessment – confirm site conditions, access, arrangement and surveys",
+   "text": "Confirm site conditions and dimensions at each location; identify access, pedestrian and traffic management requirements; confirm proposed shelter arrangement with the Council before manufacture/installation; undertake any necessary surveys or checks required to safely complete the works.\n\nSub-parts:\n- Confirm site conditions and dimensions for each location\n- Identify access, pedestrian and traffic management requirements\n- Confirm proposed shelter arrangement with the Council before manufacture/installation\n- Undertake necessary surveys/checks",
+   "section": "Pre-start/site assessment",
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_unweighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "p1",
+    "page": 1,
+    "match": "exact",
+    "quote": "Pre-start and site assessment • Confirm site conditions and dimensions at each location. • Identify access, pedestrian and traffic management requirements. • Confirm the proposed shelter arrangement with the Council before manufacture/installation. • Undertake any necessary surveys or checks required to safely complete the works.",
+    "fileId": "9a80e3f8-86d7-4113-9b20-89cd5d899e00",
+    "fileName": "02_appendix-a-specification-and-scope-of-work-1.pdf",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 160,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "",
+   "title": "Proposed methodology for works",
+   "text": "Briefly describe how you propose to carry out the works, including:\n\nSub-parts:\n- Site surveys and pre-start checks\n- Removal of existing shelters\n- Site preparation and groundworks\n- Installation of new shelters\n- Resurfacing and making good\n- Cleaning and completion",
+   "section": "Quality and Methodology",
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_unweighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Briefly describe how you propose to carry out the works, including:\n- Site surveys and pre-start checks\n- Removal of existing shelters\n- Site preparation and groundworks\n- Installation of new shelters\n- Resurfacing and making good\n- Cleaning and completion",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 170,
+   "status": "draft",
+   "draftText": "Site surveys and pre-start checks\nWe will carry out a measured site survey at each location to record dimensions, underground services and photographic condition records. RAMS will be prepared for every site and briefed daily, led by our Operations Manager (NEBOSH-qualified) prior to start [E3]. All site operatives hold CSCS and NRSWA Streetworks accreditation; supervisors hold SMSTS [E3]. [EVIDENCE NEEDED: confirmation of specific utility-locating subcontractor or in-house capability]\n\nRemoval of existing shelters\nExisting shelters will be dismantled and removed, with materials segregated for reuse/recycling and waste transferred via a licensed carrier; waste transfer notes will be kept for each site, as in our Durham programme [E2].\n\nSite preparation and groundworks\nWe will excavate to suit new foundations, install new concrete bases and make good levels. Works on the highway will be managed under Chapter 8 traffic management by our NRSWA-accredited operatives [E2][E3]. If contaminated material or unexpected services are found we will stop work and notify the contract administrator.\n\nInstallation of new shelters\nShelters will be assembled and fixed to new foundations following manufacturer instructions. We completed 14 cantilever shelters across six villages in 11 weeks, demonstrating our delivery approach and sequencing for multiple sites [E2]. [EVIDENCE NEEDED: confirmation of chosen shelter manufacturer and technical installation drawings]\n\nResurfacing and making good\nFootway and surrounding surfaces will be reinstated to match existing materials where possible; no footway will be closed for more than one working day, as achieved previously [E2]. Any defects will be rectified within the defects period.\n\nCleaning and completion\nOn completion we will remove debris, provide handover documentation, as-built photos and waste transfer notes, and complete a client snag list; in Durham two minor snags were fixed within five working days and one warranty replacement was completed within 48 hours [E2].",
+   "draftMeta": {
+    "model": "openai/gpt-5-mini",
+    "origin": "ai_revision",
+    "wordCount": 286,
+    "generatedAt": "2026-11-13T13:37:17.619Z",
+    "evidenceGaps": [
+     "confirmation of specific utility-locating subcontractor or in-house capability",
+     "confirmation of chosen shelter manufacturer and technical installation drawings"
+    ],
+    "evidenceRefs": [
+     {
+      "docId": "af4a4082-06ae-4b97-b633-f5d3139297cf",
+      "title": "Health and Safety Policy",
+      "marker": "E3",
+      "source": "library_doc",
+      "supports": ""
+     },
+     {
+      "docId": "808da1f9-5fb2-4061-bfdf-779ed80f8f9a",
+      "title": "Case study   Durham bus shelters",
+      "marker": "E2",
+      "source": "library_doc",
+      "supports": ""
+     }
+    ],
+    "instructions": null,
+    "flaggedClaims": [],
+    "trimmedToLimit": false,
+    "unansweredParts": []
+   },
+   "evaluation": {
+    "band": "Fair",
+    "model": "openai/gpt-5-mini",
+    "parts": [
+     {
+      "note": "Describes measured surveys, RAMS, daily briefs; staff accreditations claimed but unsupported.",
+      "part": "Site surveys and pre-start checks",
+      "status": "partly"
+     },
+     {
+      "note": "Describes dismantling, segregation and waste transfer notes; previous Durham example unsupported in library.",
+      "part": "Removal of existing shelters",
+      "status": "partly"
+     },
+     {
+      "note": "Mentions excavations, concrete bases and Chapter 8 traffic management; NRSWA accreditation unsupported.",
+      "part": "Site preparation and groundworks",
+      "status": "partly"
+     },
+     {
+      "note": "Explains assembly to manufacturer instructions; manufacturer choice and drawings not provided.",
+      "part": "Installation of new shelters",
+      "status": "partly"
+     },
+     {
+      "note": "Promises reinstatement and limited footway closure; previous performance claim unsupported.",
+      "part": "Resurfacing and making good",
+      "status": "partly"
+     },
+     {
+      "note": "Lists handover documents and snags resolution; specific evidence from prior works not in library.",
+      "part": "Cleaning and completion",
+      "status": "partly"
+     }
+    ],
+    "scale": "default",
+    "score": "2",
+    "maxScore": "5",
+    "rationale": "Fair — the response addresses all requested sub‑parts with a clear sequence and some relevant practice (surveys, RAMS, segregation of waste, handover). However several claims lack supporting evidence or contradict the evidence library (eg staff qualifications, NRSWA/SMSTS, previous Durham programme) and two explicit '[EVIDENCE NEEDED]' placeholders remain. The answer is therefore thin on verified detail and gives only moderate confidence the requirement would be met.",
+    "strengths": [
+     "Logical, end‑to‑end sequence covering all requested stages.",
+     "Includes practical details: RAMS, waste transfer notes, as‑built photos and snagging.",
+     "Commits to limited footway closure and prompt snag resolution which are client‑focused."
+    ],
+    "wordCount": 286,
+    "answerHash": "4e4be43b",
+    "evaluatedAt": "2026-11-13T13:41:43.214Z",
+    "improvements": [
+     {
+      "impact": "high",
+      "rationale": "Scoring rewards supported claims; the library lists ISO 9001 and CHAS only, so cite those or supply certificates.",
+      "suggestion": "Replace accreditation claims with documentary references from E1.",
+      "needsEvidence": true
+     },
+     {
+      "impact": "high",
+      "rationale": "Specific evidence for service detection is critical; removes '[EVIDENCE NEEDED]' and increases confidence in safety.",
+      "suggestion": "Confirm utility‑locating capability and name subcontractor or in‑house team.",
+      "needsEvidence": true
+     },
+     {
+      "impact": "high",
+      "rationale": "Demonstrates preparedness and technical fit; directly supports installation sub‑part and raises score.",
+      "suggestion": "Provide chosen shelter manufacturer and attach technical installation drawings.",
+      "needsEvidence": true
+     },
+     {
+      "impact": "medium",
+      "rationale": "Evaluation requires evidence of relevant experience; use verifiable examples to support delivery claims.",
+      "suggestion": "Replace references to 'Durham programme' with documented project summary from E1.",
+      "needsEvidence": true
+     },
+     {
+      "impact": "medium",
+      "rationale": "Open placeholders undermine credibility; supplying proof converts partly to covered.",
+      "suggestion": "Remove bracketed '[EVIDENCE NEEDED]' notes and include specific RAMS/NEBOSH proof.",
+      "needsEvidence": true
+     },
+     {
+      "impact": "low",
+      "rationale": "Adds technical detail to groundworks and shows proactive risk management, improving score.",
+      "suggestion": "State contingency steps for contaminated ground with specific testing method.",
+      "needsEvidence": false
+     }
+    ],
+    "missingParts": [],
+    "overWordLimit": false
+   },
+   "sample": true
+  },
+  {
+   "ref": "Programme",
+   "title": "Proposed programme for completing the works",
+   "text": "Provide your proposed programme for completing the works.\n\nSub-parts:\n- Overall contract duration:\n- Proposed start date:\n- Proposed completion date:\n- Number of sites worked on simultaneously:\n- Brief description of proposed sequence:",
+   "section": "Installation and delivery",
+   "weighting": 10,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "Lead time, ability to meet council’s required dates, installation method, traffic management included within project costs, traffic management appropriate for each site, management of disruption, site reinstatement.",
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Provide your proposed programme for completing the works.\n\nOverall contract duration: _________________________________\n\nProposed start date: ______________________________________\n\nProposed completion date: _________________________________\n\nNumber of sites worked on simultaneously: _________________\n\nBrief description of proposed sequence:\n\nProgramme attached: Yes / No",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 180,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Site Management",
+   "title": "How works will be managed on site",
+   "text": "Describe how you will manage the works on site, including:\n\nSub-parts:\n- Site supervision\n- Public safety\n- Site security\n- Deliveries and storage\n- Communication with the Council\n- Keeping sites clean and safe",
+   "section": "Quality and Methodology",
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_unweighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Describe how you will manage the works on site, including:\n\n- Site supervision\n- Public safety\n- Site security\n- Deliveries and storage\n- Communication with the Council\n- Keeping sites clean and safe",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 190,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Traffic & Pedestrian Management",
+   "title": "Traffic and pedestrian management plan",
+   "text": "Explain how you will safely manage pedestrians, traffic and access while the works are being carried out.",
+   "section": "Installation and delivery",
+   "weighting": 10,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "Traffic management included within project costs, traffic management appropriate for each site, management of disruption.",
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Explain how you will safely manage pedestrians, traffic and access while the works are being carried out.\n\nContractor Response:\n\nTraffic Management Plan attached: Yes / No",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 200,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Quality Control",
+   "title": "Quality control procedures",
+   "text": "Describe how you will ensure the works and materials meet the specification and are completed to the required standard. Include how you will check:\n\nSub-parts:\n- Shelter installation\n- Foundations and fixings\n- Levels and accessibility\n- Roof/drainage\n- Surfacing\n- Seating\n- Vandal resistance\n- Finishes\n- Final installation",
+   "section": "Quality and materials",
+   "weighting": 20,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "Construction quality, materials, durability, corrosion resistance, glazing/panels, roof/drainage, seating, finish, vandal resistance, expected lifespan and compliance with council’s specification",
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Describe how you will ensure the works and materials meet the specification and are completed to the required standard.\n\nInclude how you will check:\n\n- Shelter installation\n- Foundations and fixings\n- Levels and accessibility\n- Roof/drainage\n- Surfacing\n- Seating\n- Vandal resistance\n- Finishes\n- Final installation",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 210,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Ecological Impact",
+   "title": "Minimising environmental impact",
+   "text": "Describe your proposed approach to minimising the environmental impact of the bus shelter replacement works",
+   "section": "Ecological impact",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "Recycled/recyclable materials, carbon/environmental considerations, waste disposal.",
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Describe your proposed approach to minimising the environmental impact of the bus shelter replacement works e.g. Recycled/recyclable materials, carbon/environmental considerations, waste disposal",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 220,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Sub-contractors & Suppliers",
+   "title": "List of sub-contractors and key suppliers",
+   "text": "List any subcontractors or key suppliers you propose to use.",
+   "section": "Supply chain",
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "List any subcontractors or key suppliers you propose to use.",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 230,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Living Roof Site Selection",
+   "title": "Proposed living roof site and reason for selection",
+   "text": "State the proposed site for the living-roof shelter and briefly explain why you consider this to be the most suitable location, including consideration of coastal winds, birds, exposure, maintenance and site conditions.\n\nSub-parts:\n- Site:\n- Reason for Selection",
+   "section": "Quality and materials",
+   "weighting": 20,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "Construction quality, materials, durability, corrosion resistance, glazing/panels, roof/drainage, seating, finish, vandal resistance, expected lifespan and compliance with council’s specification",
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Proposed Site\n\nSite: _________________________________________________\n\nReason for Selection\n\nBriefly explain why you consider this to be the most suitable location, including consideration of coastal winds, birds, exposure, maintenance and site conditions.",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 240,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Site-Specific Issues",
+   "title": "Identification and proposed solutions for site-specific issues",
+   "text": "Identify any particular risks, constraints or issues you have identified at the ten locations and explain how you propose to address them.\n\nSub-parts:\n- Site\n- Issue / Risk\n- Proposed Solution",
+   "section": "Quality and Methodology",
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_unweighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Identify any particular risks, constraints or issues you have identified at the ten locations and explain how you propose to address them.\n\nSite | Issue / Risk | Proposed Solution\n01 |  |\n02 |  |\n03 |  |\n04 |  |\n05 |  |\n06 |  |\n07 |  |\n08 |  |\n09 |  |\n10 |  |",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 250,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Defects & Completion Procedure",
+   "title": "Procedure for defects and completion",
+   "text": "Describe your procedure for:\n\nSub-parts:\n- Identifying defects\n- Rectifying defects\n- Final inspection\n- Cleaning the sites\n- Removing waste and temporary works\n- Handover to the Council",
+   "section": "Warranty, maintenance and aftercare",
+   "weighting": 10,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "Length and scope of warranty, response times, availability of parts, timeframe for delivery, cost of parts and delivery, ongoing advice and support, spares process (parts numbers, process, photos required), ease of repair.",
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Describe your procedure for:\n\n- Identifying defects\n- Rectifying defects\n- Final inspection\n- Cleaning the sites\n- Removing waste and temporary works\n- Handover to the Council",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 260,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Warranty and Maintenance Details",
+   "title": "Details of warranties and maintenance information",
+   "text": "With your tender submission please submit details of Warranties, and maintenance information, including details of availability of parts and time frame for delivery.",
+   "section": "Warranty, maintenance and aftercare",
+   "weighting": 10,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "Length and scope of warranty, response times, availability of parts, timeframe for delivery, cost of parts and delivery, ongoing advice and support, spares process (parts numbers, process, photos required), ease of repair.",
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "With your tender submission please submit details of Warranties, and maintenance information, including details of availability of parts and time frame for delivery.",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 270,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Handover Information Confirmation",
+   "title": "Confirmation of handover information",
+   "text": "Confirm what information will be provided on completion:\n\nSub-parts:\n- Product information\n- Warranties and Maintenance information\n- As-built information\n- Test/inspection records\n- Waste documentation\n- Completion photographs\n- Other:",
+   "section": "Warranty, maintenance and aftercare",
+   "weighting": 10,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": "Length and scope of warranty, response times, availability of parts, timeframe for delivery, cost of parts and delivery, ongoing advice and support, spares process (parts numbers, process, photos required), ease of repair.",
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s2",
+    "page": null,
+    "match": "exact",
+    "quote": "Confirm what information will be provided on completion:\n\n☐ Product information\n☐ Warranties and Maintenance information\n☐ As-built information\n☐ Test/inspection records\n☐ Waste documentation\n☐ Completion photographs\n☐ Other: ______________________________________",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 280,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Assumptions / Exclusions",
+   "title": "Assumptions, exclusions or qualifications to proposal",
+   "text": "Please identify any assumptions, exclusions or qualifications to your proposal.",
+   "section": "Commercial/Assumptions",
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s2",
+    "page": null,
+    "match": "exact",
+    "quote": "Please identify any assumptions, exclusions or qualifications to your proposal.",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 290,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "11. CONTRACTOR CONFIRMATION",
+   "title": "Contractor Confirmation (signature block)",
+   "text": "We confirm that the above information represents our proposed approach to delivering the works in accordance with the contract specification. Name, Position, Company, Signature, Date.",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s2",
+    "page": null,
+    "match": "exact",
+    "quote": "We confirm that the above information represents our proposed approach to delivering the works in accordance with the contract specification.",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 300,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "C7_living_roof",
+   "title": "Living roof – proposed site, manufacturer, maintenance, lifespan",
+   "text": "Propose site for living roof and explain why suitable (consider winds, birds, exposure, maintenance and site conditions). Provide manufacturer/system, maintenance requirements, expected lifespan.\n\nSub-parts:\n- Proposed site\n- Reason for selection including coastal winds, birds, exposure, maintenance\n- Manufacturer/system\n- Maintenance requirements\n- Expected lifespan",
+   "section": "Living roof / Technical",
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_unweighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s2",
+    "page": null,
+    "match": "exact",
+    "quote": "Proposed Site Site: _________________________________________________ Reason for Selection Briefly explain why you consider this to be the most suitable location, including consideration of coastal winds, birds, exposure, maintenance and site conditions. Proposed Living Roof Manufacturer / system: ______________________________________ Maintenance requirements: ___________________________________ Expected lifespan: __________________________________________",
+    "fileId": "e24cb390-af34-470a-86f9-b333678d64f2",
+    "fileName": "04_appendix-c-quality-methodology-1.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 310,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS1 - Written Health & Safety Policy",
+   "title": "Written Health & Safety Policy",
+   "text": "Do you have a written Health and Safety Policy? How often is it reviewed and updated?",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "1. Written Health & Safety Policy / Do you have a written Health and Safety Policy? How often is it reviewed and updated?",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 320,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS2 - Person Responsible for Health and ",
+   "title": "Name of the Person Responsible for Health and Safety",
+   "text": "Name of the Person Responsible for Health and Safety",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "2. Name of the Person Responsible for Health and Safety",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 330,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS3 - Monitoring and Improving Health & ",
+   "title": "Monitoring and Improving Health & Safety Performance",
+   "text": "How do you monitor and improve your Health and Safety performance?",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "3. Monitoring and Improving Health & Safety Performance / How do you monitor and improve your Health and Safety performance?",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 340,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS4 - Risk Assessments and Method Statem",
+   "title": "Confirmation of Risk Assessments and Method Statements",
+   "text": "Please confirm that appropriate risk assessments and, where applicable, method statements will be prepared for the works before they commence.",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "4. Risk Assessments and Method Statements / Please confirm that appropriate risk assessments and, where applicable, method statements will be prepared for the works before they commence. / ☐ Yes ☐ No ☐ Not applicable to the works",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 350,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS4 - Examples of Risk Assessments",
+   "title": "Examples of Risk Assessments",
+   "text": "It is acceptable to attach as sperate documents.",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Examples of Risk Assessments / It is acceptable to attach as sperate documents.",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 360,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS4 - Working on or Adjacent to the High",
+   "title": "Managing risks when working on or adjacent to the highway",
+   "text": "Please provide examples demonstrating due regard to managing risks to operatives, pedestrians, road users and other members of the public when working on or adjacent to the highway.",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Working on or Adjacent to the Highway / Please provide examples demonstrating due regard to managing risks to operatives, pedestrians, road users and other members of the public when working on or adjacent to the highway.",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 370,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS4 - Safe Transportation, Unloading, Li",
+   "title": "Safe transportation, unloading, lifting and installation of shelter components",
+   "text": "How will the shelter structure and other components be safely transported, unloaded, lifted and installed?",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Safe Transportation, Unloading, Lifting and Installation / How will the shelter structure and other components be safely transported, unloaded, lifted and installed?",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 380,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS4 - Maintaining a Safe and Secure Work",
+   "title": "Maintaining a safe and secure work area",
+   "text": "How will you keep the work area safe and secure while works are in progress and, where necessary, outside working hours?",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Maintaining a Safe and Secure Work Area / How will you keep the work area safe and secure while works are in progress and, where necessary, outside working hours?",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 390,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS4 - Management of Existing Bus Stops",
+   "title": "Health and Safety management at existing bus stops",
+   "text": "How will you manage Health and Safety where works affect an existing bus stop, including arrangements for maintaining safe pedestrian access and managing passengers while the existing shelter is removed or the new shelter is installed?",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Management of Existing Bus Stops / How will you manage Health and Safety where works affect an existing bus stop, including arrangements for maintaining safe pedestrian access and managing passengers while the existing shelter is removed or the new shelter is installed?",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 400,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS5 - Competence, Training and Qualifica",
+   "title": "Employee training for H&S adjacent to a highway",
+   "text": "What training do your employees receive to ensure they are competent in Health and Safety practices associated with working adjacent to a highway?",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "5. Competence, Training and Qualifications / What training do your employees receive to ensure they are competent in Health and Safety practices associated with working adjacent to a highway?",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 410,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS6 - Subcontractors",
+   "title": "Ensuring subcontractors comply with H&S standards",
+   "text": "How do you ensure that subcontractors comply with your Health and Safety standards?",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "6. Subcontractors / How do you ensure that subcontractors comply with your Health and Safety standards?",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 420,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "HS7 - Legal and Professional Conduct",
+   "title": "Ensuring legal and professional conduct",
+   "text": "Please confirm how your organisation ensures that all works are carried out in accordance with applicable legislation, regulations, standards and professional requirements, and that employees and subcontractors conduct themselves professionally at all times.",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "7. Legal and Professional Conduct / Please confirm how your organisation ensures that all works are carried out in accordance with applicable legislation, regulations, standards and professional requirements, and that employees and subcontractors conduct themselves professionally at all times.",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "document",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 430,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "8",
+   "title": "Declaration",
+   "text": "I confirm that the information provided in this form is accurate and complete to the best of my knowledge. I understand that the Council may request further information or clarification where necessary to assess the applicant's Health and Safety competence.",
+   "section": null,
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "pass_fail",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "8. Declaration / I confirm that the information provided in this form is accurate and complete to the best of my knowledge. I understand that the Council may request further information or clarification where necessary to assess the applicant's Health and Safety competence.",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "document"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 440,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "D5",
+   "title": "Competence, training and qualifications",
+   "text": "Describe what training your employees receive to ensure they are competent in Health and Safety practices associated with working adjacent to a highway.\n\nSub-parts:\n- Training courses and frequency\n- Competence checks\n- Qualifications held by operatives",
+   "section": "Health & Safety",
+   "weighting": 5,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Competence, Training and Qualifications / What training do your employees receive to ensure they are competent in Health and Safety practices associated with working adjacent to a highway?",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 450,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "D6",
+   "title": "Subcontractor compliance with Health & Safety standards",
+   "text": "Explain how you ensure subcontractors comply with your Health and Safety standards.\n\nSub-parts:\n- Pre-qualification/assessment of subcontractors\n- Monitoring and enforcement measures\n- Documentation required from subcontractors",
+   "section": "Health & Safety",
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_unweighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Subcontractors / How do you ensure that subcontractors comply with your Health and Safety standards?",
+    "fileId": "3cd66c6e-35cb-4af3-b035-89c0f91ea8ab",
+    "fileName": "05_appendix-d-health-and-safety.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 460,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Living Roof Recommended Location Reason",
+   "title": "Reason for recommended living roof location",
+   "text": "Contractor's recommended location for the living roof: Reason for recommendation:",
+   "section": "Quality and materials",
+   "weighting": 20,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Contractor's recommended location for the living roof:\n\nReason for recommendation:",
+    "fileId": "7d7e2a05-aad1-4e28-b184-f0a74ff92c60",
+    "fileName": "06_appendix-e-pricing-schedule.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary",
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 470,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "Pricing Assumptions / Exclusions",
+   "title": "Assumptions, exclusions or qualifications to tender price",
+   "text": "Please identify any assumptions, exclusions or qualifications to your tender price. If no exclusions or qualifications apply, please state \"NONE\".\n\nSub-parts:\n- Ref\n- Details",
+   "section": "Price and value",
+   "weighting": 20,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "scored_weighted",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "exact",
+    "quote": "Please identify any assumptions, exclusions or qualifications to your tender price.\n\nRef | Details\n1 |\n2 |\n3 |\n4 |\n\nIf no exclusions or qualifications apply, please state \"NONE\".",
+    "fileId": "7d7e2a05-aad1-4e28-b184-f0a74ff92c60",
+    "fileName": "06_appendix-e-pricing-schedule.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "primary"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 480,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  },
+  {
+   "ref": "E_assumptions_exclusions",
+   "title": "Assumptions / exclusions (pricing schedule)",
+   "text": "Identify any assumptions, exclusions or qualifications to your tender price in the pricing schedule; if none state 'NONE'.\n\nSub-parts:\n- Assumption/exclusion reference\n- Details",
+   "section": "Commercial / Pricing",
+   "weighting": null,
+   "maxScore": null,
+   "wordLimit": null,
+   "pageLimit": null,
+   "limitText": null,
+   "guidance": null,
+   "scored": "information_only",
+   "scoringDescriptors": null,
+   "citation": {
+    "loc": "s1",
+    "page": null,
+    "match": "fuzzy",
+    "quote": "Please identify any assumptions, exclusions or qualifications to your tender price. Ref | Details If no exclusions or qualifications apply, please state \"NONE\".",
+    "fileId": "7d7e2a05-aad1-4e28-b184-f0a74ff92c60",
+    "fileName": "06_appendix-e-pricing-schedule.docx",
+    "verified": true
+   },
+   "provenance": {
+    "passes": [
+     "second"
+    ]
+   },
+   "source": "ai",
+   "sortOrder": 490,
+   "status": "not_started",
+   "draftText": null,
+   "draftMeta": null,
+   "evaluation": null,
+   "sample": false
+  }
+ ],
+ "sampleAnswer": {
+  "sources": [
+   {
+    "marker": "E3",
+    "title": "Health and Safety Policy",
+    "detail": "Document",
+    "passage": null
+   },
+   {
+    "marker": "E2",
+    "title": "Case study   Durham bus shelters",
+    "detail": "Document",
+    "passage": null
+   }
+  ],
+  "draftedToWords": 300
+ }
+}

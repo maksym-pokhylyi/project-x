@@ -13,6 +13,8 @@ export const navLinkVariants = cva("-outline-offset-2 transition-colors duration
       tab: tabTriggerClasses,
       header: "inline-flex min-h-11 items-center border-b-2 border-transparent text-15 font-medium text-ink hover:text-brand aria-[current=page]:border-ink aria-[current=page]:hover:text-ink",
       menu: "flex min-h-[3.25rem] items-center justify-between gap-3 text-17 font-medium text-ink after:size-2 after:shrink-0 after:rounded-full aria-[current=page]:after:bg-ink",
+      // For lists whose rows have their own layout (e.g. question cards): NavLink still decides and marks the current row.
+      plain: "",
     },
   },
   defaultVariants: { variant: "bar" },

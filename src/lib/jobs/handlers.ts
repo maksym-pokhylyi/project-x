@@ -26,10 +26,23 @@ export const jobHandlers: { [T in JobType]: JobHandler<T> } = {
     log.info("billing.reconcile done", summary);
   },
 
+  "bids.process": async (payload, context) => {
+    // Imported lazily, like the other feature handlers, so the registry stays light.
+    const { processBidJob } = await import("@/features/bids/server/pipeline/runner");
+    await processBidJob(payload, context);
+  },
+
+  "library.process": async (payload, context) => {
+    const { processLibraryDocJob } = await import("@/features/library/server/process");
+    await processLibraryDocJob(payload, context);
+  },
+
   "maintenance.cleanup": async () => {
     // Retention for every operational table: see src/config/retention.ts.
     const summary = await runMaintenance();
-    log.info("maintenance.cleanup done", summary);
+    // The bid desk's working files follow the same config; its module does the storage sweep.
+    const { runBidRetention } = await import("@/features/bids/server/retention");
+    log.info("maintenance.cleanup done", { ...summary, ...(await runBidRetention()) });
   },
 
   "procurement.backfill": async (payload) => {
