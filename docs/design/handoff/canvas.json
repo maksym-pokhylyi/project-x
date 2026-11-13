@@ -1,0 +1,45 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-13T11:58:00Z" },
+  "title": "Bidfolio — brand, landing page and product screens",
+  "launch": { "view": "canvas", "page": "brand" },
+  "pages": [
+    { "id": "brand", "name": "Brand" },
+    { "id": "landing", "name": "Landing page" },
+    { "id": "product", "name": "Product screens" }
+  ],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 1400, "title": "Logo and wordmark", "page": "brand" },
+    "Social-1200x630.dc.html": { "x": 1520, "y": 0, "w": 1200, "h": 630, "title": "Social image 1200 × 630", "page": "brand" },
+    "Foundations.dc.html": { "x": 2800, "y": 0, "w": 1000, "h": 1660, "title": "Foundations — recommended changes", "page": "brand" },
+    "Landing-1440.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 5480, "title": "Landing page · desktop 1440", "page": "landing", "expand": "fill" },
+    "Landing-390.dc.html": { "x": 1520, "y": 0, "w": 390, "h": 7500, "title": "Landing page · mobile 390", "page": "landing", "expand": "fill" },
+    "Supplier-1440.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 2930, "title": "(a) Supplier page · desktop 1440", "page": "product", "expand": "fill" },
+    "Supplier-390.dc.html": { "x": 1520, "y": 0, "w": 390, "h": 4060, "title": "(a) Supplier page · mobile 390", "page": "product", "expand": "fill" },
+    "Brief-1440.dc.html": { "x": 2070, "y": 0, "w": 1440, "h": 2780, "title": "(b) Bid brief · desktop 1440", "page": "product", "expand": "fill" },
+    "Brief-390.dc.html": { "x": 3590, "y": 0, "w": 390, "h": 4420, "title": "(b) Bid brief · mobile 390", "page": "product", "expand": "fill" },
+    "Editor-1440.dc.html": { "x": 4140, "y": 0, "w": 1440, "h": 2100, "title": "(c) Answer editor · desktop 1440", "page": "product", "expand": "fill" },
+    "Editor-390.dc.html": { "x": 5660, "y": 0, "w": 390, "h": 3760, "title": "(c) Answer editor · mobile 390", "page": "product", "expand": "fill" }
+  },
+  "order": [
+    "Main.dc.html",
+    "Social-1200x630.dc.html",
+    "Foundations.dc.html",
+    "Landing-1440.dc.html",
+    "Landing-390.dc.html",
+    "Supplier-1440.dc.html",
+    "Supplier-390.dc.html",
+    "Brief-1440.dc.html",
+    "Brief-390.dc.html",
+    "Editor-1440.dc.html",
+    "Editor-390.dc.html"
+  ],
+  "notes": {
+    "t-brand": { "x": 0, "y": -300, "text": "Logo, social image and foundations", "kind": "title1", "maxW": 3800, "page": "brand" },
+    "t-landing": { "x": 0, "y": -300, "text": "Landing page — desktop 1440 and mobile 390", "kind": "title1", "maxW": 1910, "page": "landing" },
+    "t-product": { "x": 0, "y": -300, "text": "Product screens — supplier page, bid brief, answer editor", "kind": "title1", "maxW": 6050, "page": "product" },
+    "n-landing": { "x": -420, "y": 0, "w": 340, "text": "Copy to confirm: what sits in Radar Pro and Bid Desk Plus, the FAQ answers on data handling and cancelling, and the company details in the footer are drafts. Anything in [square brackets] is a placeholder for a fact only you know.", "page": "landing" },
+    "n-product": { "x": -420, "y": 0, "w": 340, "text": "Sample data: every supplier, buyer, notice reference and figure on these screens is fictional. Today is taken as 13 Nov 2026.", "page": "product" }
+  },
+  "designSystems": []
+}
