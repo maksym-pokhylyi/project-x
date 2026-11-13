@@ -36,9 +36,6 @@ const KNOWN_DEBT = new Set([
   "features/bids/components/answer-editor.tsx",
   "features/bids/components/citation.tsx",
   "features/bids/components/fact-confirm.tsx",
-  "features/procurement/components/data-request-form.tsx",
-  "features/procurement/components/radar-profile-form.tsx",
-  "features/procurement/components/radar-screen.tsx",
 ]);
 
 function sourceFiles(dir: string): string[] {

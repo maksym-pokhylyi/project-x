@@ -14,8 +14,6 @@ const ALLOWED = new Set([
   "components/ui/nav-link.tsx",
   "components/ui/breadcrumb.tsx",
   "components/ui/pagination.tsx",
-  // Being rebuilt on <NavLink current={…}> in the radar restyle branch; remove this line when that merges.
-  "features/procurement/components/radar-screen.tsx",
 ]);
 
 function sourceFiles(dir: string): string[] {
