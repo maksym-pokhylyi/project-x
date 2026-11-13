@@ -2,17 +2,18 @@
 
 import "./bid-theme.css";
 import { useRouter } from "next/navigation";
-import { Popover } from "radix-ui";
 import { useMemo, useState, useTransition } from "react";
 import { updateRequirementAction } from "@/features/bids/actions";
 import { displayRef, gateGroup, type GateGroup } from "@/features/bids/view";
 import { verificationState } from "@/features/bids/citation-state";
-import { CitationMark, type SourceLinks } from "./citation";
+import { CitationMark, type SourceLinks } from "./ui/citation-mark";
 import type { RequirementItem } from "./requirements-view";
 import { StatusPill } from "./ui";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { FilterChip } from "@/components/ui/filter-chip";
+import { ReferenceChip } from "@/components/ui/reference-chip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 /**
  * "Pass-or-fail requirements" on the brief: each line quoted from the pack with its source
@@ -41,29 +42,29 @@ function ConfirmControl({ bidId, item, label }: { bidId: string; item: Requireme
       }
     });
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger asChild>
-        <Button variant={label === "Confirm" ? "outline" : "link"} size={label === "Confirm" ? "sm" : undefined} type="button" className={label === "Confirm" ? undefined : "text-13"} data-testid="gate-confirm">
-          {label}
-        </Button>
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content align="start" sideOffset={6} collisionPadding={12} className="bid-pop z-50 w-[min(20rem,calc(100vw-1.5rem))] p-1.5 outline-none">
-          <p className="px-3 pt-2 pb-1 text-13 text-ink-2">Read the requirement on the page first. Your answer is recorded as set by you.</p>
-          <Button variant="ghost" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" type="button"  disabled={pending} onClick={() => set("met")} data-testid="gate-confirm-met">
+    <>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant={label === "Confirm" ? "outline" : "link"} size={label === "Confirm" ? "sm" : undefined} type="button" className={label === "Confirm" ? undefined : "text-13"} data-testid="gate-confirm">
+            {label}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[min(20rem,calc(100vw-1.5rem))]">
+          <DropdownMenuLabel className="font-normal text-ink-2">Read the requirement on the page first. Your answer is recorded as set by you.</DropdownMenuLabel>
+          <DropdownMenuItem disabled={pending} onSelect={() => set("met")} data-testid="gate-confirm-met">
             We meet this
-          </Button>
-          <Button variant="ghost" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" type="button"  disabled={pending} onClick={() => set("gap")} data-testid="gate-confirm-gap">
+          </DropdownMenuItem>
+          <DropdownMenuItem disabled={pending} onSelect={() => set("gap")} data-testid="gate-confirm-gap">
             We do not meet this yet
-          </Button>
-          {error ? (
-            <p role="alert" className="px-3 py-2 text-xs text-danger">
-              {error}
-            </p>
-          ) : null}
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {error ? (
+        <p role="alert" className="text-xs text-danger">
+          {error}
+        </p>
+      ) : null}
+    </>
   );
 }
 
@@ -112,8 +113,8 @@ export function GateList({
   ];
 
   return (
-    <div className="bid-card" data-testid="gate-list">
-      <div role="group" aria-label="Filter requirements" className="bid-noprint flex flex-wrap gap-2 px-4 py-3 sm:px-6">
+    <div className="rounded-card border border-line bg-surface" data-testid="gate-list">
+      <div role="group" aria-label="Filter requirements" className="print:hidden flex flex-wrap gap-2 px-4 py-3 sm:px-6">
         {chips.map((chip) => (
           <FilterChip key={chip.key} pressed={filter === chip.key} count={chip.count} onClick={() => setFilter(chip.key)} data-testid={`gate-filter-${chip.key}`}>
             {chip.label}
@@ -121,7 +122,7 @@ export function GateList({
         ))}
       </div>
       {visible.length === 0 ? (
-        <p className="bid-rule px-4 py-6 text-sm text-ink-2 sm:px-6">{items.length === 0 ? "No pass-or-fail requirements were found in the pack. Read the instructions to tenderers yourself." : "None in this group."}</p>
+        <p className="border-t border-line px-4 py-6 text-sm text-ink-2 sm:px-6">{items.length === 0 ? "No pass-or-fail requirements were found in the pack. Read the instructions to tenderers yourself." : "None in this group."}</p>
       ) : (
         <ul className="flex flex-col">
           {visible.map((item) => {
@@ -129,10 +130,10 @@ export function GateList({
             const state = item.citation ? verificationState(item.citation) : "unverified";
             const quoted = Boolean(item.citation?.quote) && state !== "unverified";
             return (
-              <li key={item.id} id={`req-${item.ref}`} data-testid="gate-row" data-group={group} className="bid-rule flex scroll-mt-24 flex-wrap items-start gap-x-6 gap-y-3 px-4 py-[18px] sm:px-6">
-                <span className="bid-mono w-full shrink-0 pt-1 text-13 font-medium sm:w-14">{displayRef(item.ref)}</span>
+              <li key={item.id} id={`req-${item.ref}`} data-testid="gate-row" data-group={group} className="border-t border-line flex scroll-mt-24 flex-wrap items-start gap-x-6 gap-y-3 px-4 py-[18px] sm:px-6">
+                <span className="font-mono w-full shrink-0 pt-1 text-13 font-medium sm:w-14">{displayRef(item.ref)}</span>
                 <div className="flex min-w-0 flex-[1_1_380px] flex-col items-start gap-2.5">
-                  {quoted ? <p className="bid-quote">“{item.citation!.quote}”</p> : <p className="text-15 leading-[1.5]">{item.text}</p>}
+                  {quoted ? <p className="type-quote [overflow-wrap:anywhere]">“{item.citation!.quote}”</p> : <p className="text-15 leading-[1.5]">{item.text}</p>}
                   {quoted && item.threshold ? (
                     <p className="text-13 text-ink-2">
                       Level we read: <span className="font-semibold text-ink">{item.threshold}</span>
@@ -140,7 +141,7 @@ export function GateList({
                   ) : !quoted ? (
                     <p className="text-13 text-danger">Our summary — this wording was not found in the pack text. Check the documents before relying on it.</p>
                   ) : null}
-                  {item.citation ? <CitationMark citation={item.citation} links={links} /> : <span className="bid-chip" data-state-kind="unverified">No source given · Unverified</span>}
+                  {item.citation ? <CitationMark citation={item.citation} links={links} /> : <ReferenceChip file="No source given" state="unverified" />}
                   {item.provenance?.notes?.length ? <p className="text-13 text-accent-ink">{item.provenance.notes[0]}</p> : null}
                 </div>
                 <div className="flex min-w-0 flex-[0_1_300px] flex-col items-start gap-1.5">
@@ -156,9 +157,9 @@ export function GateList({
                           : "Not compared with your company yet.")}
                   </p>
                   {item.statusByUser ? (
-                    <span className="bid-mono text-xs text-ink-2">Yours: set by you</span>
+                    <span className="font-mono text-xs text-ink-2">Yours: set by you</span>
                   ) : group !== "confirm" && item.companyNote ? (
-                    <span className="bid-mono text-xs text-ink-2">Yours: company facts (confirmed)</span>
+                    <span className="font-mono text-xs text-ink-2">Yours: company facts (confirmed)</span>
                   ) : null}
                   {readOnly ? null : group === "gap" && !item.statusByUser && libraryHref ? (
                     <ButtonLink variant="outline" size="sm" href={libraryHref} className="mt-0.5">
@@ -176,7 +177,7 @@ export function GateList({
         </ul>
       )}
       {hidden > 0 ? (
-        <div className="bid-rule bid-noprint px-4 py-1 sm:px-6">
+        <div className="border-t border-line print:hidden px-4 py-1 sm:px-6">
           <Button variant="link" type="button" className="text-sm" onClick={() => setShowAllMet(true)} data-testid="gate-show-more">
             Show {hidden} more met requirement{hidden === 1 ? "" : "s"}
           </Button>

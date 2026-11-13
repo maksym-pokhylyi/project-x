@@ -145,16 +145,16 @@ export function ProcessingState({ bidId, initial }: { bidId: string; initial: St
   const stageNumber = current >= 0 ? current + 1 : Math.min(stages.length, stages.filter((entry) => entry.status === "done").length + 1);
 
   return (
-    <section aria-labelledby="progress-h" data-testid="processing-state" data-status={state.status} className={cn("bid-card bid-scope px-5 py-6 sm:px-7", state.status === "failed" ? "border-danger" : "")}>
+    <section aria-labelledby="progress-h" data-testid="processing-state" data-status={state.status} className={cn("rounded-card border border-line bg-surface text-15 text-ink px-5 py-6 sm:px-7", state.status === "failed" ? "border-danger" : "")}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="progress-h" className="bid-h3">
+        <h2 id="progress-h" className="text-15 font-semibold">
           {state.status === "failed" ? "The check stopped" : "Building the check"}{" "}
           <span className="font-normal text-ink-2">
             · stage {stageNumber} of {stages.length}
           </span>
         </h2>
         {active ? (
-          <p className="bid-mono text-xs text-ink-2 tabular-nums" aria-hidden>
+          <p className="font-mono text-xs text-ink-2 tabular-nums" aria-hidden>
             {elapsedLabel(state.startedAt, now)}
           </p>
         ) : null}
@@ -195,7 +195,7 @@ export function ProcessingState({ bidId, initial }: { bidId: string; initial: St
               <RotateCw aria-hidden className={cn("size-4", retrying ? "animate-spin" : "")} />
               {retrying ? "Trying again…" : "Try again"}
             </Button>
-            <a href="/contact" className="bid-link text-sm font-medium">
+            <a href="/contact" className="link text-sm font-medium">
               Contact support
             </a>
           </div>

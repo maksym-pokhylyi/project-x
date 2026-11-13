@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { BidAccessSummary } from "@/features/bids/access";
 import { consumeBidAllowance, getBidAccess, getFreeCheckUse } from "@/features/bids/access";
-import { UpgradePanel } from "@/features/bids/components/upgrade-panel";
+import { UpgradePanel } from "@/features/bids/components/ui/upgrade-panel";
 import { OFFERS } from "@/features/bids/offers";
 import * as bidsApi from "@/features/bids/server/bids";
 import { renderEmail } from "@/lib/email/templates";

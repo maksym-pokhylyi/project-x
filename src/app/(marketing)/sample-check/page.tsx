@@ -51,7 +51,7 @@ export default async function SampleCheckPage() {
 
   return (
     <div className="bg-paper" id="top">
-      <div className="bid-scope sticky top-0 z-20 border-b border-line bg-surface" data-testid="sample-cta-bar">
+      <div className="text-15 text-ink sticky top-0 z-20 border-b border-line bg-surface" data-testid="sample-cta-bar">
         <div className=" mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2.5 sm:px-8">
           <p className="text-sm">
             <span className="font-semibold">A sample check, built from a real public tender pack.</span>{" "}
@@ -62,16 +62,16 @@ export default async function SampleCheckPage() {
           </ButtonLink>
         </div>
       </div>
-      <div className="bid-scope mx-auto flex max-w-[1280px] flex-col px-4 pt-8 pb-16 sm:px-8" data-testid="sample-check">
+      <div className="text-15 text-ink mx-auto flex max-w-[1280px] flex-col px-4 pt-8 pb-16 sm:px-8" data-testid="sample-check">
         <header className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
           <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-2">
             <p className="self-start rounded-control bg-brand-tint px-3 py-1.5 text-sm font-semibold text-brand" data-testid="sample-band">
               A sample check, built from a real public tender pack
             </p>
-            <p className="bid-mono text-xs text-ink-2">
+            <p className="font-mono text-xs text-ink-2">
               Read-only · {sample.files.filter((file) => file.kind !== "zip").length} files as published by the buyer
             </p>
-            <h1 className="bid-h1">{source.title}</h1>
+            <h1 className="type-title [overflow-wrap:anywhere]">{source.title}</h1>
             <p className="text-15">
               {source.buyer} <span className="text-ink-2">· {bid.title}</span>
             </p>
@@ -81,18 +81,18 @@ export default async function SampleCheckPage() {
             </p>
             <p className="text-13 text-ink-2" data-testid="sample-source">
               Source documents: published by {source.buyer} on{" "}
-              <a href={source.documentsPage} target="_blank" rel="noopener noreferrer" className="bid-link">
+              <a href={source.documentsPage} target="_blank" rel="noopener noreferrer" className="link">
                 {hostOf(source.documentsPage)}
               </a>{" "}
               ·{" "}
-              <a href={source.noticeUrl} target="_blank" rel="noopener noreferrer" className="bid-link">
+              <a href={source.noticeUrl} target="_blank" rel="noopener noreferrer" className="link">
                 the buyer&rsquo;s tender notice
               </a>{" "}
               · retrieved {new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${source.retrieved}T12:00:00Z`))}. This tender has closed.
             </p>
             <p className="text-13 text-ink-2" data-testid="sample-removal">
               The tender documents belong to the buyer; we quote them to show how a check reads. Ask us to remove this sample:{" "}
-              <a href="mailto:hello@bidfolio.co.uk" className="bid-link">
+              <a href="mailto:hello@bidfolio.co.uk" className="link">
                 hello@bidfolio.co.uk
               </a>
               .
@@ -127,7 +127,7 @@ export default async function SampleCheckPage() {
 
         <section aria-labelledby="all-req-h" className="mt-14 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <h2 id="all-req-h" className="bid-h2">
+            <h2 id="all-req-h" className="type-section">
               Every requirement found
             </h2>
             <p className="max-w-[760px] text-sm text-ink-2">
@@ -135,8 +135,8 @@ export default async function SampleCheckPage() {
               once you have read it on the page.
             </p>
           </div>
-          <details className="bid-card px-4 py-3 sm:px-6" data-testid="sample-all-requirements">
-            <summary className="bid-link inline-flex min-h-11 cursor-pointer items-center text-sm font-medium">Show all {requirements.length} requirements</summary>
+          <details className="rounded-card border border-line bg-surface px-4 py-3 sm:px-6" data-testid="sample-all-requirements">
+            <summary className="link inline-flex min-h-11 cursor-pointer items-center text-sm font-medium">Show all {requirements.length} requirements</summary>
             <div className="mt-3">
               <RequirementsView bidId={bid.id} requirements={requirements} links={links} readOnly compact />
             </div>
@@ -146,7 +146,7 @@ export default async function SampleCheckPage() {
         {question ? (
           <section aria-labelledby="sample-answer" className="mt-14 flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <h2 id="sample-answer" className="bid-h2 scroll-mt-24">
+              <h2 id="sample-answer" className="type-section scroll-mt-24">
                 One drafted answer, with the evaluator&rsquo;s view
               </h2>
               <p className="max-w-[760px] text-sm text-ink-2">
@@ -190,7 +190,7 @@ export default async function SampleCheckPage() {
         ) : null}
 
         <section className="mt-16 flex flex-col items-start gap-4 rounded-card bg-brand-tint px-5 py-7 sm:px-8">
-          <h2 className="bid-serif text-3xl leading-[1.2] font-semibold sm:text-3xl">Upload your own tender pack and get this for it.</h2>
+          <h2 className="font-serif text-3xl leading-[1.2] font-semibold sm:text-3xl">Upload your own tender pack and get this for it.</h2>
           <p className="max-w-[680px] text-15">
             Your first cited bid check is free: the verdict, every pass-or-fail requirement quoted from the pack with its page, the scored questions and the terms to read yourself. Drafting and marking are part of Bid Desk.
           </p>

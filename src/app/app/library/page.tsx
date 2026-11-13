@@ -51,13 +51,13 @@ export default async function LibraryPage() {
   const now = new Date().getTime();
 
   return (
-    <div className="bid-scope flex flex-col">
-      <h1 className="bid-h1">Documents</h1>
+    <div className="text-15 text-ink flex flex-col">
+      <h1 className="type-title [overflow-wrap:anywhere]">Documents</h1>
       <p className="mt-2 max-w-[760px] text-17 leading-[1.45]">What Bidfolio knows about your company. Checks and drafts use only what is here.</p>
 
       <section aria-labelledby="facts-heading" className="mt-10 flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 id="facts-heading" className="bid-h2">
+          <h2 id="facts-heading" className="type-section">
             Company facts
           </h2>
           <p className="max-w-[760px] text-sm text-ink-2">Every bid check compares the pack&rsquo;s requirements with these. Correct anything that is wrong or out of date: nothing is used until you save it.</p>
@@ -74,7 +74,7 @@ export default async function LibraryPage() {
 
       <section aria-labelledby="docs-heading" className="mt-14 flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 id="docs-heading" className="bid-h2">
+          <h2 id="docs-heading" className="type-section">
             Documents
           </h2>
           <p className="text-sm text-ink-2">

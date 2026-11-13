@@ -14,6 +14,8 @@ import { UPLOAD_FAILED_MESSAGE, UploadError, uploadFile } from "./upload-client"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FileInput } from "@/features/bids/components/ui/file-input";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 type Row = {
   key: string;
@@ -269,17 +271,17 @@ export function NewBidForm({
     <div className="flex flex-col gap-10" data-testid="new-bid-form">
       {/* --- 1 · Which tender? ------------------------------------------------------------------ */}
       <section aria-labelledby="tender-h" className="flex flex-col gap-4">
-        <h2 id="tender-h" className="bid-h2">
+        <h2 id="tender-h" className="type-section">
           1 · Which tender?
         </h2>
         {noticeId ? (
-          <div className="bid-card flex flex-wrap items-start gap-x-8 gap-y-4 px-5 py-5 sm:px-6" data-testid="tender-card">
+          <div className="rounded-card border border-line bg-surface flex flex-wrap items-start gap-x-8 gap-y-4 px-5 py-5 sm:px-6" data-testid="tender-card">
             <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-2">
               <p className="text-17 leading-[1.35] font-semibold">{tender?.title ?? "Linked to a tender notice"}</p>
               <p className="text-15">{tender?.buyerName ?? "The title, buyer and deadline will be read from the pack you upload."}</p>
               <p className="flex flex-wrap items-center gap-2">
-                <span className="bid-pill bid-pill-info text-xs">Tender notice</span>
-                <span className="bid-mono text-xs text-ink-2">{tender?.reference ?? noticeId}</span>
+                <Badge variant="info">Tender notice</Badge>
+                <span className="font-mono text-xs text-ink-2">{tender?.reference ?? noticeId}</span>
               </p>
             </div>
             {closes && left ? (
@@ -345,7 +347,7 @@ export function NewBidForm({
 
       {/* --- 2 · Upload the tender pack --------------------------------------------------------- */}
       <section aria-labelledby="upload-h" className="flex flex-col gap-4">
-        <h2 id="upload-h" className="bid-h2">
+        <h2 id="upload-h" className="type-section">
           2 · Upload the tender pack
         </h2>
         {disabled ? <p className="text-15 text-ink-2">Upload opens once you have a bid to use.</p> : null}
@@ -363,7 +365,7 @@ export function NewBidForm({
           }}
           className={cn(
             "flex flex-col items-center justify-center gap-3 rounded-card border border-dashed px-6 py-8 text-center",
-            disabled ? "border-line bg-paper-deep opacity-70" : dragging ? "border-brand bg-brand-tint" : "border-line-strong bg-surface",
+            disabled ? "border-line bg-paper-deep text-ink-2" : dragging ? "border-brand bg-brand-tint" : "border-line-strong bg-surface",
           )}
         >
           <Upload aria-hidden className="size-6" strokeWidth={1.6} />
@@ -372,6 +374,7 @@ export function NewBidForm({
             ref={input}
             id="pack-files"
             data-testid="file-input"
+            aria-label="Tender pack files"
             multiple
             accept={ACCEPT_ATTRIBUTE}
             className="sr-only"
@@ -387,6 +390,7 @@ export function NewBidForm({
             className="sr-only"
             tabIndex={-1}
             aria-hidden
+            aria-label="Replacement file"
             onChange={(event) => {
               const file = event.target.files?.[0];
               const old = replacing.current;
@@ -404,14 +408,14 @@ export function NewBidForm({
         </div>
 
         {rows.length > 0 ? (
-          <div className="bid-card" data-testid="file-list">
+          <div className="rounded-card border border-line bg-surface" data-testid="file-list">
             <h3 className="px-5 py-4 text-15 font-semibold sm:px-6">
               Files <span className="font-normal text-ink-2">· {rows.length} added</span>
             </h3>
             <ul aria-label="Files">
               {rows.map((row) => (
-                <li key={row.key} className="bid-rule flex flex-wrap items-center gap-x-6 gap-y-1.5 px-5 py-3 sm:px-6" data-file-status={row.status}>
-                  <span className={cn("bid-mono min-w-0 flex-[1_1_240px] text-13 [overflow-wrap:anywhere]", row.status === "skipped" ? "text-ink-2" : "")}>{row.name}</span>
+                <li key={row.key} className="border-t border-line flex flex-wrap items-center gap-x-6 gap-y-1.5 px-5 py-3 sm:px-6" data-file-status={row.status}>
+                  <span className={cn("font-mono min-w-0 flex-[1_1_240px] text-13 [overflow-wrap:anywhere]", row.status === "skipped" ? "text-ink-2" : "")}>{row.name}</span>
                   <span className="w-20 shrink-0 text-13 text-ink-2 tabular-nums">{formatBytes(row.size)}</span>
                   <span className="flex min-w-0 flex-[2_1_260px] flex-wrap items-center gap-x-3 gap-y-1.5 text-13">
                     {row.status === "done" ? (
@@ -429,9 +433,7 @@ export function NewBidForm({
                         ) : (
                           <>
                             <span className="font-semibold tabular-nums">Uploading {row.progress}%</span>
-                            <span className="flex h-1 w-40 max-w-full rounded-full bg-line" role="progressbar" aria-valuenow={row.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Uploading ${row.name}`}>
-                              <span className="rounded-full bg-ink transition-[width]" style={{ width: `${row.progress}%` }} />
-                            </span>
+                            <Progress value={row.progress} aria-label={`Uploading ${row.name}`} className="h-1 w-40 max-w-full" />
                           </>
                         )}
                       </>
@@ -439,7 +441,7 @@ export function NewBidForm({
                       <span className="text-ink-2">Waiting</span>
                     ) : row.status === "skipped" ? (
                       <>
-                        <span className="bid-pill bid-pill-info text-xs">No action needed</span>
+                        <Badge variant="info">No action needed</Badge>
                         <span>Will be skipped: {row.error}.</span>
                       </>
                     ) : (
@@ -502,7 +504,7 @@ export function NewBidForm({
             {starting ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
             {starting ? "Starting…" : "Start the check"}
           </Button>
-          <Link href="/app/bids" className="bid-link text-15 font-medium" data-testid="save-later">
+          <Link href="/app/bids" className="link text-15 font-medium" data-testid="save-later">
             Save and finish later
           </Link>
         </div>

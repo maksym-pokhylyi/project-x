@@ -109,7 +109,7 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
   const shown = needle ? docs.filter((doc) => `${doc.fileName} ${doc.title} ${LIBRARY_DOC_KIND_LABELS[doc.kind]}`.toLowerCase().includes(needle)) : docs;
 
   return (
-    <div className="bid-card" data-testid="docs-panel" id="documents">
+    <div className="rounded-card border border-line bg-surface" data-testid="docs-panel" id="documents">
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 px-5 py-5 sm:px-6">
         <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-1.5">
           <label htmlFor="doc-search" className="text-15 font-medium">
@@ -135,6 +135,7 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
           className="sr-only"
           tabIndex={-1}
           aria-hidden
+          aria-label="Replacement document"
           onChange={(event) => {
             const file = event.target.files?.[0];
             const old = replacing.current;
@@ -153,7 +154,7 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
         <ul className="border-t border-line text-sm">
           {uploads.map((row) => (
             <li key={row.key} className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line px-5 py-2.5 last:border-b-0 sm:px-6">
-              <span className="bid-mono min-w-0 flex-[1_1_220px] text-13 [overflow-wrap:anywhere]">{row.name}</span>
+              <span className="font-mono min-w-0 flex-[1_1_220px] text-13 [overflow-wrap:anywhere]">{row.name}</span>
               {row.error ? (
                 <>
                   <span role="alert" className="flex-[2_1_240px] text-13 text-danger">
@@ -220,7 +221,7 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
                   <tr key={doc.id} data-testid="library-doc" data-status={doc.status}>
                     <td className={cn(cell, "max-w-[420px] pr-3 pl-6")}>
                       <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <a href={`/api/library/${doc.id}/file`} target="_blank" rel="noopener noreferrer" className="bid-mono bid-link-quiet text-13 [overflow-wrap:anywhere]">
+                        <a href={`/api/library/${doc.id}/file`} target="_blank" rel="noopener noreferrer" className="font-mono link text-13 [overflow-wrap:anywhere]">
                           {doc.fileName}
                         </a>
                         {doc.expiresAt ? (
@@ -240,7 +241,7 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
                         </span>
                       ) : (
                         <details className="mt-1 text-13">
-                          <summary className="bid-link-quiet inline-flex min-h-8 cursor-pointer items-center text-ink-2">What it says, and its dates</summary>
+                          <summary className="link inline-flex min-h-8 cursor-pointer items-center text-ink-2">What it says, and its dates</summary>
                           {doc.summary ? <p className="mt-1">{doc.summary}</p> : null}
                           {doc.error ? <p className="mt-1 text-accent-ink">{doc.error}</p> : null}
                           {doc.facts.length > 0 ? (

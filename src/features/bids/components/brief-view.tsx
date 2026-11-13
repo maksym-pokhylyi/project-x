@@ -17,11 +17,14 @@ import {
 } from "@/features/bids/types";
 import { displayRef, gateGroup, isGatingRequirement, isScoredQuestion, type CoverageSummary, type PackFileItem } from "@/features/bids/view";
 import { cn } from "@/lib/utils";
-import { CitationMark, SourceLegend, type SourceLinks } from "./citation";
+import { CitationMark, SourceLegend, type SourceLinks } from "./ui/citation-mark";
 import { GateList } from "./gate-list";
 import type { QuestionItem } from "./questions-view";
 import type { RequirementItem } from "./requirements-view";
 import { Callout, daysLeftLabel, formatDeadline } from "./ui";
+import { StackedBar } from "@/features/bids/components/ui/stacked-bar";
+import { Badge } from "@/components/ui/badge";
+import { LockedQuestions } from "@/features/bids/components/ui/locked-questions";
 
 /**
  * The cited bid check on one page, following the design handoff (Brief-1440 / Brief-390):
@@ -90,7 +93,7 @@ function RefLinks({ items }: { items: RequirementItem[] }) {
       {shown.map((item, index) => (
         <span key={item.id}>
           {index > 0 ? ", " : ""}
-          <a href={`#req-${item.ref}`} className="bid-mono bid-link-quiet text-13">
+          <a href={`#req-${item.ref}`} className="font-mono link text-13">
             {displayRef(item.ref)}
           </a>
         </span>
@@ -148,10 +151,10 @@ function DateFact({ fact, exact, links, now }: { fact: BriefFact | undefined; ex
   if (fact.status === "conflicting") {
     return (
       <span className="flex flex-col gap-1.5">
-        <span className="bid-pill bid-pill-danger">
+        <Badge variant="destructive">
           <CircleAlert aria-hidden className="size-3.5" />
           Two readings differ — check the documents
-        </span>
+        </Badge>
         {[{ value: fact.value, citation: fact.citation }, ...(fact.alternatives ?? [])].map((reading, index) => (
           <span key={index} className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold">
             {reading.value}
@@ -168,7 +171,7 @@ function DateFact({ fact, exact, links, now }: { fact: BriefFact | undefined; ex
       {left ? <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-(--accent)")} /> : null}
       <span className={left?.past ? "line-through" : undefined}>{exact ? formatDeadline(exact) : fact.value}</span>
       {left ? <span className={cn("rounded px-1.5 py-px text-xs", left.urgent && !left.past ? "bg-danger-tint text-danger" : left.past ? "bg-paper-deep" : "bg-accent-tint")}>{left.label}</span> : null}
-      {fact.status === "ambiguous" ? <span className="bid-pill bid-pill-amber text-xs">Ambiguous — check</span> : null}
+      {fact.status === "ambiguous" ? <Badge variant="warning">Ambiguous — check</Badge> : null}
       <CitationMark citation={fact.citation} links={links} variant="ref" className="ml-auto" />
     </span>
   );
@@ -216,7 +219,7 @@ export function BriefView(props: BriefViewProps) {
   return (
     <div className="flex flex-col gap-10" data-testid="brief-view">
       {warnings.length > 0 ? (
-        <Callout tone="warning" title="Read this before relying on the check" className="-mb-4" action={basePath ? <Link href={`${basePath}/files`} className="bid-link text-sm font-medium">See what was read</Link> : undefined}>
+        <Callout tone="warning" title="Read this before relying on the check" className="-mb-4" action={basePath ? <Link href={`${basePath}/files`} className="link text-sm font-medium">See what was read</Link> : undefined}>
           <ul data-testid="pack-warnings" className="flex list-disc flex-col gap-1 pl-4">
             {warnings.map((warning) => (
               <li key={warning}>{warning}</li>
@@ -243,7 +246,7 @@ export function BriefView(props: BriefViewProps) {
           </p>
           {verdict ? (
             <>
-              <h2 id="verdict-h" className="bid-serif mt-3 text-3xl leading-[1.15] font-semibold tracking-[-0.015em] text-balance sm:text-4xl">
+              <h2 id="verdict-h" className="font-serif mt-3 text-3xl leading-[1.15] font-semibold tracking-[-0.015em] text-balance sm:text-4xl">
                 {headline(verdict, gates)}
               </h2>
               <ul className="mt-4 flex max-w-[660px] flex-col gap-2.5 text-15 leading-[1.5]">
@@ -262,7 +265,7 @@ export function BriefView(props: BriefViewProps) {
                     The requirements were found in the pack but not compared with your company.{" "}
                     {libraryHref && !readOnly ? (
                       <>
-                        <Link href={libraryHref} className="bid-link font-medium">
+                        <Link href={libraryHref} className="link font-medium">
                           Confirm your company facts
                         </Link>
                         , then use “Re-check against company facts” on the Requirements tab.
@@ -288,11 +291,14 @@ export function BriefView(props: BriefViewProps) {
               <div className="mt-auto flex max-w-[660px] flex-col gap-2 pt-5">
                 {gates.total > 0 ? (
                   <>
-                    <div role="img" aria-label={`${gates.met} met, ${gates.confirm} to confirm, ${gates.gap} gaps`} className="flex h-2 gap-[3px] overflow-hidden rounded">
-                      {gates.met > 0 ? <span style={{ flex: `${gates.met} 1 0` }} className="bg-brand" /> : null}
-                      {gates.confirm > 0 ? <span style={{ flex: `${gates.confirm} 1 0` }} className="bg-info" /> : null}
-                      {gates.gap > 0 ? <span style={{ flex: `${gates.gap} 1 0` }} className="bg-danger" /> : null}
-                    </div>
+                    <StackedBar
+                      label={`${gates.met} met, ${gates.confirm} to confirm, ${gates.gap} gaps`}
+                      parts={[
+                        { count: gates.met, className: "bg-brand" },
+                        { count: gates.confirm, className: "bg-info" },
+                        { count: gates.gap, className: "bg-danger" },
+                      ]}
+                    />
                     <p className="flex flex-wrap gap-x-5 gap-y-1 text-13" data-testid="gate-counts">
                       <span>
                         <span className="font-semibold">{gates.met}</span> met
@@ -310,7 +316,7 @@ export function BriefView(props: BriefViewProps) {
                   </>
                 ) : null}
                 <details className="text-13">
-                  <summary className="bid-link inline-flex min-h-9 cursor-pointer items-center font-medium">What this check cannot tell you</summary>
+                  <summary className="link inline-flex min-h-9 cursor-pointer items-center font-medium">What this check cannot tell you</summary>
                   <ul className="mt-1 flex list-disc flex-col gap-1 pl-5" data-testid="not-assessed">
                     {verdict.notAssessed.map((item) => (
                       <li key={item}>{item}</li>
@@ -322,7 +328,7 @@ export function BriefView(props: BriefViewProps) {
             </>
           ) : (
             <>
-              <h2 id="verdict-h" className="bid-serif mt-3 text-3xl leading-[1.15] font-semibold tracking-[-0.015em] sm:text-4xl">
+              <h2 id="verdict-h" className="font-serif mt-3 text-3xl leading-[1.15] font-semibold tracking-[-0.015em] sm:text-4xl">
                 {partial ? "Still reading the pack." : "No verdict yet."}
               </h2>
               <p className="mt-3 max-w-[620px] text-15">{partial ? "What has been found so far is shown below. The verdict appears when every file has been read and checked against your company." : "The check did not finish."}</p>
@@ -367,7 +373,7 @@ export function BriefView(props: BriefViewProps) {
         </dl>
       </section>
 
-      <p className="bid-mono -mt-6 text-xs text-ink-2" data-testid="coverage">
+      <p className="font-mono -mt-6 text-xs text-ink-2" data-testid="coverage">
         Coverage: {coverage.headline}
         {coverage.citations ? ` · ${coverage.citations.verified} of ${coverage.citations.total} quotes found word for word in the pack` : ""}
         {coverage.transcribedPages > 0 ? ` · ${coverage.transcribedPages} scanned ${plural(coverage.transcribedPages, "page")} transcribed by AI` : ""}
@@ -375,7 +381,7 @@ export function BriefView(props: BriefViewProps) {
         {basePath ? (
           <>
             {" · "}
-            <Link href={`${basePath}/files`} className="bid-link-quiet">
+            <Link href={`${basePath}/files`} className="link">
               what was read
             </Link>
           </>
@@ -387,7 +393,7 @@ export function BriefView(props: BriefViewProps) {
           {/* --- Pass-or-fail requirements -------------------------------------------------- */}
           <section aria-labelledby="req-h" className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <h2 id="req-h" className="bid-h2">
+              <h2 id="req-h" className="type-section">
                 Pass-or-fail requirements
               </h2>
               <p className="text-sm text-ink-2">Each line is quoted word for word from the pack. Open a reference to read it on the page. Gaps come first.</p>
@@ -397,7 +403,7 @@ export function BriefView(props: BriefViewProps) {
             {others > 0 ? (
               <p className="text-sm">
                 {basePath ? (
-                  <Link href={`${basePath}/requirements`} className="bid-link font-medium" data-testid="all-requirements-link">
+                  <Link href={`${basePath}/requirements`} className="link font-medium" data-testid="all-requirements-link">
                     All {props.requirements.length} requirements
                   </Link>
                 ) : (
@@ -413,7 +419,7 @@ export function BriefView(props: BriefViewProps) {
           {/* --- Scored questions ----------------------------------------------------------- */}
           <section aria-labelledby="q-h" className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <h2 id="q-h" className="bid-h2">
+              <h2 id="q-h" className="type-section">
                 Scored questions
               </h2>
               <p className="text-sm text-ink-2">
@@ -427,16 +433,9 @@ export function BriefView(props: BriefViewProps) {
               </p>
             </div>
             {scored.length > 0 && props.locked ? (
-              <ol className="bid-card" data-testid="scored-questions-locked">
-                {scored.map((question, index) => (
-                  <li key={question.id} className={cn("flex items-baseline gap-4 px-5 py-3 text-15 sm:px-6", index > 0 ? "bid-rule" : "")}>
-                    <span className="bid-mono w-14 shrink-0 text-xs text-ink-2">{question.ref}</span>
-                    <span className="min-w-0">{question.title ?? question.text}</span>
-                  </li>
-                ))}
-              </ol>
+              <LockedQuestions items={scored.map((question) => ({ id: question.id, reference: question.ref, title: question.title ?? question.text }))} />
             ) : scored.length > 0 ? (
-              <div className="bid-card overflow-hidden">
+              <div className="rounded-card border border-line bg-surface overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[720px] border-collapse text-sm" data-testid="scored-questions">
                     <thead>
@@ -457,9 +456,9 @@ export function BriefView(props: BriefViewProps) {
                         return (
                           <tr key={question.id}>
                             <td className={cn(cell, "pr-3 pl-6")}>
-                              {question.ref ? <span className="bid-mono mr-2.5 text-13 text-ink-2">{question.ref}</span> : null}
+                              {question.ref ? <span className="font-mono mr-2.5 text-13 text-ink-2">{question.ref}</span> : null}
                               {href ? (
-                                <Link href={href} className="bid-link font-semibold">
+                                <Link href={href} className="link font-semibold">
                                   {title}
                                 </Link>
                               ) : (
@@ -498,7 +497,7 @@ export function BriefView(props: BriefViewProps) {
             {forms > 0 ? (
               <p className="text-sm">
                 {basePath ? (
-                  <Link href={`${basePath}/questions`} className="bid-link font-medium">
+                  <Link href={`${basePath}/questions`} className="link font-medium">
                     {forms} {plural(forms, "form or declaration", "forms and declarations")} to complete
                   </Link>
                 ) : (
@@ -510,8 +509,8 @@ export function BriefView(props: BriefViewProps) {
               </p>
             ) : null}
             {scale.length > 0 || (evaluationModel?.criteria.length ?? 0) > 0 || (evaluationModel?.minimumThresholds.length ?? 0) > 0 ? (
-              <details className="bid-card px-5 py-3 text-sm" data-testid="marking-detail">
-                <summary className="bid-link inline-flex min-h-9 cursor-pointer items-center font-medium">How answers are marked: criteria and scoring scale</summary>
+              <details className="rounded-card border border-line bg-surface px-5 py-3 text-sm" data-testid="marking-detail">
+                <summary className="link inline-flex min-h-9 cursor-pointer items-center font-medium">How answers are marked: criteria and scoring scale</summary>
                 <div className="mt-2 flex flex-col gap-4 pb-2">
                   {evaluationModel && evaluationModel.criteria.length > 0 ? (
                     <ul className="flex flex-col">
@@ -528,7 +527,7 @@ export function BriefView(props: BriefViewProps) {
                     <ul className="flex flex-col gap-2">
                       {scale.map((row) => (
                         <li key={row.score} className="flex gap-3">
-                          <span className="bid-mono w-8 shrink-0 font-medium">{row.score}</span>
+                          <span className="font-mono w-8 shrink-0 font-medium">{row.score}</span>
                           <span>
                             {row.label ? <span className="font-semibold">{row.label}. </span> : null}
                             {row.descriptor}
@@ -552,8 +551,8 @@ export function BriefView(props: BriefViewProps) {
 
         {/* --- Side column ---------------------------------------------------------------------- */}
         <aside className="flex min-w-0 flex-[1_1_320px] flex-col gap-6">
-          <section aria-labelledby="files-h" className="bid-card px-5 pt-[18px] pb-2" data-testid="pack-files-card">
-            <h2 id="files-h" className="bid-h3">
+          <section aria-labelledby="files-h" className="rounded-card border border-line bg-surface px-5 pt-[18px] pb-2" data-testid="pack-files-card">
+            <h2 id="files-h" className="text-15 font-semibold">
               Coverage{" "}
               <span className="font-normal text-ink-2">
                 · {coverage.read} {plural(coverage.read, "file")} read{files.length - coverage.read > 0 ? `, ${files.length - coverage.read} not read` : ""}
@@ -565,11 +564,11 @@ export function BriefView(props: BriefViewProps) {
                 return (
                   <li key={file.id} className="flex min-h-10 items-center justify-between gap-3 border-t border-line">
                     {href ? (
-                      <a href={href} target="_blank" rel="noopener noreferrer" className="bid-mono bid-link-quiet min-w-0 truncate" title={file.name}>
+                      <a href={href} target="_blank" rel="noopener noreferrer" className="font-mono link min-w-0 truncate" title={file.name}>
                         {file.name}
                       </a>
                     ) : (
-                      <span className="bid-mono min-w-0 truncate" title={file.name}>
+                      <span className="font-mono min-w-0 truncate" title={file.name}>
                         {file.name}
                       </span>
                     )}
@@ -580,8 +579,8 @@ export function BriefView(props: BriefViewProps) {
             </ul>
           </section>
 
-          <section aria-labelledby="read-h" className="bid-card px-5 pt-[18px] pb-1.5" data-testid="read-yourself">
-            <h2 id="read-h" className="bid-h3">
+          <section aria-labelledby="read-h" className="rounded-card border border-line bg-surface px-5 pt-[18px] pb-1.5" data-testid="read-yourself">
+            <h2 id="read-h" className="text-15 font-semibold">
               Read these yourself
             </h2>
             <p className="mt-0.5 text-13 text-ink-2">Terms that change your price or your risk.</p>
@@ -602,8 +601,8 @@ export function BriefView(props: BriefViewProps) {
           </section>
 
           {brief && brief.documentsToReturn.length > 0 ? (
-            <section aria-labelledby="return-h" className="bid-card px-5 pt-[18px] pb-1.5" data-testid="documents-to-return">
-              <h2 id="return-h" className="bid-h3">
+            <section aria-labelledby="return-h" className="rounded-card border border-line bg-surface px-5 pt-[18px] pb-1.5" data-testid="documents-to-return">
+              <h2 id="return-h" className="text-15 font-semibold">
                 Return with your tender
               </h2>
               <ul className="mt-2.5 flex flex-col">
@@ -611,7 +610,7 @@ export function BriefView(props: BriefViewProps) {
                   <li key={index} className="flex flex-col items-start gap-1 border-t border-line py-2.5">
                     <p className="text-sm">
                       <span className="font-medium">{item.name}</span>
-                      {item.mandatory ? <span className="bid-tag ml-2 text-xs">Required</span> : null}
+                      {item.mandatory ? <span className="rounded-chip border border-line-strong px-2 py-0.5 text-xs font-semibold whitespace-nowrap ml-2 text-xs">Required</span> : null}
                       {item.formatNote ? <span className="text-ink-2"> · {item.formatNote}</span> : null}
                     </p>
                     <CitationMark citation={item.citation} links={links} variant="ref" short={false} />
@@ -622,8 +621,8 @@ export function BriefView(props: BriefViewProps) {
           ) : null}
 
           {props.keyDates.length > 0 ? (
-            <section aria-labelledby="dates-h" className="bid-card px-5 pt-[18px] pb-1.5" data-testid="key-dates">
-              <h2 id="dates-h" className="bid-h3">
+            <section aria-labelledby="dates-h" className="rounded-card border border-line bg-surface px-5 pt-[18px] pb-1.5" data-testid="key-dates">
+              <h2 id="dates-h" className="text-15 font-semibold">
                 Dates in the pack
               </h2>
               <ul className="mt-2.5 flex flex-col">
@@ -642,8 +641,8 @@ export function BriefView(props: BriefViewProps) {
           ) : null}
 
           {brief && brief.unknowns.length > 0 ? (
-            <section aria-labelledby="unknown-h" className="bid-card px-5 pt-[18px] pb-1.5" data-testid="unknowns">
-              <h2 id="unknown-h" className="bid-h3">
+            <section aria-labelledby="unknown-h" className="rounded-card border border-line bg-surface px-5 pt-[18px] pb-1.5" data-testid="unknowns">
+              <h2 id="unknown-h" className="text-15 font-semibold">
                 Not stated in the pack
               </h2>
               <p className="mt-0.5 text-13 text-ink-2">Worth a clarification question.</p>

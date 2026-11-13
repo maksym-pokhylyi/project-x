@@ -1,12 +1,12 @@
 "use client";
 
-import "./bid-theme.css";
-import { Check, ExternalLink, X } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
 import { Popover } from "radix-ui";
-import { VERIFICATION_LABELS, verificationState, type VerificationState } from "@/features/bids/citation-state";
-import { describeLoc } from "@/features/bids/locations";
+import { verificationState, type VerificationState } from "@/features/bids/citation-state";
 import type { Citation } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
+import { ReferenceChipButton, ReferenceStateMark } from "@/components/ui/reference-chip";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * CitationMark + CitationPopover: the product's core promise in one control. A small
@@ -93,11 +93,15 @@ export function citationLabel(citation: Citation, short = false): string {
   return `${file} · ${where}`;
 }
 
-/** Tick = verified, amber dot = check, hollow dot = unverified (shape and colour both differ). */
-function StateGlyph({ state }: { state: VerificationState }) {
-  if (state === "verified") return <Check aria-hidden className="size-3 shrink-0 text-brand" strokeWidth={2.6} />;
-  if (state === "check") return <span aria-hidden className="size-[7px] shrink-0 rounded-full bg-(--accent)" />;
-  return <span aria-hidden className="size-[7px] shrink-0 rounded-full border-[1.5px] border-ink-2" />;
+/** The reference as the chip shows it: file, then a page number or another place in the file. */
+function citationParts(citation: Citation, short: boolean): { file: string; page?: string; clause?: string } {
+  const name = citation.fileName.split("/").pop() ?? citation.fileName;
+  const file = short ? shortFileLabel(name) : name;
+  if (!citation.loc) return { file };
+  const page = /^p(\d+)$/.exec(citation.loc);
+  if (page) return { file, page: page[1] };
+  const section = /^s(\d+)$/.exec(citation.loc);
+  return { file, clause: section ? `section ${section[1]}` : citation.loc.startsWith("sheet:") ? `sheet “${citation.loc.slice(6)}”` : citation.loc };
 }
 
 /** The key to the three marks, shown above any list of cited items. */
@@ -105,15 +109,15 @@ export function SourceLegend({ className }: { className?: string }) {
   return (
     <p className={cn("flex flex-wrap gap-x-6 gap-y-1 text-13 text-ink-2", className)} data-testid="source-legend">
       <span className="inline-flex items-center gap-1.5">
-        <StateGlyph state="verified" />
+        <ReferenceStateMark state="verified" />
         Verified: matches the file word for word
       </span>
       <span className="inline-flex items-center gap-1.5">
-        <StateGlyph state="check" />
+        <ReferenceStateMark state="check" />
         Check: read it yourself
       </span>
       <span className="inline-flex items-center gap-1.5">
-        <StateGlyph state="unverified" />
+        <ReferenceStateMark state="unverified" />
         Unverified: could not be matched
       </span>
     </p>
@@ -126,6 +130,10 @@ export function SourceLegend({ className }: { className?: string }) {
  * that page. `variant="chip"` is the boxed reference under a quoted line; `variant="ref"`
  * is the quiet underlined reference used in fact cards and side lists. Both always carry
  * the verification state — a quote our own check could not find never looks verified.
+ *
+ * The trigger has no `aria-label`: its accessible name is the text it shows (file, page,
+ * place) followed by the state word the chip carries for screen readers, so what is heard
+ * starts with what is seen (WCAG 2.5.3, label in name).
  */
 export function CitationMark({
   citation,
@@ -142,25 +150,22 @@ export function CitationMark({
 }) {
   if (!citation || (!citation.quote && !citation.fileName)) return null;
   const state = verificationState(citation);
-  const label = citationLabel(citation, short ?? variant === "ref");
+  const parts = citationParts(citation, short ?? variant === "ref");
   const source = sourceHref(citation, links);
   const note = stateNote(citation, state);
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
-        <button
-          type="button"
+        <ReferenceChipButton
           data-testid="citation-mark"
           data-verified={citation.verified ? "true" : "false"}
-          data-state-kind={state}
-          aria-label={`Source, ${VERIFICATION_LABELS[state].toLowerCase()}: ${citation.fileName}${citation.loc ? `, ${describeLoc(citation.loc)}` : ""}`}
-          className={cn(variant === "chip" ? "bid-chip" : "bid-ref", className)}
-        >
-          {variant === "chip" ? <StateGlyph state={state} /> : null}
-          <span className={variant === "chip" ? "min-w-0 truncate" : "min-w-0 [overflow-wrap:anywhere]"}>{label}</span>
-          {variant === "chip" ? null : <StateGlyph state={state} />}
-          <span className="sr-only">{VERIFICATION_LABELS[state]}</span>
-        </button>
+          file={parts.file}
+          page={parts.page}
+          clause={parts.clause}
+          state={state}
+          quiet={variant === "ref"}
+          className={className}
+        />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
@@ -169,26 +174,27 @@ export function CitationMark({
           sideOffset={6}
           collisionPadding={12}
           data-testid="citation-popover"
-          className="bid-pop z-50 w-[min(27rem,calc(100vw-1.5rem))] p-4 text-sm outline-none"
+          aria-label={`Source: ${citationLabel(citation)}`}
+          className="rounded-card border border-line bg-surface text-ink shadow-overlay z-50 w-[min(27rem,calc(100vw-1.5rem))] p-4 text-sm outline-none"
         >
           <div className="flex items-start justify-between gap-2">
-            <p className={cn("bid-pill", state === "verified" ? "bid-pill-met" : state === "check" ? "bid-pill-amber" : "bid-pill-danger")}>
-              <StateGlyph state={state} />
+            <Badge variant={state === "verified" ? "success" : state === "check" ? "warning" : "destructive"}>
+              <ReferenceStateMark state={state} />
               {STATE_HEADING[state]}
-            </p>
+            </Badge>
             <Popover.Close aria-label="Close" className="-mt-1 -mr-1 flex size-8 items-center justify-center rounded text-ink-2 hover:bg-paper">
               <X aria-hidden className="size-4" />
             </Popover.Close>
           </div>
           {citation.quote ? (
-            <blockquote className="bid-serif mt-3 max-h-56 overflow-y-auto rounded-control bg-paper px-3 py-2.5 text-15 leading-[1.45] whitespace-pre-wrap">“{citation.quote}”</blockquote>
+            <blockquote className="font-serif mt-3 max-h-56 overflow-y-auto rounded-control bg-paper px-3 py-2.5 text-15 leading-[1.45] whitespace-pre-wrap">“{citation.quote}”</blockquote>
           ) : (
             <p className="mt-3 text-ink-2">No quote was given for this item.</p>
           )}
-          <p className="bid-mono mt-2 text-xs break-words text-ink-2">{citationLabel(citation)}</p>
+          <p className="font-mono mt-2 text-xs break-words text-ink-2">{citationLabel(citation)}</p>
           {note ? <p className={cn("mt-2 text-13", state === "verified" ? "text-ink-2" : "")}>{note}</p> : null}
           {source ? (
-            <a href={source.href} target="_blank" rel="noopener noreferrer" className="bid-link mt-3 inline-flex min-h-9 items-center gap-1.5 text-sm font-medium">
+            <a href={source.href} target="_blank" rel="noopener noreferrer" className="link mt-3 inline-flex min-h-9 items-center gap-1.5 text-sm font-medium">
               <ExternalLink aria-hidden className="size-3.5" />
               {citation.page ? `Open source page ${citation.page}` : source.external ? "Open the published document" : "Open source file"}
             </a>

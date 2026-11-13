@@ -31,11 +31,6 @@ const KNOWN_DEBT = new Set([
   "components/marketing/mobile-nav.tsx",
   "components/marketing/plan-comparison.tsx",
   "components/styleguide/demos.tsx",
-  // Bid desk patterns with their own toggle or chip button (source marker, citation chip, fact tick):
-  // they leave this list when the patterns move into src/components/ui.
-  "features/bids/components/answer-editor.tsx",
-  "features/bids/components/citation.tsx",
-  "features/bids/components/fact-confirm.tsx",
   "features/procurement/components/data-request-form.tsx",
   "features/procurement/components/radar-profile-form.tsx",
   "features/procurement/components/radar-screen.tsx",
