@@ -11,6 +11,9 @@ import { tenderReferenceFromInput, type TenderSummary } from "@/features/bids/te
 import { cn } from "@/lib/utils";
 import { daysLeftLabel } from "./ui";
 import { uploadFile } from "./upload-client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FileInput } from "@/features/bids/components/ui/file-input";
 
 type Row = {
   key: string;
@@ -263,9 +266,9 @@ export function NewBidForm({
                 </span>
               </div>
             ) : null}
-            <button type="button" className="bid-btn" onClick={() => void setTender(null)} disabled={disabled}>
+            <Button variant="outline" type="button"  onClick={() => void setTender(null)} disabled={disabled}>
               Change
-            </button>
+            </Button>
           </div>
         ) : null}
         <div className="flex max-w-[560px] flex-col gap-1.5">
@@ -273,9 +276,9 @@ export function NewBidForm({
             {noticeId ? "Or paste a Find a Tender link" : "Paste a Find a Tender link (optional)"}
           </label>
           <div className="flex flex-wrap gap-2">
-            <input
+            <Input
               id="tender-link"
-              className="bid-input min-w-0 flex-[1_1_260px]"
+              className="min-w-0 flex-[1_1_260px]"
               type="url"
               inputMode="url"
               placeholder="https://www.find-tender.service.gov.uk/Notice/…"
@@ -290,11 +293,11 @@ export function NewBidForm({
               }}
               aria-describedby="tender-link-hint"
               aria-invalid={linkError ? true : undefined}
-            />
+/>
             {link.trim() ? (
-              <button type="button" className="bid-btn" onClick={submitLink}>
+              <Button variant="outline" type="button"  onClick={submitLink}>
                 Link this tender
-              </button>
+              </Button>
             ) : null}
           </div>
           {linkError ? (
@@ -336,11 +339,10 @@ export function NewBidForm({
         >
           <Upload aria-hidden className="size-6" strokeWidth={1.6} />
           <p className="text-17 font-semibold">Drop the files here</p>
-          <input
+          <FileInput
             ref={input}
             id="pack-files"
             data-testid="file-input"
-            type="file"
             multiple
             accept={ACCEPT_ATTRIBUTE}
             className="sr-only"
@@ -350,9 +352,8 @@ export function NewBidForm({
               event.target.value = "";
             }}
           />
-          <input
+          <FileInput
             ref={replaceInput}
-            type="file"
             accept={ACCEPT_ATTRIBUTE}
             className="sr-only"
             tabIndex={-1}
@@ -367,9 +368,9 @@ export function NewBidForm({
               void addFiles([file]);
             }}
           />
-          <button type="button" className="bid-btn" disabled={disabled} onClick={() => input.current?.click()}>
+          <Button variant="outline" type="button"  disabled={disabled} onClick={() => input.current?.click()}>
             Choose files
-          </button>
+          </Button>
           <p className="max-w-[560px] text-sm text-ink-2">PDF, Word, Excel, CSV, text or ZIP, up to 50 MB a file. Send everything the buyer sent, including appendices and clarifications.</p>
         </div>
 
@@ -411,28 +412,28 @@ export function NewBidForm({
                           </span>
                           {row.error}
                         </span>
-                        <button
+                        <Button variant="outline" size="sm"
                           type="button"
-                          className="bid-btn bid-btn-sm"
+                          
                           onClick={() => {
                             replacing.current = row;
                             replaceInput.current?.click();
                           }}
-                        >
+>
                           Replace
-                        </button>
+                        </Button>
                       </>
                     )}
                   </span>
-                  <button
+                  <Button variant="ghost" size="icon"
                     type="button"
-                    className="-mr-2 flex size-11 shrink-0 items-center justify-center rounded text-ink hover:bg-paper disabled:opacity-40"
+                    className="shrink-0"
                     aria-label={`Remove ${row.name}`}
                     disabled={row.status === "uploading"}
                     onClick={() => void remove(row)}
                   >
                     <X aria-hidden className="size-4" />
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -447,9 +448,9 @@ export function NewBidForm({
           </p>
         ) : null}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <button
+          <Button
             type="button"
-            className={cn("bid-btn px-6 text-17", disabled || reason ? "border-paper-deep bg-paper-deep text-ink-2" : "bid-btn-primary")}
+            className="px-6"
             onClick={() => void start()}
             disabled={disabled || starting || Boolean(reason)}
             data-testid="start-check"
@@ -457,7 +458,7 @@ export function NewBidForm({
           >
             {starting ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
             {starting ? "Starting…" : "Start the check"}
-          </button>
+          </Button>
           <Link href="/app/bids" className="bid-link text-15 font-medium" data-testid="save-later">
             Save and finish later
           </Link>

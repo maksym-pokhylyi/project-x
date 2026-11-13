@@ -1,7 +1,6 @@
 "use client";
 
 import "./bid-theme.css";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Popover } from "radix-ui";
 import { useMemo, useState, useTransition } from "react";
@@ -11,6 +10,9 @@ import { verificationState } from "@/features/bids/citation-state";
 import { CitationMark, type SourceLinks } from "./citation";
 import type { RequirementItem } from "./requirements-view";
 import { StatusPill } from "./ui";
+import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
+import { FilterChip } from "@/components/ui/filter-chip";
 
 /**
  * "Pass-or-fail requirements" on the brief: each line quoted from the pack with its source
@@ -41,19 +43,19 @@ function ConfirmControl({ bidId, item, label }: { bidId: string; item: Requireme
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger asChild>
-        <button type="button" className={label === "Confirm" ? "bid-btn bid-btn-sm mt-0.5" : "bid-link min-h-9 border-0 bg-transparent p-0 text-13 font-medium"} data-testid="gate-confirm">
+        <Button variant={label === "Confirm" ? "outline" : "link"} size={label === "Confirm" ? "sm" : undefined} type="button" className={label === "Confirm" ? undefined : "text-13"} data-testid="gate-confirm">
           {label}
-        </button>
+        </Button>
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content align="start" sideOffset={6} collisionPadding={12} className="bid-pop z-50 w-[min(20rem,calc(100vw-1.5rem))] p-1.5 outline-none">
           <p className="px-3 pt-2 pb-1 text-13 text-ink-2">Read the requirement on the page first. Your answer is recorded as set by you.</p>
-          <button type="button" className="bid-menu-item" disabled={pending} onClick={() => set("met")} data-testid="gate-confirm-met">
+          <Button variant="ghost" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" type="button"  disabled={pending} onClick={() => set("met")} data-testid="gate-confirm-met">
             We meet this
-          </button>
-          <button type="button" className="bid-menu-item" disabled={pending} onClick={() => set("gap")} data-testid="gate-confirm-gap">
+          </Button>
+          <Button variant="ghost" className="h-auto w-full justify-start px-3 py-2 text-left font-normal whitespace-normal" type="button"  disabled={pending} onClick={() => set("gap")} data-testid="gate-confirm-gap">
             We do not meet this yet
-          </button>
+          </Button>
           {error ? (
             <p role="alert" className="px-3 py-2 text-xs text-danger">
               {error}
@@ -113,9 +115,9 @@ export function GateList({
     <div className="bid-card" data-testid="gate-list">
       <div role="group" aria-label="Filter requirements" className="bid-noprint flex flex-wrap gap-2 px-4 py-3 sm:px-6">
         {chips.map((chip) => (
-          <button key={chip.key} type="button" className="bid-filter" aria-pressed={filter === chip.key} onClick={() => setFilter(chip.key)} data-testid={`gate-filter-${chip.key}`}>
-            {chip.label} <span className="tabular-nums">{chip.count}</span>
-          </button>
+          <FilterChip key={chip.key} pressed={filter === chip.key} count={chip.count} onClick={() => setFilter(chip.key)} data-testid={`gate-filter-${chip.key}`}>
+            {chip.label}
+          </FilterChip>
         ))}
       </div>
       {visible.length === 0 ? (
@@ -159,9 +161,9 @@ export function GateList({
                     <span className="bid-mono text-xs text-ink-2">Yours: company facts (confirmed)</span>
                   ) : null}
                   {readOnly ? null : group === "gap" && !item.statusByUser && libraryHref ? (
-                    <Link href={libraryHref} className="bid-btn bid-btn-sm mt-0.5">
+                    <ButtonLink variant="outline" size="sm" href={libraryHref} className="mt-0.5">
                       Upload evidence
-                    </Link>
+                    </ButtonLink>
                   ) : group === "confirm" ? (
                     <ConfirmControl bidId={bidId} item={item} label="Confirm" />
                   ) : item.statusByUser ? (
@@ -175,9 +177,9 @@ export function GateList({
       )}
       {hidden > 0 ? (
         <div className="bid-rule bid-noprint px-4 py-1 sm:px-6">
-          <button type="button" className="bid-link min-h-11 border-0 bg-transparent p-0 text-sm font-medium" onClick={() => setShowAllMet(true)} data-testid="gate-show-more">
+          <Button variant="link" type="button" className="text-sm" onClick={() => setShowAllMet(true)} data-testid="gate-show-more">
             Show {hidden} more met requirement{hidden === 1 ? "" : "s"}
-          </button>
+          </Button>
         </div>
       ) : null}
     </div>

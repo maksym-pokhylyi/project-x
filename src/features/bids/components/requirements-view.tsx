@@ -31,6 +31,8 @@ import {
 import { cn } from "@/lib/utils";
 import { CitationMark, type SourceLinks } from "./citation";
 import { Pill, StatusPill } from "./ui";
+import { FilterChip } from "@/components/ui/filter-chip";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export type RequirementItem = {
   id: string;
@@ -133,18 +135,9 @@ export function RequirementsView({
             {FILTERS.map((entry) => {
               const count = requirements.filter(entry.test).length;
               return (
-                <button
-                  key={entry.key}
-                  type="button"
-                  aria-pressed={filter === entry.key}
-                  onClick={() => setFilter(entry.key)}
-                  className={cn(
-                    "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                    filter === entry.key ? "border-primary bg-brand text-white" : "bg-paper text-ink-2 hover:text-ink",
-                  )}
-                >
-                  {entry.label} <span className="tabular-nums opacity-80">{count}</span>
-                </button>
+                <FilterChip key={entry.key} pressed={filter === entry.key} count={count} onClick={() => setFilter(entry.key)}>
+                  {entry.label}
+                </FilterChip>
               );
             })}
           </div>
@@ -315,14 +308,7 @@ function RequirementRow({
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
           <label className={cn("flex items-center gap-1.5 text-xs", readOnly ? "text-ink-2" : "cursor-pointer")}>
-            <input
-              type="checkbox"
-              className="size-4 accent-[var(--primary)]"
-              checked={item.checked}
-              disabled={readOnly}
-              onChange={(event) => onToggleChecked(event.target.checked)}
-              aria-label={`Requirement ${item.ref} checked against the documents`}
-            />
+            <Checkbox checked={item.checked} disabled={readOnly} onCheckedChange={(checked) => onToggleChecked(checked === true)} aria-label={`Requirement ${item.ref} checked against the documents`} />
             Checked
           </label>
           {!readOnly ? (

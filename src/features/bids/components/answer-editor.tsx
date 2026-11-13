@@ -20,6 +20,10 @@ import type { AnswerEvaluation, AnswerVersion, Citation, DraftMeta, QuestionStat
 import { cn } from "@/lib/utils";
 import { CitationMark, type SourceLinks } from "./citation";
 import { Callout, DeadlineChip, StandingNotice, UpgradeNotice } from "./ui";
+import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
 /**
  * Answer editor, following the design handoff (Editor-1440 / Editor-390).
@@ -326,25 +330,25 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
 
   const finalControl = (where: "header" | "bar") =>
     readOnly || !question.draftText ? null : question.status === "final" ? (
-      <button type="button" className="bid-btn" disabled={busy !== null} onClick={() => setStatus("draft")} data-testid={where === "header" ? "reopen-answer" : "reopen-answer-bar"}>
+      <Button variant="outline" type="button"  disabled={busy !== null} onClick={() => setStatus("draft")} data-testid={where === "header" ? "reopen-answer" : "reopen-answer-bar"}>
         <Check aria-hidden className="size-4 text-brand" strokeWidth={2.6} />
         Final · reopen
-      </button>
+      </Button>
     ) : (
-      <button type="button" className="bid-btn bid-btn-primary" disabled={busy !== null || !text.trim()} onClick={() => setStatus("final")} data-testid={where === "header" ? "mark-final" : "mark-final-bar"}>
+      <Button type="button"  disabled={busy !== null || !text.trim()} onClick={() => setStatus("final")} data-testid={where === "header" ? "mark-final" : "mark-final-bar"}>
         Mark as final
-      </button>
+      </Button>
     );
   const markControl = (where: "panel" | "bar") => readOnly ? null : (
-    <button type="button" className={cn("bid-btn w-full", evaluation && !evaluationStale ? "" : where === "panel" ? "bid-btn-primary" : "")} onClick={mark} disabled={busy !== null || !text.trim()} data-testid={where === "panel" ? "evaluate-button" : "evaluate-button-bar"}>
+    <Button type="button" className="w-full" variant={(!evaluation || evaluationStale) && where === "panel" ? "default" : "outline"} onClick={mark} disabled={busy !== null || !text.trim()} data-testid={where === "panel" ? "evaluate-button" : "evaluate-button-bar"}>
       {busy === "evaluate" ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
       {busy === "evaluate" ? "Marking…" : evaluation ? "Mark again" : "Mark this answer"}
-    </button>
+    </Button>
   );
   const buyer = bid.buyerName ?? "the buyer";
 
   return (
-    <div className="bid-scope bid-toolbar @container flex flex-col" data-testid="answer-editor">
+    <div className="bid-scope @container flex flex-col" data-testid="answer-editor">
       {/* --- Sub-header ------------------------------------------------------------------------ */}
       <div className={cn("flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-b border-line pb-3", embedded ? "hidden" : "")}>
         <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1">
@@ -362,10 +366,10 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
             {readOnly ? "" : busy === "save" ? "Saving…" : dirty ? "Unsaved changes" : savedAt ? `Saved at ${timeOf(savedAt)}` : question.draftText ? "Saved" : ""}
           </span>
           {bid.exportHref ? (
-            <a href={bid.exportHref} className="bid-btn" download data-testid="export-answers">
+            <ButtonLink variant="outline" href={bid.exportHref}  download data-testid="export-answers">
               <Download aria-hidden className="size-4" />
               Export to Word
-            </a>
+            </ButtonLink>
           ) : null}
           <span className="hidden @[900px]:inline-flex">{finalControl("header")}</span>
         </div>
@@ -379,9 +383,9 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
             actionLabel="See plans"
             secondary={
               canUnlock ? (
-                <Link href={`/app/bids/${bidId}/questions`} className="bid-btn bid-btn-sm">
+                <ButtonLink variant="outline" href={`/app/bids/${bidId}/questions`}>
                   Use a Bid Pass
-                </Link>
+                </ButtonLink>
               ) : undefined
             }
           >
@@ -406,9 +410,9 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
       {/* Small screens: one question at a time. */}
       <div className={cn("mt-4 flex items-center justify-between gap-3 @[1180px]:hidden", embedded ? "hidden" : "")}>
         {nav.previousHref ? (
-          <Link href={nav.previousHref} aria-label="Previous question" className="bid-btn px-3">
+          <ButtonLink variant="outline" href={nav.previousHref} aria-label="Previous question" className="px-3">
             <ChevronLeft aria-hidden className="size-5" />
-          </Link>
+          </ButtonLink>
         ) : (
           <span className="w-11" />
         )}
@@ -419,9 +423,9 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
           <p className="text-xs text-ink-2">{question.draftText ? `Draft ${draftNumber}` : "Not started"}</p>
         </div>
         {nav.nextHref ? (
-          <Link href={nav.nextHref} aria-label="Next question" className="bid-btn px-3">
+          <ButtonLink variant="outline" href={nav.nextHref} aria-label="Next question" className="px-3">
             <ChevronRight aria-hidden className="size-5" />
-          </Link>
+          </ButtonLink>
         ) : (
           <span className="w-11" />
         )}
@@ -578,27 +582,27 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
 
             {!readOnly ? (
               <div className="bid-noprint flex flex-wrap items-center gap-2 border-b border-line px-5 py-2.5 sm:px-7">
-                <button type="button" className={cn("bid-btn bid-btn-sm", question.draftText ? "" : "bid-btn-primary")} onClick={draft} disabled={busy !== null} data-testid="draft-button">
+                <Button type="button" variant={question.draftText ? "outline" : "default"} onClick={draft} disabled={busy !== null} data-testid="draft-button">
                   {busy === "draft" ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
                   {busy === "draft" ? "Drafting from your documents…" : question.draftText ? "Regenerate" : "Draft from my documents"}
-                </button>
-                <button type="button" className="bid-btn bid-btn-sm bid-btn-quiet" onClick={() => setShowInstructions((value) => !value)} aria-expanded={showInstructions}>
+                </Button>
+                <Button variant="ghost" type="button"  onClick={() => setShowInstructions((value) => !value)} aria-expanded={showInstructions}>
                   {question.draftText ? "Regenerate with instructions" : "Add instructions"}
-                </button>
+                </Button>
                 <span className="ml-auto flex flex-wrap items-center gap-2">
                   {question.versions.length > 0 ? (
-                    <button type="button" className="bid-btn bid-btn-sm bid-btn-quiet" onClick={() => setShowHistory((value) => !value)} aria-expanded={showHistory}>
+                    <Button variant="ghost" type="button"  onClick={() => setShowHistory((value) => !value)} aria-expanded={showHistory}>
                       History ({question.versions.length})
-                    </button>
+                    </Button>
                   ) : null}
                   {mode === "edit" ? (
-                    <button type="button" className="bid-btn bid-btn-sm" onClick={() => void save().then((ok) => (ok ? setMode("read") : undefined))} disabled={busy !== null} data-testid="edit-done">
+                    <Button variant="outline" type="button"  onClick={() => void save().then((ok) => (ok ? setMode("read") : undefined))} disabled={busy !== null} data-testid="edit-done">
                       {busy === "save" ? "Saving…" : "Done"}
-                    </button>
+                    </Button>
                   ) : (
-                    <button type="button" className="bid-btn bid-btn-sm" onClick={() => setMode("edit")} disabled={busy !== null} data-testid="edit-answer">
+                    <Button variant="outline" type="button"  onClick={() => setMode("edit")} disabled={busy !== null} data-testid="edit-answer">
                       Edit
-                    </button>
+                    </Button>
                   )}
                 </span>
               </div>
@@ -608,15 +612,15 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                 <label htmlFor="draft-instructions" className="text-sm font-semibold">
                   Instructions for the next draft
                 </label>
-                <textarea
+                <Textarea
                   id="draft-instructions"
-                  className="bid-input"
+                  
                   value={instructions}
                   onChange={(event) => setInstructions(event.target.value)}
                   rows={3}
                   maxLength={1500}
                   placeholder="e.g. Lead with the Leeds case study. Shorter sentences. Say more about mobilisation in the first four weeks."
-                />
+/>
                 <p className="text-xs text-ink-2">Instructions shape the writing; they cannot add facts. Anything not in your documents still becomes a gap to fill.</p>
               </div>
             ) : null}
@@ -633,16 +637,16 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
               </p>
             ) : mode === "edit" && !readOnly ? (
               <div className="px-3 py-3 sm:px-5">
-                <textarea
+                <Textarea
                   aria-label="Answer text"
                   data-testid="answer-textarea"
-                  className="bid-input bid-draft min-h-[28rem] resize-y"
+                  className="bid-draft resize-y"
                   value={text}
                   onChange={(event) => setText(event.target.value)}
                   onBlur={() => void save()}
-                  rows={18}
+                  rows={20}
                   placeholder="Write your answer here, or use “Draft from my documents” to start from your evidence."
-                />
+/>
                 <p className="mt-1.5 text-xs text-ink-2">Source markers look like [E2] here; a gap looks like [EVIDENCE NEEDED: what is missing]. Saved when you leave the box.</p>
               </div>
             ) : text ? (
@@ -666,16 +670,16 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                         </p>
                         <p className="mt-0.5 line-clamp-2 text-sm">{version.text}</p>
                       </div>
-                      <button
+                      <Button variant="outline"
                         type="button"
-                        className="bid-btn bid-btn-sm"
+                        
                         disabled={busy !== null || readOnly}
                         onClick={() => {
                           if (window.confirm("Restore this draft? The current answer is kept in History.")) void run("restore", () => restoreVersionAction(bidId, question.id, version.id));
                         }}
-                      >
+>
                         Restore
-                      </button>
+                      </Button>
                     </li>
                   ))}
                 </ul>
@@ -790,12 +794,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                           ) : null}
                           {!readOnly ? (
                             <label className="flex min-h-9 cursor-pointer items-center gap-2 text-13">
-                              <input
-                                type="checkbox"
-                                className="size-4 accent-brand"
-                                checked={selectedFixes.includes(index)}
-                                onChange={(event) => setSelectedFixes((value) => (event.target.checked ? [...value, index] : value.filter((item) => item !== index)))}
-                              />
+                              <Checkbox checked={selectedFixes.includes(index)} onCheckedChange={(checked) => setSelectedFixes((value) => (checked === true ? [...value, index] : value.filter((item) => item !== index)))} />
                               Include when revising
                             </label>
                           ) : null}
@@ -805,15 +804,15 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                   </ol>
                   {!readOnly ? (
                     <div className="mt-3 flex flex-col gap-1.5">
-                      <button
+                      <Button variant="outline"
                         type="button"
-                        className="bid-btn bid-btn-sm self-start"
+                        className="self-start"
                         disabled={busy !== null || evaluationStale}
                         data-testid="apply-suggestions"
                         onClick={() => void run("apply", () => applySuggestionsAction(bidId, question.id, selectedFixes.length > 0 ? selectedFixes : evaluation.improvements.map((_, index) => index)))}
-                      >
+>
                         {selectedFixes.length > 0 ? `Revise with ${selectedFixes.length} selected` : "Revise with all of these"}
-                      </button>
+                      </Button>
                       <span className="text-xs text-ink-2">Writes a new draft from your documents. The current text stays in History.</span>
                     </div>
                   ) : null}

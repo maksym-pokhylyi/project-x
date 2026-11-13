@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import type { BidAccessSummary } from "@/features/bids/access";
 import { OFFERS, PLANS_URL, TOP_PLAN_FULL_BIDS } from "@/features/bids/offers";
 import { cn } from "@/lib/utils";
+import { ButtonLink } from "@/components/ui/button-link";
 
 const date = (value: Date) => new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" }).format(value);
 const month = (value: Date) => new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", month: "long", year: "numeric" }).format(value);
@@ -17,9 +18,9 @@ function Offer({ offer, children, primary, testId }: { offer: (typeof OFFERS)[ke
         <span className="text-13 text-ink-2">{offer.cadence}</span>
       </p>
       <p className="text-sm text-ink">{children}</p>
-      <Link href={offer.href} className={cn("bid-btn mt-auto self-start", primary ? "bid-btn-primary" : "")}>
+      <ButtonLink href={offer.href} variant={primary ? "default" : "outline"} className="mt-auto self-start">
         {offer.action}
-      </Link>
+      </ButtonLink>
     </div>
   );
 }
@@ -98,13 +99,13 @@ export function UpgradePanel({
       ) : null}
       {moment === "locked" ? (
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link href={OFFERS.bidPass.href} className="bid-btn bid-btn-primary" data-testid="offer-bid-pass">
+          <ButtonLink href={OFFERS.bidPass.href}  data-testid="offer-bid-pass">
             {OFFERS.bidPass.action} · {OFFERS.bidPass.price}
-          </Link>
+          </ButtonLink>
           {onBidPlan ? null : (
-            <Link href={OFFERS.trial.href} className="bid-btn" data-testid="offer-trial">
+            <ButtonLink variant="outline" href={OFFERS.trial.href}  data-testid="offer-trial">
               Start the 14-day Bid Desk trial
-            </Link>
+            </ButtonLink>
           )}
         </div>
       ) : (

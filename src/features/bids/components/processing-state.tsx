@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { retryProcessingAction } from "@/features/bids/actions";
 import { PROCESSING_STAGE_LABELS, type ProcessingStage } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type StageStatus = "pending" | "running" | "done" | "failed";
 
@@ -190,10 +191,10 @@ export function ProcessingState({ bidId, initial }: { bidId: string; initial: St
           <p className="mt-1">{state.failure.message}</p>
           <p className="mt-1">Nothing found so far has been lost. Trying again continues from this stage and does not use another check from your plan.</p>
           <div className="mt-3 flex flex-wrap items-center gap-4">
-            <button type="button" className="bid-btn bid-btn-primary bid-btn-sm" onClick={retry} disabled={retrying} data-testid="retry-check">
+            <Button size="sm" type="button"  onClick={retry} disabled={retrying} data-testid="retry-check">
               <RotateCw aria-hidden className={cn("size-4", retrying ? "animate-spin" : "")} />
               {retrying ? "Trying again…" : "Try again"}
-            </button>
+            </Button>
             <a href="/contact" className="bid-link text-sm font-medium">
               Contact support
             </a>

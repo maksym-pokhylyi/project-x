@@ -8,6 +8,7 @@ import { listBids, type BidListItem } from "@/features/bids/server/bids";
 import { VERDICT_LABELS, type VerdictKey } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
 import { requireOrgForPage } from "@/server/session";
+import { ButtonLink } from "@/components/ui/button-link";
 
 export const metadata: Metadata = { title: "Bids" };
 export const dynamic = "force-dynamic";
@@ -23,6 +24,8 @@ function stageOf(bid: BidListItem): string {
   if (bid.status === "failed") return "Check stopped";
   if (bid.status === "archived") return "Archived";
   if (bid.questionCount > 0 && bid.finalCount === bid.questionCount) return "Answers final";
+  // Every question has a draft and every draft has been marked.
+  if (bid.questionCount > 0 && bid.draftedCount === bid.questionCount && bid.markedCount === bid.draftedCount) return "Marked";
   if (bid.draftedCount > 0) return `Drafting ${bid.draftedCount} of ${bid.questionCount} ${plural(bid.questionCount, "answer")}`;
   return "Check ready";
 }
@@ -85,13 +88,13 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
 
   return (
     <div className="bid-scope flex flex-col">
-      <div className="bid-toolbar flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
+      <div className=" flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
         <h1 className="bid-h1">Bids</h1>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           <UsageLine access={access} />
-          <Link href="/app/bids/new" className="bid-btn bid-btn-primary" data-testid="new-bid">
+          <ButtonLink href="/app/bids/new"  data-testid="new-bid">
             New bid check
-          </Link>
+          </ButtonLink>
         </div>
       </div>
 
@@ -99,10 +102,10 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
         <section className="bid-card mt-7 flex flex-col items-start gap-4 px-6 py-9 sm:px-9" data-testid="bids-empty">
           <h2 className="bid-h2">No bids yet</h2>
           <p className="max-w-[620px] text-17 leading-[1.45]">Upload a tender pack and get every requirement quoted and cited, checked against your company, with a plain verdict.</p>
-          <div className="bid-toolbar flex flex-wrap items-center gap-x-5 gap-y-3">
-            <Link href="/app/bids/new" className="bid-btn bid-btn-primary">
+          <div className=" flex flex-wrap items-center gap-x-5 gap-y-3">
+            <ButtonLink href="/app/bids/new">
               New bid check
-            </Link>
+            </ButtonLink>
             <Link href="/sample-check" className="bid-link text-15 font-medium text-ink">
               See a sample check
             </Link>

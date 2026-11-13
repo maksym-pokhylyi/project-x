@@ -9,6 +9,7 @@ import { BidTabs } from "@/features/bids/components/bid-tabs";
 import { StandingNotice } from "@/features/bids/components/ui";
 import { loadBidPage } from "@/features/bids/server/page-data";
 import { coverageSummary, isScoredQuestion } from "@/features/bids/view";
+import { ButtonLink } from "@/components/ui/button-link";
 
 export const metadata: Metadata = { title: "Bid" };
 export const dynamic = "force-dynamic";
@@ -65,17 +66,17 @@ export default async function BidLayout({ children, params }: { children: ReactN
             {bid.accessLevel === "brief" ? <span className="bid-tag">Check only</span> : null}
           </p>
         </div>
-        <div className="bid-noprint bid-toolbar flex flex-wrap items-center gap-2.5">
+        <div className="bid-noprint flex flex-wrap items-center gap-2.5">
           {done ? <ExportMenu bidId={bid.id} canExportAnswers={capabilities.exportAnswers} answersReady={answersReady} label={bid.accessLevel === "full" ? undefined : "Download the check (Word)"} /> : null}
           {done && bid.accessLevel !== "full" && bid.status === "ready" ? (
-            <Link href={`${base}#upgrade-h`} className="bid-btn bid-btn-primary" data-testid="unlock-full-bid">
+            <ButtonLink href={`${base}#upgrade-h`}  data-testid="unlock-full-bid">
               Unlock the full bid
-            </Link>
+            </ButtonLink>
           ) : done && questions.length > 0 ? (
-            <Link href={firstScored ? `${base}/questions/${firstScored.id}` : `${base}/questions`} className="bid-btn bid-btn-primary" data-testid="open-answers">
+            <ButtonLink href={firstScored ? `${base}/questions/${firstScored.id}` : `${base}/questions`}  data-testid="open-answers">
               Open draft answers
               <ArrowRight aria-hidden className="size-4" />
-            </Link>
+            </ButtonLink>
           ) : null}
           <BidActions bidId={bid.id} status={bid.status} />
         </div>

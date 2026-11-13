@@ -7,6 +7,11 @@ import { useMemo, useState, useTransition, type ReactNode } from "react";
 import { TURNOVER_BAND_LABELS, TURNOVER_BANDS, type CompanyFacts } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
 import { discardFactsDraftAction, draftFactsFromWebsiteAction, saveCompanyFactsAction } from "../actions";
+import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
+import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/forms/native-select";
+import { Textarea } from "@/components/ui/textarea";
 
 type AccreditationRow = { name: string; reference: string; expiresAt: string };
 
@@ -243,18 +248,18 @@ export function CompanyFactsForm({
               </ul>
             </details>
           ) : null}
-          <button
+          <Button variant="outline" size="sm"
             type="button"
-            className="bid-btn bid-btn-sm mt-3"
+            className="mt-3"
             onClick={() =>
               startSaving(async () => {
                 await discardFactsDraftAction();
                 window.location.reload();
               })
             }
-          >
+>
             Discard suggestions
-          </button>
+          </Button>
         </div>
       ) : null}
 
@@ -267,27 +272,27 @@ export function CompanyFactsForm({
             </h3>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(min(180px,100%),1fr))] gap-4">
               <Field id="turnoverLatest" label="Latest year" error={err("turnover.latestGbp")}>
-                <input id="turnoverLatest" className="bid-input tabular-nums" inputMode="decimal" placeholder="£" value={form.turnoverLatest} onChange={(event) => set("turnoverLatest", event.target.value)} />
+                <Input id="turnoverLatest" className="tabular-nums" inputMode="decimal" placeholder="£" value={form.turnoverLatest} onChange={(event) => set("turnoverLatest", event.target.value)}/>
               </Field>
               <Field id="turnoverPrevious" label="Year before" error={err("turnover.previousGbp")}>
-                <input id="turnoverPrevious" className="bid-input tabular-nums" inputMode="decimal" placeholder="£" value={form.turnoverPrevious} onChange={(event) => set("turnoverPrevious", event.target.value)} />
+                <Input id="turnoverPrevious" className="tabular-nums" inputMode="decimal" placeholder="£" value={form.turnoverPrevious} onChange={(event) => set("turnoverPrevious", event.target.value)}/>
               </Field>
               <Field id="turnoverYearEnd" label="Latest year ended" error={err("turnover.yearEnd")}>
-                <input id="turnoverYearEnd" className="bid-input" type="date" value={form.turnoverYearEnd} onChange={(event) => set("turnoverYearEnd", event.target.value)} />
+                <Input id="turnoverYearEnd"  type="date" value={form.turnoverYearEnd} onChange={(event) => set("turnoverYearEnd", event.target.value)}/>
               </Field>
             </div>
             {form.turnoverLatest.trim() ? (
               <p className="text-13 text-ink-2">From your filed accounts. You can type 3.9m or 3,900,000.</p>
             ) : (
               <Field id="turnoverBand" label="Or choose a range" error={err("turnoverBand")} suggested={suggested.has("turnoverBand")} hint="An exact figure settles more turnover tests than a range.">
-                <select id="turnoverBand" className="bid-input" value={form.turnoverBand} onChange={(event) => set("turnoverBand", event.target.value)}>
+                <NativeSelect id="turnoverBand"  value={form.turnoverBand} onChange={(event) => set("turnoverBand", event.target.value)}>
                   <option value="">Not given</option>
                   {TURNOVER_BANDS.map((band) => (
                     <option key={band} value={band}>
                       {TURNOVER_BAND_LABELS[band]}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </Field>
             )}
           </fieldset>
@@ -302,7 +307,7 @@ export function CompanyFactsForm({
               return (
                 <div key={key} className="grid grid-cols-[repeat(auto-fit,minmax(min(180px,100%),1fr))] gap-4">
                   <Field id={key} label={label} error={err(`insurance.${key}.amountGbp`)} suggested={suggested.has(key)}>
-                    <input id={key} className="bid-input tabular-nums" inputMode="decimal" placeholder="£" value={form[key]} onChange={(event) => set(key, event.target.value)} />
+                    <Input id={key} className="tabular-nums" inputMode="decimal" placeholder="£" value={form[key]} onChange={(event) => set(key, event.target.value)}/>
                   </Field>
                   <Field
                     id={`${key}Expires`}
@@ -310,7 +315,7 @@ export function CompanyFactsForm({
                     error={err(`insurance.${key}.expiresAt`)}
                     hint={state.kind === "expired" ? undefined : state.kind === "soon" ? state.label : undefined}
                   >
-                    <input id={`${key}Expires`} className="bid-input" type="date" value={form[`${key}Expires`]} onChange={(event) => set(`${key}Expires`, event.target.value)} />
+                    <Input id={`${key}Expires`}  type="date" value={form[`${key}Expires`]} onChange={(event) => set(`${key}Expires`, event.target.value)}/>
                     {state.kind === "expired" && form[key].trim() ? <p className="text-13 font-semibold text-danger">Ended {state.days} days ago. Checks ask you to confirm it was renewed.</p> : null}
                   </Field>
                 </div>
@@ -344,21 +349,21 @@ export function CompanyFactsForm({
                     <label htmlFor={`accreditation-name-${index}`} className="sr-only">
                       Accreditation name
                     </label>
-                    <input
+                    <Input
                       id={`accreditation-name-${index}`}
-                      className="bid-input font-semibold"
+                      className="font-semibold"
                       value={row.name}
                       placeholder="e.g. ISO 9001, CHAS, Cyber Essentials"
                       maxLength={120}
                       onChange={(event) => setAccreditation(index, { name: event.target.value })}
-                    />
+/>
                     {err(`accreditations.${index}.name`) ? <p className="text-13 text-danger">{err(`accreditations.${index}.name`)}</p> : null}
                   </div>
                   <div>
                     <label htmlFor={`accreditation-expiry-${index}`} className="sr-only">
                       Expires
                     </label>
-                    <input id={`accreditation-expiry-${index}`} className="bid-input" type="date" value={row.expiresAt} onChange={(event) => setAccreditation(index, { expiresAt: event.target.value })} />
+                    <Input id={`accreditation-expiry-${index}`}  type="date" value={row.expiresAt} onChange={(event) => setAccreditation(index, { expiresAt: event.target.value })}/>
                   </div>
                   <span className="text-13 font-semibold">
                     {state.kind === "valid" ? (
@@ -379,9 +384,9 @@ export function CompanyFactsForm({
                       <span className="font-normal text-ink-2">No date</span>
                     )}
                   </span>
-                  <button type="button" className="flex size-11 items-center justify-center rounded hover:bg-paper" aria-label={`Remove ${row.name || "accreditation"}`} onClick={() => set("accreditations", form.accreditations.filter((_, i) => i !== index))}>
+                  <Button variant="ghost" size="icon" type="button" className="shrink-0" aria-label={`Remove ${row.name || "accreditation"}`} onClick={() => set("accreditations", form.accreditations.filter((_, i) => i !== index))}>
                     <X aria-hidden className="size-4" />
-                  </button>
+                  </Button>
                 </div>
                 {state.kind === "expired" ? (
                   <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-card bg-danger-tint px-4 py-3 text-sm">
@@ -389,19 +394,19 @@ export function CompanyFactsForm({
                     <p className="min-w-0 flex-[1_1_220px]">
                       <span className="font-semibold text-danger">Expired {state.days} days ago.</span> Checks treat it as not held until you enter the renewed date.
                     </p>
-                    <a href="#documents" className="bid-btn bid-btn-sm">
+                    <ButtonLink variant="outline" size="sm" href="#documents">
                       Upload renewal
-                    </a>
+                    </ButtonLink>
                   </div>
                 ) : null}
               </div>
             );
           })}
           <div className="px-5 pt-5 sm:px-6">
-            <button type="button" className="bid-btn" onClick={() => set("accreditations", [...form.accreditations, { name: "", reference: "", expiresAt: "" }])}>
+            <Button variant="outline" type="button"  onClick={() => set("accreditations", [...form.accreditations, { name: "", reference: "", expiresAt: "" }])}>
               <Plus aria-hidden className="size-4" />
               Add accreditation
-            </button>
+            </Button>
           </div>
         </fieldset>
       </div>
@@ -410,40 +415,40 @@ export function CompanyFactsForm({
         <summary className="bid-h3 cursor-pointer">Company details and where you work</summary>
         <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(260px,100%),1fr))] gap-4">
           <Field id="legalName" label="Legal name" error={err("legalName")} suggested={suggested.has("legalName")}>
-            <input id="legalName" className="bid-input" value={form.legalName} onChange={(event) => set("legalName", event.target.value)} maxLength={160} />
+            <Input id="legalName"  value={form.legalName} onChange={(event) => set("legalName", event.target.value)} maxLength={160}/>
           </Field>
           <Field id="tradingName" label="Trading name (if different)" error={err("tradingName")} suggested={suggested.has("tradingName")}>
-            <input id="tradingName" className="bid-input" value={form.tradingName} onChange={(event) => set("tradingName", event.target.value)} maxLength={160} />
+            <Input id="tradingName"  value={form.tradingName} onChange={(event) => set("tradingName", event.target.value)} maxLength={160}/>
           </Field>
           <Field id="companyNumber" label="Companies House number" error={err("companyNumber")} suggested={suggested.has("companyNumber")} hint="8 characters, for example 01234567">
-            <input id="companyNumber" className="bid-input bid-mono" value={form.companyNumber} onChange={(event) => set("companyNumber", event.target.value)} maxLength={10} />
+            <Input id="companyNumber" className="bid-mono" value={form.companyNumber} onChange={(event) => set("companyNumber", event.target.value)} maxLength={10}/>
           </Field>
           <Field id="website" label="Website" error={err("website")} hint="We can read it to suggest facts for the empty fields. You check and save them.">
             <div className="flex flex-wrap gap-2">
-              <input id="website" className="bid-input min-w-0 flex-[1_1_180px]" value={form.website} onChange={(event) => set("website", event.target.value)} placeholder="https://www.yourcompany.co.uk" maxLength={200} />
-              <button type="button" className="bid-btn" disabled={drafting || !form.website.trim()} onClick={draftFromWebsite} data-testid="draft-from-website">
+              <Input id="website" className="min-w-0 flex-[1_1_180px]" value={form.website} onChange={(event) => set("website", event.target.value)} placeholder="https://www.yourcompany.co.uk" maxLength={200}/>
+              <Button variant="outline" type="button"  disabled={drafting || !form.website.trim()} onClick={draftFromWebsite} data-testid="draft-from-website">
                 {drafting ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
                 {drafting ? "Reading…" : "Suggest from website"}
-              </button>
+              </Button>
             </div>
           </Field>
           <Field id="employees" label="Employees" error={err("employees")} suggested={suggested.has("employees")}>
-            <input id="employees" className="bid-input" inputMode="numeric" value={form.employees} onChange={(event) => set("employees", event.target.value)} />
+            <Input id="employees"  inputMode="numeric" value={form.employees} onChange={(event) => set("employees", event.target.value)}/>
           </Field>
           <Field id="yearsTrading" label="Years trading" error={err("yearsTrading")} suggested={suggested.has("yearsTrading")}>
-            <input id="yearsTrading" className="bid-input" inputMode="numeric" value={form.yearsTrading} onChange={(event) => set("yearsTrading", event.target.value)} />
+            <Input id="yearsTrading"  inputMode="numeric" value={form.yearsTrading} onChange={(event) => set("yearsTrading", event.target.value)}/>
           </Field>
           <Field id="sectors" label="Sectors" hint="Comma-separated, for example Local government, Housing, Schools" suggested={suggested.has("sectors")}>
-            <textarea id="sectors" className="bid-input" rows={2} value={form.sectors} onChange={(event) => set("sectors", event.target.value)} />
+            <Textarea id="sectors"  rows={2} value={form.sectors} onChange={(event) => set("sectors", event.target.value)}/>
           </Field>
           <Field id="regions" label="Regions" hint="Comma-separated, for example North East England, Yorkshire" suggested={suggested.has("regions")}>
-            <textarea id="regions" className="bid-input" rows={2} value={form.regions} onChange={(event) => set("regions", event.target.value)} />
+            <Textarea id="regions"  rows={2} value={form.regions} onChange={(event) => set("regions", event.target.value)}/>
           </Field>
           <Field id="policies" label="Policies you hold" hint="One per line, for example Health and Safety Policy" suggested={suggested.has("policies")}>
-            <textarea id="policies" className="bid-input" rows={4} value={form.policies} onChange={(event) => set("policies", event.target.value)} />
+            <Textarea id="policies"  rows={4} value={form.policies} onChange={(event) => set("policies", event.target.value)}/>
           </Field>
           <Field id="notes" label="Anything else worth knowing" hint="Short facts you would repeat in most bids: depots, fleet, DBS-checked staff" suggested={suggested.has("notes")}>
-            <textarea id="notes" className="bid-input" rows={4} value={form.notes} onChange={(event) => set("notes", event.target.value)} maxLength={4000} />
+            <Textarea id="notes"  rows={4} value={form.notes} onChange={(event) => set("notes", event.target.value)} maxLength={4000}/>
           </Field>
         </div>
       </details>
@@ -455,10 +460,10 @@ export function CompanyFactsForm({
       ) : null}
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <button type="submit" className="bid-btn bid-btn-primary" disabled={saving} data-testid="confirm-facts">
+        <Button type="submit"  disabled={saving} data-testid="confirm-facts">
           {saving ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
           {saving ? "Saving…" : "Save changes"}
-        </button>
+        </Button>
         <p className="text-sm text-ink-2" data-testid="facts-status" data-confirmed={confirmedAt ? "true" : "false"}>
           {dirty || hasSuggestions
             ? "Unsaved changes. Saving confirms these facts are true today; checks and drafts will rely on them."

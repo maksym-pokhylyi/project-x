@@ -9,6 +9,10 @@ import { fileKindFromName, MAX_LIBRARY_FILE_BYTES, unsupportedFileReason } from 
 import { LIBRARY_DOC_KIND_LABELS, LIBRARY_DOC_KINDS, type LibraryDocKind } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
 import { deleteLibraryDocAction, planLibraryUploadAction, registerLibraryDocAction, updateLibraryDocAction } from "../actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/forms/native-select";
+import { FileInput } from "@/features/bids/components/ui/file-input";
 
 export type LibraryDocItem = {
   id: string;
@@ -108,11 +112,10 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
           <label htmlFor="doc-search" className="text-15 font-medium">
             Search documents
           </label>
-          <input id="doc-search" className="bid-input max-w-[360px]" type="search" placeholder="File name or type" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <Input id="doc-search" className="max-w-[360px]" type="search" placeholder="File name or type" value={query} onChange={(event) => setQuery(event.target.value)}/>
         </div>
-        <input
+        <FileInput
           ref={input}
-          type="file"
           multiple
           accept=".pdf,.docx,.xlsx,.csv,.txt"
           className="sr-only"
@@ -123,9 +126,8 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
             event.target.value = "";
           }}
         />
-        <input
+        <FileInput
           ref={replaceInput}
-          type="file"
           accept=".pdf,.docx,.xlsx,.csv,.txt"
           className="sr-only"
           tabIndex={-1}
@@ -138,10 +140,10 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
             if (file && old) void add([file], old);
           }}
         />
-        <button type="button" className="bid-btn bid-btn-primary" onClick={() => input.current?.click()}>
+        <Button type="button"  onClick={() => input.current?.click()}>
           <Upload aria-hidden className="size-4" />
           Upload documents
-        </button>
+        </Button>
       </div>
 
       {uploads.length > 0 ? (
@@ -154,9 +156,9 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
                   <span role="alert" className="flex-[2_1_240px] text-13 text-danger">
                     {row.error}
                   </span>
-                  <button type="button" className="bid-link min-h-9 border-0 bg-transparent text-13 font-medium" onClick={() => setUploads((current) => current.filter((item) => item.key !== row.key))}>
+                  <Button variant="link" type="button" className="text-13" onClick={() => setUploads((current) => current.filter((item) => item.key !== row.key))}>
                     Dismiss
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <span className="inline-flex items-center gap-2 text-13 font-semibold tabular-nums">
@@ -233,16 +235,16 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
                           ) : null}
                           <label className="mt-2 flex flex-wrap items-center gap-2">
                             Valid until
-                            <input
+                            <Input
                               type="date"
-                              className="bid-input w-auto"
+                              className="w-auto"
                               defaultValue={doc.expiresAt ?? ""}
                               disabled={pending}
                               onChange={(event) => {
                                 const value = event.target.value;
                                 if (value === "" || /^\d{4}-\d{2}-\d{2}$/.test(value)) act(() => updateLibraryDocAction(doc.id, { expiresAt: value || null }));
                               }}
-                            />
+/>
                           </label>
                         </details>
                       )}
@@ -251,38 +253,38 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
                       <label className="sr-only" htmlFor={`kind-${doc.id}`}>
                         Type of {doc.fileName}
                       </label>
-                      <select id={`kind-${doc.id}`} className="bid-input w-auto min-w-[9rem] py-1.5" value={doc.kind} disabled={pending} onChange={(event) => act(() => updateLibraryDocAction(doc.id, { kind: event.target.value }))}>
+                      <NativeSelect id={`kind-${doc.id}`} className="w-auto min-w-[9rem] py-1.5" value={doc.kind} disabled={pending} onChange={(event) => act(() => updateLibraryDocAction(doc.id, { kind: event.target.value }))}>
                         {LIBRARY_DOC_KINDS.map((kind) => (
                           <option key={kind} value={kind}>
                             {LIBRARY_DOC_KIND_LABELS[kind]}
                           </option>
                         ))}
-                      </select>
+                      </NativeSelect>
                     </td>
                     <td className={cn(cell, "px-3 whitespace-nowrap tabular-nums")}>{shortDate(doc.createdAt)}</td>
                     <td className={cn(cell, "px-3 whitespace-nowrap tabular-nums", doc.usedIn === 0 ? "text-ink-2" : "")}>{doc.usedIn === 0 ? "Not yet" : `${doc.usedIn} bid${doc.usedIn === 1 ? "" : "s"}`}</td>
                     <td className={cn(cell, "pr-6 pl-3 text-right whitespace-nowrap")}>
-                      <button
+                      <Button variant="link"
                         type="button"
-                        className="bid-link mr-5 min-h-9 border-0 bg-transparent p-0 text-sm font-medium"
+                        className="mr-5 text-sm"
                         disabled={pending}
                         onClick={() => {
                           replacing.current = doc;
                           replaceInput.current?.click();
                         }}
-                      >
+>
                         Replace
-                      </button>
-                      <button
+                      </Button>
+                      <Button variant="link"
                         type="button"
-                        className="bid-link min-h-9 border-0 bg-transparent p-0 text-sm font-medium"
+                        className="text-sm"
                         disabled={pending}
                         onClick={() => {
                           if (window.confirm(`Remove “${doc.fileName}”? Drafts will no longer be able to use it.`)) act(() => deleteLibraryDocAction(doc.id));
                         }}
-                      >
+>
                         Remove
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 );

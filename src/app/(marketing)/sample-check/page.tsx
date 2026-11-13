@@ -1,6 +1,5 @@
 import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { effectiveWordLimit } from "@/features/bids/answer-text";
 import { AnswerEditor } from "@/features/bids/components/answer-editor";
@@ -12,6 +11,7 @@ import { loadSampleCheck } from "@/features/bids/sample/load";
 import { DEFAULT_SCALE } from "@/features/bids/server/drafting";
 import type { QuestionStatus } from "@/features/bids/types";
 import { coverageSummary, toEditorQuestion, toPackFileItems, toQuestionItem, toRequirementItem } from "@/features/bids/view";
+import { ButtonLink } from "@/components/ui/button-link";
 
 export const metadata: Metadata = {
   title: "Sample cited bid check",
@@ -24,10 +24,10 @@ const CTA_HREF = "/sign-up?next=/app/bids/new";
 
 function Cta({ className }: { className?: string }) {
   return (
-    <Link href={CTA_HREF} className={`bid-btn bid-btn-primary ${className ?? ""}`} data-testid="sample-cta">
+    <ButtonLink href={CTA_HREF} className={className} data-testid="sample-cta">
       Get a free cited bid check
       <ArrowRight aria-hidden className="size-4" />
-    </Link>
+    </ButtonLink>
   );
 }
 
@@ -52,14 +52,14 @@ export default async function SampleCheckPage() {
   return (
     <div className="bg-paper" id="top">
       <div className="bid-scope sticky top-0 z-20 border-b border-line bg-surface" data-testid="sample-cta-bar">
-        <div className="bid-toolbar mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2.5 sm:px-8">
+        <div className=" mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2.5 sm:px-8">
           <p className="text-sm">
             <span className="font-semibold">A sample check, built from a real public tender pack.</span>{" "}
             <span className="text-ink-2">Company details are an example. Nothing here can be edited.</span>
           </p>
-          <Link href={CTA_HREF} className="bid-btn bid-btn-primary">
+          <ButtonLink href={CTA_HREF}>
             Get a free cited bid check
-          </Link>
+          </ButtonLink>
         </div>
       </div>
       <div className="bid-scope mx-auto flex max-w-[1280px] flex-col px-4 pt-8 pb-16 sm:px-8" data-testid="sample-check">

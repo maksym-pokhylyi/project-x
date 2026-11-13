@@ -1,10 +1,10 @@
 import "./bid-theme.css";
 import { AlertTriangle, Check, CircleHelp, Info, Lock, SearchCheck, TriangleAlert } from "lucide-react";
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { STANDING_NOTICE } from "@/features/bids/constants";
 import type { CompanyStatus } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
+import { ButtonLink } from "@/components/ui/button-link";
 
 /**
  * Small presentational pieces shared by the bid desk and the library (no client state).
@@ -92,9 +92,9 @@ export function UpgradeNotice({
       </div>
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         {secondary}
-        <Link href={href} className="bid-btn bid-btn-primary bid-btn-sm">
+        <ButtonLink size="sm" href={href}>
           {actionLabel}
-        </Link>
+        </ButtonLink>
       </div>
     </section>
   );
