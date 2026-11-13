@@ -24,8 +24,8 @@ export function UsageMeter({
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between gap-3 text-sm">
-        <span className="font-medium text-ink">{label}</span>
-        <span className={cn("text-ink-2 tabular-nums", nearLimit && "font-medium text-accent-ink", atLimit && "font-medium text-danger")}>
+        <span className="font-semibold text-ink">{label}</span>
+        <span className={cn("shrink-0 whitespace-nowrap text-ink-2 tabular-nums", nearLimit && "font-semibold text-accent-ink", atLimit && "font-semibold text-danger")}>
           {valueText ?? `${format(used)} ${limit === null ? "· unlimited" : `of ${format(limit)}`}`}
           {atLimit ? <span className="ml-1.5">· limit reached</span> : null}
         </span>

@@ -24,9 +24,9 @@ export function OnboardingChecklist({ progress }: { progress: OnboardingProgress
             <li key={step.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between" data-done={step.done}>
               <div className="flex items-start gap-3">
                 {step.done ? (
-                  <CheckCircle2 aria-label="Done" className="mt-0.5 size-5 shrink-0 text-success" />
+                  <CheckCircle2 aria-label="Done" className="mt-0.5 size-5 shrink-0 text-brand" />
                 ) : (
-                  <Circle aria-label="To do" className="mt-0.5 size-5 shrink-0 text-ink-3" />
+                  <Circle aria-label="To do" className="mt-0.5 size-5 shrink-0 text-ink-2" />
                 )}
                 <div>
                   <p className={step.done ? "text-sm font-medium text-ink-2 line-through" : "text-sm font-medium text-ink"}>{step.title}</p>

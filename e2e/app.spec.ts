@@ -23,6 +23,14 @@ let ownerPage: Page;
 let memberContext: BrowserContext;
 let memberPage: Page;
 
+/** The plan badge is in the account menu (opened from the avatar in the top bar). */
+async function expectPlanBadge(page: Page, plan: string) {
+  await page.getByTestId("user-menu").first().click();
+  await expect(page.getByTestId("plan-badge")).toHaveText(plan);
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("plan-badge")).toHaveCount(0);
+}
+
 async function newContext(browser: Browser): Promise<BrowserContext> {
   return browser.newContext();
 }
@@ -165,7 +173,7 @@ test("sign up, verify e-mail through the dev outbox, land in an auto-created wor
   await expect(page).toHaveURL(/\/app$/);
   await expect(page.getByRole("heading", { level: 1, name: "Welcome, Olivia" })).toBeVisible();
   await expect(page.getByTestId("current-workspace-name").first()).toHaveText("Olivia's workspace");
-  await expect(page.getByTestId("plan-badge")).toHaveText("Free");
+  await expectPlanBadge(page, "Free");
   await expect(page.getByTestId("onboarding-checklist")).toContainText("0 of 3 steps completed");
 });
 
@@ -214,7 +222,7 @@ test("the Free plan has a single seat; Radar Pro has two", async () => {
 
   await subscribeWorkspace(WORKSPACE, "starter");
   await page.reload();
-  await expect(page.getByTestId("plan-badge")).toHaveText("Radar Pro");
+  await expectPlanBadge(page, "Radar Pro");
   await expect(page.getByTestId("seat-usage")).toContainText("1 of 2 seats in use on the Radar Pro plan");
 });
 

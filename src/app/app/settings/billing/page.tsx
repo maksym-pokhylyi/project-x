@@ -50,8 +50,8 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   const graceEnd = formatDate(ctx.entitlements.graceEndsAt);
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Billing" description="Plan, payment details and usage for this workspace." />
+    <>
+      <PageHeader level={2} title="Billing" description="Plan, payment details and usage for this workspace." />
 
       <Card data-testid="current-plan">
         <CardHeader>
@@ -103,9 +103,9 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
       <UsagePanel usage={usage} planName={ctx.plan.name} />
 
       <section aria-labelledby="plans-title" className="space-y-4">
-        <h2 id="plans-title" className="type-h3 text-ink">
+        <h3 id="plans-title" className="font-display text-xl font-semibold text-ink">
           Plans
-        </h2>
+        </h3>
         <BillingPlans
           config={config}
           currentPlan={ctx.entitlements.planKey}
@@ -115,6 +115,6 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
           defaultInterval={isBillingInterval(params.interval) ? params.interval : (subscribedInterval ?? "month")}
         />
       </section>
-    </div>
+    </>
   );
 }

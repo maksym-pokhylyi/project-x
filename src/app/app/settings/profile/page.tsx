@@ -9,8 +9,8 @@ export const metadata: Metadata = { title: "Profile" };
 export default async function ProfilePage() {
   const ctx = await requireOrgForPage();
   return (
-    <div className="space-y-6">
-      <PageHeader title="Profile" description="Your personal account details." />
+    <>
+      <PageHeader level={2} title="Profile" description="Your personal account details." />
       <Card>
         <CardHeader>
           <CardTitle>Personal information</CardTitle>
@@ -20,6 +20,6 @@ export default async function ProfilePage() {
           <ProfileForm name={ctx.user.name} email={ctx.user.email} />
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 }

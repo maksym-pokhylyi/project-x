@@ -17,8 +17,8 @@ export default async function WorkspaceSettingsPage() {
   const audit = canEdit && auditEnabled ? await listAuditLog(ctx, 15) : [];
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Workspace" description="Name and branding of this workspace." />
+    <>
+      <PageHeader level={2} title="Workspace" description="Name and branding of this workspace." />
       <Card>
         <CardHeader>
           <CardTitle>General</CardTitle>
@@ -65,6 +65,6 @@ export default async function WorkspaceSettingsPage() {
           </CardContent>
         </Card>
       ) : null}
-    </div>
+    </>
   );
 }
