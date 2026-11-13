@@ -1,10 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { AcceptInvitationButton, SignOutButton } from "@/components/auth/accept-invitation";
 import { AuthCard } from "@/components/auth/auth-card";
-import { AuthShell } from "@/components/auth/auth-shell";
-import { Button } from "@/components/ui/button";
+import { AuthColumn, AuthShell } from "@/components/auth/auth-shell";
+import { ButtonLink } from "@/components/ui/button-link";
 import { db } from "@/db";
 import { invitations, organizations } from "@/db/schema";
 import { getUser } from "@/server/session";
@@ -41,9 +40,9 @@ export default async function AcceptInvitationPage({ params }: { params: Promise
         title="This invitation is no longer valid"
         description="It may have expired, been cancelled or already been used. Ask the person who invited you to send a new one."
       >
-        <Button asChild className="w-full" variant="outline">
-          <Link href="/">Go to the homepage</Link>
-        </Button>
+        <ButtonLink href="/" className="w-full" variant="outline">
+          Go to the homepage
+        </ButtonLink>
       </AuthCard>
     );
   } else if (!user) {
@@ -59,12 +58,12 @@ export default async function AcceptInvitationPage({ params }: { params: Promise
         }
       >
         <div className="space-y-2">
-          <Button asChild className="w-full">
-            <Link href={`/sign-up?${query}`}>Create account</Link>
-          </Button>
-          <Button asChild className="w-full" variant="outline">
-            <Link href={`/sign-in?${query}`}>I already have an account</Link>
-          </Button>
+          <ButtonLink href={`/sign-up?${query}`} className="w-full">
+            Create account
+          </ButtonLink>
+          <ButtonLink href={`/sign-in?${query}`} className="w-full" variant="outline">
+            I already have an account
+          </ButtonLink>
         </div>
       </AuthCard>
     );
@@ -97,5 +96,9 @@ export default async function AcceptInvitationPage({ params }: { params: Promise
     );
   }
 
-  return <AuthShell>{content}</AuthShell>;
+  return (
+    <AuthShell>
+      <AuthColumn>{content}</AuthColumn>
+    </AuthShell>
+  );
 }

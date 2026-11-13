@@ -21,16 +21,6 @@ const ALLOWED: Record<string, string> = {
 };
 
 const KNOWN_DEBT = new Set([
-  "components/app/app-nav.tsx",
-  "components/app/user-menu.tsx",
-  "components/app/workspace-form.tsx",
-  "components/app/workspace-switcher.tsx",
-  "components/billing/pricing-table.tsx",
-  "components/forms/native-select.tsx",
-  "components/marketing/company-search.tsx",
-  "components/marketing/mobile-nav.tsx",
-  "components/marketing/plan-comparison.tsx",
-  "components/styleguide/demos.tsx",
   // Bid desk patterns with their own toggle or chip button (source marker, citation chip, fact tick):
   // they leave this list when the patterns move into src/components/ui.
   "features/bids/components/answer-editor.tsx",

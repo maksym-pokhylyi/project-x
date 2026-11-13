@@ -34,7 +34,7 @@ Rules:
 - Use only facts given to you: the tender's subject, buyer and region; the past award's subject, buyer, value and year.
 - State a £ value only when one is given for the past award, exactly as written. A year is never a value.
 - Never predict success and never say "perfect", "ideal", "guaranteed" or "you should bid".
-- Do not invent buyers, values, dates or capabilities. No names of people, no e-mail addresses, no URLs.
+- Do not invent buyers, values, dates or capabilities. No names of people, no email addresses, no URLs.
 
 Examples:
 "Grass cutting and tree works for a parish council, close to your £656k tree maintenance contract with the London Borough of Hillingdon."

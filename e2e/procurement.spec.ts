@@ -170,7 +170,9 @@ test("supplier page: the company's record, three items a block, where it comes f
   await expect(attribution.getByRole("link", { name: "Data sources" })).toHaveAttribute("href", "/about-the-data");
   await expect(attribution.getByRole("link", { name: "Privacy" })).toHaveAttribute("href", "/legal/privacy");
 
-  // No personal data anywhere in the HTML: no e-mail address, no telephone number.
+  // No personal data anywhere in the HTML: no e-mail address, no telephone number. (A supplier
+  // page ends with "Where this comes from"; the operator's own contact line is on Find, Claim,
+  // About the data and Flag a mistake.)
   const html = await page.content();
   expect(html).not.toMatch(/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(example|com|co\.uk)/);
   expect(html).not.toContain("acmegrounds.example");
@@ -416,7 +418,7 @@ test("find your company: results, a plain GET without script, then no result →
   await page.getByTestId("manual-radar-submit").click();
   // Signed out: nothing is stored. The selection travels to sign-up in the address it will come back to.
   await expect(page).toHaveURL(/\/sign-up\?redirect=%2Fapp%2Fradar%2Fsetup%3Fname%3DTidewell%2BRoofing%2BLtd%26trade%3Droofing%26trade%3Dgrounds%26region%3DUKE&email=/);
-  await expect(page.getByLabel("Work e-mail")).toHaveValue(nora.email);
+  await expect(page.getByLabel("Work email")).toHaveValue(nora.email);
   await page.getByLabel("Name").fill(nora.name);
   await page.getByLabel("Password").fill(nora.password);
   await page.getByRole("button", { name: "Create account" }).click();

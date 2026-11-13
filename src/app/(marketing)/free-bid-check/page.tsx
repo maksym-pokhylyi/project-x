@@ -1,4 +1,3 @@
-import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Faq, type FaqItem } from "@/components/marketing/faq";
@@ -6,7 +5,8 @@ import { JsonLd, faqJsonLd } from "@/components/marketing/json-ld";
 import { Eyebrow, Point, Section, SectionHeading } from "@/components/marketing/section";
 import { KeyDatesCard, ScoredQuestionsCard, VerdictPanel } from "@/components/marketing/visuals/brief-visuals";
 import { DocumentExcerpt, ProofBridge, RequirementCard } from "@/components/marketing/visuals/proof-visuals";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
+import { ArrowRightIcon } from "@/components/ui/icons";
 import { landing } from "@/config/landing";
 import { site } from "@/config/site";
 
@@ -121,14 +121,13 @@ export default function FreeBidCheckPage() {
               word with its file and page, and a plain verdict on whether you can comply.
             </p>
             <div className="mt-1 flex flex-col gap-2.5 sm:flex-row md:mt-2">
-              <Button asChild size="lg">
-                <Link href={START_HREF}>
-                  Create an account and upload <ArrowRight aria-hidden strokeWidth={2.2} />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/sample-check">See a sample check</Link>
-              </Button>
+              <ButtonLink href={START_HREF} size="form">
+                Create an account and upload
+                <ArrowRightIcon />
+              </ButtonLink>
+              <ButtonLink href="/sample-check" size="form" variant="outline">
+                See a sample check
+              </ButtonLink>
             </div>
             <p className="text-13 text-ink-2">Your first check is free. No card needed.</p>
           </div>
@@ -242,14 +241,13 @@ export default function FreeBidCheckPage() {
           </h2>
           <div className="flex min-w-0 flex-[0_1_auto] flex-col gap-3">
             <div className="flex flex-col gap-2.5 sm:flex-row">
-              <Button asChild size="lg">
-                <Link href={START_HREF}>
-                  Create an account and upload <ArrowRight aria-hidden strokeWidth={2.2} />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/sample-check">See a sample check</Link>
-              </Button>
+              <ButtonLink href={START_HREF} size="form">
+                Create an account and upload
+                <ArrowRightIcon />
+              </ButtonLink>
+              <ButtonLink href="/sample-check" size="form" variant="outline">
+                See a sample check
+              </ButtonLink>
             </div>
             <p className="text-13 text-ink-2">Your first check is free. No card needed.</p>
           </div>

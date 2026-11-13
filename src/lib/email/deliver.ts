@@ -32,7 +32,7 @@ export async function deliverOutboxEmail(outboxId: string): Promise<void> {
   const [row] = await db.select().from(emailOutbox).where(eq(emailOutbox.id, outboxId));
   if (!row) return; // deleted meanwhile: nothing to do
   if (row.status === "sent" || row.status === "outbox") return;
-  if (!env.RESEND_API_KEY) throw new Error("RESEND_API_KEY is not set; cannot deliver queued e-mail");
+  if (!env.RESEND_API_KEY) throw new Error("RESEND_API_KEY is not set; cannot deliver queued email");
   if (!row.html || !row.text) {
     await db.update(emailOutbox).set({ status: "failed", error: "body no longer available" }).where(eq(emailOutbox.id, outboxId));
     return;
@@ -49,7 +49,7 @@ export async function deliverOutboxEmail(outboxId: string): Promise<void> {
     // Provider messages can quote the recipient or parts of the request.
     const reason = scrubText(error.message, 500);
     await db.update(emailOutbox).set({ status: "failed", error: reason }).where(eq(emailOutbox.id, outboxId));
-    throw new Error(`Resend rejected the e-mail: ${reason}`);
+    throw new Error(`Resend rejected the email: ${reason}`);
   }
   // Bodies (and headers) contain one-time or signed links; do not keep them once the provider has the message.
   await db

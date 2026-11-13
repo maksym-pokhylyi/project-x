@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Placeholders } from "@/components/marketing/placeholders";
+import { IdentityLine } from "@/components/marketing/identity-line";
 import { site } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { DATA_SOURCES_HREF, flagMistakeHref, PRIVACY_HREF } from "../domain/links";
@@ -90,16 +90,10 @@ export function builtFromNotices(count: number): string {
  * the service, how to reach them, who takes payments, where the data comes from.
  */
 export function LegalFooter() {
-  const { company, facts } = site;
   return (
     <FooterBand data-testid="legal-footer">
-      <p className="max-w-[61.25rem]">
-        {site.name} is operated by <Placeholders text={company.legalName} />, an independent sole trader based in {facts.operatorCountry}. Contact:{" "}
-        <a href={`mailto:${site.supportEmail}`} className="link">
-          {site.supportEmail}
-        </a>{" "}
-        · UK representative: <Placeholders text={company.ukRepresentative} /> · Payments are processed by Paddle. · {INDEPENDENCE}
-      </p>
+      {/* One source for these words on every public page and in e-mails: src/config/site.ts (`identity`). */}
+      <IdentityLine className="text-inherit" />
     </FooterBand>
   );
 }

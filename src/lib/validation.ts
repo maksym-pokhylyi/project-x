@@ -11,7 +11,7 @@ import { ValidationError } from "./errors";
 // (`new Function("")`), which the browser reports as a CSP violation: tell it up front.
 if (typeof window !== "undefined") z.config({ jitless: true });
 
-export const emailSchema = z.string().trim().toLowerCase().pipe(z.email("Enter a valid e-mail address.").max(254));
+export const emailSchema = z.string().trim().toLowerCase().pipe(z.email("Enter a valid email address.").max(254));
 export const passwordSchema = z
   .string()
   .min(8, "Use at least 8 characters.")

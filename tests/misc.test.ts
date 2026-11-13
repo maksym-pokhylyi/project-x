@@ -4,9 +4,9 @@ vi.mock("next/headers", () => import("./helpers/next-headers"));
 
 import { GET as cronJobs } from "@/app/api/cron/jobs/route";
 import { GET as health } from "@/app/api/health/route";
-import { hasUnfilledPlaceholders } from "@/components/marketing/legal-document";
+import { hasOpenMarkers } from "@/components/marketing/legal-document";
 import { PLANS, PLAN_KEYS, QUOTA_METRIC_KEYS, annualSavingsPercent, formatPrice, planRank } from "@/config/plans";
-import { site } from "@/config/site";
+import { identityText, operatorAddress, pendingOperatorDetails, site, ukRepresentativeLine } from "@/config/site";
 import { db } from "@/db";
 import { errorLog, jobs } from "@/db/schema";
 import { AppError, QuotaExceededError, ValidationError, serializeError } from "@/lib/errors";
@@ -93,9 +93,17 @@ describe("helpers", () => {
     });
   });
 
-  it("reports that seller placeholders still need filling in", () => {
-    // Guard for launch: this starts failing once the company details are real — then flip it.
-    expect(hasUnfilledPlaceholders()).toBe(site.company.legalName.includes("[["));
+  it("names the operator, and says which of their details are still pending", () => {
+    // The seller identity is real (supplied by the owner): nothing in it may be a marker.
+    expect(hasOpenMarkers(site.operator, operatorAddress, identityText)).toBe(false);
+    expect(identityText).toContain("operated by Maksym Pokhylyi, an independent sole trader registered in Ukraine (Kremenchuk)");
+    // Guard for launch: this starts failing once the UK representative or the ICO reference
+    // is filled in — then check the pages that print them and update the list.
+    expect(pendingOperatorDetails()).toEqual(["ukRepresentative", "icoRegistrationNumber"]);
+    expect(ukRepresentativeLine).toBe(`UK representative: being appointed — contact ${site.supportEmail}`);
+    // A document that still has a marker for the lawyer is reported as a draft.
+    expect(hasOpenMarkers("Governed by the laws of [[GOVERNING_LAW_JURISDICTION]].")).toBe(true);
+    expect(hasOpenMarkers("Refunds within 14 days.", ["a", "b"])).toBe(false);
   });
 });
 

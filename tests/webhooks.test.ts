@@ -301,7 +301,7 @@ describe("POST /api/webhooks/paddle", () => {
       expect(await eventNames()).toContain("billing.payment_failed");
     });
 
-    it("customer.created/updated: keep the billing e-mail of the linked subscription in sync", async () => {
+    it("customer.created/updated: keep the billing email of the linked subscription in sync", async () => {
       // customer.created arrives before the subscription exists: stored, picked up later.
       expect((await deliver(paddleEvent("customer.created"))).body.outcome).toBe("processed");
       await deliver(paddleEvent("subscription.created", { organizationId: ORG }));

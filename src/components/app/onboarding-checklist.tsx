@@ -1,6 +1,5 @@
 import { CheckCircle2, Circle } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import type { OnboardingProgress } from "@/server/onboarding";
@@ -34,9 +33,9 @@ export function OnboardingChecklist({ progress }: { progress: OnboardingProgress
                 </div>
               </div>
               {step.done ? null : (
-                <Button asChild variant="outline" size="sm" className="shrink-0 self-start sm:self-auto">
-                  <Link href={step.href}>{step.cta}</Link>
-                </Button>
+                <ButtonLink href={step.href} variant="outline" size="sm" className="shrink-0 self-start sm:self-auto">
+                  {step.cta}
+                </ButtonLink>
               )}
             </li>
           ))}

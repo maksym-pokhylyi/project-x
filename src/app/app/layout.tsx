@@ -3,8 +3,11 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { AppMenu, AppNav } from "@/components/app/app-nav";
 import { AppBreadcrumbs, BreadcrumbProvider } from "@/components/app/breadcrumbs";
+import { FreePlanBar, FreePlanChip, SeePlansLink, TrialStrip } from "@/components/app/plan-strips";
 import { UserMenu, type UserMenuPlan } from "@/components/app/user-menu";
 import { WorkspaceSwitcher } from "@/components/app/workspace-switcher";
+import { OnBillingRoutes } from "@/components/billing/on-billing-routes";
+import { TestModeNotice } from "@/components/billing/test-mode-notice";
 import { Logo } from "@/components/logo";
 import { NoticeBand } from "@/components/ui/notice-band";
 import { PLANS, formatPrice } from "@/config/plans";
@@ -31,7 +34,7 @@ function SeatBanner({ ctx }: { ctx: OrgContext }) {
             remove members
           </Link>{" "}
           or{" "}
-          <Link href="/app/settings/billing" className="link font-medium">
+          <Link href="/pricing" className="link font-medium">
             upgrade
           </Link>
           .
@@ -103,15 +106,21 @@ function menuPlan(ctx: OrgContext): UserMenuPlan {
  *   ≥ 768 px   logo · Radar · Bids · Documents ………… workspace name · avatar menu   (60 px)
  *   < 768 px   logo ………………………………………………………… avatar menu · menu button       (56 px)
  *
- * The avatar menu holds the plan (with Upgrade), Settings and sign-out; on phones the menu
- * button opens the same sections plus the workspace switcher. Pages render inside a 1280 px
- * container, with their breadcrumb above the title. Landmarks: <header>,
+ * On Free the bar also carries the "Free plan" chip and "See plans" (Radar artboard); on
+ * phones those two and the workspace name sit in a 44 px bar of their own under it
+ * (RadarFirstRun-390). Under the bar, in this order and only when they apply: the trial
+ * strip, the test-mode band (Billing pages), a payment problem, a seat problem.
+ *
+ * The avatar menu holds the plan (with Upgrade), Billing, Settings and sign-out; on phones
+ * the menu button opens the same sections plus the workspace switcher. Pages render inside a
+ * 1280 px container, with their breadcrumb above the title. Landmarks: <header>,
  * <nav aria-label="App">, <main id="main"> (target of the skip link in the root layout).
  */
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const ctx = await requireOrgForPage();
   const workspaces = await listUserWorkspaces(ctx.user.id);
   const current = { id: ctx.organization.id, name: ctx.organization.name, logo: ctx.organization.logo, role: ctx.role };
+  const isFree = ctx.entitlements.planKey === "free";
 
   return (
     <BreadcrumbProvider>
@@ -124,11 +133,22 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="flex min-w-0 items-center md:gap-2">
               <WorkspaceSwitcher current={current} workspaces={workspaces} className="hidden max-w-[24rem] md:inline-flex" />
+              {isFree ? (
+                <>
+                  <FreePlanChip className="max-md:hidden" />
+                  <SeePlansLink className="mx-1 max-md:hidden" />
+                </>
+              ) : null}
               <UserMenu name={ctx.user.name} email={ctx.user.email} workspaceName={ctx.organization.name} plan={menuPlan(ctx)} isAdmin={ctx.user.isAdmin} />
               <AppMenu workspace={<WorkspaceSwitcher current={current} workspaces={workspaces} variant="field" testId="workspace-switcher-sheet" />} />
             </div>
           </div>
         </header>
+        <FreePlanBar ctx={ctx} />
+        <TrialStrip ctx={ctx} />
+        <OnBillingRoutes>
+          <TestModeNotice />
+        </OnBillingRoutes>
         <BillingBanner ctx={ctx} />
         <SeatBanner ctx={ctx} />
         <main id="main" className="container-app flex-1 pt-5 pb-12 md:pt-7 md:pb-[4.5rem]">

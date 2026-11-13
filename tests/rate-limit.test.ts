@@ -164,7 +164,7 @@ describe("auth endpoints are rate limited", () => {
     expect((await authPost(signInRequest("198.51.100.21"))).status).not.toBe(429);
   });
 
-  describe("sign-in is limited per e-mail + IP pair, so nobody can lock someone else out (F-08)", () => {
+  describe("sign-in is limited per email + IP pair, so nobody can lock someone else out (F-08)", () => {
     it("an attacker failing against a victim's address only locks out themselves", async () => {
       const victim = await createTestUser({ email: "victim@example.com" });
       await clearOfWindowBoundary(900, 10);
@@ -181,7 +181,7 @@ describe("auth endpoints are rate limited", () => {
       expect(response.status).toBe(200);
     });
 
-    it("a distributed attack hits the per-e-mail failure ceiling, but never the owner's known device", async () => {
+    it("a distributed attack hits the per-email failure ceiling, but never the owner's known device", async () => {
       const victim = await createTestUser({ email: "victim@example.com" });
       const failuresKey = `auth:sign-in:failures:${emailKey(victim.email)}`;
 
@@ -214,7 +214,7 @@ describe("auth endpoints are rate limited", () => {
     });
   });
 
-  it("limits e-mail-sending endpoints per target address, whatever the source", async () => {
+  it("limits email-sending endpoints per target address, whatever the source", async () => {
     const victim = await createTestUser({ email: "inbox@example.com" });
     const statuses: number[] = [];
     for (let i = 0; i < MAIL_PER_ADDRESS.limit + 2; i += 1) {
@@ -261,7 +261,7 @@ describe("response time does not reveal whether an address is registered (F-27)"
       return Date.now() - started;
     };
     const unknownAddress = await timed(0, "203.0.113.1"); // nothing to do
-    const knownAddress = await timed(150, "203.0.113.2"); // renders and stores an e-mail
+    const knownAddress = await timed(150, "203.0.113.2"); // renders and stores an email
     expect(unknownAddress).toBeGreaterThanOrEqual(590);
     expect(knownAddress).toBeGreaterThanOrEqual(590);
     expect(Math.abs(knownAddress - unknownAddress)).toBeLessThan(120);

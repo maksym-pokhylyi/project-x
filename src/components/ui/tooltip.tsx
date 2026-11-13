@@ -44,4 +44,27 @@ function TooltipContent({ className, sideOffset = 6, children, ...props }: React
   )
 }
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+/**
+ * A word or figure in running text that explains itself on hover and on keyboard focus:
+ * "£102k" → "£101,950 as published". A dotted underline says there is more. It is a button
+ * (so it can take focus) set inside the line, exempt from the control scale by design.
+ */
+function TooltipText({ tip, className, children, ...props }: Omit<React.ComponentProps<"button">, "type"> & { tip: React.ReactNode }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          data-inline-control=""
+          className={cn("rounded-sm font-medium text-ink underline decoration-ink-2 decoration-dotted underline-offset-4", className)}
+          {...props}
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{tip}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider, TooltipText }

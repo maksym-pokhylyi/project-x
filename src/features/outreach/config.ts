@@ -1,4 +1,4 @@
-import { site } from "@/config/site";
+import { operatorAddress, site } from "@/config/site";
 
 /**
  * Settings of the founder's outreach tooling. Read on the server only.
@@ -13,26 +13,26 @@ import { site } from "@/config/site";
  * (docs/OWNER_ACTIONS.md, item C). Every letter and the opt-out page state it
  * (PECR reg. 23(a): the sender's identity must not be concealed).
  *
- * The same values are being added to src/config/site.ts as `site.operator`. When they are
- * there, make this ONE line read `const OPERATOR = site.operator;` — nothing else in the
- * outreach module holds them.
+ * The values live in ONE place, `site.operator` in src/config/site.ts (with the site
+ * footer, the legal pages and every e-mail footer); this is only the shape the outreach
+ * module reads them in. Nothing else in the module holds them.
  */
 const OPERATOR = {
   /** The person behind the brand: signs the letter and heads its signature. */
-  name: "Maksym Pokhylyi",
+  name: site.operator.name,
   /** As registered. */
-  legalName: "FOP Pokhylyi Maksym Ihorovych",
+  legalName: site.operator.legalName,
   /** What he is, in the words agreed for letters and public pages. */
-  description: "an independent sole trader registered in Ukraine",
+  description: `an independent ${site.operator.legalForm} registered in ${site.operator.address.country}`,
   /** Named in the one-line footer, where the full address would be too long. */
-  town: "Kremenchuk",
+  town: site.operator.address.city,
   /** Where post is received. */
-  address: "14 Stoliarnyi Lane, Kremenchuk, Poltava Oblast, Ukraine",
+  address: operatorAddress,
   /** A mailbox that is read every day. */
-  contactEmail: "hello@bidfolio.co.uk",
+  contactEmail: site.supportEmail,
 } as const;
 
-/** A value that is missing or still a `[[PLACEHOLDER]]` from src/config/site.ts. */
+/** A value that is missing (null in src/config/site.ts while it is pending) or still a `[[PLACEHOLDER]]`. */
 function real(value: string | undefined | null): string | null {
   const trimmed = value?.replace(/\s+/g, " ").trim();
   return trimmed && !trimmed.includes("[[") ? trimmed : null;
@@ -55,8 +55,8 @@ export type OutreachSender = {
 
 /**
  * The identity block of a letter. The operator comes from OPERATOR above; the UK
- * representative and the ICO number come from `site.company`, where they are still
- * placeholders — a placeholder counts as "not there", so neither is named in a letter.
+ * representative and the ICO number come from `site.operator`, where they are null while
+ * pending — and then neither is named in a letter.
  */
 export function outreachSender(): OutreachSender {
   const fullName = real(OPERATOR.name);
@@ -67,8 +67,8 @@ export function outreachSender(): OutreachSender {
     description: real(OPERATOR.description),
     postalAddress: real(OPERATOR.address),
     contactEmail: real(OPERATOR.contactEmail),
-    ukRepresentative: real(site.company.ukRepresentative),
-    icoNumber: real(site.company.icoRegistrationNumber),
+    ukRepresentative: real(site.operator.ukRepresentative),
+    icoNumber: real(site.operator.icoRegistrationNumber),
   };
 }
 
@@ -100,15 +100,15 @@ export const NAMED_ADDRESSES_BLOCKED = "Do not send to named addresses until a U
 export type SenderProblem = { field: keyof OutreachSender; label: string; where: string };
 
 const REQUIRED: SenderProblem[] = [
-  { field: "fullName", label: "The operator’s full name", where: "OPERATOR in src/features/outreach/config.ts" },
-  { field: "legalName", label: "The operator’s registered name", where: "OPERATOR in src/features/outreach/config.ts" },
-  { field: "postalAddress", label: "A postal address where post is received", where: "OPERATOR in src/features/outreach/config.ts" },
-  { field: "contactEmail", label: "A contact address that is read every day", where: "OPERATOR in src/features/outreach/config.ts" },
+  { field: "fullName", label: "The operator’s full name", where: "site.operator in src/config/site.ts" },
+  { field: "legalName", label: "The operator’s registered name", where: "site.operator in src/config/site.ts" },
+  { field: "postalAddress", label: "A postal address where post is received", where: "site.operator in src/config/site.ts" },
+  { field: "contactEmail", label: "A contact address that is read every day", where: "site.operator in src/config/site.ts" },
 ];
 const REQUIRED_FOR_NAMED: SenderProblem = {
   field: "ukRepresentative",
   label: "A UK data-protection representative (name and UK address)",
-  where: "site.company.ukRepresentative in src/config/site.ts",
+  where: "site.operator.ukRepresentative in src/config/site.ts",
 };
 
 /**

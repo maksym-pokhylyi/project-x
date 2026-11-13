@@ -9,6 +9,14 @@ import { cn } from "@/lib/utils"
  * Menu surface shared with Select and Popover: white, hairline, 8 px radius, overlay shadow.
  * Items are 40 px tall (36 px from md) and highlight on sunken; keyboard focus moves with
  * the arrow keys (Radix roving focus), so the highlight doubles as the focus indicator.
+ * Every item shows the pointer cursor; a disabled one does not react at all.
+ *
+ * DropdownMenuItem variants:
+ *   default       a plain row
+ *   destructive   danger ink on a danger tint when highlighted ("Delete", "Remove")
+ *   cta           the one call to action of a menu ("Upgrade"): brand fill, white semibold
+ *                 label, centred, 44 px; highlighted like a pressed primary button. One per
+ *                 menu at most. When it navigates, keep `asChild` with a <Link> inside.
  */
 const menuSurface =
   "z-50 min-w-[10rem] overflow-x-hidden overflow-y-auto rounded-card border border-line bg-surface p-1 text-ink shadow-overlay duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1"
@@ -56,7 +64,7 @@ function DropdownMenuItem({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
   inset?: boolean
-  variant?: "default" | "destructive"
+  variant?: "default" | "destructive" | "cta"
 }) {
   return (
     <DropdownMenuPrimitive.Item
@@ -66,6 +74,7 @@ function DropdownMenuItem({
       className={cn(
         menuItem,
         "data-[inset]:pl-8 data-[variant=destructive]:text-danger data-[variant=destructive]:focus:bg-danger-tint data-[variant=destructive]:*:[svg]:text-danger!",
+        "data-[variant=cta]:mx-1.5 data-[variant=cta]:my-1.5 data-[variant=cta]:min-h-11 data-[variant=cta]:justify-center data-[variant=cta]:bg-brand data-[variant=cta]:text-15 data-[variant=cta]:font-semibold data-[variant=cta]:text-white data-[variant=cta]:hover:bg-brand-hover data-[variant=cta]:focus:bg-brand-hover data-[variant=cta]:focus:text-white data-[variant=cta]:*:[svg]:text-white!",
         className
       )}
       {...props}

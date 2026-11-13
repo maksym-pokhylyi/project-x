@@ -49,7 +49,7 @@ export async function confirmEmailAction(input: unknown): Promise<ActionResult<{
     const [user] = await db.select().from(users).where(eq(users.email, email));
     if (!user || (typeof payload.userId === "string" && payload.userId !== user.id)) throw new ValidationError(INVALID_LINK);
     if (user.emailVerified) {
-      throw new ConflictError("This e-mail address is already confirmed. Sign in, or reset your password if you do not know it.");
+      throw new ConflictError("This email address is already confirmed. Sign in, or reset your password if you do not know it.");
     }
 
     const context = await auth.$context;
@@ -62,7 +62,7 @@ export async function confirmEmailAction(input: unknown): Promise<ActionResult<{
         .set({ emailVerified: true })
         .where(and(eq(users.id, user.id), eq(users.emailVerified, false)))
         .returning({ id: users.id });
-      if (verified.length === 0) throw new ConflictError("This e-mail address is already confirmed. Sign in to continue.");
+      if (verified.length === 0) throw new ConflictError("This email address is already confirmed. Sign in to continue.");
       await tx.delete(sessions).where(eq(sessions.userId, user.id));
       const replaced = await tx
         .update(accounts)

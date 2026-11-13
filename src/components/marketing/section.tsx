@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * A band of a public page. Vertical rhythm, as in the artboards: 56 px on phones, 80 px on
+ * A band of a public page. Vertical rhythm, as in the artboards: 44 px on phones, 80 px on
  * tablets, 96 px from 1024 px. Tones: paper (default), `deep` (paper-deep, no rules),
  * `surface` (white between two hairlines), `ink` (the independence band).
  */
@@ -26,7 +26,7 @@ export function Section({
       id={id}
       aria-labelledby={labelledBy}
       className={cn(
-        "py-14 md:py-20 lg:py-24",
+        "py-11 md:py-20 lg:py-24",
         tone === "deep" && "bg-paper-deep",
         tone === "surface" && "border-y border-line bg-surface",
         tone === "ink" && "on-ink bg-ink text-paper",
@@ -38,9 +38,9 @@ export function Section({
   );
 }
 
-/** The small green line above a heading: 14 px, 600, sentence case. */
+/** The small green line above a heading: 600, sentence case; 13 px on phones, 14 px from 640 px. */
 export function Eyebrow({ className, children }: { className?: string; children: ReactNode }) {
-  return <p className={cn("type-eyebrow", className)}>{children}</p>;
+  return <p className={cn("font-sans text-13 leading-[1.5] font-semibold text-brand sm:text-sm sm:leading-[1.5]", className)}>{children}</p>;
 }
 
 /** Eyebrow + h2 + lead, left-aligned (editorial, not centred marketing). */
@@ -58,12 +58,12 @@ export function SectionHeading({
   className?: string;
 }) {
   return (
-    <div className={cn("flex max-w-[45rem] flex-col gap-3", className)}>
+    <div className={cn("flex max-w-[45rem] flex-col gap-2 sm:gap-3", className)}>
       {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
       <h2 id={id} className="type-h2 text-ink">
         {title}
       </h2>
-      {lead ? <p className="type-lead mt-1 max-w-[42.5rem] text-ink">{lead}</p> : null}
+      {lead ? <p className="type-lead text-ink max-sm:mt-0.5">{lead}</p> : null}
     </div>
   );
 }
@@ -75,8 +75,8 @@ export function SectionHeading({
 export function Point({ title, children, className }: { title: string; children: ReactNode; className?: string }) {
   return (
     <div className={cn("flex flex-col gap-1.5 border-t-2 border-ink pt-[1.125rem]", className)}>
-      <h3 className="font-sans text-17 font-semibold text-ink">{title}</h3>
-      <p className="text-15 leading-[1.45rem] text-ink">{children}</p>
+      <h3 className="font-sans text-17 leading-[1.5] font-semibold text-ink">{title}</h3>
+      <p className="text-15 leading-[1.55] text-ink">{children}</p>
     </div>
   );
 }

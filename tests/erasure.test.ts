@@ -250,7 +250,7 @@ describe("account deletion (F-12)", () => {
     actAs(user);
   });
 
-  it("needs the typed e-mail address and the current password", async () => {
+  it("needs the typed email address and the current password", async () => {
     expect(await deleteAccountAction({ confirmEmail: "someone@else.example", password: PASSWORD })).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
     expect(await deleteAccountAction({ confirmEmail: user.email })).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
     expect(await deleteAccountAction({ confirmEmail: user.email, password: "not-my-password" })).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
@@ -277,7 +277,7 @@ describe("account deletion (F-12)", () => {
     expect(await storage.list(orgStoragePrefix(user.organizationId))).toHaveLength(2);
   });
 
-  it("removes the account, its own workspace and files, its memberships, and its e-mail address everywhere", async () => {
+  it("removes the account, its own workspace and files, its memberships, and its email address everywhere", async () => {
     // The leaver is also an admin in a colleague's workspace, and their address was copied around.
     await addMember(colleague.organizationId, user, "admin");
     await db.insert(aiUsage).values({ organizationId: colleague.organizationId, userId: user.id, feature: "check", model: "m" });
@@ -302,7 +302,7 @@ describe("account deletion (F-12)", () => {
     const tables = await db.execute<{ table_name: string }>(sql`select table_name from information_schema.tables where table_schema = 'public' and table_type = 'BASE TABLE'`);
     for (const { table_name: table } of tables) {
       const [hit] = await db.execute<{ n: number }>(sql`select count(*)::int as n from ${sql.identifier(table)} t where t::text ilike ${`%${user.email}%`}`);
-      expect(hit!.n, `e-mail address left in ${table}`).toBe(0);
+      expect(hit!.n, `email address left in ${table}`).toBe(0);
     }
     expect(await db.select().from(aiUsage).where(eq(aiUsage.userId, user.id))).toHaveLength(0);
     expect((await db.select().from(errorLog).where(eq(errorLog.message, "something failed")))[0]!.userId).toBeNull();

@@ -46,6 +46,7 @@ const pages = [
       await page.getByText("Enter your name.").waitFor();
     },
   },
+  { name: "sign-up-plan", path: `/sign-up?redirect=${encodeURIComponent("/app/settings/billing?plan=pro&interval=month")}` },
   { name: "sign-in", path: "/sign-in" },
   { name: "verify-email", path: "/verify-email?email=olivia%40harlowfinch.example" },
   { name: "forgot-password", path: "/forgot-password" },
@@ -61,6 +62,16 @@ const pages = [
   { name: "app-settings-members", path: "/app/settings/members", auth: true },
   { name: "app-settings-billing", path: "/app/settings/billing", auth: true },
   { name: "app-usage", path: "/app/usage", auth: true },
+  { name: "app-billing-confirm-plan", path: "/app/settings/billing?plan=business&interval=month", auth: true, fullPage: false, prepare: (page) => page.getByTestId("billing-confirm").waitFor() },
+  { name: "app-billing-confirm-pass", path: "/app/settings/billing?buy=bid_pass", auth: true, fullPage: false, prepare: (page) => page.getByTestId("billing-confirm").waitFor() },
+  { name: "app-checkout-plan", path: "/app/settings/billing/success", auth: true },
+  { name: "app-checkout-pass-waiting", path: "/app/settings/billing/success?bought=bid_pass", auth: true },
+  { name: "app-not-found", path: "/app/this-page-does-not-exist", auth: true },
+  { name: "pricing-signed-in", path: "/pricing", auth: true, prepare: (page) => page.getByRole("button", { name: "Current plan" }).first().waitFor() },
+  // The seeded demo owner is a founder only where ADMIN_EMAILS says so (the local .env); otherwise these show the 403 page.
+  { name: "admin-overview", path: "/admin", auth: true },
+  { name: "admin-organizations", path: "/admin/organizations", auth: true },
+  { name: "admin-ingestion", path: "/admin/ingestion", auth: true },
   { name: "app-forbidden", path: "/admin", auth: "member" },
   {
     name: "app-account-menu",
@@ -93,14 +104,21 @@ mkdirSync(OUT_DIR, { recursive: true });
 const browser = await chromium.launch();
 const problems = [];
 
-async function signIn(context, who) {
-  const page = await context.newPage();
-  await page.goto(`${BASE_URL}/sign-in`);
-  await page.getByLabel("E-mail").fill(who === "member" ? "teammate@example.com" : DEMO.email);
-  await page.getByLabel("Password").fill(DEMO.password);
-  await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await page.waitForURL(/\/app/);
-  await page.close();
+/** Signs in once per role for the whole run and hands the session to every context (sign-in is rate-limited). */
+const sessions = {};
+async function sessionFor(who) {
+  if (!sessions[who]) {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto(`${BASE_URL}/sign-in`);
+    await page.getByLabel("Email").fill(who === "member" ? "teammate@example.com" : DEMO.email);
+    await page.getByLabel("Password").fill(DEMO.password);
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await page.waitForURL(/\/app/);
+    sessions[who] = await context.storageState();
+    await context.close();
+  }
+  return sessions[who];
 }
 
 for (const viewport of viewports) {
@@ -108,8 +126,12 @@ for (const viewport of viewports) {
   const contextFor = async (auth) => {
     const key = auth === true ? "owner" : auth || "anonymous";
     if (!contexts[key]) {
-      contexts[key] = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: 1, reducedMotion: "reduce" });
-      if (auth) await signIn(contexts[key], key);
+      contexts[key] = await browser.newContext({
+        viewport: { width: viewport.width, height: viewport.height },
+        deviceScaleFactor: 1,
+        reducedMotion: "reduce",
+        storageState: auth ? await sessionFor(key) : undefined,
+      });
     }
     return contexts[key];
   };

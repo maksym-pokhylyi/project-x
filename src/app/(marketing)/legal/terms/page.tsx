@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { LegalDocument, type LegalSection } from "@/components/marketing/legal-document";
-import { BID_PASS } from "@/config/plan-display";
-import { site } from "@/config/site";
+import { trialIncludes } from "@/config/billing-copy";
+import { BID_PASS_DISPLAY as BID_PASS } from "@/config/plan-display";
+import { operatorAddress, operatorLegalName, site } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/legal/terms" },
 };
 
-const { company, facts, legal } = site;
+const { operator, facts, legal } = site;
 
 const summary = [
   `${site.name} is software that helps you find public tenders and prepare bids. It is not a government service and it does not submit bids for you.`,
@@ -23,7 +24,7 @@ const sections: LegalSection[] = [
     heading: "Who we are and who these terms are for",
     id: "who-we-are",
     body: [
-      `${site.name} (the “Service”) is operated by ${company.legalName}, ${company.address}, registration number ${company.registrationNumber} (“we”, “us”). These terms are a contract between us and the business that creates an account (“you”).`,
+      `${site.name} (the “Service”) is operated by ${operatorLegalName}, a ${operator.legalForm} registered in ${operator.address.country}, of ${operatorAddress}${operator.registrationNumber ? `, registration number ${operator.registrationNumber}` : ""} (“we”, “us”). These terms are a contract between us and the business that creates an account (“you”).`,
       "The Service is for business use. By creating an account you confirm that you are at least 18, that you are acting for a business and not as a consumer, and that you may accept these terms on behalf of that business.",
       "These terms sit alongside the [privacy notice](/legal/privacy), the [refund policy](/legal/refunds), the [acceptable use policy](/legal/acceptable-use) and, where we process personal data for you, the [data processing agreement](/legal/dpa).",
     ],
@@ -62,11 +63,11 @@ const sections: LegalSection[] = [
         "We send a reminder by email at least 7 days before an annual plan renews.",
         "You can pause a subscription for one to three months, or cancel it, from Settings. A cancellation takes effect at the end of the period you have paid for; the workspace then returns to the free plan and your data stays.",
         "Full bids included in a plan that you do not use roll over for one month and then expire.",
-        `Bid Desk can be started with a ${facts.trialDays}-day trial. A payment card is required. The first payment is taken when the trial ends unless you cancel before then.`,
+        `Bid Desk can be started with a ${facts.trialDays}-day trial. ${trialIncludes} A payment card is required. The first payment is taken when the trial ends unless you cancel before then.`,
         "If a payment fails, paid features stay available for 7 days while you update the payment method. After that the workspace is limited to the free plan until payment succeeds. Your data stays.",
       ],
       { subheading: `${BID_PASS.name}` },
-      `A ${BID_PASS.name} is a single payment of ${BID_PASS.price} for one full bid. It does not renew. [[CONFIRM_BID_PASS_EXPIRY: state how long an unused pass remains valid, for example 12 months]]`,
+      `A ${BID_PASS.name} is a single payment of ${BID_PASS.price} for one full bid. It does not renew, and an unused pass does not expire while your account is open.`,
       { subheading: "Price changes" },
       "We may change prices. A change does not affect a period you have already paid for. We tell workspace owners by email at least 30 days before a new price applies to a renewal, and you can cancel before it does.",
       `Refunds are described in the [refund policy](/legal/refunds). In short: ${legal.refundWindowDays} days from your first payment.`,
@@ -180,7 +181,7 @@ const sections: LegalSection[] = [
     heading: "Governing law",
     id: "governing-law",
     body: [
-      `These terms are governed by the laws of ${company.governingLaw}, and the courts of ${company.governingLaw} have exclusive jurisdiction, without affecting any mandatory rights you have under the law of your own country.`,
+      `These terms are governed by the laws of ${legal.governingLaw}, and the courts of ${legal.governingLaw} have exclusive jurisdiction, without affecting any mandatory rights you have under the law of your own country.`,
     ],
   },
   {

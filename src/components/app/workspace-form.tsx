@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { FormField } from "@/components/forms/form-field";
+import { Form } from "@/components/forms/form";
+import { FieldGroup, FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { FileButton } from "@/components/ui/file-button";
 import { fieldErrorsFrom, workspaceSchema, type FieldErrors } from "@/lib/validation";
 import { updateWorkspaceAction } from "@/server/actions/workspace";
 import { WorkspaceAvatar } from "./workspace-avatar";
@@ -14,7 +15,6 @@ const MAX_LOGO_BYTES = 1024 * 1024;
 
 export function WorkspaceForm({ name, logo, canEdit }: { name: string; logo: string | null; canEdit: boolean }) {
   const router = useRouter();
-  const fileInput = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [pending, setPending] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -39,9 +39,7 @@ export function WorkspaceForm({ name, logo, canEdit }: { name: string; logo: str
     router.refresh();
   }
 
-  async function onLogoSelected(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
+  async function onLogoSelected([file]: File[]) {
     if (!file) return;
     if (file.size > MAX_LOGO_BYTES) {
       toast.error("The logo must be 1 MB or smaller.");
@@ -68,27 +66,16 @@ export function WorkspaceForm({ name, logo, canEdit }: { name: string; logo: str
 
   return (
     <div className="max-w-md space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="workspace-logo">Logo</Label>
+      <FieldGroup id="workspace-logo-group" label="Logo" hint="PNG, JPEG or WebP, up to 1 MB.">
         <div className="flex items-center gap-3">
           <WorkspaceAvatar name={name} logo={logo} className="size-12 rounded-card text-lg" />
-          <input
-            id="workspace-logo"
-            ref={fileInput}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="sr-only"
-            onChange={onLogoSelected}
-            disabled={!canEdit || uploading}
-          />
-          <Button type="button" variant="outline" size="sm" disabled={!canEdit} loading={uploading} onClick={() => fileInput.current?.click()}>
+          <FileButton id="workspace-logo" accept="image/png,image/jpeg,image/webp" variant="outline" size="sm" disabled={!canEdit} loading={uploading} onFiles={(files) => void onLogoSelected(files)}>
             {uploading ? "Uploading…" : logo ? "Replace logo" : "Upload logo"}
-          </Button>
+          </FileButton>
         </div>
-        <p className="text-13 text-ink-2">PNG, JPEG or WebP, up to 1 MB.</p>
-      </div>
+      </FieldGroup>
 
-      <form onSubmit={onSubmit} noValidate className="space-y-4">
+      <Form onSubmit={onSubmit} noValidate>
         <FormField
           label="Workspace name"
           name="name"
@@ -103,7 +90,7 @@ export function WorkspaceForm({ name, logo, canEdit }: { name: string; logo: str
             {pending ? "Saving…" : "Save changes"}
           </Button>
         ) : null}
-      </form>
+      </Form>
     </div>
   );
 }

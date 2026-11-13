@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState, PageHeader, PageSection } from "@/components/app/page-header";
 import { FieldError, FieldHint, FormError, FormField } from "@/components/forms/form-field";
-import { NativeSelect } from "@/components/forms/native-select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Logo, LogoMark, Wordmark } from "@/components/logo";
 import { MARK_FAVICON } from "@/components/logo-paths";
 import {
@@ -20,6 +20,7 @@ import {
   WordCountDemo,
 } from "@/components/styleguide/demos";
 import { Canvas, Code, Group, GuideSection, Row, Snippet, Specimen, Swatch } from "@/components/styleguide/parts";
+import { ActionsSection, ComposeSection, ControlSizesSection, FiguresSection, JobsSection, PlansSection, SourcesSection, WhereYouAreSection } from "@/components/styleguide/system";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,7 @@ import { ReferenceChip } from "@/components/ui/reference-chip";
 import { ScoreBars } from "@/components/ui/score-bars";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SourceMark } from "@/components/ui/source-mark";
 import { Spinner } from "@/components/ui/spinner";
 import { StatusPill } from "@/components/ui/status-pill";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -49,18 +51,26 @@ export const metadata: Metadata = {
 
 const nav = [
   ["principles", "How to use this"],
+  ["compose", "Composing a screen"],
   ["colour", "Colour"],
   ["type", "Typography"],
   ["layout", "Space, radius, shadow"],
   ["brand", "Brand"],
   ["buttons", "Buttons"],
+  ["control-sizes", "Control sizes"],
+  ["actions", "Links, icons and menus"],
   ["forms", "Form controls"],
   ["badges", "Badges and chips"],
   ["bid", "Bid components"],
+  ["sources", "Sources and deadlines"],
+  ["plans", "Plans and limits"],
+  ["jobs", "Uploads and long jobs"],
   ["alerts", "Alerts"],
   ["surfaces", "Cards and feedback"],
   ["navigation", "Navigation"],
+  ["where-you-are", "Where you are"],
   ["tables", "Tables"],
+  ["figures", "Figures and facts"],
   ["overlays", "Overlays"],
   ["patterns", "Page patterns"],
   ["domain", "Domain recipes"],
@@ -187,6 +197,9 @@ export default function StyleguidePage() {
               </AlertDescription>
             </Alert>
           </GuideSection>
+
+          {/* ------------------------------------------------------------------ */}
+          <ComposeSection />
 
           {/* ------------------------------------------------------------------ */}
           <GuideSection
@@ -343,7 +356,7 @@ export default function StyleguidePage() {
                   <p className="type-ref text-ink-2">Bid brief · built 13 Nov 2026 at 09:42 · 6 files, 214 pages read</p>
                 </Specimen>
                 <Specimen label="type-figure (+ a size) · large numerals in the serif">
-                  <p className="type-figure text-[2.125rem] leading-[1.15] text-ink">£6.4m</p>
+                  <p className="type-figure text-34 leading-[1.15] text-ink">£6.4m</p>
                 </Specimen>
               </div>
             </Group>
@@ -522,7 +535,7 @@ export default function StyleguidePage() {
           </GuideSection>
 
           {/* ------------------------------------------------------------------ */}
-          <GuideSection id="buttons" title="Buttons" lead="One green button per view; everything else is outlined. 44 px tall, 6 px radius, 15 px semibold. Small sizes keep a 44 px hit area.">
+          <GuideSection id="buttons" title="Buttons" lead="One green button per view; everything else is outlined. 6 px radius, semibold label, 44 px tall on its own and as tall as its group inside a form or a search row (see Control sizes).">
             <Group title="Variants">
               <Row>
                 <Specimen label="default">
@@ -551,7 +564,7 @@ export default function StyleguidePage() {
             </Group>
             <Group title="Sizes">
               <Row>
-                <Specimen label="lg · 52 px · beside the company search">
+                <Specimen label="lg · 52 px · a search row">
                   <Button size="lg">
                     Show my page <ArrowRight aria-hidden strokeWidth={2.2} />
                   </Button>
@@ -561,14 +574,9 @@ export default function StyleguidePage() {
                     <Upload aria-hidden /> Upload tender pack
                   </Button>
                 </Specimen>
-                <Specimen label="sm · 36 px">
+                <Specimen label="sm · 44 px · compact 14 px label">
                   <Button size="sm" variant="outline">
                     Confirm
-                  </Button>
-                </Specimen>
-                <Specimen label="xs · 28 px">
-                  <Button size="xs" variant="outline">
-                    Apply
                   </Button>
                 </Specimen>
                 <Specimen label="icon · 44 px">
@@ -644,6 +652,12 @@ export default function StyleguidePage() {
               </Canvas>
             </Group>
           </GuideSection>
+
+          {/* ------------------------------------------------------------------ */}
+          <ControlSizesSection />
+
+          {/* ------------------------------------------------------------------ */}
+          <ActionsSection />
 
           {/* ------------------------------------------------------------------ */}
           <GuideSection
@@ -745,7 +759,7 @@ export default function StyleguidePage() {
                   <Badge variant="strong">Mandatory</Badge>
                 </Specimen>
                 <Specimen label="outline">
-                  <Badge variant="outline">Pass / fail</Badge>
+                  <Badge variant="outline">Pass or fail</Badge>
                 </Specimen>
                 <Specimen label="secondary">
                   <Badge variant="secondary">Free</Badge>
@@ -897,7 +911,7 @@ export default function StyleguidePage() {
               <div className="max-w-sm rounded-lg bg-paper-deep p-4">
                 <p className="text-xs text-ink-2">Marked against the buyer’s scheme</p>
                 <p className="mt-1 flex items-baseline gap-2 text-ink">
-                  <span className="type-figure text-[2.75rem] leading-none">3</span>
+                  <span className="type-figure text-44 leading-none">3</span>
                   <span className="text-15 font-semibold">of 5</span>
                   <span className="text-15">· Satisfactory</span>
                 </p>
@@ -965,6 +979,15 @@ export default function StyleguidePage() {
               </div>
             </Group>
           </GuideSection>
+
+          {/* ------------------------------------------------------------------ */}
+          <SourcesSection />
+
+          {/* ------------------------------------------------------------------ */}
+          <PlansSection />
+
+          {/* ------------------------------------------------------------------ */}
+          <JobsSection />
 
           {/* ------------------------------------------------------------------ */}
           <GuideSection
@@ -1074,7 +1097,7 @@ export default function StyleguidePage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-modal bg-brand-tint p-6">
                   <Badge>Verdict</Badge>
-                  <p className="mt-3 font-display text-[1.625rem] leading-[1.15] font-semibold tracking-[-0.015em] text-ink">Worth bidding, if you close two gaps first.</p>
+                  <p className="mt-3 font-display text-26 leading-[1.15] font-semibold tracking-[-0.015em] text-ink">Worth bidding, if you close two gaps first.</p>
                 </div>
                 <div className="rounded-lg bg-paper-deep p-6">
                   <p className="text-xs text-ink-2">How it is marked</p>
@@ -1155,7 +1178,7 @@ export default function StyleguidePage() {
           <GuideSection id="navigation" title="Navigation">
             <Group
               title="Tabs"
-              note="The underline style of the supplier page and the bid brief: ink labels on a hairline, a 2 px ink rule under the current one, counts in mono. For sections that are separate pages, use links styled with tabListClasses and tabTriggerClasses (see SettingsNav)."
+              note="The underline style of the supplier page and the bid brief: ink labels on a hairline, a 2 px ink rule under the current one, counts in mono. The current tab is ink and semibold with a 2 px ink rule; the others are muted. For sections that are separate pages use NavLink variant “tab” inside a nav with tabListClasses from ui/tab-classes (see SettingsNav and Where you are)."
             >
               <TabsDemo />
             </Group>
@@ -1227,6 +1250,9 @@ export default function StyleguidePage() {
           </GuideSection>
 
           {/* ------------------------------------------------------------------ */}
+          <WhereYouAreSection />
+
+          {/* ------------------------------------------------------------------ */}
           <GuideSection
             id="tables"
             title="Tables"
@@ -1275,6 +1301,9 @@ export default function StyleguidePage() {
               The second row is selected (<Code>data-state=&quot;selected&quot;</Code>). Give the container a maximum height and the header stays while the rows scroll.
             </p>
           </GuideSection>
+
+          {/* ------------------------------------------------------------------ */}
+          <FiguresSection />
 
           {/* ------------------------------------------------------------------ */}
           <GuideSection id="overlays" title="Overlays" lead="White surface, hairline, overlay shadow. 10 px radius for menus and popovers, 12 px for dialogs. Escape closes all of them and focus returns to the trigger.">
@@ -1363,24 +1392,9 @@ export default function StyleguidePage() {
           <GuideSection
             id="domain"
             title="Domain recipes"
-            lead="Treatments the feature modules should share where there is no component yet. Copy the classes; if you use one twice, make it a component in src/components/ui."
+            lead="Treatments the feature modules share that are words and classes rather than components. The stat row, the source mark and the upgrade band used to be here: they are components now (Figures and facts, Sources and deadlines, Plans and limits)."
           >
             <div className="grid gap-x-8 gap-y-10 md:grid-cols-2">
-              <Group title="Stat block" note="A large serif numeral over a 13 px muted label, in one white card divided by hairlines." className="md:col-span-2">
-                <dl className="grid rounded-card border border-line bg-surface sm:grid-cols-2 lg:grid-cols-4">
-                  {[
-                    ["14", "public contracts won since 2021"],
-                    ["£6.4m", "total awarded value"],
-                    ["9", "public buyers"],
-                    ["4", "open tenders like your past work"],
-                  ].map(([value, label], index) => (
-                    <div key={label} className={`flex flex-col-reverse gap-0.5 px-6 py-[1.125rem] ${index > 0 ? "border-t border-line sm:border-t-0 sm:border-l" : ""} ${index === 2 ? "sm:max-lg:border-t sm:max-lg:border-l-0" : ""} ${index === 3 ? "sm:max-lg:border-t" : ""}`}>
-                      <dt className="text-13 text-ink-2">{label}</dt>
-                      <dd className="type-figure text-[2.125rem] leading-[1.15] text-ink">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </Group>
               <Group title="Money" note="Rounded for reading, exact in tables; never £0 for an unknown value.">
                 <ul className="space-y-1.5 text-sm text-ink">
                   <li>
@@ -1394,11 +1408,10 @@ export default function StyleguidePage() {
                   </li>
                 </ul>
               </Group>
-              <Group title="Source marker" note="In a draft: a small mono number on brand-tint, 3 px radius. The chosen source is filled brand green.">
+              <Group title="Source mark" note="In a draft: a small mono number on brand-tint (SourceMark). It opens the passage it rests on; the open one is filled brand green.">
                 <p className="max-w-md text-15 leading-[1.6] text-ink">
-                  …where it has handled 11,260 orders since March 2024.{" "}
-                  <span className="rounded-[3px] bg-brand-tint px-1 font-mono text-xs font-medium text-brand">1</span> We completed 94.8% of routine repairs within target.{" "}
-                  <span className="rounded-[3px] bg-brand px-1 font-mono text-xs font-medium text-white">3</span>
+                  …where it has handled 11,260 orders since March 2024. <SourceMark number={1} label="Mobilisation plan.pdf, page 4" /> We completed 94.8% of routine repairs within target.{" "}
+                  <SourceMark number={3} label="KPI report Q4 2025-26.pdf, page 3" data-state="open" />
                 </p>
               </Group>
               <Group title="A labelled gap in a draft" note="Where the documents do not support a point the question asks for, the draft says what is missing instead of guessing.">
@@ -1406,16 +1419,6 @@ export default function StyleguidePage() {
                   Calls outside working hours are answered by our duty supervisor.{" "}
                   <span className="rounded-chip bg-danger-tint box-decoration-clone px-1.5 py-0.5 text-13 font-semibold text-danger">Gap: how a night call reaches the engineer</span>
                 </p>
-              </Group>
-              <Group title="Upgrade notice" note="Inline, never a modal trap: what is locked, what the plan includes, the price, one button.">
-                <div className="rounded-card border border-line bg-surface p-5 sm:p-6">
-                  <p className="font-display text-xl font-semibold text-ink">Drafting is part of Bid Desk</p>
-                  <p className="mt-1.5 text-sm text-ink-2">Your check is ready. To draft and mark the 6 scored questions, start a full bid: 3 a month on Bid Desk, or one with a Bid Pass.</p>
-                  <div className="mt-4 flex flex-wrap items-center gap-2.5">
-                    <Button>Start Bid Desk · £149 a month</Button>
-                    <Button variant="outline">Buy a Bid Pass · £99</Button>
-                  </div>
-                </div>
               </Group>
               <Group title="Data attribution" note="On every page that shows public data.">
                 <p className="max-w-md text-13 text-ink-2">

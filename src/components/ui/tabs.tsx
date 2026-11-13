@@ -15,8 +15,9 @@ function Tabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive
   return <TabsPrimitive.Root data-slot="tabs" className={cn("flex flex-col gap-6", className)} {...props} />
 }
 
-// The class recipes live in ./tab-classes (no "use client") so server components can use them too.
-export { tabListClasses, tabTriggerClasses }
+// The class recipes live in ./tab-classes (no "use client"): import them from there. They are
+// not re-exported here, because a non-component export of a client module cannot be used by
+// a server component, and only `pnpm build` would say so.
 
 function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return <TabsPrimitive.List data-slot="tabs-list" className={cn(tabListClasses, className)} {...props} />

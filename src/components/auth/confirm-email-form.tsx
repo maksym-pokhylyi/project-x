@@ -35,7 +35,7 @@ export function ConfirmEmailForm({ token, redirectTo }: { token: string; redirec
       setFormError(result.error.message);
       return;
     }
-    toast.success(result.data.signedIn ? "E-mail confirmed. Welcome!" : "E-mail confirmed. Sign in with your new password.");
+    toast.success(result.data.signedIn ? "Email confirmed. Welcome!" : "Email confirmed. Sign in with your new password.");
     router.push(result.data.redirectTo);
     router.refresh();
   }
@@ -52,8 +52,8 @@ export function ConfirmEmailForm({ token, redirectTo }: { token: string; redirec
         hint="At least 8 characters."
         error={errors.password?.[0]}
       />
-      <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Confirming…" : "Confirm e-mail and set password"}
+      <Button type="submit" className="w-full" loading={pending}>
+        {pending ? "Confirming…" : "Confirm email and set password"}
       </Button>
     </form>
   );

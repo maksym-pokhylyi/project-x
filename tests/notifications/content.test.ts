@@ -3,6 +3,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("next/headers", () => import("../helpers/next-headers"));
 vi.mock("next/cache", () => ({ revalidatePath: () => undefined, unstable_cache: (fn: unknown) => fn }));
 
+import { identityText as siteIdentityText } from "@/config/site";
 import { notificationsConfig } from "@/features/notifications/config";
 import { arrangeNew, buildAlert, buildDigest } from "@/features/notifications/content/digest";
 import { enteredWindow, isStrongMatch, seenAfter, selectDigestMatches, STRONG_MATCH } from "@/features/notifications/content/matches";
@@ -443,14 +444,16 @@ describe("the letter itself", () => {
     expect(images).toEqual(["http://localhost:3000/email/mark.png", "http://localhost:3000/email/mark-dark.png"]);
     expect(email!.html).not.toMatch(/width="1"|height="1"|\.gif/);
 
-    // Footer: why, how to stop, who we are (placeholders exactly as the site config has them), the data licence.
+    // Footer: why, how to stop, who we are (the one identity line of src/config/site.ts), the data licence.
     for (const body of [plainText(email!.html), email!.text.replace(/\s+/g, " ")]) {
       expect(body.includes("You get this once a week because you have a Bidfolio radar for Acme Grounds Ltd."), "You get this once a week because you have a Bidfolio radar for Acme Grounds Ltd.").toBe(true);
       expect(body.includes("Reply to this email if anything looks wrong."), "Reply to this email if anything looks wrong.").toBe(true);
       expect(body.includes("Unsubscribe"), "Unsubscribe").toBe(true);
       expect(body.includes("Change what you get"), "Change what you get").toBe(true);
-      expect(body.includes("Bidfolio is operated by [[COMPANY_LEGAL_NAME]], an independent sole trader based in Ukraine."), "Bidfolio is operated by [[COMPANY_LEGAL_NAME]], an independent sole trader based in Ukraine.").toBe(true);
-      expect(body.includes("UK representative: [[UK REPRESENTATIVE NAME AND ADDRESS]]"), "UK representative: [[UK REPRESENTATIVE NAME AND ADDRESS]]").toBe(true);
+      expect(body.includes(siteIdentityText), siteIdentityText).toBe(true);
+      expect(body.includes("Bidfolio is operated by Maksym Pokhylyi, an independent sole trader registered in Ukraine (Kremenchuk). Contact: hello@bidfolio.co.uk"), "operator and contact").toBe(true);
+      expect(body.includes("UK representative: being appointed"), "UK representative: being appointed").toBe(true);
+      expect(body, "no unfilled placeholder").not.toMatch(/\[\[/);
       expect(body.includes("Contains public sector information licensed under the Open Government Licence v3.0."), "Contains public sector information licensed under the Open Government Licence v3.0.").toBe(true);
       expect(body.includes("Bidfolio is an independent service and is not affiliated with, or endorsed by, the UK Government."), "Bidfolio is an independent service and is not affiliated with, or endorsed by, the UK Government.").toBe(true);
     }
