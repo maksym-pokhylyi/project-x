@@ -13,6 +13,7 @@ import { track } from "@/lib/analytics";
 import { recordAudit } from "@/lib/audit";
 import { getOrgEntitlements } from "@/lib/billing/subscription";
 import { emailKey } from "@/lib/crypto";
+import { describeError, scrubText } from "@/lib/describe-error";
 import { sendEmail } from "@/lib/email/send";
 import { log } from "@/lib/logger";
 import { rateLimit } from "@/lib/rate-limit";
@@ -68,10 +69,13 @@ export const auth = betterAuth({
   logger: {
     level: "warn",
     log: (level, message, ...details) => {
-      const fields = details.length > 0 ? { details: details.map((detail) => (detail instanceof Error ? detail.message : detail)) } : undefined;
-      if (level === "error") log.error(`[auth] ${message}`, fields);
-      else if (level === "warn") log.warn(`[auth] ${message}`, fields);
-      else log.info(`[auth] ${message}`, fields);
+      // Better Auth passes raw errors (failed queries with their bind parameters) and
+      // arbitrary objects (users, request data) as details: keep only safe text.
+      const fields = details.length > 0 ? { details: details.map(authLogDetail) } : undefined;
+      const line = `[auth] ${scrubText(String(message), 300)}`;
+      if (level === "error") log.error(line, fields);
+      else if (level === "warn") log.warn(line, fields);
+      else log.info(line, fields);
     },
   },
 
@@ -271,6 +275,16 @@ export const auth = betterAuth({
 });
 
 export type AuthSession = typeof auth.$Infer.Session;
+
+function authLogDetail(detail: unknown): unknown {
+  if (typeof detail === "string") return scrubText(detail, 300);
+  if (typeof detail === "number" || typeof detail === "boolean" || detail === null || detail === undefined) return detail;
+  if (detail instanceof Error || (typeof detail === "object" && "message" in detail)) {
+    const described = describeError(detail);
+    return `${described.name}: ${described.message}`;
+  }
+  return "[object]";
+}
 
 function str(value: unknown): string | null {
   return typeof value === "string" && value.length > 0 ? value : null;

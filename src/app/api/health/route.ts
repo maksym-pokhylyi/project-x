@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
+import { errorReason } from "@/lib/describe-error";
 import { log } from "@/lib/logger";
 
 /** Liveness + database check for uptime monitors. 200 when Postgres answers, 503 otherwise. */
@@ -14,7 +15,7 @@ export async function GET(): Promise<Response> {
       { headers: { "cache-control": "no-store" } },
     );
   } catch (error) {
-    log.error("health check failed", { reason: error instanceof Error ? error.message : "unknown" });
+    log.error("health check failed", { reason: errorReason(error) });
     return Response.json(
       { status: "error", database: "unreachable", time: new Date().toISOString() },
       { status: 503, headers: { "cache-control": "no-store" } },

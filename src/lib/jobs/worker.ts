@@ -1,5 +1,6 @@
 import "server-only";
 import { runInBackground } from "@/lib/background";
+import { errorReason } from "@/lib/describe-error";
 import { log } from "@/lib/logger";
 import { reportError } from "@/lib/report-error";
 import { jobHandlers, type JobHandler } from "./handlers";
@@ -25,7 +26,8 @@ export async function executeJob(job: JobRow): Promise<"succeeded" | "pending" |
     await markJobSucceeded(job.id);
     return "succeeded";
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    // Sanitised: a failed query must not copy its bind parameters into jobs.last_error.
+    const message = errorReason(error);
     const status = await markJobFailed(job, message);
     if (status === "failed") {
       await reportError(error, { route: `job:${job.type}`, extra: { jobId: job.id, attempts: job.attempts } });

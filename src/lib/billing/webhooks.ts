@@ -4,6 +4,7 @@ import { db, type Tx } from "@/db";
 import { auditLog, organizations, subscriptions, users, webhookEvents } from "@/db/schema";
 import { env } from "@/env";
 import { track } from "@/lib/analytics";
+import { errorReason } from "@/lib/describe-error";
 import { log } from "@/lib/logger";
 import { reportError } from "@/lib/report-error";
 import {
@@ -141,10 +142,11 @@ export async function processStoredEvent(eventId: string, options: { force?: boo
     for (const effect of result.effects) await effect();
     return { ok: true, duplicate: result.duplicate, outcome: result.outcome };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    // Sanitised: Paddle payload values bound into a failed statement stay out of the row.
+    const message = errorReason(error);
     await db
       .update(webhookEvents)
-      .set({ error: message.slice(0, 2000), attempts: sql`${webhookEvents.attempts} + 1` })
+      .set({ error: message, attempts: sql`${webhookEvents.attempts} + 1` })
       .where(eq(webhookEvents.eventId, eventId))
       .catch(() => undefined);
     await reportError(error, { route: "webhook:paddle", extra: { eventId } });

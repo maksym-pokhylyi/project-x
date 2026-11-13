@@ -2,6 +2,7 @@ import "server-only";
 import { eq, sql } from "drizzle-orm";
 import { db, type DbOrTx } from "@/db";
 import { jobs } from "@/db/schema";
+import { scrubText } from "@/lib/describe-error";
 
 /**
  * Durable background jobs on Postgres.
@@ -114,7 +115,7 @@ export async function markJobFailed(
   options: { retry?: boolean } = {},
 ): Promise<"pending" | "failed"> {
   const exhausted = options.retry === false || job.attempts >= job.maxAttempts;
-  const message = errorMessage.slice(0, 2000);
+  const message = scrubText(errorMessage, 2000);
   if (exhausted) {
     await db.execute(sql`
       update jobs

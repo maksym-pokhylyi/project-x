@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { emailOutbox } from "@/db/schema";
 import { site } from "@/config/site";
 import { env } from "@/env";
+import { scrubText } from "@/lib/describe-error";
 
 let resend: Resend | null = null;
 
@@ -35,8 +36,10 @@ export async function deliverOutboxEmail(outboxId: string): Promise<void> {
     { idempotencyKey: `outbox-${row.id}` },
   );
   if (error) {
-    await db.update(emailOutbox).set({ status: "failed", error: error.message.slice(0, 500) }).where(eq(emailOutbox.id, outboxId));
-    throw new Error(`Resend rejected the e-mail: ${error.message}`);
+    // Provider messages can quote the recipient or parts of the request.
+    const reason = scrubText(error.message, 500);
+    await db.update(emailOutbox).set({ status: "failed", error: reason }).where(eq(emailOutbox.id, outboxId));
+    throw new Error(`Resend rejected the e-mail: ${reason}`);
   }
   // Bodies contain one-time links; do not keep them once the provider has the message.
   await db

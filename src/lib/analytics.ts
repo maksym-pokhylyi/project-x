@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { events } from "@/db/schema";
 import type { EventMap, EventName } from "@/config/events";
 import { env, features } from "@/env";
+import { errorReason } from "./describe-error";
 import { log } from "./logger";
 
 export type TrackContext = {
@@ -47,7 +48,7 @@ export async function track<Name extends EventName>(
       properties: props,
     });
   } catch (error) {
-    log.warn("analytics: failed to store event", { name, reason: error instanceof Error ? error.message : "unknown" });
+    log.warn("analytics: failed to store event", { name, reason: errorReason(error) });
   }
 
   const client = getPosthog();
@@ -61,6 +62,6 @@ export async function track<Name extends EventName>(
       groups: context.organizationId ? { organization: context.organizationId } : undefined,
     });
   } catch (error) {
-    log.warn("analytics: posthog forwarding failed", { name, reason: error instanceof Error ? error.message : "unknown" });
+    log.warn("analytics: posthog forwarding failed", { name, reason: errorReason(error) });
   }
 }

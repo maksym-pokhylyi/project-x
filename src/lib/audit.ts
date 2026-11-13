@@ -1,6 +1,7 @@
 import "server-only";
 import { db, type DbOrTx } from "@/db";
 import { auditLog } from "@/db/schema";
+import { errorReason } from "./describe-error";
 import { log } from "./logger";
 
 export type AuditEntry = {
@@ -36,6 +37,6 @@ export async function recordAudit(entry: AuditEntry, executor?: DbOrTx): Promise
   try {
     await db.insert(auditLog).values(values);
   } catch (error) {
-    log.error("audit log write failed", { action: entry.action, organizationId: entry.organizationId, reason: error instanceof Error ? error.message : "unknown" });
+    log.error("audit log write failed", { action: entry.action, organizationId: entry.organizationId, reason: errorReason(error) });
   }
 }
