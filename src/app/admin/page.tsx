@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ReplayWebhookButton, RetryJobButton } from "@/components/admin/admin-buttons";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAdminActivity, getAdminMetrics } from "@/server/admin";
+import { getAdminActivity, getAdminConfigWarnings, getAdminMetrics } from "@/server/admin";
 import { requireAdminForPage } from "@/server/session";
 
 export const metadata: Metadata = { title: "Overview" };
@@ -23,12 +23,22 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
 export default async function AdminOverviewPage() {
   // Pages render in parallel with their layout, so each admin page guards itself.
   await requireAdminForPage();
-  const [metrics, activity] = await Promise.all([getAdminMetrics(), getAdminActivity()]);
+  const [metrics, activity, configWarnings] = await Promise.all([getAdminMetrics(), getAdminActivity(), getAdminConfigWarnings()]);
   const conversion = metrics.trials.conversionRate === null ? "—" : `${Math.round(metrics.trials.conversionRate * 100)}%`;
 
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
+
+      {configWarnings.length > 0 ? (
+        <section aria-label="Configuration warnings" className="space-y-2" data-testid="config-warnings">
+          {configWarnings.map((warning) => (
+            <p key={warning.code} role="alert" data-testid="config-warning" data-level={warning.level} className="rounded-md border border-warning/40 bg-warning/10 p-3 text-sm">
+              <strong>{warning.level === "error" ? "Action required" : "Warning"}:</strong> {warning.message}
+            </p>
+          ))}
+        </section>
+      ) : null}
 
       <section aria-label="Key numbers" className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Sign-ups" value={String(metrics.signups.total)} hint={`${metrics.signups.last7Days} in 7 days · ${metrics.signups.last30Days} in 30 days`} />

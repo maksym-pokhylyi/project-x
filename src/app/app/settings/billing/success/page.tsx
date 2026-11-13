@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CheckoutStatus } from "@/components/billing/checkout-status";
+import { TestModeNotice } from "@/components/billing/test-mode-notice";
 import { PLANS, PLAN_KEYS } from "@/config/plans";
 import { requireOrgForPage } from "@/server/session";
 
@@ -9,7 +10,8 @@ export default async function CheckoutSuccessPage() {
   await requireOrgForPage({ role: "owner" });
   const planNames = Object.fromEntries(PLAN_KEYS.map((key) => [key, PLANS[key].name]));
   return (
-    <div className="flex min-h-[50dvh] items-center justify-center">
+    <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-4">
+      <TestModeNotice inline />
       <CheckoutStatus planNames={planNames} />
     </div>
   );

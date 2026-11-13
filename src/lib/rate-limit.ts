@@ -1,6 +1,7 @@
 import "server-only";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
+import { env, features } from "@/env";
 import { RateLimitError } from "./errors";
 
 export type RateLimitRule = {
@@ -65,14 +66,54 @@ export async function enforceRateLimit(key: string, rule: RateLimitRule): Promis
   return result;
 }
 
-/** Best-effort client IP. On Vercel `x-forwarded-for` is set by the platform and cannot be spoofed. */
+/**
+ * Reads the current count of a window WITHOUT consuming it. `ok` is false once `limit`
+ * has been reached. For limits that are counted after the fact (e.g. failed sign-ins).
+ */
+export async function peekRateLimit(key: string, rule: RateLimitRule): Promise<RateLimitResult> {
+  const window = Math.max(1, Math.floor(rule.windowSeconds));
+  const rows = await db.execute<{ count: number | null; window_start: string }>(sql`
+    select
+      (select count from rate_limits where key = ${key}
+         and window_start = to_timestamp(floor(extract(epoch from now()) / ${window}::int) * ${window}::int)) as count,
+      to_timestamp(floor(extract(epoch from now()) / ${window}::int) * ${window}::int) as window_start
+  `);
+  const count = Number(rows[0]?.count ?? 0);
+  const resetAt = new Date(new Date(rows[0]!.window_start).getTime() + window * 1000);
+  return {
+    ok: count < rule.limit,
+    limit: rule.limit,
+    remaining: Math.max(0, rule.limit - count),
+    resetAt,
+    retryAfterSeconds: Math.max(1, Math.ceil((resetAt.getTime() - Date.now()) / 1000)),
+  };
+}
+
+/**
+ * Request headers that carry the client's IP address AND cannot be set by the client.
+ *
+ *  - On Vercel the platform sets (and overwrites) these headers.
+ *  - Anywhere else nothing is trusted by default: a client could send any
+ *    `X-Forwarded-For` and get a fresh rate-limit bucket per request. Set
+ *    TRUST_PROXY_HEADERS=1 only behind a reverse proxy that overwrites them.
+ */
+export const trustedIpHeaders: readonly string[] = features.onVercel
+  ? ["x-vercel-forwarded-for", "x-real-ip", "x-forwarded-for"]
+  : env.TRUST_PROXY_HEADERS === "1"
+    ? ["x-forwarded-for", "x-real-ip"]
+    : [];
+
+/**
+ * The client IP from a trusted header (see `trustedIpHeaders`), or "unknown". With no
+ * trusted source every client shares the "unknown" bucket: the per-IP limits then act as
+ * global limits instead of being bypassable.
+ */
 export function clientIp(headers: Headers): string {
-  const forwarded = headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
+  for (const name of trustedIpHeaders) {
+    const first = headers.get(name)?.split(",")[0]?.trim();
+    if (first) return first.slice(0, 64);
   }
-  return headers.get("x-real-ip")?.trim() || "unknown";
+  return "unknown";
 }
 
 /** Standard headers describing the limit, for 429 responses. */

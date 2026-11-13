@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, isNotNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { members, organizations, sessions } from "@/db/schema";
 import { track } from "@/lib/analytics";
@@ -25,15 +25,27 @@ function personalWorkspaceName(user: { name?: string | null; email: string }): s
 }
 
 /**
- * Creates the personal workspace every user gets at sign-up, with the user as owner.
+ * Makes sure the user has a workspace: returns their oldest one, or creates the personal
+ * workspace every user gets at sign-up (with the user as owner).
+ *
  * Written directly with Drizzle (not through the Better Auth API) because it runs inside
  * Better Auth's own `user.create.after` hook and from `requireOrg()` as a self-heal.
+ * Idempotent and serialised per user (transaction-scoped advisory lock): the sign-up hook
+ * and parallel first requests cannot each create one.
  */
 export async function createPersonalWorkspace(user: { id: string; name?: string | null; email: string }): Promise<string> {
   const name = personalWorkspaceName(user);
-  const organizationId = newId();
-  const now = new Date();
-  await db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`personal-workspace:${user.id}`}))`);
+    const [existing] = await tx
+      .select({ organizationId: members.organizationId })
+      .from(members)
+      .where(eq(members.userId, user.id))
+      .orderBy(asc(members.createdAt))
+      .limit(1);
+    if (existing) return { organizationId: existing.organizationId, created: false };
+    const organizationId = newId();
+    const now = new Date();
     await tx.insert(organizations).values({
       id: organizationId,
       name,
@@ -42,9 +54,10 @@ export async function createPersonalWorkspace(user: { id: string; name?: string 
       metadata: JSON.stringify({ personal: true }),
     });
     await tx.insert(members).values({ id: newId(), organizationId, userId: user.id, role: "owner", createdAt: now });
+    return { organizationId, created: true };
   });
-  await track("workspace.created", { organizationId, userId: user.id }, { personal: true });
-  return organizationId;
+  if (result.created) await track("workspace.created", { organizationId: result.organizationId, userId: user.id }, { personal: true });
+  return result.organizationId;
 }
 
 /** The user's oldest membership (their personal workspace unless they left it). */

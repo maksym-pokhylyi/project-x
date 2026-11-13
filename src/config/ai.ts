@@ -31,3 +31,49 @@ export function estimateCostUsd(model: string, inputTokens: number, outputTokens
   const cost = (inputTokens * price.inputPerMTok + outputTokens * price.outputPerMTok) / 1_000_000;
   return Math.round(cost * 1_000_000) / 1_000_000;
 }
+
+// ---------------------------------------------------------------------------
+// Budget policy (enforced in src/lib/ai.ts by reserving before every call)
+// ---------------------------------------------------------------------------
+
+/** Per call. Anything larger must be split by the feature; nothing is sent to the model. */
+export const AI_MAX_INPUT_TOKENS = 200_000;
+export const AI_DEFAULT_MAX_OUTPUT_TOKENS = 1024;
+/** Upper bound for `maxOutputTokens`; larger requests are clamped. */
+export const AI_MAX_OUTPUT_TOKENS = 16_000;
+
+/**
+ * Pessimistic token estimate for a prompt, used to RESERVE budget before the call (the
+ * real token counts replace it afterwards). Tokenisers rarely produce more than one token
+ * per two bytes of UTF-8; ordinary English is closer to one per four.
+ */
+export function estimateInputTokens(utf8Bytes: number): number {
+  return Math.ceil(utf8Bytes / 2) + 64;
+}
+
+/** The most a call can cost: estimated input at the input price + every allowed output token. */
+export function worstCaseCostUsd(model: string, estimatedInputTokens: number, maxOutputTokens: number): number {
+  return estimateCostUsd(model, estimatedInputTokens, maxOutputTokens);
+}
+
+export const AI_BUDGET_POLICY = {
+  /**
+   * Share of its MONTHLY budget (plan limit `aiMonthlyBudgetUsd`) a workspace may spend in
+   * one UTC day. Stops one workspace from burning a month of allowance — or the shared
+   * daily pool — in an afternoon.
+   */
+  dailyShareOfMonthly: { free: 0.2, paid: 0.5 },
+  /** No single workspace may take more than this share of AI_DAILY_BUDGET_USD in a day. */
+  maxShareOfGlobalDaily: 0.5,
+  /**
+   * Free-plan workspaces TOGETHER may use at most this share of AI_DAILY_BUDGET_USD per day
+   * (override the amount with AI_FREE_DAILY_BUDGET_USD). Creating many free workspaces can
+   * therefore never exhaust the pool that paying customers draw from.
+   */
+  freePoolShareOfGlobalDaily: 0.25,
+  /** A reservation whose call never settled (crash, timeout) is finalised at its worst-case cost after this long. */
+  staleReservationMinutes: 15,
+} as const;
+
+/** Calls per workspace per minute through generateAiText (abuse and runaway-loop protection). */
+export const AI_RATE_LIMIT = { limit: 120, windowSeconds: 60 } as const;

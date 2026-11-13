@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AccountDangerZone } from "@/components/app/danger-zone";
 import { PageHeader } from "@/components/app/page-header";
 import { ProfileForm } from "@/components/app/profile-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,15 @@ export default async function ProfilePage() {
         </CardHeader>
         <CardContent>
           <ProfileForm name={ctx.user.name} email={ctx.user.email} />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Delete account</CardTitle>
+          <CardDescription>Remove your account and personal data.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AccountDangerZone email={ctx.user.email} />
         </CardContent>
       </Card>
     </>

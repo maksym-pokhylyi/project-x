@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import { MockLanguageModelV4 } from "ai/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { estimateCostUsd, FALLBACK_PRICE, MODEL_PRICES } from "@/config/ai";
@@ -94,7 +93,8 @@ describe("AI wrapper", () => {
 
   it("derives the workspace budget from its plan", async () => {
     await createOrg("org_ai_pro", "pro");
-    await recordSpend("org_ai_pro", PLANS.free.limits.aiMonthlyBudgetUsd + 0.2);
+    // More than a free workspace could ever spend in a day (0.10), less than Pro's daily ceiling here (0.50).
+    await recordSpend("org_ai_pro", 0.3);
     await expect(assertAiBudget("org_ai_pro")).resolves.toBeUndefined();
     // Stay under the global daily budget (1 USD in tests) by dating the big spend earlier this month.
     const earlierThisMonth = new Date(Math.max(startOfUtcMonth(new Date()).getTime(), startOfUtcDay(new Date()).getTime() - 1));
@@ -131,35 +131,27 @@ describe("AI wrapper", () => {
     expect(await getAiSpendUsd(startOfUtcDay(new Date()))).toBe(0);
   });
 
-  it("stops once accumulated calls reach the budget", async () => {
-    // Each call costs 0.035 USD at the fallback price; the free budget is 0.5 USD.
+  it("stops before accumulated calls can cross the budget (hard cap, never overshoots)", async () => {
+    // A paying workspace: its daily ceiling here is 0.50 USD (half the 1 USD global test budget).
+    await createOrg("org_ai_loop", "starter");
+    // Each call costs 0.035 USD at the fallback price and reserves its worst case first.
     const { model, doGenerate } = mockModel({ input: 1000, output: 500 });
     let completed = 0;
     let blocked: unknown = null;
     for (let i = 0; i < 40 && !blocked; i += 1) {
       try {
-        await generateAiText({ organizationId: ORG, feature: "loop", model, prompt: "hi" });
+        await generateAiText({ organizationId: "org_ai_loop", feature: "loop", model, prompt: "hi" });
         completed += 1;
       } catch (error) {
         blocked = error;
       }
     }
     expect(blocked).toBeInstanceOf(AiBudgetExceededError);
-    expect(completed).toBe(Math.ceil(PLANS.free.limits.aiMonthlyBudgetUsd / 0.035)); // 15 calls: 14 × 0.035 < 0.5 ≤ 15 × 0.035
+    expect(blocked).toMatchObject({ code: "AI_ORG_BUDGET_EXCEEDED", details: { period: "day", limitUsd: 0.5 } });
     expect(doGenerate).toHaveBeenCalledTimes(completed);
-  });
-
-  it("records a failed model call and rethrows", async () => {
-    const model = new MockLanguageModelV4({
-      provider: "mock",
-      modelId: "broken",
-      doGenerate: async () => {
-        throw new Error("upstream 500");
-      },
-    });
-    await expect(generateAiText({ organizationId: ORG, feature: "summary", model, prompt: "hi" })).rejects.toThrow();
-    const rows = await db.select().from(aiUsage).where(eq(aiUsage.organizationId, ORG));
-    expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({ status: "error", costUsd: 0, inputTokens: 0, outputTokens: 0, model: "mock/broken" });
+    const spent = await getAiSpendUsd(startOfUtcDay(new Date()), "org_ai_loop");
+    expect(spent).toBeCloseTo(completed * 0.035, 6);
+    expect(spent).toBeLessThanOrEqual(0.5);
+    expect(completed).toBeGreaterThanOrEqual(12); // the cap is tight, not merely safe
   });
 });

@@ -1,4 +1,3 @@
-import { TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -7,6 +6,7 @@ import { AppBreadcrumbs, BreadcrumbProvider } from "@/components/app/breadcrumbs
 import { UserMenu, type UserMenuPlan } from "@/components/app/user-menu";
 import { WorkspaceSwitcher } from "@/components/app/workspace-switcher";
 import { Logo } from "@/components/logo";
+import { NoticeBand } from "@/components/ui/notice-band";
 import { PLANS, formatPrice } from "@/config/plans";
 import { listUserWorkspaces } from "@/server/members";
 import { requireOrgForPage, type OrgContext } from "@/server/session";
@@ -15,35 +15,73 @@ export const metadata: Metadata = { title: { default: "App", template: "%s · Ap
 
 const formatDate = (date: Date | null | undefined) => date?.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
+/** Shown while the workspace has more members than its plan allows (see OrgContext.seats). */
+function SeatBanner({ ctx }: { ctx: OrgContext }) {
+  if (!ctx.seats.overLimit) return null;
+  return (
+    <NoticeBand tone="warning" role="status" data-testid="seat-limit-banner" containerClassName="container-app">
+      <strong className="font-semibold">
+        This workspace has {ctx.seats.used} members but the {ctx.plan.name} plan includes {ctx.seats.limit}.
+      </strong>{" "}
+      It is read-only and nobody can be invited until{" "}
+      {ctx.role === "owner" ? (
+        <>
+          you{" "}
+          <Link href="/app/settings/members" className="link font-medium">
+            remove members
+          </Link>{" "}
+          or{" "}
+          <Link href="/app/settings/billing" className="link font-medium">
+            upgrade
+          </Link>
+          .
+        </>
+      ) : (
+        "an owner removes members or upgrades the plan."
+      )}
+    </NoticeBand>
+  );
+}
+
 /** Payment problem: said once, at the top of every app page, with the one thing to do about it. */
 function BillingBanner({ ctx }: { ctx: OrgContext }) {
   const { source, graceEndsAt } = ctx.entitlements;
+  if (source === "period_lapsed") {
+    return (
+      <NoticeBand tone="warning" role="status" data-testid="period-lapsed-banner" containerClassName="container-app">
+        <strong className="font-semibold">We could not confirm the renewal of this subscription.</strong> The workspace is limited to the Free plan for
+        now.{" "}
+        {ctx.role === "owner" ? (
+          <Link href="/app/settings/billing" className="link font-medium">
+            Check billing
+          </Link>
+        ) : (
+          "Ask a workspace owner to check billing."
+        )}
+      </NoticeBand>
+    );
+  }
   if (source !== "past_due_grace" && source !== "past_due_expired") return null;
   const isOwner = ctx.role === "owner";
   return (
-    <div role="status" className="bg-accent-tint">
-      <p className="container-app flex items-start gap-2.5 py-3 text-sm text-ink">
-        <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-accent" />
-        <span>
-          {source === "past_due_grace" ? (
-            <>
-              <strong className="font-semibold">Payment failed.</strong> Paid features stay on until {formatDate(graceEndsAt)}.
-            </>
-          ) : (
-            <>
-              <strong className="font-semibold">Subscription past due.</strong> This workspace is limited to the Free plan until payment succeeds.
-            </>
-          )}{" "}
-          {isOwner ? (
-            <Link href="/app/settings/billing" className="link font-medium">
-              Update payment method
-            </Link>
-          ) : (
-            "Ask a workspace owner to update the payment method."
-          )}
-        </span>
-      </p>
-    </div>
+    <NoticeBand tone="warning" role="status" containerClassName="container-app">
+      {source === "past_due_grace" ? (
+        <>
+          <strong className="font-semibold">Payment failed.</strong> Paid features stay on until {formatDate(graceEndsAt)}.
+        </>
+      ) : (
+        <>
+          <strong className="font-semibold">Subscription past due.</strong> This workspace is limited to the Free plan until payment succeeds.
+        </>
+      )}{" "}
+      {isOwner ? (
+        <Link href="/app/settings/billing" className="link font-medium">
+          Update payment method
+        </Link>
+      ) : (
+        "Ask a workspace owner to update the payment method."
+      )}
+    </NoticeBand>
   );
 }
 
@@ -92,6 +130,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
         <BillingBanner ctx={ctx} />
+        <SeatBanner ctx={ctx} />
         <main id="main" className="container-app flex-1 pt-5 pb-12 md:pt-7 md:pb-[4.5rem]">
           <AppBreadcrumbs />
           {children}

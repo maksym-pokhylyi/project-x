@@ -30,13 +30,13 @@ describe("environment validation and feature flags", () => {
     const { features } = await loadEnv({ NODE_ENV: "production", VERCEL_ENV: "production", DEV_TOOLS: "1" });
     expect(features.devTools).toBe(false);
     expect(features.isRealProduction).toBe(true);
-    // No way to deliver or read e-mail there, so verification cannot be required.
-    expect(features.requireEmailVerification).toBe(false);
+    // No way to deliver or read e-mail there: verification stays REQUIRED and sign-up is off (F-04).
+    expect(features).toMatchObject({ requireEmailVerification: true, signUpEnabled: false, passwordResetEnabled: false, mailDelivery: "none" });
   });
 
   it("requires e-mail verification in production once Resend is configured", async () => {
-    const { features } = await loadEnv({ NODE_ENV: "production", VERCEL_ENV: "production", RESEND_API_KEY: "re_live_key" });
-    expect(features).toMatchObject({ emailConfigured: true, requireEmailVerification: true, devTools: false });
+    const { features } = await loadEnv({ NODE_ENV: "production", VERCEL_ENV: "production", RESEND_API_KEY: "re_live_key", EMAIL_FROM: "Bidfolio <no-reply@bidfolio.co.uk>" });
+    expect(features).toMatchObject({ emailConfigured: true, requireEmailVerification: true, devTools: false, signUpEnabled: true, passwordResetEnabled: true, mailDelivery: "resend" });
   });
 
   it("derives the canonical URL", async () => {

@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/app/page-header";
 import { UsagePanel } from "@/components/app/usage-panel";
 import { BillingPlans, type BillingClientConfig } from "@/components/billing/billing-plans";
 import { ManageBillingButton } from "@/components/billing/manage-billing-button";
+import { TestModeNotice } from "@/components/billing/test-mode-notice";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PAID_PLAN_KEYS, PLANS, isBillingInterval, isPlanKey, type BillingInterval, type PaidPlanKey } from "@/config/plans";
@@ -36,7 +37,8 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
 
   const catalogue = getPriceCatalogue();
   const config: BillingClientConfig = {
-    paddle: env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN ? { environment: env.PADDLE_ENV, clientToken: env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN } : null,
+    // `features.paddleCheckout` is false for sandbox credentials on real production without ALLOW_SANDBOX_BILLING=1.
+    paddle: features.paddleCheckout && env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN ? { environment: env.PADDLE_ENV, clientToken: env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN } : null,
     availablePrices: Object.fromEntries(
       PAID_PLAN_KEYS.map((plan) => [plan, { month: Boolean(catalogue[plan].month), year: Boolean(catalogue[plan].year) }]),
     ) as Record<PaidPlanKey, Record<BillingInterval, boolean>>,
@@ -52,6 +54,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   return (
     <>
       <PageHeader level={2} title="Billing" description="Plan, payment details and usage for this workspace." />
+      <TestModeNotice inline />
 
       <Card data-testid="current-plan">
         <CardHeader>

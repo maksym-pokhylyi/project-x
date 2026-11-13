@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { WorkspaceDangerZone } from "@/components/app/danger-zone";
 import { PageHeader } from "@/components/app/page-header";
 import { WorkspaceForm } from "@/components/app/workspace-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +63,18 @@ export default async function WorkspaceSettingsPage() {
                 ))}
               </ul>
             )}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {ctx.role === "owner" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Export and deletion</CardTitle>
+            <CardDescription>Owners only.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <WorkspaceDangerZone workspaceName={ctx.organization.name} />
           </CardContent>
         </Card>
       ) : null}

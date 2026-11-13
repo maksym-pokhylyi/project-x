@@ -1,16 +1,16 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { forbidden, redirect } from "next/navigation";
 import { cache } from "react";
 import type { Plan } from "@/config/plans";
 import { db } from "@/db";
 import { members, organizations, sessions } from "@/db/schema";
-import { adminEmails } from "@/env";
+import { adminEmails, adminUserIds } from "@/env";
 import { auth } from "@/lib/auth";
 import type { Entitlements } from "@/lib/billing/entitlements";
 import { entitlementsFor, getSubscription, type SubscriptionRow } from "@/lib/billing/subscription";
-import { ForbiddenError, UnauthorizedError } from "@/lib/errors";
+import { ForbiddenError, SeatsOverLimitError, UnauthorizedError } from "@/lib/errors";
 import { createPersonalWorkspace, firstOrganizationIdForUser, hasRole, isRole, type Role } from "./workspaces";
 
 /**
@@ -30,7 +30,7 @@ export type CurrentUser = {
   email: string;
   image: string | null;
   emailVerified: boolean;
-  /** Founder/admin access to /admin (ADMIN_EMAILS + a VERIFIED e-mail). */
+  /** Founder/admin access to /admin (ADMIN_EMAILS + a VERIFIED e-mail, + ADMIN_USER_IDS when pinned). */
   isAdmin: boolean;
 };
 
@@ -54,7 +54,17 @@ export type OrgContext = {
   /** Effective plan, limits and feature flags (see src/lib/billing/entitlements.ts). */
   entitlements: Entitlements;
   plan: Plan;
+  /**
+   * Seats in use against the plan's limit. `overLimit` is true when the workspace has more
+   * members than its plan allows — typically after a downgrade or cancellation. Nobody is
+   * removed automatically: members keep READ access, no member or invitation can be added,
+   * and product writes are refused (`requireOrg({ write: true })`) until an owner removes
+   * members or upgrades. Show a banner when it is set.
+   */
+  seats: SeatState;
 };
+
+export type SeatState = { used: number; limit: number | null; overLimit: boolean };
 
 const getSession = cache(async () => auth.api.getSession({ headers: await headers() }));
 
@@ -65,9 +75,21 @@ function toCurrentUser(user: { id: string; name: string; email: string; image?: 
     email: user.email,
     image: user.image ?? null,
     emailVerified: user.emailVerified,
-    // An unverified address proves nothing, so it never grants admin access.
-    isAdmin: user.emailVerified && adminEmails.has(user.email.toLowerCase()),
+    isAdmin: isAdminUser(user),
   };
+}
+
+/**
+ * Founder access. Three conditions, all required:
+ *  - the address is listed in ADMIN_EMAILS,
+ *  - it is VERIFIED — which only the mailbox owner can achieve, and which always replaces a
+ *    password chosen by anyone else (see src/lib/signup-binding.ts), so registering the
+ *    founder's address first does not lead here,
+ *  - when ADMIN_USER_IDS is set, the account is one of the pinned ids.
+ */
+export function isAdminUser(user: { id: string; email: string; emailVerified: boolean }): boolean {
+  if (!user.emailVerified || !adminEmails.has(user.email.toLowerCase())) return false;
+  return adminUserIds.size === 0 || adminUserIds.has(user.id);
 }
 
 function isPersonalWorkspace(metadata: string | null): boolean {
@@ -118,8 +140,13 @@ const loadOrgContext = cache(async (): Promise<OrgContext | null> => {
   }
 
   const role: Role = isRole(membership.role) ? membership.role : "member";
-  const subscription = await getSubscription(membership.organization.id);
+  const [subscription, [memberCount]] = await Promise.all([
+    getSubscription(membership.organization.id),
+    db.select({ value: count() }).from(members).where(eq(members.organizationId, membership.organization.id)),
+  ]);
   const entitlements = entitlementsFor(subscription);
+  const seatsUsed = memberCount?.value ?? 1;
+  const seatLimit = entitlements.limits.seats;
   return {
     user,
     sessionId: session.session.id,
@@ -135,6 +162,7 @@ const loadOrgContext = cache(async (): Promise<OrgContext | null> => {
     subscription,
     entitlements,
     plan: entitlements.plan,
+    seats: { used: seatsUsed, limit: seatLimit, overLimit: seatLimit !== null && seatsUsed > seatLimit },
   };
 });
 
@@ -142,12 +170,22 @@ const loadOrgContext = cache(async (): Promise<OrgContext | null> => {
  * The signed-in user, their active workspace, role and entitlements.
  * Throws UnauthorizedError (401) without a session and ForbiddenError (403) when
  * `options.role` is not met. Use in Server Actions, Route Handlers and data access.
+ *
+ * Pass `write: true` in every action that CREATES or CHANGES product data: it refuses
+ * (402 SEAT_LIMIT_REACHED) while the workspace has more members than its plan allows.
+ * Reads, member management and billing do not pass it, so the workspace can be repaired.
  */
-export async function requireOrg(options: { role?: Role } = {}): Promise<OrgContext> {
+export async function requireOrg(options: { role?: Role; write?: boolean } = {}): Promise<OrgContext> {
   const context = await loadOrgContext();
   if (!context) throw new UnauthorizedError();
   if (options.role) assertRole(context, options.role);
+  if (options.write) assertWorkspaceWritable(context);
   return context;
+}
+
+/** Throws SeatsOverLimitError while the workspace is over its seat limit (read-only mode). */
+export function assertWorkspaceWritable(context: Pick<OrgContext, "seats">): void {
+  if (context.seats.overLimit && context.seats.limit !== null) throw new SeatsOverLimitError(context.seats.used, context.seats.limit);
 }
 
 /** Throws ForbiddenError unless the context's role is at least `minimum`. */

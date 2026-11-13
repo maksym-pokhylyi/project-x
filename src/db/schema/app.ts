@@ -60,6 +60,19 @@ export const subscriptions = pgTable(
     customerEmail: text("customer_email"),
     /** occurred_at of the newest event applied; older events are ignored. */
     lastEventAt: tz("last_event_at"),
+    /**
+     * users.id of the owner whose server-signed checkout created this subscription
+     * (see src/lib/billing/checkout-signature.ts). Null for manual/legacy rows.
+     */
+    checkoutUserId: text("checkout_user_id"),
+    /**
+     * Set when paddle_subscription_id and paddle_customer_id were bound to this workspace by
+     * an event carrying a valid checkout signature. Self-service billing links are only
+     * created for rows where this is set.
+     */
+    verifiedAt: tz("verified_at"),
+    /** Last time the daily reconciliation job compared this row with the Paddle API. */
+    reconciledAt: tz("reconciled_at"),
     /** Last subscription entity received from Paddle, for debugging/audit. */
     raw: jsonb("raw"),
     createdAt: createdAt(),
@@ -86,7 +99,7 @@ export const webhookEvents = pgTable(
     receivedAt: tz("received_at").notNull().defaultNow(),
     /** Set once handling finished successfully (including deliberate ignores). */
     processedAt: tz("processed_at"),
-    /** processed | ignored_stale | ignored_unhandled | ignored_unmapped */
+    /** processed | ignored_stale | ignored_unhandled | ignored_unmapped | ignored_conflict | ignored_unverified */
     outcome: text("outcome"),
     /** Last processing error; cleared on success. */
     error: text("error"),
@@ -96,7 +109,28 @@ export const webhookEvents = pgTable(
     uniqueIndex("webhook_events_event_id_key").on(t.eventId),
     index("webhook_events_received_at_idx").on(t.receivedAt),
     index("webhook_events_unprocessed_idx").on(t.receivedAt).where(sql`${t.processedAt} is null`),
+    // Lookups by the Paddle entity an event is about (customer e-mail, newer events of a subscription).
+    index("webhook_events_data_id_idx").on(sql`((${t.payload} -> 'data' ->> 'id'))`, t.occurredAt),
   ],
+);
+
+/**
+ * Checkout nonces that have attached a subscription to a workspace. A nonce comes from
+ * server-signed checkout data and may bind exactly ONE Paddle subscription: replaying the
+ * same signed data with another subscription is refused (see resolveVerifiedCheckout).
+ */
+export const billingCheckoutNonces = pgTable(
+  "billing_checkout_nonces",
+  {
+    nonce: text("nonce").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(),
+    paddleSubscriptionId: text("paddle_subscription_id").notNull(),
+    consumedAt: tz("consumed_at").notNull().defaultNow(),
+  },
+  (t) => [index("billing_checkout_nonces_organization_id_idx").on(t.organizationId)],
 );
 
 /** Metered usage per organization, metric and period (see consumeQuota). */
@@ -261,15 +295,24 @@ export const aiUsage = pgTable(
     model: text("model").notNull(),
     inputTokens: integer("input_tokens").notNull().default(0),
     outputTokens: integer("output_tokens").notNull().default(0),
-    /** Estimate from src/config/ai.ts price table, not an invoice. */
+    /**
+     * Estimate from src/config/ai.ts price table, not an invoice. While status = "reserved"
+     * this is the worst-case cost held against the budgets; it is replaced by the real
+     * cost when the call settles.
+     */
     costUsd: numeric("cost_usd", { precision: 12, scale: 6, mode: "number" }).notNull().default(0),
+    /** Worst-case cost reserved before the call (kept after settling, for comparison). */
+    reservedUsd: numeric("reserved_usd", { precision: 12, scale: 6, mode: "number" }),
+    /** Effective plan of the workspace when the call was made ("free" rows share the free pool). */
+    planKey: text("plan_key"),
     latencyMs: integer("latency_ms").notNull().default(0),
-    /** ok | error */
+    /** reserved (call in flight) | ok | error */
     status: text("status").notNull().default("ok"),
     createdAt: createdAt(),
   },
   (t) => [
     index("ai_usage_organization_id_created_at_idx").on(t.organizationId, t.createdAt),
     index("ai_usage_created_at_idx").on(t.createdAt),
+    index("ai_usage_reserved_idx").on(t.createdAt).where(sql`${t.status} = 'reserved'`),
   ],
 );

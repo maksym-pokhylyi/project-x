@@ -6,22 +6,27 @@
 // ("pnpm db:migrate && next build"). Plain .mjs on purpose, so it has no
 // build-time dependency beyond `postgres` and `drizzle-orm`.
 //
+// WHERE it runs is decided by ./migrate-policy.mjs: locally and in CI always; on Vercel
+// only for production deployments (a Preview build never migrates unless the Preview
+// environment sets MIGRATE_PREVIEW_DATABASE=1 for its own, separate database).
+//
 // Connection: DATABASE_URL_UNPOOLED (Neon's direct connection, preferred for DDL)
 // falls back to DATABASE_URL. `prepare: false` keeps the pooled URL working too.
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import { loadEnv } from "./load-env.mjs";
+import { migrationDecision } from "./migrate-policy.mjs";
 
 // Load .env.local / .env for local runs (no-op on Vercel, where env is injected).
 loadEnv();
 
-// Escape hatch for environments that must not touch the schema (e.g. a Vercel Preview
-// environment that shares a database with production — better: give previews their own).
-if (process.env.SKIP_DB_MIGRATE === "1") {
-  console.log("[db:migrate] skipped (SKIP_DB_MIGRATE=1)");
+const decision = migrationDecision(process.env);
+if (!decision.run) {
+  console.log(`[db:migrate] SKIPPED — ${decision.reason}`);
   process.exit(0);
 }
+console.log(`[db:migrate] running — ${decision.reason}`);
 
 const url = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
 if (!url) {

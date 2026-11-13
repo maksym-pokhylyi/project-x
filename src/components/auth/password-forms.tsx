@@ -27,7 +27,8 @@ export function ForgotPasswordForm() {
     setPending(true);
     const { error } = await authClient.requestPasswordReset({ email: parsed.data.email, redirectTo: "/reset-password" });
     setPending(false);
-    if (error && error.status === 429) {
+    if (error && (error.status === 429 || error.status === 503)) {
+      // 429: rate limited. 503: this deployment cannot send e-mail (never per-address, so nothing is revealed).
       setFormError(error.message ?? "Too many attempts. Please try again later.");
       return;
     }

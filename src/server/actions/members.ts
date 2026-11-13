@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { ConflictError } from "@/lib/errors";
-import { enforceRateLimit } from "@/lib/rate-limit";
 import { inviteSchema, memberRoleSchema, parseInput } from "@/lib/validation";
 import { fromAuthError } from "../auth-errors";
 import { runAction, type ActionResult } from "../http";
@@ -24,7 +23,7 @@ export async function inviteMemberAction(input: unknown): Promise<ActionResult<{
   return runAction("member.invite", async () => {
     const ctx = await requireOrg({ role: "admin" });
     const { email, role } = parseInput(inviteSchema, input);
-    await enforceRateLimit(`invite:${ctx.organization.id}`, { limit: 30, windowSeconds: 3600 });
+    // The per-workspace invitation limit lives in the Better Auth hook, so the raw endpoint obeys it too.
     try {
       const invitation = await auth.api.createInvitation({
         headers: await headers(),
