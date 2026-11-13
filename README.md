@@ -760,6 +760,72 @@ a retention period in `src/config/retention.ts` and a line in `src/lib/maintenan
 streamed page has already sent `200`). Layouts and pages render in parallel, so a check
 in the layout alone does not protect the page.
 
+## Outreach tooling (founder only)
+
+The first customers come from a small, manual e-mail test to companies that recently won a
+public contract. **The app never sends these letters.** It builds the list, renders each
+letter and hands over a CSV; the founder sends them from his own mailbox. Code:
+`src/features/outreach` (`domain/` pure rules, `server/` data access, `components/`), pages
+in `src/app/admin/outreach` and `src/app/optout`, tables in `src/db/schema/outreach.ts`.
+
+| Where | What it does |
+|---|---|
+| `/admin/outreach` | Segment builder (trade by CPV, region, award age, value band, mailbox kind, batch of at most 400); a preview with a count of everyone left out, per reason; "Create campaign"; results against the 400-e-mail test; the audit trail. A preview stores nothing |
+| `/admin/outreach/campaigns/<id>` | Letter preview; CSV export (a POST; suppressions and contact-by dates are checked again every time); mark as sent by count or by ticked rows, and clear a wrong mark; results |
+| `/admin/suppressions` | The do-not-contact list: search, add an address or a domain, import a bounce list, export, remove (typed confirmation, logged). Also the queue of correction and removal requests |
+| `/optout?c=<code>` | Public. Opening it shows a confirmation that names the company and changes nothing; the one button (a Server Action) suppresses the address. Without a code: a form that answers every address alike, rate-limited. Works without JavaScript; `noindex` |
+| `/admin` | Founder's key numbers: sign-ups, verified accounts, workspaces, claimed companies, activated workspaces (first bid check built), paying workspaces by plan, MRR, Bid Pass sales (purchases still paid for), AI spend against the daily budget, job queue, ingestion freshness, outreach |
+
+**What the code enforces**
+
+- Who may be listed is decided by `outreachEligibility` (`src/features/procurement/domain/outreach.ts`):
+  Ltd, PLC and LLP companies with a Companies House number, never a webmail address, a named
+  address only within 30 days of the day it was first stored. The builder adds its own
+  caution: the address must be on the company's website domain when the notice gives a
+  website, SMEs by default, award decisions and contract details notices only.
+- Always left out, with a visible count: suppressed (the address, its domain, or a company
+  that opted out), already a user, listed or written to in the last 180 days
+  (`outreachConfig.coolOffDays`), removed or merged companies, a second address of a company.
+- No named addresses until a UK representative (UK GDPR Art. 27) is in
+  `site.company.ukRepresentative`: the builder shows a blocking notice and the server refuses.
+- Suppression is by address. `suppressions` is the source of truth, read when a list is built
+  and again at every export, so an address that re-appears in a later notice stays suppressed
+  (`supplier_contacts.suppressed_at` is a copy, re-stamped by the daily maintenance job).
+- Letters are plain text from typed templates (`domain/letter.ts`; the wording is that of
+  `docs/gtm/02-outreach-kit.md` and changes only together with it): one personal link
+  `/suppliers/<slug>?r=<code>`, the opt-out link, the privacy notice. No tracking pixel, no
+  link shortener. CSV cells are guarded against formula injection.
+- Prospect lists are personal data. Every function, action, download and page starts with
+  `requireAdmin()`. Addresses never go to logs, analytics events, audit entries or error
+  messages, and no page shows a prospect's address: it exists in the exported file and on the
+  suppression list only.
+
+**What stays with the founder** (the panel on the builder page says so): check each company
+at Companies House before sending; one letter and at most two reminders; 10 rising to 30
+letters per mailbox per day; never phone; add every "stop" reply, complaint and bounce to
+Suppressions within 24 hours; mark each batch as sent on the day, because that date is the
+legal record of first contact. Procedures: `docs/gtm/07-compliance-pack.md`.
+
+**Where the data lives and for how long** (`src/config/retention.ts`; enforced by
+`runOutreachRetention`, part of the daily `maintenance.cleanup` job)
+
+| Table | Holds | Kept |
+|---|---|---|
+| `outreach_campaigns` | segment, letter template, build summary (counts only) | kept |
+| `outreach_prospects` | company, address, link code, status, dates, the letter's merge fields | A named address: erased 90 days after its letter, or when its one-month window ends if it was never written to. Every address, its fingerprint and the merge fields: erased 12 months after the campaign. The rows, statuses, dates and codes stay, so the counts do |
+| `suppressions` | address or domain, reason, source | never purged: it is what keeps the promise |
+| `outreach_audit` | who, when, what, how many (never whom) | 2 years |
+
+**For other code**: `getOutreachResults(campaignId \| null)` and `getFounderKpis()` (admin
+only); `findSuppression(email)` / `loadSuppressionIndex()` to ask whether an address is on the
+do-not-contact list; `addSuppressionEntry(target, input, tx)` to put one there;
+`queryOptionalTable(table, run)` in `src/lib/optional-table.ts` to read a table another
+module owns and that may not be installed yet (`null` instead of an error).
+
+**Try it**: `pnpm exec tsx --import ./scripts/register-server-only.mjs scripts/outreach-preview.ts --days 30`
+prints the counts for a segment (no addresses, nothing stored). Tests: `tests/outreach/*`.
+Browser journey: `pnpm exec playwright test -c playwright.outreach.config.ts --trace off`.
+
 ## Deployment (Vercel + Neon)
 
 1. **Neon**: create a project (region close to the Vercel functions region). Copy the

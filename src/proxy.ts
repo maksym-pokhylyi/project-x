@@ -54,5 +54,7 @@ export const config = {
     "/dev/:path*",
     // Paddle's default payment link: loads Paddle.js, so it gets the strict (nonce) policy.
     "/pay",
+    // The public opt-out page: rendered per request (a link code and a Server Action form).
+    "/optout",
   ],
 };
