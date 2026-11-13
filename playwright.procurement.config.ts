@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { E2E_DEV_TOOLS_SECRET } from "./e2e/bids.env";
 
 /**
  * End-to-end tests of the procurement module (public data pages, claim flow, Radar)
@@ -33,7 +34,9 @@ export default defineConfig({
   use: { baseURL: BASE_URL, trace: "off", screenshot: "only-on-failure", video: "off" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `${process.env.E2E_SKIP_BUILD ? "" : "pnpm exec next build && "}pnpm exec next start -p ${PORT}`,
+    // The database is rebuilt for every run, so what the last run's pages cached (unstable_cache, kept under
+    // .next/cache between starts) goes too: otherwise a supplier page can show the previous seed's numbers.
+    command: `${process.env.E2E_SKIP_BUILD ? "" : "pnpm exec next build && "}rm -rf .next/cache/fetch-cache && pnpm exec next start -p ${PORT}`,
     url: `${BASE_URL}/api/health`,
     reuseExistingServer: false,
     timeout: 300_000,
@@ -48,6 +51,7 @@ export default defineConfig({
       CRON_SECRET: "e2e-cron-secret-0123456789",
       // Production build, but the dev outbox must be reachable to read verification links.
       DEV_TOOLS: "1",
+      DEV_TOOLS_SECRET: E2E_DEV_TOOLS_SECRET,
       LOG_LEVEL: "warn",
       // Force every optional integration OFF, whatever a developer has in .env.local.
       RESEND_API_KEY: "",

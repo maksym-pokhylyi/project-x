@@ -270,10 +270,11 @@ test("the recipient opts out with one button, without JavaScript", async ({ brow
   // Coming back to the link, or reloading, shows the same and changes nothing more.
   await page.reload();
   await expect(page.getByRole("heading", { level: 1, name: "You are unsubscribed" })).toBeVisible();
-  // The further step is the existing request form, with the company's page filled in.
+  // The further step is the request form ("Flag a mistake"), with the company's page filled in: the link goes on to it.
   await page.getByTestId("optout-request").click();
-  await expect(page).toHaveURL(/\/about-the-data\?page=%2Fsuppliers%2Facme-grounds-ltd-01111111#request$/);
-  await expect(page.getByTestId("data-request-form").getByLabel("Page address")).toHaveValue(/\/suppliers\/acme-grounds-ltd-01111111$/);
+  await expect(page).toHaveURL(/\/flag-a-mistake\?page=%2Fsuppliers%2Facme-grounds-ltd-01111111(#request)?$/);
+  await expect(page.getByTestId("flag-form").getByTestId("flag-page")).toContainText("/suppliers/acme-grounds-ltd-01111111");
+  await expect(page.getByTestId("flag-form").locator("input[name='page']")).toHaveValue("/suppliers/acme-grounds-ltd-01111111");
   await context.close();
 });
 

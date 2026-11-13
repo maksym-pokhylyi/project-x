@@ -40,24 +40,27 @@ async function shot(page: Page, name: string) {
   await page.screenshot({ path: `${SHOTS}/${name}.png`, fullPage: true });
 }
 
-/** Public supplier page → "Claim this page" → sign up → verify (dev outbox) → confirm → Radar. */
+/** Public supplier page → "Claim this page" → the account form on the claim page → verify (dev outbox) → confirm → Radar. */
 async function signUpAndClaim(page: Page, user: typeof alex) {
   await page.goto(SUPPLIER);
   await page.getByTestId("claim-cta").click();
-  await expect(page).toHaveURL(/\/sign-up\?redirect=%2Fclaim%2Facme-grounds-ltd-01111111$/);
-  await page.getByLabel("Name").fill(user.name);
-  await page.getByLabel("Work e-mail").fill(user.email);
-  await page.getByLabel("Password").fill(user.password);
-  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page).toHaveURL(/\/claim\/acme-grounds-ltd-01111111$/);
+  const account = page.getByTestId("claim-sign-up");
+  await account.getByLabel("Your name").fill(user.name);
+  await account.getByLabel("Work email").fill(user.email);
+  await account.getByLabel("Password").fill(user.password);
+  await account.getByTestId("claim-authorised").click();
+  await account.getByRole("button", { name: "Create account and claim" }).click();
   await expect(page).toHaveURL(/\/verify-email/);
   await page.goto(OUTBOX);
   const email = page.locator(`[data-testid="outbox-email"][data-to="${user.email}"][data-template="verify-email"]`).first();
   await expect(email).toBeVisible();
   await email.getByTestId("outbox-link").first().click();
-  await expect(page).toHaveURL(/\/claim\/acme-grounds-ltd-01111111$/);
+  // Back on the claim page, signed in, with the tick remembered: one button.
+  await expect(page).toHaveURL(/\/claim\/acme-grounds-ltd-01111111\?authorised=1$/);
   await page.getByTestId("claim-confirm").click();
   await expect(page).toHaveURL(/\/app\?claimed=1/);
-  await expect(page.getByTestId("radar-source")).toContainText("Acme Grounds Ltd");
+  await expect(page.getByTestId("first-run")).toContainText("Acme Grounds Ltd");
 }
 
 /** The five-minute cron tick, as if it were `now`. */

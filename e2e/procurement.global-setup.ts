@@ -16,8 +16,11 @@ import { clock, contractRelease, planningRelease, tenderRelease } from "../tests
  * pipeline (mapRelease -> upsertBatch -> profile builder):
  *
  *   Acme Grounds Ltd (company no. 01111111) with two grounds-maintenance contracts,
- *   14 open tenders in its trade (more than the Free plan's 10), rivals whose contracts
- *   end soon, an early notice and an unrelated trade.
+ *   14 open tenders in its trade and region (more than the Free plan's 10) — one of them
+ *   with no published value — and one in another region (a wider match), rivals whose
+ *   contracts end soon, an early notice, an unrelated trade, a company with a single award
+ *   and no open tender near it, and one with 120 contracts (three pages of them).
+ *   A finished ingestion run is recorded, so pages can say when the data was updated.
  *
  * Until the procurement tables are in a committed migration they are created here from
  * the Drizzle schema; once the migration exists this step finds them and does nothing.
@@ -73,17 +76,35 @@ export default async function globalSetup() {
           buyer: index % 3 === 2 ? YORK : LEEDS,
           cpv: GROUNDS,
           regions: ["UKE"],
-          value: 100_000 + index * 5_000,
+          // One notice gives no value: the screens say "Value not published".
+          value: index === 4 ? null : 100_000 + index * 5_000,
           deadlineInDays: index === 0 ? 3 : 6 + index * 2,
           aboveThreshold: index % 2 === 1,
         }),
       ),
+      // The same work in a region Acme has never worked in: a wider match, counted but not listed on the Free plan.
+      tenderRelease({ ocid: "ocds-h6vhtk-w00001", title: "Estate Grounds Maintenance 2027", buyer: BRISTOL, cpv: GROUNDS, regions: ["UKK"], value: 95_000, deadlineInDays: 16 }),
       tenderRelease({ title: "Payroll Software", buyer: BRISTOL, cpv: ["48450000"], regions: ["UKK"], deadlineInDays: 12 }),
+      // More than a hundred contracts: three pages of "Show all" (50 a page); in a trade and at end dates that touch nobody else's lists.
+      ...Array.from({ length: 120 }, (_, index) =>
+        contractRelease({
+          title: `Office Cleaning, Building ${index + 1}`,
+          buyer: BRISTOL,
+          suppliers: [{ name: "Avon Cleaning Services Ltd", coh: "08888888", region: "UKK11" }],
+          cpv: ["90919200"],
+          regions: ["UKK"],
+          value: 20_000 + index * 500,
+          signedDaysAgo: 30 + index * 4,
+          endsInDays: 500 + index,
+        }),
+      ),
       planningRelease({ title: "Grounds Maintenance Market Engagement", buyer: YORK, cpv: GROUNDS }),
     ];
     const mapped = releases.map((release) => mapRelease(release)).filter((entry): entry is MappedRelease => entry !== null);
     const summary = await upsertBatch(db, mapped);
     await rebuildSupplierProfiles(db, summary.touchedSupplierIds);
+    // What a real ingestion leaves behind: the date behind "updated 13 Nov 2026" on every page.
+    await db.insert(procurementSchema.ingestRuns).values({ source: "fts:seed", mode: "seed", status: "ok", finishedAt: new Date(), releases: releases.length, notices: mapped.length });
   } finally {
     await client.end({ timeout: 5 });
   }
