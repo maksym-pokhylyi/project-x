@@ -400,6 +400,7 @@ describe("getBillingOverview", () => {
     expect(overview.nextPaymentAt?.getTime()).toBe(ctx.subscription!.currentPeriodEnd!.getTime());
     // PADDLE_API_KEY is not set in tests: the rules allow the actions, the configuration does not.
     expect(overview.manage.pause).toMatchObject({ allowed: false, step: "pause_at_period_end", reason: "not_configured" });
+    expect(overview.planChange).toEqual({ allowed: false, message: "Billing is not configured for this environment." });
     expect(overview.managementLinks).toEqual({ available: false, unavailableReason: "not_configured" });
     expect(paddle.state.invoiceCalls).toHaveLength(0);
   });
@@ -423,6 +424,7 @@ describe("getBillingOverview", () => {
       cancel: { allowed: true, step: "cancel_at_period_end" }, // replaces the scheduled pause
     });
     expect(overview.managementLinks).toEqual({ available: true, unavailableReason: null });
+    expect(overview.planChange).toEqual({ allowed: false, message: "This subscription is scheduled to pause. Undo the pause first." });
 
     await db.update(subscriptions).set({ pauseAt: null, status: "paused", pausedAt: new Date(), currentPeriodEnd: new Date(Date.now() - DAY) }).where(eq(subscriptions.organizationId, owner.organizationId));
     vi.resetModules();
@@ -442,6 +444,7 @@ describe("getBillingOverview", () => {
     expect(overview.trialEndsAt?.getTime()).toBe(trialEnd.getTime());
     expect(overview.nextPaymentAt?.getTime()).toBe(trialEnd.getTime());
     expect(overview.trial).toMatchObject({ daysLeft: 9, firstPayment: { amountMinor: 14900, currency: "GBP", formatted: "£149" } });
+    expect(overview.planChange).toMatchObject({ allowed: false, message: expect.stringContaining("once your trial has ended") }); // Paddle refuses plan changes in a trial
     expect(overview.trial!.firstPayment!.at.getTime()).toBe(trialEnd.getTime());
 
     await db.update(subscriptions).set({ cancelAt: trialEnd }).where(eq(subscriptions.organizationId, owner.organizationId));

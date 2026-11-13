@@ -8,6 +8,7 @@ import { hasRole, type Role } from "@/server/workspaces";
 import type { EntitlementSource } from "./entitlements";
 import { decideManageAction, type ManageAction, type ManageRefusal, type ManageStep } from "./manage";
 import { getOneOffPriceId } from "./one-off";
+import { planChangeBlocker } from "./paddle";
 import { describePaymentMethod, normalizePaymentMethod, type PaymentMethodSummary } from "./payment-method";
 import { listReceipts, type Receipt } from "./receipts";
 import { isTrialEligible } from "./trial";
@@ -96,6 +97,11 @@ export type BillingOverview = {
   /** The user may pause, resume, cancel and change the plan (owners). */
   canManage: boolean;
   manage: Record<ManageAction, ManageOption>;
+  /**
+   * Can the plan or interval be changed now (changePlanAction)? Not during a trial and not
+   * while a pause or cancellation is scheduled — `message` says why.
+   */
+  planChange: { allowed: boolean; message: string | null };
   /** Can "Manage billing" / "Update payment method" (openBillingPortalAction) work for this subscription? */
   managementLinks: {
     available: boolean;
@@ -168,6 +174,15 @@ export async function getBillingOverview(ctx: OrgContext, now: Date = new Date()
     else manage[action] = { ...planned, allowed: true, reason: null, message: null };
   }
 
+  const planChangeBlockedBy = planChangeBlocker(subscription);
+  const planChange = planChangeBlockedBy
+    ? { allowed: false, message: planChangeBlockedBy }
+    : !canManage
+      ? { allowed: false, message: "Only an owner of this workspace can manage billing." }
+      : !features.paddleApi
+        ? { allowed: false, message: "Billing is not configured for this environment." }
+        : { allowed: true, message: null };
+
   const storedMethod = isAdmin ? normalizePaymentMethod(subscription?.paymentMethod) : null;
   const bidPassOnSale = features.paddleCheckout && Boolean(env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN) && getOneOffPriceId("bid_pass") !== null;
 
@@ -207,6 +222,7 @@ export async function getBillingOverview(ctx: OrgContext, now: Date = new Date()
     testMode: features.billingTestMode,
     canManage,
     manage,
+    planChange,
     managementLinks: !canManage
       ? { available: false, unavailableReason: "forbidden" }
       : !features.paddleApi
