@@ -10,7 +10,8 @@
  *                                    re-activates the (archived) objects of an earlier run instead of creating new ones
  *
  * The write scenario needs no card. It creates, all named "ZZ API verification (automated,
- * safe to ignore)": 1 product, 2 prices (one with a 14-day trial), 1 customer with an
+ * safe to ignore)": 1 product, 2 prices of £149.00 EXCLUDING tax (`tax_mode: external`, as
+ * the catalogue prices must be; one with a 14-day trial), 1 customer with an
  * @example.com address, and 2 manually-collected (invoice) transactions, which Paddle turns
  * into 2 subscriptions. It then runs the manage steps on them, prints what Paddle answered
  * and which events it emitted, and ALWAYS cleans up: subscriptions cancelled immediately,
@@ -216,7 +217,6 @@ async function writeScenario(created: Created, startedAt: Date): Promise<void> {
 
   heading(REUSE.product ? "Re-activating the test catalogue and customer of an earlier run" : "Creating the test catalogue and customer");
   if (REUSE.product) {
-    for (const key of ["product", "price", "trialPrice", "customer", "address"]) if (!REUSE[key]) throw new Error(`--reuse needs ${key}=…`);
     created.product = await reactivate(`/products/${REUSE.product}`);
   } else {
     const product = await must("POST", "/products", { name: PREFIX, description: `${PREFIX} — run ${run}`, tax_category: "standard", custom_data: custom });
@@ -226,7 +226,8 @@ async function writeScenario(created: Created, startedAt: Date): Promise<void> {
   const price = async (name: string, trial: boolean) => {
     const reused = REUSE[trial ? "trialPrice" : "price"];
     if (reused) {
-      created.prices.push(await reactivate(`/prices/${reused}`));
+      // An earlier run may have created it with the account's default tax mode: make it ex-VAT like a catalogue price.
+      created.prices.push(await reactivate(`/prices/${reused}`, { tax_mode: "external" }));
       return reused;
     }
     const result = await must("POST", "/prices", {
@@ -234,6 +235,8 @@ async function writeScenario(created: Created, startedAt: Date): Promise<void> {
       name: `${PREFIX} — ${name}`,
       description: `${PREFIX} — ${name}`,
       unit_price: { amount: "14900", currency_code: "GBP" },
+      // Catalogue prices exclude VAT: tax is added on top at checkout.
+      tax_mode: "external",
       billing_cycle: { interval: "month", frequency: 1 },
       quantity: { minimum: 1, maximum: 1 },
       ...(trial ? { trial_period: { interval: "day", frequency: 14 } } : {}),
@@ -275,6 +278,14 @@ async function writeScenario(created: Created, startedAt: Date): Promise<void> {
     created.transactions.push(String(result.data.id));
     dump(`transaction-${label}`, result.data);
     line(`   ${label}: transaction ${String(result.data.id)} status=${String(result.data.status)} origin=${String(result.data.origin)}`);
+    if (label === "active") {
+      // "Prices exclude VAT": £149.00 must be the amount BEFORE tax, with VAT added on top for a UK address.
+      const totals = (result.data.details as { totals?: Record<string, string> } | null)?.totals ?? {};
+      const [subtotal, tax, total] = [Number(totals.subtotal), Number(totals.tax), Number(totals.total)];
+      const exclusive = subtotal === 14900 && tax > 0 && total === subtotal + tax;
+      line(`   ${label}: totals subtotal=${totals.subtotal} tax=${totals.tax} total=${totals.total} ${totals.currency_code} -> ${exclusive ? "OK: £149.00 + VAT" : "UNEXPECTED: the price is not treated as excluding tax"}`);
+      if (!exclusive) process.exitCode = 1;
+    }
     const subscription = await subscriptionOf(String(result.data.id), created.customer!, created.subscriptions);
     if (subscription) {
       created.subscriptions.push(String(subscription.id));
@@ -284,10 +295,23 @@ async function writeScenario(created: Created, startedAt: Date): Promise<void> {
     return subscription;
   };
 
+  /**
+   * What changeSubscriptionPlan() would do, WITHOUT doing it: Paddle's preview endpoint
+   * calculates a plan change and changes nothing.
+   */
+  const previewPlanChange = async (label: string, subscriptionId: string, priceId: string, mode: string) => {
+    const result = await api("PATCH", `/subscriptions/${subscriptionId}/preview`, { items: [{ price_id: priceId, quantity: 1 }], proration_billing_mode: mode });
+    const immediate = (result.data?.immediate_transaction as { details?: { totals?: { grand_total?: string; credit_to_balance?: string } } } | null | undefined)?.details?.totals;
+    line(
+      `   ${label} (${mode}): ${result.data ? `accepted — charged now: ${immediate?.grand_total ?? "nothing"}, credited to balance: ${immediate?.credit_to_balance ?? "0"}` : `REFUSED — HTTP ${result.status} ${result.error?.code ?? ""}: ${result.error?.detail ?? ""}`}`,
+    );
+  };
+
   heading("Active subscription: pause / undo / cancel / undo at the end of the paid period");
   const active = await invoice("active", plainPrice);
   if (active) {
     const id = String(active.id);
+    await previewPlanChange("preview: change the price of an active subscription", id, trialPrice, "prorated_immediately");
     await step("pause at period end", id, { kind: "pause_at_period_end" });
     await step("pause again while a pause is scheduled", id, { kind: "pause_at_period_end" });
     await step("cancel while a pause is scheduled", id, { kind: "cancel_at_period_end" });
@@ -316,6 +340,9 @@ async function writeScenario(created: Created, startedAt: Date): Promise<void> {
   const trialing = await invoice("trialing", trialPrice);
   if (trialing) {
     const id = String(trialing.id);
+    // Does Paddle accept the plan change changeSubscriptionPlan() sends (prorated_immediately) during a trial?
+    await previewPlanChange("preview: change the price of a TRIALING subscription", id, plainPrice, "prorated_immediately");
+    await previewPlanChange("preview: change the price of a TRIALING subscription", id, plainPrice, "do_not_bill");
     await step("cancel at period end (trial)", id, { kind: "cancel_at_period_end" });
     await step("undo the cancellation (trial)", id, { kind: "remove_scheduled_change", change: "cancel" });
     await step("pause at period end (trial)", id, { kind: "pause_at_period_end" });
