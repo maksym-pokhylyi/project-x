@@ -21,14 +21,14 @@ export default async function QuestionsPage({ params }: { params: Promise<{ bidI
     const scored = questions.filter((question) => isScoredQuestion(question));
     return (
       <div className="flex flex-col gap-5">
-        <p className="text-[15px]">
+        <p className="text-15">
           {scored.length} scored question{scored.length === 1 ? "" : "s"} found. Titles are shown; the matrix, drafts and marking are part of a full bid.
         </p>
         {scored.length > 0 ? (
           <ol className="bid-card" data-testid="scored-questions-locked">
             {scored.map((question, index) => (
-              <li key={question.id} className={`flex items-baseline gap-4 px-5 py-3 text-[15px] sm:px-6 ${index > 0 ? "bid-rule" : ""}`}>
-                <span className="bid-mono w-14 shrink-0 text-xs text-(--bid-muted)">{question.ref}</span>
+              <li key={question.id} className={`flex items-baseline gap-4 px-5 py-3 text-15 sm:px-6 ${index > 0 ? "bid-rule" : ""}`}>
+                <span className="bid-mono w-14 shrink-0 text-xs text-ink-2">{question.ref}</span>
                 <span className="min-w-0">{question.title ?? question.text}</span>
               </li>
             ))}

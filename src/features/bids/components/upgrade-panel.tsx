@@ -4,22 +4,23 @@ import type { ReactNode } from "react";
 import type { BidAccessSummary } from "@/features/bids/access";
 import { OFFERS, PLANS_URL, TOP_PLAN_FULL_BIDS } from "@/features/bids/offers";
 import { cn } from "@/lib/utils";
+import { ButtonLink } from "@/components/ui/button-link";
 
 const date = (value: Date) => new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" }).format(value);
 const month = (value: Date) => new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", month: "long", year: "numeric" }).format(value);
 
 function Offer({ offer, children, primary, testId }: { offer: (typeof OFFERS)[keyof typeof OFFERS]; children: ReactNode; primary?: boolean; testId: string }) {
   return (
-    <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-2 rounded-[10px] border border-(--bid-line) bg-(--bid-surface) px-5 py-4" data-testid={testId}>
+    <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-2 rounded-card border border-line bg-surface px-5 py-4" data-testid={testId}>
       <p className="flex flex-wrap items-baseline gap-x-2">
-        <span className="text-[15px] font-semibold">{offer.name}</span>
-        <span className="bid-serif text-[22px] leading-none font-semibold">{offer.price}</span>
-        <span className="text-[13px] text-(--bid-muted)">{offer.cadence}</span>
+        <span className="text-15 font-semibold">{offer.name}</span>
+        <span className="bid-serif text-2xl leading-none font-semibold">{offer.price}</span>
+        <span className="text-13 text-ink-2">{offer.cadence}</span>
       </p>
-      <p className="text-sm text-(--bid-ink)">{children}</p>
-      <Link href={offer.href} className={cn("bid-btn mt-auto self-start", primary ? "bid-btn-primary" : "")}>
+      <p className="text-sm text-ink">{children}</p>
+      <ButtonLink href={offer.href} variant={primary ? "default" : "outline"} className="mt-auto self-start">
         {offer.action}
-      </Link>
+      </ButtonLink>
     </div>
   );
 }
@@ -81,30 +82,30 @@ export function UpgradePanel({
   }
 
   return (
-    <section aria-labelledby="upgrade-h" className={cn("rounded-[10px] bg-(--bid-paper-deep) px-5 py-5 sm:px-6", className)} data-testid="upgrade-panel" data-moment={moment}>
+    <section aria-labelledby="upgrade-h" className={cn("rounded-card bg-paper-deep px-5 py-5 sm:px-6", className)} data-testid="upgrade-panel" data-moment={moment}>
       <h2 id="upgrade-h" className="bid-h3">
         {title}
       </h2>
-      <p className="mt-1.5 max-w-[720px] text-[15px]" data-testid="quota-reached">
+      <p className="mt-1.5 max-w-[720px] text-15" data-testid="quota-reached">
         {body}
       </p>
       {moment === "none_left" && onBidPlan && !fullBids.trial ? (
         <p className="mt-3 text-sm">
-          <span className="font-semibold">Full bids</span> <span className="text-(--bid-muted)">· {month(new Date(fullBids.renewsAt.getTime() - 1))}</span>{" "}
-          <span className="bid-mono ml-2 text-[13px]">
+          <span className="font-semibold">Full bids</span> <span className="text-ink-2">· {month(new Date(fullBids.renewsAt.getTime() - 1))}</span>{" "}
+          <span className="bid-mono ml-2 text-13">
             {fullBids.used} of {fullBids.used + (fullBids.remaining ?? 0)} used
           </span>
         </p>
       ) : null}
       {moment === "locked" ? (
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link href={OFFERS.bidPass.href} className="bid-btn bid-btn-primary" data-testid="offer-bid-pass">
+          <ButtonLink href={OFFERS.bidPass.href}  data-testid="offer-bid-pass">
             {OFFERS.bidPass.action} · {OFFERS.bidPass.price}
-          </Link>
+          </ButtonLink>
           {onBidPlan ? null : (
-            <Link href={OFFERS.trial.href} className="bid-btn" data-testid="offer-trial">
+            <ButtonLink variant="outline" href={OFFERS.trial.href}  data-testid="offer-trial">
               Start the 14-day Bid Desk trial
-            </Link>
+            </ButtonLink>
           )}
         </div>
       ) : (
@@ -128,12 +129,12 @@ export function UpgradePanel({
       </div>
       )}
       {children ? <div className="mt-4">{children}</div> : null}
-      <p className="mt-4 text-[13px] text-(--bid-muted)">
+      <p className="mt-4 text-13 text-ink-2">
         Prices exclude VAT. VAT is added at checkout where it applies.{" "}
         {moment === "none_left" && onBidPlan ? (
           <>Or wait until {renews}.</>
         ) : (
-          <Link href={PLANS_URL} className="bid-link text-(--bid-ink)">
+          <Link href={PLANS_URL} className="bid-link text-ink">
             {moment === "locked" ? "Compare the plans" : "Compare the plans in full"}
           </Link>
         )}
