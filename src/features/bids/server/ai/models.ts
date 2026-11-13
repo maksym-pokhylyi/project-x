@@ -1,5 +1,6 @@
 import "server-only";
 import { defaultSettingsMiddleware, gateway, wrapLanguageModel, type LanguageModel } from "ai";
+import { offlineModel } from "./offline-model";
 
 /**
  * Model routing for the bid desk and library — the ONE place that decides which model does
@@ -106,6 +107,10 @@ export function resolveModel(step: ModelStep, which: "primary" | "fallback" = "p
   if (testResolver) {
     const mocked = testResolver(step, which);
     return mocked ? { model: mocked, id: `${mocked.provider}/${mocked.modelId}` } : null;
+  }
+  // Offline pattern-matching stand-in for e2e tests and network-free demos; never in production.
+  if (process.env.BIDS_OFFLINE_AI === "1" && process.env.VERCEL_ENV !== "production") {
+    return which === "primary" ? { model: offlineModel, id: "offline/pattern-matcher" } : null;
   }
   const ids = modelIdsFor(step);
   const id = which === "primary" ? ids.primary : ids.fallback;

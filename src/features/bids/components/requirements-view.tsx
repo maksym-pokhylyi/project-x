@@ -106,10 +106,12 @@ export function RequirementsView({
   const [editing, setEditing] = useState<Editing>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  // Ticks show at once; the server confirms in the background (and a failure puts them back).
+  const [ticks, setTicks] = useState<Record<string, boolean>>({});
 
   const visible = useMemo(() => requirements.filter(FILTERS.find((entry) => entry.key === filter)!.test), [requirements, filter]);
   const passFail = requirements.filter((item) => item.isPassFail);
-  const passFailChecked = passFail.filter((item) => item.checked).length;
+  const passFailChecked = passFail.filter((item) => ticks[item.id] ?? item.checked).length;
 
   const run = (work: () => Promise<{ ok: boolean; error?: { message: string } }>) =>
     startTransition(async () => {
@@ -194,11 +196,20 @@ export function RequirementsView({
               {rows.map((item) => (
                 <RequirementRow
                   key={item.id}
-                  item={item}
+                  item={{ ...item, checked: ticks[item.id] ?? item.checked }}
                   links={links}
                   readOnly={readOnly}
                   pending={pending}
-                  onToggleChecked={(checked) => run(() => setRequirementCheckedAction(bidId, item.id, checked))}
+                  onToggleChecked={(checked) => {
+                    setTicks((current) => ({ ...current, [item.id]: checked }));
+                    startTransition(async () => {
+                      const result = await setRequirementCheckedAction(bidId, item.id, checked);
+                      if (!result.ok) {
+                        setTicks((current) => ({ ...current, [item.id]: !checked }));
+                        setError(result.error.message);
+                      }
+                    });
+                  }}
                   onEdit={() => setEditing({ mode: "edit", item })}
                   onDelete={() => {
                     if (window.confirm(`Delete requirement ${item.ref}? This cannot be undone.`)) run(() => deleteRequirementAction(bidId, item.id));
@@ -304,7 +315,7 @@ function RequirementRow({
               type="checkbox"
               className="size-4 accent-[var(--primary)]"
               checked={item.checked}
-              disabled={readOnly || pending}
+              disabled={readOnly}
               onChange={(event) => onToggleChecked(event.target.checked)}
               aria-label={`Requirement ${item.ref} checked against the documents`}
             />
