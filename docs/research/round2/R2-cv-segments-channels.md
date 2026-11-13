@@ -45,3 +45,18 @@ _Status: work in progress — sections are appended as research completes._
 
 **INFERENCE:** in every English-speaking market roughly three quarters or more of agencies are micro-businesses (<10 staff). This is the population that cannot justify HireAra-style £180–950/month contracts or a Bullhorn Marketplace integration, but is also the population with the lowest CV volume per firm and the highest churn (start-up agencies fail often).
 
+
+<!-- PROGRESS NOTES (will be restructured into final sections below) -->
+## Working notes saved 2026-11-13 (to be consolidated)
+
+- FACT REC member directory: public JSON-backed directory, 221 pages x 20 = ~4,420 entries (branches listed separately); fields name, town, full postal address, website link, sectors; no email. Technology sector ~480 entries; Executive search ~360. https://www.rec.uk.com/jobseekers/member-directory
+- FACT RCSA (AU/NZ) corporate member directory: 1,997 entries, public, filter by country/state/specialisation. https://www.rcsa.com.au/ (Directory Search)
+- FACT TRN partner programme: £249 / £799 / £1,350 per month on 12-month terms; "4500+ recruitment business owners". https://therecruitmentnetwork.com/partners
+- FACT Bullhorn API access: annual platform fee (figure not on page; "$5,000" seen only in search snippet of partner-program FAQ), paid in full upfront, 200k API calls/month, security assessment, no redlines, no middleware, paid validation before any promotion. https://www.bullhorn.com/bullhorn-api-access-faqs/
+- FACT Recruit CRM now ships a native "Resume Formatting Agent". https://recruitcrm.io/integration-partners/
+- FACT JobAdder integrations: 188 partners, category "Resume Formatting" lists Allsorter and Daxtra as "Paid / Preferred". Vincere lists Allsorter + HireAra. HireAra is now an Access Group product.
+- FACT Cinode pricing: Free (up to 10 users, CV template with logo/colours), Skills €39.9/mo, Business €120.8/mo, Partner €230.8/mo (headcount selector; >20 employees quote). Flowcase: quote only.
+- FACT Telegram: "IT Outstaff Projects" 16,577 subscribers; "Outstaffing IT" chat 2,188 members (Russian-language request/bench exchange).
+- FACT Ukraine: 2,062 active verified tech companies, 46% outsourcing, 2% outstaffing (IT Research Ukraine 2025, Lviv IT Cluster).
+- FACT Eurostat 2023 J62 enterprises with 10+ persons: PL 1,980; RO 1,337; BG 1,049; LT 427; EE 284; LV 252; DE 12,540; FR 4,555; NL 3,182.
+- FACT compliance: HireAra ISO 27001 + Cyber Essentials + UK storage + DPA + sub-processor list; CVFormatter (US LLC) "DPA on request"; RemakeCV stores in Singapore; iReformat (US LLC) deletes after download.

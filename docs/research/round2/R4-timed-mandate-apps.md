@@ -4,7 +4,16 @@ Research date: **2026-11-13**. Decision context: solo founder, Ukraine-based sol
 
 Evidence labels: **FACT** = read today on the primary page named (URL in the source list, section 7). **FACT-3P** = read today on a third-party data page (e.g. Store Leads crawler); the number is that vendor's estimate, not an official one. **INFERENCE** = my reasoning. **ASSUMPTION** = unverified premise used in a calculation. **UNKNOWN** = could not verify.
 
-STATUS: work in progress — sections are saved as they are completed.
+Limits of this run: 23 of the 35 allowed web searches were used; everything else was fetched directly from primary pages. EUR-Lex returned a bot challenge and the EU Publications Office returned HTTP 500 today, so EU dates are verified on European Commission pages or, where marked, taken from secondary sources. Shopify publishes no install counts; install figures come from Store Leads' public crawler pages and are labelled FACT-3P.
+
+## 0. Bottom line
+
+1. **The hypothesis is half right.** Timing and search rank decided the withdrawal-button race, and the platform's own answer came one day before the deadline. But the effect needed two more conditions that the hypothesis does not name: the mandate must require a **function with a back office** (form, e-mail, log), not a static notice, and the jurisdiction must have **credible private enforcement** (German warning letters). The next mandate of the same family — the EU guarantee notice, three months later, same merchants — produced 2–3% of the reviews.
+2. **Even the winner is probably not far above $10k MRR.** 2,325 reviews do not mean 100,000 installs: 58% of sampled reviews were written within minutes of install, and Store Leads detects the app on 3,715 stores. My central estimate for the winner is ~700 paying merchants and ~$8,500 MRR (range $1,700–$40,000).
+3. **No opportunity available today meets all six criteria and plausibly reaches $10k MRR in 12 months.** I checked 36 rules and platform deadlines. The 2027 EU calendar contains no storefront function that hits all merchants. Every trigger with a date is already squatted on Shopify by zero-review apps — except one.
+4. **The one empty shelf: India's Consumer Protection (E-Commerce) (Amendment) Rules, 2026**, in force 1 January 2027 (official gazette text read today). 130,450 Shopify stores are in India (Store Leads), more than in Germany. The rules require a displayed dark-pattern self-audit certificate, a "prior price" (30-day lowest) next to every announced price cut, grievance-officer details with a 48-hour acknowledgement duty, and GST/MSME numbers. One single-feature, zero-review app exists. It formally passes criteria (a)–(f), but price points in India ($5) and regulator-only enforcement put a realistic month-12 result at **$0.3k–3k MRR**, not $10k.
+5. **Second: UK (1 Jan 2027) and Australia (1 Jul 2027) subscription rules.** Firm dates, but only ~17,000 UK and ~10,500 Australian Shopify stores run a subscription app, the subscription apps own the data (Shopify's API lets an app read only its own subscription contracts), and two zero-review apps are already listed.
+6. **Getting paid from Ukraine through Shopify is plausible but not confirmed for 2026.** Shopify pays through Hyperwallet to PayPal or a real bank account; its only statement naming Ukraine is from November 2021; the actual rails are visible only inside the partner dashboard. New since 10 November 2026: identity verification (through Stripe's ID check) is mandatory before submitting a new app, only one new app may be in review at a time, and a second app needs 10 paid installs on the first.
 
 ---
 
@@ -22,7 +31,7 @@ STATUS: work in progress — sections are saved as they are completed.
 | EU Withdrawal Button Free (Nayvo, IN) | 2026-06-03 | 16 days | 74 / 4.8 | Free; $7.99; $22 | no | 13 languages |
 | EU Widerrufsbutton Pro (Visionz GmbH) | 2026-05-12 | 38 days | 51 / 5.0 | Free; $5.99; $24.99 | yes | DE only |
 | Avada EU Withdrawal Button (Avada, SG — large multi-app publisher) | 2026-06-12 | 7 days | 36 / 5.0 | Free | yes | 6 languages |
-| Händlerbund Widerrufs-Button (Händlerbund Legal Tech GmbH — Germany's largest e-commerce trade association) | 2026-05-13 | 37 days | 5 / 4.0 | Free | — | DE |
+| Händlerbund Widerrufs-Button (Händlerbund Legal Tech GmbH — a large German e-commerce trade association and legal-text provider) | 2026-05-13 | 37 days | 5 / 4.0 | Free | no | DE |
 | Existing apps that added the feature: easyReturns (2021) 87 / 4.4; Complimus Omnibus & Withdrawal (2022) 75 / 5.0 | — | — | — | $14.99–59 | — | — |
 | Tail: ~80 apps | May–Nov 2026 | ≤ 40 days or after | 0–18 | mostly Free + $5–20 | — | — |
 
@@ -49,8 +58,8 @@ STATUS: work in progress — sections are saved as they are completed.
 | 2026-08-12 | ~2,255 | |
 | 2026-11-12 | 2,325 | ~10 reviews per 15 days now |
 
-- **About 85% of the leader's reviews arrived in the 12 days from 12 to 23 June; about 98% of all demand came in the last 5 weeks** (INFERENCE from the table). In its first 3 months the app collected ~35 reviews. Being early did **not** produce early revenue; it produced the #1 search position, the Built for Shopify badge and a review base *before the wave*, and the wave then went to whoever was ranked first.
-- The second app (Revoq) shows the same shape: launched 11 March, ~50 reviews by 6 May, ~100 by 11 June, ~290 by 18 June, ~390 by 23 June, 583 today (FACT, 10 of 59 review pages sampled).
+- **About 69% of the leader's reviews arrived in the 12 days from 12 to 23 June, and about 86% in the five weeks from 20 May to 23 June** (INFERENCE from the table). The first 19 weeks after launch produced ~135 reviews (6%); the 20 weeks since 23 June produced ~190 (8%). Being early did **not** produce early revenue; it produced the #1 search position, the Built for Shopify badge and a review base *before the wave*, and the wave then went to whoever was ranked first.
+- The second app (Revoq) shows the same shape: launched 11 March, ~40 reviews by 6 May, ~90 by 11 June, ~290 by 18 June, ~390 by 23 June, 583 today (FACT, 10 of 59 review pages sampled).
 - **The demand is German** (FACT): of 210 sampled EW reviews, 153 are from Germany (73%), 15 Austria, 9 France, 6 Netherlands. Store Leads' crawler puts 79.5% of detected EW installs in Germany and 5.2% in Austria (FACT-3P). INFERENCE: the driver is Germany's private-enforcement culture (competitor/association warning letters, "Abmahnung"; the listing and reviews cite § 356a BGB), not the EU-wide rule as such. The same rule in France, Spain or Italy produced far less visible demand for the leader.
 - **Reviews were harvested at onboarding** (FACT): 125 of 214 sampled EW reviews (58%) were written after "N minutes using the app", another 36 within hours. For Anviara the share is 17 of 48. Review counts therefore overstate scale compared with ordinary apps, where reviews come after weeks of use (two honest developers in report D got ~100 reviews in three years).
 
