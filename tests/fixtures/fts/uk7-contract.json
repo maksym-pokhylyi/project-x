@@ -1,0 +1,174 @@
+{
+ "buyerID": [],
+ "id": "095682-2026",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "date": "2026-10-09T13:53:05+01:00",
+ "initiationType": "tender",
+ "ocid": "ocds-h6vhtk-06e4e1",
+ "parties": [
+  {
+   "name": "University of Salford",
+   "id": "GB-CHC-RC000666",
+   "identifier": {
+    "scheme": "GB-CHC",
+    "id": "RC000666"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PDHR-3751-QPQR"
+    }
+   ],
+   "address": {
+    "streetAddress": "43 The Crescent",
+    "locality": "Salford",
+    "postalCode": "M5 4WT",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD34"
+   },
+   "contactPoint": {
+    "email": "procurement-finance@salford.ac.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicAuthoritySubCentralGovernment",
+      "description": "Public authority - sub-central government"
+     }
+    ]
+   }
+  },
+  {
+   "name": "KEISER UK LIMITED",
+   "id": "GB-COH-04264117",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "04264117"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PPBM-3347-QNGJ"
+    }
+   ],
+   "address": {
+    "streetAddress": "Unit 3 Hampton Street Industrial Estate",
+    "locality": "Tetbury",
+    "postalCode": "GL8 8LD",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKK13"
+   },
+   "contactPoint": {
+    "email": "tender@keiseruk.com"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "https://keiseruk.com",
+    "scale": "sme",
+    "vcse": false
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-CHC-RC000666",
+  "name": "University of Salford"
+ },
+ "tender": {
+  "id": "UoS/OW/26/27/QTR1/Sports Rehabilitation Equipment (Thrive Building)",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Sports Rehabilitation Equipment (Thrive Building)",
+  "description": "The Thrive Health and Wellbeing Centre will provide a new Sports Rehabilitation Clinic & Sports Rehabilitation Gymnasium on the first floor of the building. This is a student-led clinic where staff supervise students in their learning; this is akin to what you would see in teaching hospitals nationwide and is also commonplace in professional sports.\nThe clinic will offer the following services:\n• Musculoskeletal injury assessment\n• Injury prevention and performance enhancement programmes\n• Knee clinic\n• Tendon clinic\n• Health education injury risk assessment\n• Sports massage, stretching, manual therapy, and recovery\nThe new Sports Rehabilitation Gym will be equipped with new specialist equipment to facilitate this service which presents an opportunity for Participants to supply specialist gym equipment as part of this tender for the new facility.\nThis opportunity is for the supply, installation and commissioning of sports rehabilitation equipment for Thrive Health & Wellbeing Centre.",
+  "status": "complete",
+  "procurementMethod": "open",
+  "procurementMethodDetails": "Below threshold - open competition",
+  "lots": [
+   {
+    "id": "1",
+    "status": "complete",
+    "description": null
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "status": "active",
+   "mainProcurementCategory": "goods",
+   "suppliers": [
+    {
+     "id": "GB-COH-04264117",
+     "name": "KEISER UK LIMITED"
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "additionalClassifications": [
+      {
+       "scheme": "CPV",
+       "id": "37400000",
+       "description": "Sports goods and equipment"
+      }
+     ],
+     "deliveryAddresses": [
+      {
+       "region": "UKD3",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      }
+     ],
+     "relatedLot": "1"
+    }
+   ],
+   "relatedLots": [
+    "1"
+   ]
+  }
+ ],
+ "contracts": [
+  {
+   "id": "1",
+   "awardID": "1",
+   "status": "active",
+   "period": {
+    "startDate": "2026-09-28T00:00:00+01:00",
+    "endDate": "2027-12-28T23:59:59Z"
+   },
+   "value": {
+    "amountGross": 77998.2,
+    "amount": 64998.5,
+    "currency": "GBP"
+   },
+   "aboveThreshold": false,
+   "dateSigned": "2026-09-28T00:00:00+01:00",
+   "statusDetails": null,
+   "documents": [
+    {
+     "id": "095682-2026",
+     "documentType": "contractNotice",
+     "noticeType": "UK7",
+     "description": "Contract details notice on Find a Tender",
+     "url": "https://www.find-tender.service.gov.uk/Notice/095682-2026",
+     "datePublished": "2026-10-09T13:53:05+01:00",
+     "format": "text/html"
+    }
+   ]
+  }
+ ],
+ "language": "en"
+}

@@ -1,0 +1,209 @@
+{
+ "ocid": "ocds-h6vhtk-06f6d8",
+ "buyerID": [],
+ "id": "085895-2026",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "date": "2026-09-10T13:39:37+01:00",
+ "initiationType": "tender",
+ "parties": [
+  {
+   "name": "London Borough of Islington",
+   "id": "GB-PPON-PBMD-2513-CWJJ",
+   "identifier": {
+    "scheme": "GB-PPON",
+    "id": "PBMD-2513-CWJJ"
+   },
+   "address": {
+    "streetAddress": "Islington Town Hall, Upper Street, Islington",
+    "locality": "London",
+    "postalCode": "N1 2UD",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI43"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@islington.gov.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "url": "https://www.islington.gov.uk",
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicAuthoritySubCentralGovernment",
+      "description": "Public authority - sub-central government"
+     }
+    ]
+   }
+  },
+  {
+   "name": "REBOUND RUBBER LIMITED",
+   "id": "GB-COH-12320781",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "12320781"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PHBB-9581-VLJX"
+    }
+   ],
+   "address": {
+    "streetAddress": "23-25 Waterloo Place",
+    "locality": "Leamington Spa",
+    "postalCode": "CV32 5LA",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKG13"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@reboundrubber.co.uk"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "https://reboundrubber.co.uk/",
+    "scale": "sme",
+    "vcse": false
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-PPON-PBMD-2513-CWJJ",
+  "name": "London Borough of Islington"
+ },
+ "tender": {
+  "id": "ocds-h6vhtk-06f6d8",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "2627-0047 Atrium works-Prior Weston Primary School",
+  "description": "Atrium works-Prior Weston Primary School - Replacement of atrium",
+  "status": "complete",
+  "procurementMethodDetails": "Below threshold - unknown",
+  "lots": [
+   {
+    "id": "1",
+    "status": "complete",
+    "description": null
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "status": "active",
+   "mainProcurementCategory": "works",
+   "suppliers": [
+    {
+     "id": "GB-COH-12320781",
+     "name": "REBOUND RUBBER LIMITED"
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "additionalClassifications": [
+      {
+       "scheme": "CPV",
+       "id": "45262700",
+       "description": "Building alteration work"
+      }
+     ],
+     "deliveryAddresses": [
+      {
+       "region": "UKC",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      },
+      {
+       "region": "UKD",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      },
+      {
+       "region": "UKE",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      },
+      {
+       "region": "UKF",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      },
+      {
+       "region": "UKG",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      },
+      {
+       "region": "UKH",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      },
+      {
+       "region": "UKI",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      },
+      {
+       "region": "UKJ",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      },
+      {
+       "region": "UKK",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      }
+     ],
+     "relatedLot": "1"
+    }
+   ],
+   "relatedLots": [
+    "1"
+   ]
+  }
+ ],
+ "contracts": [
+  {
+   "id": "1",
+   "awardID": "1",
+   "title": "2627-0047 Atrium works-Prior Weston Primary School",
+   "status": "active",
+   "period": {
+    "startDate": "2026-07-21T00:00:00+01:00",
+    "endDate": "2026-08-11T23:59:59+01:00"
+   },
+   "value": {
+    "amountGross": 179988,
+    "amount": 149990,
+    "currency": "GBP"
+   },
+   "aboveThreshold": false,
+   "dateSigned": "2026-07-10T00:00:00+01:00",
+   "statusDetails": null,
+   "documents": [
+    {
+     "id": "085895-2026",
+     "documentType": "contractNotice",
+     "noticeType": "UK7",
+     "description": "Contract details notice on Find a Tender",
+     "url": "https://www.find-tender.service.gov.uk/Notice/085895-2026",
+     "datePublished": "2026-09-10T13:39:37+01:00",
+     "format": "text/html"
+    }
+   ]
+  }
+ ],
+ "language": "en"
+}

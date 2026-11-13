@@ -1,0 +1,167 @@
+{
+ "ocid": "ocds-h6vhtk-06f719",
+ "buyerID": [],
+ "id": "086008-2026",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "date": "2026-09-10T15:25:29+01:00",
+ "initiationType": "tender",
+ "parties": [
+  {
+   "name": "UNIVERSITY OF EXETER",
+   "id": "GB-COH-RC000653",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "RC000653"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PZYG-2396-XCRZ"
+    }
+   ],
+   "address": {
+    "streetAddress": "Northcote House, Queens Drive",
+    "locality": "Exeter",
+    "postalCode": "EX4 4QJ",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKK43"
+   },
+   "contactPoint": {
+    "email": "procurement@exeter.ac.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "url": "http://www.exeter.ac.uk",
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicAuthoritySubCentralGovernment",
+      "description": "Public authority - sub-central government"
+     }
+    ]
+   }
+  },
+  {
+   "name": "GraphPad Software, LLC",
+   "id": "GB-PPON-PGGL-9493-PMMR",
+   "identifier": {
+    "scheme": "GB-PPON",
+    "id": "PGGL-9493-PMMR"
+   },
+   "address": {
+    "streetAddress": "225 Franklin St. Flr#26",
+    "locality": "Boston",
+    "postalCode": "02210",
+    "country": "US",
+    "countryName": "United States",
+    "region": "US"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@dotmatics.com"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-COH-RC000653",
+  "name": "UNIVERSITY OF EXETER"
+ },
+ "tender": {
+  "id": "ocds-h6vhtk-06f719",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Prism Group Academic Annual Subscription",
+  "description": "1050 Prism group academic annual subscription from GraphPad Inc",
+  "status": "complete",
+  "procurementMethod": "direct",
+  "procurementMethodDetails": "Below threshold - without competition",
+  "lots": [
+   {
+    "id": "1",
+    "status": "complete",
+    "description": null
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "status": "active",
+   "mainProcurementCategory": "services",
+   "suppliers": [
+    {
+     "id": "GB-PPON-PGGL-9493-PMMR",
+     "name": "GraphPad Software, LLC"
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "additionalClassifications": [
+      {
+       "scheme": "CPV",
+       "id": "79980000",
+       "description": "Subscription services"
+      }
+     ],
+     "deliveryAddresses": [
+      {
+       "region": "UKK4",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      }
+     ],
+     "relatedLot": "1"
+    }
+   ],
+   "relatedLots": [
+    "1"
+   ]
+  }
+ ],
+ "contracts": [
+  {
+   "id": "1",
+   "awardID": "1",
+   "status": "active",
+   "period": {
+    "startDate": "2026-05-01T00:00:00+01:00",
+    "endDate": "2027-05-04T23:59:59+01:00"
+   },
+   "value": {
+    "amountGross": 115500.0,
+    "currency": "USD"
+   },
+   "aboveThreshold": false,
+   "dateSigned": "2026-04-24T00:00:00+01:00",
+   "statusDetails": null,
+   "documents": [
+    {
+     "id": "086008-2026",
+     "documentType": "contractNotice",
+     "noticeType": "UK7",
+     "description": "Contract details notice on Find a Tender",
+     "url": "https://www.find-tender.service.gov.uk/Notice/086008-2026",
+     "datePublished": "2026-09-10T15:25:29+01:00",
+     "format": "text/html"
+    }
+   ]
+  }
+ ],
+ "language": "en"
+}

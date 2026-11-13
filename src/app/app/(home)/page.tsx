@@ -1,35 +1,40 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { OnboardingChecklist } from "@/components/app/onboarding-checklist";
-import { EmptyState, PageHeader } from "@/components/app/page-header";
-import { Button } from "@/components/ui/button";
-import { getOnboardingProgress } from "@/server/onboarding";
+import { unstable_rethrow } from "next/navigation";
+import { after } from "next/server";
+import { RadarError, RadarScreen } from "@/features/procurement/components/radar-screen";
+import { scheduleMatchReasons } from "@/features/procurement/radar/reasons-ai";
+import { loadRadar, parseRadarQuery, type RadarView } from "@/features/procurement/radar/view";
+import { track } from "@/lib/analytics";
+import { reportError } from "@/lib/report-error";
+import { hasRole } from "@/server/workspaces";
 import { requireOrgForPage } from "@/server/session";
 
-export const metadata: Metadata = { title: "Home" };
+export const metadata: Metadata = { title: "Radar" };
 
 /**
- * App home. Intentionally empty: this is where the product's main screen goes.
- * Read data through functions that take `ctx` (see src/server/*) so it stays tenant-scoped.
+ * App home = the Radar: open tenders that match the workspace's company, contracts ending
+ * soon in its trade, the buyers behind them and early notices.
+ * All data is read through functions that take `ctx` (tenant-scoped).
  */
-export default async function AppHomePage() {
+export default async function RadarPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const ctx = await requireOrgForPage();
-  const progress = await getOnboardingProgress(ctx);
-  const firstName = ctx.user.name.split(/\s+/)[0] || "there";
+  const params = await searchParams;
+  const now = new Date();
 
-  return (
-    <div className="space-y-6">
-      <PageHeader title={`Welcome, ${firstName}`} description={`You are in the ${ctx.organization.name} workspace.`} />
-      <OnboardingChecklist progress={progress} />
-      <EmptyState
-        title="Nothing here yet"
-        description="This is where your product's main content will appear once it is built."
-        action={
-          <Button asChild variant="outline">
-            <Link href="/app/usage">View usage</Link>
-          </Button>
-        }
-      />
-    </div>
-  );
+  let view: RadarView;
+  try {
+    view = await loadRadar(ctx, parseRadarQuery(params), now);
+  } catch (error) {
+    unstable_rethrow(error);
+    await reportError(error, { route: "/app", organizationId: ctx.organization.id, userId: ctx.user.id });
+    return <RadarError />;
+  }
+
+  after(() => track("radar_viewed", { organizationId: ctx.organization.id, userId: ctx.user.id }, { tab: view.tab, source: view.active ? view.active.kind : "none" }));
+  // Top matches without a cached model-written reason get one in the background (budgeted, optional).
+  if (view.spec && view.list?.tab === "matches") {
+    scheduleMatchReasons({ organizationId: ctx.organization.id, userId: ctx.user.id }, view.spec, view.list.items);
+  }
+
+  return <RadarScreen view={view} now={now} justClaimed={params.claimed === "1"} canManage={hasRole(ctx.role, "admin")} />;
 }

@@ -38,6 +38,14 @@ export type EventMap = {
   "quota.limit_reached": { metric: string; limit: number };
   "ai.request_completed": { feature: string; model: string };
   "ai.budget_exceeded": { scope: "organization" | "global"; feature: string };
+
+  // Procurement data pages and Radar (names fixed by docs/product/SPEC.md §7)
+  supplier_page_viewed: { supplier: string; ref: string | null };
+  claim_started: { supplier: string };
+  supplier_claimed: { supplier: string; method: string };
+  radar_viewed: { tab: string; source: "supplier" | "manual" | "none" };
+  tender_saved: { ocid: string };
+  tender_dismissed: { ocid: string };
 };
 
 export type EventName = keyof EventMap;

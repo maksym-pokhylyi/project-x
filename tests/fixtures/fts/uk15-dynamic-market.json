@@ -1,0 +1,597 @@
+{
+ "id": "085875-2026",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "date": "2026-09-10T13:12:56+01:00",
+ "initiationType": "tender",
+ "ocid": "ocds-h6vhtk-06839c",
+ "parties": [
+  {
+   "name": "SEC PROCUREMENT LIMITED T/A SOUTH EAST CONSORTIUM",
+   "id": "GB-COH-15363999",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "15363999"
+   },
+   "address": {
+    "streetAddress": "Building 1092 Galley Drive",
+    "locality": "Sittingbourne",
+    "postalCode": "ME9 8GA",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKJ43"
+   },
+   "contactPoint": {
+    "email": "procurement@southeastconsortium.org.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicAuthorityCentralGovernment",
+      "description": "Public authority - central government"
+     }
+    ]
+   }
+  },
+  {
+   "name": "I Like The Way U Move Removals",
+   "id": "GB-PPON-PWWJ-2179-NVLQ",
+   "identifier": {
+    "scheme": "GB-PPON",
+    "id": "PWWJ-2179-NVLQ"
+   },
+   "address": {
+    "streetAddress": "68 Swan Mead",
+    "locality": "London",
+    "postalCode": "W4 1QP",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI75"
+   },
+   "contactPoint": {
+    "email": "admin@ilikethewayumove.com",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "Wilson Electric (Battersea) Limited",
+   "id": "GB-COH-00491289",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "00491289"
+   },
+   "address": {
+    "streetAddress": "51 Willow Lane",
+    "locality": "Mitcham",
+    "postalCode": "CR4 4NA",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI63"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@wilsongrp.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "Niblock (Builders) Ltd",
+   "id": "GB-COH-00633825",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "00633825"
+   },
+   "address": {
+    "streetAddress": "135 Anerley Road",
+    "locality": "Anerley",
+    "postalCode": "SE20 8AJ",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI61"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@niblock.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "Grosvenor Cleaning Services Limited",
+   "id": "GB-COH-02601775",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "02601775"
+   },
+   "address": {
+    "streetAddress": "Pepper Street",
+    "locality": "London",
+    "postalCode": "E14 9RP",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI42"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@grosvenorservices.com",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "AA4 services ltd",
+   "id": "GB-COH-13300966",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "13300966"
+   },
+   "address": {
+    "streetAddress": "Office G62 , 9-11 Gunnery Terrace",
+    "locality": "London",
+    "postalCode": "SE18 6sw",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI51"
+   },
+   "contactPoint": {
+    "email": "hello@aa4services.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "NC Range Site Ltd",
+   "id": "GB-COH-06407699",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "06407699"
+   },
+   "address": {
+    "streetAddress": "fairfields",
+    "locality": "Romford",
+    "postalCode": "RM2 5SX",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI52"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@ncrangesite.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "B & M McHugh Ltd",
+   "id": "GB-COH-00915420",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "00915420"
+   },
+   "address": {
+    "streetAddress": "The Whitehouse ,429a Footscray Road",
+    "locality": "New Eltham",
+    "postalCode": "SE9 3UL",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI51"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@mchughltd.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "M&J Group (Construction and Roofing) Ltd",
+   "id": "GB-COH-01371473",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "01371473"
+   },
+   "address": {
+    "streetAddress": "Elm Farm Industrial Estate",
+    "locality": "Bedford",
+    "postalCode": "MK41 0UD",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKH24"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@mjconstructiongroup.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "MAK Integrated Services Ltd",
+   "id": "GB-COH-06990809",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "06990809"
+   },
+   "address": {
+    "streetAddress": "Manor Street",
+    "locality": "Manchester",
+    "postalCode": "M34 5JG",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD35"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@mak-security.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "Anti Graffiti Systems Ltd t/a AGS One",
+   "id": "GB-COH-04375020",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "04375020"
+   },
+   "address": {
+    "streetAddress": "Hyde Business Park",
+    "locality": "Brighton",
+    "postalCode": "BN2 4JE",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKJ21"
+   },
+   "contactPoint": {
+    "email": "tenders@agsone.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "G4S Facilities Management (UK) Limited",
+   "id": "GB-COH-03333860",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "03333860"
+   },
+   "address": {
+    "streetAddress": "50 Broadway,",
+    "locality": "London",
+    "postalCode": "SW1H 0DB",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI32"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@uk.g4s.com",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "PipeFlow Drainage Solutions Ltd",
+   "id": "GB-COH-13602462",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "13602462"
+   },
+   "address": {
+    "streetAddress": "Admirals Park, Victory Way",
+    "locality": "Dartford",
+    "postalCode": "DA2 6FB",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKJ43"
+   },
+   "contactPoint": {
+    "email": "info@pipeflowdrainage.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "Cablesheer Homes Ltd",
+   "id": "GB-COH-08241548",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "08241548"
+   },
+   "address": {
+    "streetAddress": "Brasted",
+    "locality": "Westerham",
+    "postalCode": "TN16 1JE",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKJ46"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@cablesheerhomes.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "BEECHWOOD PROPERTY SERVICES LTD",
+   "id": "GB-COH-03228011",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "03228011"
+   },
+   "address": {
+    "streetAddress": "Fountayne Road",
+    "locality": "London",
+    "postalCode": "N15 4QN",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI43"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@beechwoodps.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  },
+  {
+   "name": "Cleanscapes Limited",
+   "id": "GB-COH-06868508",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "06868508"
+   },
+   "address": {
+    "streetAddress": "Ockley",
+    "locality": "Dorking",
+    "postalCode": "RH5 5HW",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKJ26"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@cleanscapes.co.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-COH-15363999",
+  "name": "SEC PROCUREMENT LIMITED T/A SOUTH EAST CONSORTIUM"
+ },
+ "tender": {
+  "id": "ocds-h6vhtk-06839c",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "techniques": {
+   "dynamicPurchasingSystem": [],
+   "frameworkAgreement": {
+    "period": []
+   }
+  },
+  "amendments": [
+   {
+    "date": "2026-09-10T00:00:00+01:00",
+    "id": "085875-2026"
+   }
+  ],
+  "title": "Facilities Management",
+  "documents": [
+   {
+    "id": "085875-2026",
+    "documentType": "awardNotice",
+    "noticeType": "UK15",
+    "description": "Dynamic market modification notice on Find a Tender",
+    "url": "https://www.find-tender.service.gov.uk/Notice/085875-2026",
+    "datePublished": "2026-09-10T13:12:56+01:00",
+    "format": "text/html"
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "amendments": [
+    {
+     "id": "085875-2026"
+    }
+   ],
+   "suppliers": [
+    {
+     "id": "GB-COH-02601775",
+     "name": "Grosvenor Cleaning Services Limited"
+    },
+    {
+     "id": "GB-COH-13300966",
+     "name": "AA4 services ltd"
+    },
+    {
+     "id": "GB-COH-06990809",
+     "name": "MAK Integrated Services Ltd"
+    },
+    {
+     "id": "GB-COH-04375020",
+     "name": "Anti Graffiti Systems Ltd t/a AGS One"
+    },
+    {
+     "id": "GB-COH-03333860",
+     "name": "G4S Facilities Management (UK) Limited"
+    },
+    {
+     "id": "GB-COH-03228011",
+     "name": "BEECHWOOD PROPERTY SERVICES LTD"
+    },
+    {
+     "id": "GB-COH-06868508",
+     "name": "Cleanscapes Limited"
+    }
+   ]
+  },
+  {
+   "id": "2",
+   "amendments": [
+    {
+     "id": "085875-2026"
+    }
+   ],
+   "suppliers": [
+    {
+     "id": "GB-PPON-PWWJ-2179-NVLQ",
+     "name": "I Like The Way U Move Removals"
+    },
+    {
+     "id": "GB-COH-00491289",
+     "name": "Wilson Electric (Battersea) Limited"
+    },
+    {
+     "id": "GB-COH-00633825",
+     "name": "Niblock (Builders) Ltd"
+    },
+    {
+     "id": "GB-COH-02601775",
+     "name": "Grosvenor Cleaning Services Limited"
+    },
+    {
+     "id": "GB-COH-06407699",
+     "name": "NC Range Site Ltd"
+    },
+    {
+     "id": "GB-COH-00915420",
+     "name": "B & M McHugh Ltd"
+    },
+    {
+     "id": "GB-COH-01371473",
+     "name": "M&J Group (Construction and Roofing) Ltd"
+    },
+    {
+     "id": "GB-COH-03333860",
+     "name": "G4S Facilities Management (UK) Limited"
+    },
+    {
+     "id": "GB-COH-13602462",
+     "name": "PipeFlow Drainage Solutions Ltd"
+    },
+    {
+     "id": "GB-COH-08241548",
+     "name": "Cablesheer Homes Ltd"
+    }
+   ]
+  },
+  {
+   "id": "3",
+   "amendments": [
+    {
+     "id": "085875-2026"
+    }
+   ],
+   "suppliers": [
+    {
+     "id": "GB-COH-02601775",
+     "name": "Grosvenor Cleaning Services Limited"
+    },
+    {
+     "id": "GB-COH-13300966",
+     "name": "AA4 services ltd"
+    },
+    {
+     "id": "GB-COH-03333860",
+     "name": "G4S Facilities Management (UK) Limited"
+    }
+   ]
+  }
+ ],
+ "language": "en"
+}

@@ -1,0 +1,446 @@
+{
+ "buyerID": [],
+ "id": "086156-2026",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "date": "2026-09-10T18:58:22+01:00",
+ "initiationType": "tender",
+ "ocid": "ocds-h6vhtk-0518d5",
+ "parties": [
+  {
+   "name": "MAGENTA LIVING",
+   "id": "GB-COH-04912562",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "04912562"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PXCY-5613-ZTLY"
+    }
+   ],
+   "address": {
+    "streetAddress": "Partnership Building",
+    "locality": "Birkenhead",
+    "postalCode": "CH41 5AA",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD74"
+   },
+   "contactPoint": {
+    "email": "procurement@magenta.org.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicUndertaking",
+      "description": "Public undertaking"
+     }
+    ]
+   }
+  },
+  {
+   "name": "APEXSG LTD",
+   "id": "GB-COH-13833868",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "13833868"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PQBC-4265-PMDL"
+    }
+   ],
+   "address": {
+    "streetAddress": "Unit 6 Ashley Business Centre, East Street, Prescot, Liverpool",
+    "locality": "Liverpool",
+    "postalCode": "L34 5RR",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD71"
+   },
+   "contactPoint": {
+    "email": "info@apex-sg.co.uk"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "http://www.apex-sg.co.uk",
+    "scale": "sme",
+    "vcse": false,
+    "publicServiceMissionOrganization": false,
+    "shelteredWorkshop": false
+   }
+  },
+  {
+   "name": "P. CASEY & CO., LIMITED",
+   "id": "GB-COH-01074194",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "01074194"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PCRZ-4483-PCQH"
+    }
+   ],
+   "address": {
+    "streetAddress": "Rydings Road",
+    "locality": "Rochdale",
+    "postalCode": "OL12 9PS",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD37"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@casey.co.uk"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "https://www.casey.co.uk/",
+    "scale": "sme",
+    "vcse": false,
+    "publicServiceMissionOrganization": false,
+    "shelteredWorkshop": false
+   }
+  },
+  {
+   "name": "CARROLL GROUP LIMITED",
+   "id": "GB-COH-14028001",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "14028001"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PYLT-9424-TNCN"
+    }
+   ],
+   "address": {
+    "streetAddress": "Carroll House Unit 8 Tiger Court",
+    "locality": "Knowsley",
+    "postalCode": "L34 1PJ",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD71"
+   },
+   "contactPoint": {
+    "email": "tenders@carrollgroupltd.co.uk"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "http://www.carrollgroupltd.co.uk",
+    "scale": "sme",
+    "vcse": false,
+    "publicServiceMissionOrganization": false,
+    "shelteredWorkshop": false
+   }
+  },
+  {
+   "name": "DLP SERVICES (NORTHERN) LIMITED",
+   "id": "GB-COH-02650749",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "02650749"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PDWX-7328-YTVH"
+    }
+   ],
+   "address": {
+    "streetAddress": "54 Cobden Street",
+    "locality": "Pendleton  Salford",
+    "postalCode": "M6 6WF",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD34"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@dlpservices.com"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "https://dlpservices.com/",
+    "scale": "sme",
+    "vcse": false,
+    "publicServiceMissionOrganization": false,
+    "shelteredWorkshop": false
+   }
+  },
+  {
+   "name": "SPECIALISED GROUP LIMITED",
+   "id": "GB-COH-09957505",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "09957505"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PZLN-6125-TZTN"
+    }
+   ],
+   "address": {
+    "streetAddress": "61 Rodney Street",
+    "locality": "Liverpool",
+    "postalCode": "L1 9ER",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD72"
+   },
+   "contactPoint": {
+    "email": "enquiries@ssr-uk.com"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "http://www.ssr-uk.com",
+    "scale": "sme",
+    "vcse": false,
+    "publicServiceMissionOrganization": false,
+    "shelteredWorkshop": false
+   }
+  },
+  {
+   "name": "A. CONNOLLY LIMITED",
+   "id": "GB-COH-03860866",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "03860866"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PGDX-9644-YPYP"
+    }
+   ],
+   "address": {
+    "streetAddress": "The Old Dairy",
+    "locality": "Wigan",
+    "postalCode": "WN3 4BW",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD36"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@connollyltd.co.uk"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "http://www.connollyltd.co.uk",
+    "scale": "large",
+    "vcse": false,
+    "publicServiceMissionOrganization": false,
+    "shelteredWorkshop": false
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-COH-04912562",
+  "name": "MAGENTA LIVING"
+ },
+ "tender": {
+  "id": "ML 2025 022",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Planned Investment Works Framework",
+  "description": "The Planned Investment Works Framework will deliver planned investment works to ML stock which consist of Houses, Bungalows, Flats and Extra Care Living Scheme.\nThe structure of the Framework is Lot specific and covers the following \n•\t1PI Energy Efficiency Measures - Lot value £1.66m (net)\n•\t2PI Roofing - Lot value £6.66m (net)\n•\t3PI Windows & Doors - Lot value £2.16m (net)\n•\t4P1Kitchens & Bathrooms - Lot value £26.66m (net)\n•\t5PI Electrical - Lot value £4.16m (net)\n•\t6PI Internal and External Paint and Repair - Lot value £5m (net)\n•\t7PI External Works (Groundworks, fencing, pointing etc.) - Lot value £2.5m (net)\n•\t8PI Heating - Domestic - Lot value £4.58m (net)\n•\t9PI Heating Commercial- Lot value £1.66m (net)\n•\t10PI Whole House Lot- Lot value £10m (net)",
+  "status": "complete",
+  "procurementMethod": "open",
+  "procurementMethodDetails": "Open procedure",
+  "participationFees": [
+   {
+    "type": [
+     "win"
+    ],
+    "description": "No fee applies as Framework is for use by Magenta Living only.",
+    "id": "ocds-h6vhtk-0518d5"
+   }
+  ],
+  "techniques": {
+   "hasFrameworkAgreement": true,
+   "frameworkAgreement": {
+    "method": "withAndWithoutReopeningCompetition",
+    "type": "closed",
+    "description": "Whenever Magenta Living wishes to call-off Works under the Framework those Works shall be allocated either through:\n•\tDirect Award to the top ranked provider where the in circumstance identified for Mini-Competition do not apply. If the topped ranked Provider on a specific Lot indicates they do not have the capacity to undertake the Works, the Order will be allocated to the next ranked provider and so on.\n•\tMini-Competition\n•\tthe Works need to be delivered within a shorter Target Completion Date than provided for in the Specification\n•\tthe nature of the Works means that there are specific health and safety risks that the Provider needs to manage when undertaking them which do not apply to other Works under this Framework\n•\tthere is an accurate quantified volume of Works and Magenta Living cannot determine which Service Provider will provide the best value\n•\twhere there are some minor additional works, services or rates which have not been originally assessed as part of the process for appointment to the Framework.\n•\twhere there are amendments to the requirements set out than those provided in the Specifications"
+   }
+  },
+  "lots": [
+   {
+    "id": "1",
+    "status": "complete",
+    "description": null
+   },
+   {
+    "id": "2PI",
+    "status": "complete",
+    "description": null
+   },
+   {
+    "id": "3PI",
+    "status": "complete",
+    "description": null
+   },
+   {
+    "id": "4PI",
+    "status": "complete",
+    "description": null
+   },
+   {
+    "id": "5PI",
+    "status": "complete",
+    "description": null
+   },
+   {
+    "id": "6PI",
+    "status": "complete",
+    "description": null
+   },
+   {
+    "id": "7PI",
+    "status": "complete",
+    "description": null
+   },
+   {
+    "id": "8PI",
+    "status": "complete",
+    "description": null
+   },
+   {
+    "id": "9PI",
+    "status": "complete",
+    "description": null
+   },
+   {
+    "id": "10PI",
+    "status": "complete",
+    "description": null
+   }
+  ],
+  "documents": [
+   {
+    "id": "conflictOfInterest",
+    "documentType": "conflictOfInterest",
+    "description": "Not published"
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "status": "active",
+   "mainProcurementCategory": "works",
+   "suppliers": [
+    {
+     "id": "GB-COH-13833868",
+     "name": "APEXSG LTD"
+    },
+    {
+     "id": "GB-COH-01074194",
+     "name": "P. CASEY & CO., LIMITED"
+    },
+    {
+     "id": "GB-COH-14028001",
+     "name": "CARROLL GROUP LIMITED"
+    },
+    {
+     "id": "GB-COH-02650749",
+     "name": "DLP SERVICES (NORTHERN) LIMITED"
+    },
+    {
+     "id": "GB-COH-09957505",
+     "name": "SPECIALISED GROUP LIMITED"
+    },
+    {
+     "id": "GB-COH-03860866",
+     "name": "A. CONNOLLY LIMITED"
+    }
+   ],
+   "items": [
+    {
+     "id": "2PI",
+     "additionalClassifications": [
+      {
+       "scheme": "CPV",
+       "id": "45000000",
+       "description": "Construction work"
+      }
+     ],
+     "deliveryAddresses": [
+      {
+       "region": "UKD6",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      },
+      {
+       "region": "UKD7",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      }
+     ],
+     "relatedLot": "2PI"
+    }
+   ],
+   "relatedLots": [
+    "2PI"
+   ]
+  }
+ ],
+ "contracts": [
+  {
+   "id": "1",
+   "awardID": "1",
+   "title": "Lot 2PI Roofing",
+   "status": "active",
+   "period": {
+    "startDate": "2026-07-01T00:00:00+01:00",
+    "endDate": "2030-06-30T23:59:59+01:00"
+   },
+   "value": {
+    "amountGross": 8000000,
+    "amount": 6666666,
+    "currency": "GBP"
+   },
+   "aboveThreshold": true,
+   "dateSigned": "2026-07-01T00:00:00+01:00",
+   "statusDetails": null,
+   "documents": [
+    {
+     "id": "086156-2026",
+     "documentType": "contractNotice",
+     "noticeType": "UK7",
+     "description": "Contract details notice on Find a Tender",
+     "url": "https://www.find-tender.service.gov.uk/Notice/086156-2026",
+     "datePublished": "2026-09-10T18:58:22+01:00",
+     "format": "text/html"
+    }
+   ]
+  }
+ ],
+ "language": "en"
+}
