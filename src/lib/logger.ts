@@ -1,3 +1,5 @@
+import { describeError } from "./describe-error";
+
 /**
  * Structured server logging.
  *
@@ -5,9 +7,12 @@
  *
  * Production: one JSON object per line (what Vercel's log drains and search expect).
  * Development: a compact human-readable line.
- * Keys that look like credentials are redacted. Never pass raw request bodies or tokens.
+ * Keys that look like credentials are redacted, and Error values are reduced with
+ * describeError() (no bind parameters, model output or tokens). Never pass raw request
+ * bodies or tokens.
  *
- * This module deliberately has no imports from the app so it can be used from scripts.
+ * This module deliberately imports nothing but ./describe-error (itself import-free), so
+ * it can be used from scripts.
  */
 type Level = "debug" | "info" | "warn" | "error";
 type Fields = Record<string, unknown>;
@@ -23,7 +28,8 @@ function threshold(): number {
 
 function sanitize(value: unknown, depth = 0): unknown {
   if (value instanceof Error) {
-    return { name: value.name, message: value.message, stack: value.stack };
+    const described = describeError(value);
+    return { name: described.name, message: described.message, code: described.code ?? undefined, stack: described.stack ?? undefined };
   }
   if (value instanceof Date) return value.toISOString();
   if (typeof value === "bigint") return value.toString();

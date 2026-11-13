@@ -1,0 +1,205 @@
+{
+ "ocid": "ocds-h6vhtk-06f773",
+ "buyerID": [],
+ "id": "086149-2026",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "date": "2026-09-10T18:11:03+01:00",
+ "initiationType": "tender",
+ "parties": [
+  {
+   "name": "TRANSPORT UK EAST MIDLANDS LIMITED",
+   "id": "GB-COH-09860485",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "09860485"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PYJP-8287-BJGL"
+    }
+   ],
+   "address": {
+    "streetAddress": "2nd Floor St Andrew's House",
+    "locality": "London",
+    "postalCode": "EC4A 3AG",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI31"
+   },
+   "contactPoint": {
+    "email": "Procurement@eastmidlandsrailway.co.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "privateUtility",
+      "description": "Private utility"
+     }
+    ]
+   }
+  },
+  {
+   "name": "PERMANENT WAY MANAGEMENT CO. LTD.",
+   "id": "GB-COH-03551936",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "03551936"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PRZM-7859-RHBD"
+    }
+   ],
+   "address": {
+    "streetAddress": "Eagle House",
+    "locality": "Northampton",
+    "postalCode": "NN1 5AJ",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKF24"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@pmc-ltd.com"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme",
+    "vcse": false
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-COH-09860485",
+  "name": "TRANSPORT UK EAST MIDLANDS LIMITED"
+ },
+ "tender": {
+  "id": "ocds-h6vhtk-06f773",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Platform Safety Lining and Visual Cues",
+  "description": "This contract is for the provision of Platform Safety Lining, inclusive of white platform lining, yellow platform lining visual cues for operational platforms across the EMR estate. EMR are responsible for 102 stations which are a range of sizes and different number of platforms. Each station experiences a variety of footfall across commuting, business and leisure.\nThe service will ensure a robust schedule of painting which is planned in advance and communicated with EMR. The service will also allow for an ad-hoc call out service for responsive works as identified by EMR in line with safety and EMR's Service Quality Regime (SQR) requirements.",
+  "status": "complete",
+  "procurementMethod": "direct",
+  "procurementMethodDetails": "Direct award",
+  "procurementMethodRationale": "This opportunity was published via a tender notice. All tender bids received were non-compliant as they did not meet the minimum quality threshold stated within our tender pack. The tender has therefore been ended and a direct award is justified.",
+  "specialRegime": [
+   "utilities"
+  ],
+  "lots": [
+   {
+    "id": "1",
+    "status": "complete",
+    "description": null
+   }
+  ],
+  "documents": [
+   {
+    "id": "conflictOfInterest",
+    "documentType": "conflictOfInterest",
+    "description": "Not published"
+   }
+  ],
+  "procurementMethodRationaleClassifications": [
+   {
+    "id": "switchingDirectAward"
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "title": "Platform Safety Lining and Visual Cues",
+   "status": "pending",
+   "value": {
+    "amountGross": 1805760,
+    "amount": 1504800,
+    "currency": "GBP"
+   },
+   "mainProcurementCategory": "services",
+   "aboveThreshold": true,
+   "suppliers": [
+    {
+     "id": "GB-COH-03551936",
+     "name": "PERMANENT WAY MANAGEMENT CO. LTD."
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "additionalClassifications": [
+      {
+       "scheme": "CPV",
+       "id": "50220000",
+       "description": "Repair, maintenance and associated services related to railways and other equipment"
+      }
+     ],
+     "deliveryAddresses": [
+      {
+       "region": "UK",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      }
+     ],
+     "relatedLot": "1"
+    }
+   ],
+   "contractPeriod": {
+    "startDate": "2026-09-24T00:00:00+01:00",
+    "endDate": "2029-09-23T23:59:59+01:00",
+    "maxExtentDate": "2032-09-23T23:59:59+01:00"
+   },
+   "hasRenewal": true,
+   "renewal": {
+    "description": "Optional 3 year extension"
+   },
+   "relatedLots": [
+    "1"
+   ],
+   "documents": [
+    {
+     "id": "086149-2026",
+     "documentType": "awardNotice",
+     "noticeType": "UK5",
+     "description": "Transparency notice on Find a Tender",
+     "url": "https://www.find-tender.service.gov.uk/Notice/086149-2026",
+     "datePublished": "2026-09-10T18:11:03+01:00",
+     "format": "text/html"
+    }
+   ],
+   "milestones": [
+    {
+     "id": "1",
+     "type": "futureSignatureDate",
+     "dueDate": "2026-09-23T23:59:59+01:00",
+     "status": "scheduled"
+    }
+   ]
+  }
+ ],
+ "relatedProcesses": [
+  {
+   "id": "unsuccessfulProcess",
+   "relationship": [
+    "unsuccessfulProcess"
+   ],
+   "scheme": "ocid",
+   "identifier": "ocds-h6vhtk-0679b8",
+   "uri": "https://www.find-tender.service.gov.uk/api/1.0/ocdsReleasePackages/ocds-h6vhtk-0679b8"
+  }
+ ],
+ "language": "en"
+}

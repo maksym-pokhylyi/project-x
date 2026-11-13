@@ -1,0 +1,192 @@
+{
+ "ocid": "ocds-h6vhtk-06f954",
+ "id": "086952-2026",
+ "date": "2026-09-14T14:50:15+01:00",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "description": "\"This is a Provider Selection Regime (PSR) confirmation of contract award notice. This contract has been awarded under the Health Care Services (Provider Selection Regime) Regulations 2023. For the avoidance of doubt, the provisions of the Public Contracts Regulations 2015 do not apply to this award.\nThe decision to award this contract was made by the NHS Birmingham and Solihull ICB All Age Continuing Healthcare Team and no declarations of interest have been declared.\"",
+ "initiationType": "tender",
+ "tender": {
+  "id": "BSOL_Stephen Support Services Ltd_2026-27_IFPCHC",
+  "legalBasis": {
+   "id": "32014L0024",
+   "scheme": "CELEX"
+  },
+  "title": "BSOL_Stephen Support Services Ltd_2026-27_IFPCHC",
+  "status": "complete",
+  "classification": {
+   "scheme": "CPV",
+   "id": "85323000",
+   "description": "Community health services"
+  },
+  "mainProcurementCategory": "services",
+  "description": "Domiciliary Care Services",
+  "lots": [
+   {
+    "id": "1",
+    "description": "\"The service provided under this notice will be for home care placements.\nThis contract award has been made following Direct Award Process B under the Health Care Services (Provider Selection Regime) Regulations 2023 and the Public Contract Regulations 2015 (as amended) do not apply.\nThe contract is awarded with no guarantee of activity. The value will vary dependent on the activity delivered.\nThis is a new contract.  The contract will run from 14th May 2026 to 31st March 2027.\"",
+    "awardCriteria": {
+     "criteria": [
+      {
+       "name": "Patient Choice",
+       "type": "quality",
+       "description": "100"
+      },
+      {
+       "name": "None",
+       "type": "cost",
+       "description": "0"
+      }
+     ]
+    },
+    "hasOptions": false,
+    "status": "cancelled"
+   }
+  ],
+  "items": [
+   {
+    "id": "1",
+    "deliveryAddresses": [
+     {
+      "region": "UKG31"
+     },
+     {
+      "region": "UKG32"
+     }
+    ],
+    "relatedLot": "1"
+   }
+  ],
+  "procurementMethod": "limited",
+  "procurementMethodDetails": "Award procedure without prior publication of a call for competition",
+  "procurementMethodRationaleClassifications": [
+   {
+    "scheme": "TED_PT_AWARD_CONTRACT_WITHOUT_CALL",
+    "id": "D_OUTSIDE_SCOPE",
+    "description": "The procurement falls outside the scope of application of the directive"
+   }
+  ],
+  "procurementMethodRationale": "This is a Provider Selection Regime (PSR) intention to award notice. The awarding of this contract is subject to the Health Care Services (Provider Selection Regime) Regulations 2023. For the avoidance of doubt, the provisions of the Public Contracts Regulations 2015 do not apply to this award."
+ },
+ "awards": [
+  {
+   "id": "086952-2026-BSOL_Stephen Support Services Ltd_2026-27_IFPCHC-1",
+   "relatedLots": [
+    "1"
+   ],
+   "title": "BSOL_Stephen Support Services Ltd_2026-27_IFPCHC",
+   "status": "active",
+   "suppliers": [
+    {
+     "id": "GB-COH-09680966",
+     "name": "Stephen Support Services Ltd"
+    }
+   ]
+  }
+ ],
+ "parties": [
+  {
+   "name": "NHS BIRMINGHAM AND SOLIHULL INTEGRATED CARE BOARD",
+   "id": "GB-NHS-QHL",
+   "identifier": {
+    "legalName": "NHS BIRMINGHAM AND SOLIHULL INTEGRATED CARE BOARD",
+    "id": "QHL",
+    "scheme": "GB-NHS"
+   },
+   "address": {
+    "streetAddress": "NHS Birmingham and Solihull Integrated Care Board Alpha Tower, 8th Floor, Suffolk Street Queensway",
+    "locality": "Birmingham",
+    "region": "UKG31",
+    "postalCode": "B11TT",
+    "countryName": "United Kingdom"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@nhs.net"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "url": "https://www.birminghamsolihull.icb.nhs.uk/",
+    "classifications": [
+     {
+      "scheme": "TED_CA_TYPE",
+      "id": "BODY_PUBLIC",
+      "description": "Body governed by public law"
+     },
+     {
+      "scheme": "COFOG",
+      "id": "07",
+      "description": "Health"
+     }
+    ]
+   }
+  },
+  {
+   "name": "Stephen Support Services Ltd",
+   "id": "GB-COH-09680966",
+   "identifier": {
+    "legalName": "Stephen Support Services Ltd",
+    "id": "09680966",
+    "scheme": "GB-COH"
+   },
+   "address": {
+    "locality": "Birmingham",
+    "region": "UKG31",
+    "postalCode": "B20 2LB",
+    "countryName": "United Kingdom"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "scale": "sme"
+   }
+  },
+  {
+   "name": "NHS Birmingham and Solihull ICB",
+   "id": "GB-FTS-120210",
+   "identifier": {
+    "legalName": "NHS Birmingham and Solihull ICB"
+   },
+   "address": {
+    "locality": "Birmingham",
+    "postalCode": "B1 1TT",
+    "countryName": "United Kingdom"
+   },
+   "roles": [
+    "reviewBody"
+   ]
+  }
+ ],
+ "buyer": {
+  "id": "GB-NHS-QHL",
+  "name": "NHS BIRMINGHAM AND SOLIHULL INTEGRATED CARE BOARD"
+ },
+ "contracts": [
+  {
+   "id": "086952-2026-BSOL_Stephen Support Services Ltd_2026-27_IFPCHC-1",
+   "awardID": "086952-2026-BSOL_Stephen Support Services Ltd_2026-27_IFPCHC-1",
+   "title": "BSOL_Stephen Support Services Ltd_2026-27_IFPCHC",
+   "status": "active",
+   "value": {
+    "amount": 1,
+    "currency": "GBP"
+   },
+   "dateSigned": "2026-09-08T00:00:00+01:00"
+  }
+ ],
+ "bids": {
+  "statistics": [
+   {
+    "id": "1",
+    "measure": "bids",
+    "relatedLot": "1",
+    "value": 1
+   }
+  ]
+ },
+ "language": "en"
+}

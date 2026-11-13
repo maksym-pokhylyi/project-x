@@ -1,6 +1,6 @@
 import "server-only";
 import { APIError } from "better-auth/api";
-import { AppError, ConflictError, ForbiddenError, NotFoundError, SeatLimitError, UnauthorizedError } from "@/lib/errors";
+import { AppError, ConflictError, ForbiddenError, NotFoundError, RateLimitError, SeatLimitError, UnauthorizedError, ValidationError } from "@/lib/errors";
 
 const SEAT_LIMIT_CODES = new Set(["ORGANIZATION_MEMBERSHIP_LIMIT_REACHED", "INVITATION_LIMIT_REACHED"]);
 
@@ -14,6 +14,9 @@ export function fromAuthError(error: unknown, context: { seatLimit?: number | nu
   const body = (error.body ?? {}) as { code?: string; message?: string };
   const message = body.message ?? error.message;
   if (body.code && SEAT_LIMIT_CODES.has(body.code)) return new SeatLimitError(context.seatLimit ?? 0);
+  // Raised by our own hooks in src/lib/auth.ts (same rules whichever way an endpoint is reached).
+  if (body.code === "VALIDATION") return new ValidationError(message);
+  if (body.code === "RATE_LIMITED") return new RateLimitError(Number((body as { retryAfterSeconds?: unknown }).retryAfterSeconds) || 60);
   switch (error.statusCode) {
     case 401:
       return new UnauthorizedError();

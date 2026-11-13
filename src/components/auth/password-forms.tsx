@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { FormError, FormField } from "@/components/forms/form-field";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { fieldErrorsFrom, forgotPasswordSchema, resetPasswordSchema, type FieldErrors } from "@/lib/validation";
@@ -26,7 +27,8 @@ export function ForgotPasswordForm() {
     setPending(true);
     const { error } = await authClient.requestPasswordReset({ email: parsed.data.email, redirectTo: "/reset-password" });
     setPending(false);
-    if (error && error.status === 429) {
+    if (error && (error.status === 429 || error.status === 503)) {
+      // 429: rate limited. 503: this deployment cannot send e-mail (never per-address, so nothing is revealed).
       setFormError(error.message ?? "Too many attempts. Please try again later.");
       return;
     }
@@ -36,10 +38,14 @@ export function ForgotPasswordForm() {
 
   if (sentTo) {
     return (
-      <p role="status" className="text-sm text-muted-foreground">
-        If an account exists for <strong className="text-foreground">{sentTo}</strong>, we have sent a link to reset the
-        password. The link is valid for one hour.
-      </p>
+      <Alert variant="success" role="status">
+        <AlertTitle>Check your inbox</AlertTitle>
+        <AlertDescription>
+          <p>
+            If an account exists for <strong className="font-semibold">{sentTo}</strong>, we have sent a link to reset the password. The link is valid for one hour.
+          </p>
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -47,7 +53,7 @@ export function ForgotPasswordForm() {
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <FormError message={formError} />
       <FormField label="E-mail" name="email" type="email" autoComplete="email" required error={errors.email?.[0]} />
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" className="w-full" loading={pending}>
         {pending ? "Sending…" : "Send reset link"}
       </Button>
     </form>
@@ -92,7 +98,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         hint="At least 8 characters."
         error={errors.password?.[0]}
       />
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" className="w-full" loading={pending}>
         {pending ? "Saving…" : "Set new password"}
       </Button>
     </form>

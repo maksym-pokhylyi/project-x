@@ -1,6 +1,8 @@
 import "server-only";
+import { waitUntil } from "@vercel/functions";
 import { db } from "@/db";
 import { errorLog } from "@/db/schema";
+import { describeError, errorReason, summarizeError } from "./describe-error";
 import { log } from "./logger";
 import { sendToSentry } from "./sentry";
 
@@ -17,23 +19,33 @@ export type ErrorContext = {
   extra?: Record<string, unknown>;
 };
 
-function toError(value: unknown): Error {
-  if (value instanceof Error) return value;
-  return new Error(typeof value === "string" ? value : "Non-error value thrown");
+/** jsonb rejects NUL escapes; `extra` is small, so a JSON round-trip is cheap. */
+function jsonSafe(extra: Record<string, unknown> | undefined): Record<string, unknown> {
+  if (!extra) return {};
+  try {
+    return JSON.parse(JSON.stringify(extra).replaceAll("\\u0000", "")) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
 }
 
 /**
  * Records an UNEXPECTED server error: structured log line + `error_log` row + Sentry
  * (when configured). Never throws — failing to record an error must not mask it.
+ *
+ * Everything written here goes through describeError(): SQL text and SQLSTATE but never
+ * bound values, AI SDK error names but never model output, no tokens, no NUL bytes.
  */
 export async function reportError(value: unknown, context: ErrorContext = {}): Promise<void> {
-  const error = toError(value);
-  log.error(error.message, {
+  const described = describeError(value);
+  log.error(described.message, {
     requestId: context.requestId,
     route: context.route,
     organizationId: context.organizationId,
     userId: context.userId,
-    stack: error.stack,
+    errorName: described.name,
+    code: described.code ?? undefined,
+    stack: described.stack ?? undefined,
   });
   try {
     await db.insert(errorLog).values({
@@ -42,15 +54,15 @@ export async function reportError(value: unknown, context: ErrorContext = {}): P
       method: context.method ?? null,
       organizationId: context.organizationId ?? null,
       userId: context.userId ?? null,
-      message: error.message.slice(0, 2000),
-      stack: error.stack?.slice(0, 8000) ?? null,
+      message: summarizeError(described),
+      // First line rebuilt from the sanitised message; the original one repeats the raw message.
+      stack: described.stack ? `${described.name}: ${described.message}\n${described.stack}` : null,
       digest: context.digest ?? null,
-      context: context.extra ?? {},
+      context: jsonSafe(context.extra),
     });
   } catch (insertError) {
-    log.error("failed to write error_log", {
-      reason: insertError instanceof Error ? insertError.message : "unknown",
-    });
+    log.error("failed to write error_log", { reason: errorReason(insertError) });
   }
-  await sendToSentry(error, context);
+  // Forwarding must not delay the response (or a webhook acknowledgement).
+  waitUntil(sendToSentry(described, context));
 }

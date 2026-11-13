@@ -70,7 +70,25 @@ export const paddleCustomerSchema = z.looseObject({
 });
 export type PaddleCustomer = z.infer<typeof paddleCustomerSchema>;
 
-/** Custom data we attach at checkout: `customData: { organization_id, user_id }`. */
+/** Refunds, credits and chargebacks against a transaction. */
+export const paddleAdjustmentSchema = z.looseObject({
+  id: z.string().startsWith("adj_"),
+  /** refund | credit | chargeback | chargeback_reverse | chargeback_warning | credit_reverse … */
+  action: z.string(),
+  /** pending_approval | approved | rejected | reversed */
+  status: z.string(),
+  transaction_id: z.string().nullish(),
+  subscription_id: z.string().nullish(),
+  customer_id: z.string().nullish(),
+  currency_code: z.string().nullish(),
+  totals: z.looseObject({ total: z.string().nullish(), currency_code: z.string().nullish() }).nullish(),
+});
+export type PaddleAdjustment = z.infer<typeof paddleAdjustmentSchema>;
+
+/**
+ * Unverified read of checkout custom data. NOT a basis for deciding which workspace an
+ * event belongs to — use verifyCheckoutData() (./checkout-signature.ts) for that.
+ */
 export function readCheckoutCustomData(customData: Record<string, unknown> | null | undefined): {
   organizationId: string | null;
   userId: string | null;
@@ -95,9 +113,11 @@ export const SUBSCRIPTION_EVENT_TYPES = [
 ] as const;
 export const TRANSACTION_EVENT_TYPES = ["transaction.completed", "transaction.payment_failed"] as const;
 export const CUSTOMER_EVENT_TYPES = ["customer.created", "customer.updated"] as const;
+export const ADJUSTMENT_EVENT_TYPES = ["adjustment.created", "adjustment.updated"] as const;
 
 export const HANDLED_EVENT_TYPES: readonly string[] = [
   ...SUBSCRIPTION_EVENT_TYPES,
   ...TRANSACTION_EVENT_TYPES,
   ...CUSTOMER_EVENT_TYPES,
+  ...ADJUSTMENT_EVENT_TYPES,
 ];

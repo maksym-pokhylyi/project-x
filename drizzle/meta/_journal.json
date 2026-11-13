@@ -8,6 +8,20 @@
       "when": 1794565897631,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794576784538,
+      "tag": "0001_security_hardening",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794577943857,
+      "tag": "0002_procurement",
+      "breakpoints": true
     }
   ]
 }

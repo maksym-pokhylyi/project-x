@@ -10,8 +10,10 @@ import { getUser } from "@/server/session";
 
 export const metadata: Metadata = { title: "Sign in", robots: { index: false } };
 
-export default async function SignInPage({ searchParams }: { searchParams: Promise<{ redirect?: string }> }) {
-  const redirectTo = safeRedirect((await searchParams).redirect);
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ redirect?: string; next?: string }> }) {
+  const params = await searchParams;
+  // `next` is accepted as an alias of `redirect` (marketing links use it).
+  const redirectTo = safeRedirect(params.redirect ?? params.next);
   if (await getUser()) redirect(redirectTo);
 
   return (
@@ -19,10 +21,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
       title={`Sign in to ${site.name}`}
       footer={
         <>
-          New here?{" "}
-          <Link className="font-medium text-foreground underline-offset-4 hover:underline" href={`/sign-up?redirect=${encodeURIComponent(redirectTo)}`}>
-            Create an account
-          </Link>
+          New here? <Link href={`/sign-up?redirect=${encodeURIComponent(redirectTo)}`}>Create an account</Link>
         </>
       }
     >

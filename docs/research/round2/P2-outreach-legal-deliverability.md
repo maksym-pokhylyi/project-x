@@ -41,9 +41,9 @@ Source IDs in square brackets (e.g. [S3]) refer to the source list in section 11
 
 **Three things that are unwise even though lawful**
 
-- Emailing all ~1,000 a week. The lawful, deliverable volume is nearer **350–500 first-touch emails a week**.
+- Emailing all ~1,000 a week. The lawful, deliverable volume is nearer **400–500 first-touch emails a week**.
 - Using open-tracking pixels. They fall under PECR's separate storage/access (cookie) rules, which apply to every subscriber type [S6]; they also hurt deliverability. Turn them off.
-- Indexing thousands of auto-generated supplier pages on day one (section 4.5).
+- Indexing thousands of auto-generated supplier pages on day one (section 4.6).
 
 ---
 
@@ -114,6 +114,8 @@ All of the following were checked on legislation.gov.uk on 2026-11-13.
 | Information Commissioner's Office replaced by the **Information Commission** (functions transferred) | **In force 30 Sep 2026** — S.I. 2026/1015 reg. 2: *"section 118 (abolition of the office of Information Commissioner); section 119 (transfer of functions to the Information Commission)"*. The brand "ICO" is still used on ico.org.uk | **FACT** [S15] |
 
 **FACT** — ICO on its new powers (page updated 19 June 2026): *"the law has commenced and we can, and will, use these powers where necessary for the most serious cases."* The same page confirms *"all data protection provisions in the Data (Use and Access) Act 2025 are now in force."* [S16]
+
+**FACT** — Recent PECR penalties concern consumer-scale campaigns: on 20 January 2026 the ICO fined one company £105,000 for *"over 67 million marketing emails"* sent without valid consent, and noted that *"Public reporting plays a crucial role in our work"*. [S70] **INFERENCE:** a few hundred relevant B2B emails a week is not the enforcement priority, but complaints are what start investigations, so the complaint rate is the number to manage.
 
 **FACT** — The ICO's B2B marketing guide and Guide to PECR still carry the banner *"Due to changes made by the Data (Use and Access) Act, this guidance is under review and may be subject to change."* The corporate/individual subscriber rule itself was not changed by the Act (reg. 22(1) is unamended). [S1][S3]
 
@@ -352,7 +354,7 @@ Use a `noindex` robots meta tag rather than blocking the pages in `robots.txt`, 
 
 ## 5. Paddle
 
-Documents read on 2026-11-13: Acceptable Use Policy, *"Last Updated 13 April 2026"* [S44]; Paddle Checkout seller terms (Master Services Agreement), *"Last updated: 6 October 2026"* [S45]; Retain and Metrics AUP, *"Last Updated: 1 February 2023"* [S46]; supported-countries page [S47].
+Documents read on 2026-11-13: Acceptable Use Policy, *"Last Updated 13 April 2026"* [S44]; Paddle Master Services Agreement (the seller terms), *"Last updated: 6 October 2026"* [S45]; Retain and Metrics AUP, *"Last Updated: 1 February 2023"* [S46]; supported-countries page [S47].
 
 ### 5.1 Relevant clauses, quoted
 
@@ -426,5 +428,493 @@ Product-category risks to design around (**INFERENCE**):
 > Thank you,
 > [Name]
 
+Send this only once every statement in it is true — in particular the advice taken, the UK representative, and the exclusion rules. Paddle may treat the message as a representation under clause 11.
+
 **UNKNOWN** — how Paddle will answer. Until it does, treat Paddle approval as a launch dependency, and have a fallback processor identified.
 
+---
+
+## 6. Deliverability and operations (state of play, November 2026)
+
+### 6.1 What the mailbox providers require
+
+| Provider | Scope of the published rules | Requirements | Source |
+|---|---|---|---|
+| **Google (Gmail)** | *"Sender requirements and Google enforcement apply only when sending email to personal Gmail accounts"* — not to Google Workspace recipients. Bulk tier = *"more than 5,000 messages per day to Gmail accounts"*; once reached, *"permanently classified"* | All senders: SPF **or** DKIM, valid PTR, TLS, spam rate *"below 0.3%"*. Bulk: SPF **and** DKIM, DMARC (*"can be set to none"*), From-domain alignment, *"one-click unsubscribe, and … a clearly visible unsubscribe link in the message body"*, and *"Keep spam rates reported in Postmaster Tools below 0.10% and avoid ever reaching a spam rate of 0.30% or higher"*. *"Starting November 2025, Gmail is ramping up its enforcement"*, including rejections | **FACT** [S48][S49] |
+| **Yahoo** | Yahoo consumer domains; bulk tier not numerically defined on the page | All: SPF or DKIM, spam rate below 0.3%, valid DNS. Bulk: SPF and DKIM, DMARC *"at least p=none"*, a *"functioning list-unsubscribe header, which supports one-click unsubscribe"*, *"Honor unsubscribes within 2 days"*, spam rate below 0.3% | **FACT** [S50] |
+| **Microsoft (Outlook.com consumer)** | *"Outlook.com - our consumer service, which is supporting hotmail.com live.com and outlook.com consumer domain addresses"*; *"domains sending over 5,000 emails per day"* | SPF, DKIM, DMARC *"at least p=none and align with either SPF or DKIM"*; non-compliant mail rejected with *"550; 5.7.515 Access denied"* from 5 May 2025; *"Functional Unsubscribe Links"* recommended | **FACT** [S51] |
+
+**INFERENCE** — What this means here:
+
+- You will be far below 5,000 a day, and after the red lines in section 8 you will send almost nothing to consumer Gmail, Yahoo or Outlook.com. The published bulk-sender rules therefore do not formally bind this campaign. Meet them anyway: the same signals feed the filters that protect business mailboxes.
+- Your recipients are UK SMEs, mostly on Microsoft 365 and Google Workspace, some behind gateways such as Mimecast or Proofpoint (**ASSUMPTION**). None of those publishes a threshold. Placement there depends on authentication, domain age and reputation, content, and what recipients do with the message.
+
+### 6.2 The uncomfortable part: the sending platforms' own terms
+
+| Platform | Term | Label |
+|---|---|---|
+| Google Workspace AUP (*"Last modified: October 12, 2026"*) | Customers must not use the services *"to generate, distribute, publish or facilitate unsolicited mass email, promotions, advertisements, or other solicitations ('spam')"* | **FACT** [S52] |
+| Google sender guidelines | *"Don't purchase email addresses from other companies. Don't send messages to people who didn't sign up to get messages from you."* | **FACT** [S48] |
+| Microsoft Exchange Online | *"To discourage the delivery of unsolicited bulk messages, Exchange Online has recipient limits"*; customers needing *"legitimate bulk commercial email … should use third-party providers"*; *"Exchange Online isn't suited to accommodate bulk-mailing scenarios."* | **FACT** [S53] |
+
+**INFERENCE** — Lawful under PECR is not the same as permitted by the mailbox host. At a few hundred individually relevant emails a day, spread over several mailboxes, the practical risk of suspension is low but not zero; a burst of spam reports is what triggers review. This is the main reason to keep the sending domain separate from the product domain.
+
+### 6.3 Platform sending limits (hard ceilings, not targets)
+
+| Platform | Limit | Label |
+|---|---|---|
+| Google Workspace | *"Maximum messages per day … 2,000"*; *"500 for trial accounts"*; limits rise only after the domain has *"cumulatively paid at least $100 USD"*, which *"can take up to 75 days"* | **FACT** [S54] |
+| Microsoft 365 / Exchange Online | *"10,000 recipients per day"* per mailbox; a tenant-wide external recipient limit (TERRL) scaled to licence count, *"capped at 5,000 external recipients per day"* for trial tenants; `onmicrosoft.com` addresses limited to *"100 external recipients per organization"* a day | **FACT** [S53] |
+| Microsoft per-mailbox 2,000 external-recipient limit | Announced, then withdrawn: *"01/06/2026 … The implementation of this limit has now been CANCELLED and will not go into effect."* | **FACT** [S55] |
+
+### 6.4 Volume plan
+
+**ASSUMPTION (vendor guidance, not provider rules; search of 2026-11-13):** practitioners converge on about **25–30 cold emails per mailbox per day** once warmed, **3–5 mailboxes per sending domain**, and **3–6 weeks** of warm-up for a new domain. [S56]
+
+| Quantity | Figure | Basis |
+|---|---|---|
+| Lawful first-touch emails per week | 400–500 | Section 1.3 |
+| Follow-ups | 1 (recommended) or 2 (maximum) | Brief; section 6.8 |
+| Steady-state emails per week | 800–1,000 (one follow-up) to 1,200–1,500 (two) | Arithmetic |
+| Per business day | 160–200, up to 300 | ÷ 5 |
+| Mailboxes at 25 a day | 7–8, up to 12 | Arithmetic |
+| Sending domains at 3 mailboxes each | 3–4 | Arithmetic |
+
+### 6.5 Separate sending domain — yes
+
+**FACT** — Yahoo recommends segregation: *"Don't send bulk/marketing email from the same IPs you use to send user mail, transactional mail, alerts, etc. Each IP and DKIM domain has a reputation"*; and warns *"Sending unsolicited commercial email can negatively affect your reputation."* [S50]
+
+**INFERENCE** — Set-up:
+
+- Product domain (app, password resets, receipts, replies to customers): never used for cold outreach.
+- 3–4 outreach domains that are obvious variants of the brand (for PECR reg. 23, the sender must be recognisable), each redirecting to the main site, each with MX, SPF, 2048-bit DKIM and DMARC.
+- DMARC at `p=none` with a reporting address for the first 2–4 weeks, then `quarantine`, then `reject`.
+- Register the domains at least 4 weeks before the first cold send; very new domains are scored harshly (**ASSUMPTION**).
+- The link in the email goes straight to the supplier page on your own domain. No link shorteners and no shared tracking-redirect domains.
+
+### 6.6 Warm-up reality
+
+**FACT** — Google: *"Increase sending volume slowly to avoid delivery problems… The more email that you send, the more slowly you should increase sending volume… You can increase the sending volume more quickly when you send daily instead of weekly."* [S48]
+
+**INFERENCE / ASSUMPTION** — For mailboxes sending 25 a day, "warm-up" means age plus normal use, not weeks of automated traffic:
+
+| Week | Activity |
+|---|---|
+| −4 | Register domains; DNS and authentication; create mailboxes with real names and signatures |
+| −3 to −1 | Ordinary correspondence from each mailbox (suppliers, your own accounts, newsletters, a few real conversations a day). Seed tests to your own Microsoft 365 and Google Workspace inboxes |
+| 1 | Hand-sent test, 10 → 30 per mailbox per day (6.7) |
+| 2–4 | Hold at 20–25 per mailbox per day; add follow-ups; add mailboxes only if signals are clean |
+
+Sequencing tools bundle "warm-up pools" that exchange automated emails between customers' mailboxes. They are widely used; mailbox providers do not endorse them and can treat engineered engagement as abuse (**ASSUMPTION** — not verified in a provider document this session). Do not depend on them.
+
+### 6.7 The "hand-sent first 400" test (first sending week)
+
+Purpose: measure reply quality and complaint signals before automating anything.
+
+| Element | Specification |
+|---|---|
+| Senders | 4 aged mailboxes on 2 outreach domains |
+| Ramp | Mon 10 each (40) · Tue 15 (60) · Wed 20 (80) · Thu 25 (100) · Fri 30 (120) = **400** |
+| "Hand-sent" | Each email opened, checked against the supplier page, and sent individually from the mail client, a few minutes apart, inside UK office hours. Template plus one specific line drawn from the award (buyer, contract title, month) |
+| Format | Plain text, about 80–120 words, one link (the supplier page), no images, no attachments, **no open-tracking pixel** |
+| Mix | Half generic mailboxes, half named addresses, tagged so the two can be compared |
+| Pre-checks | Section 1.3 gate; address verified the same week; suppression list checked |
+| Logged per email | Recipient company, notice ID, mailbox, time, template version; then bounce, reply (positive / neutral / negative), opt-out, page visit, sign-up |
+| Daily routine | Read every reply within one working day; add opt-outs and hard bounces to suppression before the next day's sends |
+
+Stop-and-fix thresholds (**ASSUMPTION** — rules of thumb, not provider rules):
+
+| Signal | Stop if |
+|---|---|
+| Hard bounces | over 3% in any day |
+| Opt-outs plus hostile replies | over 5% |
+| Any "reported as spam / blocked" bounce text, or seed tests landing in junk | once |
+| Any complaint mentioning the ICO or Paddle | once — pause and review |
+
+What "good" looks like (**ASSUMPTION**): page visits from 15–30% of recipients, replies from 3–8%, a handful of sign-ups. If named addresses do not clearly outperform generic ones, drop named addresses — that removes most of the UK GDPR workload for outreach.
+
+### 6.8 Bounces, role addresses, timing
+
+**Bounces**
+
+- Verify each address in the week it is sent (**ASSUMPTION:** about $0.005–0.01 per check). Addresses from that week's award notices should be fresh; older notices will bounce more.
+- Hard bounce (5xx, user unknown, domain invalid): suppress permanently at once.
+- Soft bounce (4xx, mailbox full): one retry after 48 hours, then suppress.
+- Policy or block bounce (5.7.x, "spam", "blocked"): stop that mailbox for the day and investigate; this is a reputation signal, not a bad address.
+- "Catch-all" domains cannot be verified; send to them last and watch the result.
+
+**Role addresses (`info@`, `tenders@`, `bids@`)**
+
+| For | Against |
+|---|---|
+| Not personal data when no name is stored — outside UK GDPR [S3] | Often shared: more readers, more chances that one presses "report spam" |
+| The address the company itself chose for procurement contact; `tenders@`/`bids@` is exactly the right team | Lower reply rates; may feed a ticketing system that auto-replies |
+| An opt-out covers the organisation cleanly | Some sending tools and verification services flag role accounts as risky (**ASSUMPTION**) |
+
+Keep both types; measure them separately. Still subject to the PECR gate — a role address at a sole trader is an individual subscriber [S6a].
+
+**Timing and follow-ups in the UK (ASSUMPTION — practitioner norms)**
+
+- Send Tuesday–Thursday, 08:30–11:30 and 13:30–16:00 UK time; avoid Monday mornings, Friday afternoons, bank holidays, and 20 December–3 January.
+- Follow-up 1 at +3 to +4 working days, in the same thread, two or three sentences, with the opt-out line again.
+- Follow-up 2 (optional) at +7 to +10 working days; say it is the last. Then stop for good.
+- Any reply — including "not now" — ends the sequence for that company. "Remove us" suppresses the whole domain.
+
+### 6.9 Tooling and monthly cost
+
+Prices read from vendor pages on 2026-11-13 unless marked.
+
+| Item | Option | Price | Label |
+|---|---|---|---|
+| Sequencer | Smartlead Base (2,000 contacts, 6,000 sends/month) | $32/month as displayed (see note) | **FACT** [S57] |
+| | Smartlead Pro (30,000 contacts, 90,000 sends) | $78/month as displayed (see note) | **FACT** [S57] |
+| | Instantly Growth (1,000 uploaded contacts, 5,000 emails/month) — contact cap too low for ~2,000 new companies a month | $47/month | **FACT** [S58] |
+| | Instantly Hypergrowth (25,000 contacts, 125,000 emails) | $107/month | **FACT** [S58] |
+| | lemlist Email (50,000 emails/month, unlimited senders) | $69/month, $55 billed yearly | **FACT** [S59] |
+| Mailboxes | Google Workspace Business Starter, bought direct | about $7–8.40 per mailbox/month | **ASSUMPTION** (price not extractable from the page) |
+| | Reseller mailboxes via Smartlead's marketplace (Google or Outlook) | $4.50 per mailbox/month | **FACT** [S57] |
+| Domains | Per outreach domain | about $13 a year | **FACT** [S57] |
+| Verification | ~2,000 addresses a month | about $10–20/month | **ASSUMPTION** |
+| Monitoring | Google Postmaster Tools; DMARC reports | free | **ASSUMPTION** |
+
+Note: the Smartlead page has a monthly/yearly toggle advertising 17% off; I could not tell which billing period the displayed prices reflect. Month-to-month may be about 20% higher (**UNKNOWN**).
+
+| Stack | Monthly cost |
+|---|---|
+| **Test week only:** 4 Workspace mailboxes, 2 domains, manual sending, a spreadsheet | about $30–40 |
+| **Lean steady state:** 8 mailboxes, 3 domains, Smartlead Base or lemlist, verification | about $110–170 |
+| **Full:** 12 mailboxes, 4 domains, Smartlead Pro or Instantly Hypergrowth, verification | about $180–250 |
+| Compliance overhead on top: UK representative (£30–100/month), ICO fee (£52/year) | about £35–105 |
+
+Plain Workspace or Microsoft 365 mailboxes with manual sending are enough for the test week and give the cleanest signal. A sequencer earns its fee from week 2 for throttling, follow-up logic, reply detection and suppression. Whichever tool is used: check that it sends `List-Unsubscribe` and `List-Unsubscribe-Post` headers, lets you disable open tracking, and will sign a data-processing agreement.
+
+### 6.10 What gets the domain or the Paddle account into trouble
+
+| Domain / mailboxes | Paddle account |
+|---|---|
+| Volume spikes; more than ~30–50 a day from a young mailbox | **Any telephone outreach**, by anyone |
+| Hard-bounce rate above a few percent (old or guessed addresses) | Emailing sole traders or personal addresses (unlawful → warranty breach) |
+| Recipients pressing "report spam"; no visible opt-out | Complaints sent to Paddle, card disputes, chargebacks |
+| Consumer webmail addresses on the list | A regulator complaint or published enforcement naming the business |
+| Open-tracking pixels, link shorteners, several links, attachments, heavy HTML | Pages or emails that look official or government-run |
+| Identical text to hundreds of recipients on the same day | Income or win-rate claims; "business opportunity" framing |
+| Outreach from the product domain | Selling consultancy or paid listings through the checkout |
+| Buying or renting a list (Google and Yahoo both say not to [S48][S50]) | Running outreach through Paddle Retain / ProfitWell tools [S46] |
+
+---
+
+## 7. Email content rules and template skeleton
+
+### 7.1 What must be in the email
+
+| Requirement | Source | Label |
+|---|---|---|
+| Sender's identity not disguised or concealed | PECR reg. 23(a) [S1b] | **FACT** |
+| A valid address for opt-out requests. ICO checklist: *"We offer an opt-out (by reply or unsubscribe link) and act on this promptly."* | PECR reg. 23(b) [S1b][S4] | **FACT** |
+| Clearly identifiable as a commercial communication; identifies on whose behalf it is sent; unsolicited commercial email identifiable as such *"as soon as it is received"* | E-Commerce Regs 2002 regs 7–8 via PECR reg. 23(c) [S10] | **FACT** |
+| For named recipients: controller identity and contact details, **the UK representative**, purpose and lawful basis, the legitimate interest, source of the data, retention, rights, complaint routes — in the email or one click away, at the latest with the first email | UK GDPR Art. 14 [S9] | **FACT** |
+| For named recipients: the right to object *"explicitly brought to the attention of the data subject and … presented clearly and separately from any other information"* | UK GDPR Art. 21(4) [S19] | **FACT** |
+| Not misleading to traders (content, presentation, who the advertiser is) | Business Protection from Misleading Marketing Regs 2008 reg. 3 [S41] | **FACT** |
+| OGL attribution, if the email itself reproduces notice data | OGL v3.0 [S20] | **FACT** |
+
+### 7.2 Identity details for a non-UK sole trader
+
+| Detail | Required? | Basis |
+|---|---|---|
+| Real name of the person or business behind the brand ("[Brand] is operated by [Full name], sole proprietor registered in Ukraine") | **Yes** | PECR reg. 23(a); Art. 14(1)(a). A brand name alone, with no legal person behind it, risks "concealed identity" (**INFERENCE**) |
+| Contact email that is read | **Yes** | PECR reg. 23(b); Art. 14(1)(a) |
+| Postal address **in the email** | **Not expressly required by UK law** | PECR requires a "valid address" for opt-outs, which the ICO accepts as reply or link [S4]; Art. 14 says "contact details" [S9] |
+| Postal (geographic) address **available on the website** | **Yes, treat as required** | E-Commerce Regs reg. 6(1): *"(a) the name of the service provider; (b) the geographic address at which the service provider is established; (c) the details of the service provider, including his electronic mail address"*, *"easily, directly and permanently accessible"* [S10]. Whether reg. 6 binds a provider established outside the UK is **UNKNOWN**; comply regardless |
+| Registration reference (Ukrainian state register entry / tax number) | Where one exists, on the website | Reg. 6(1)(d) [S10] |
+| UK representative's name and UK address | **Yes**, in the privacy notice | Art. 14(1)(a) [S9] |
+| ICO registration number | Optional; useful trust signal | — |
+
+**Recommendation (INFERENCE):** put a postal address in the footer anyway. It costs one line, it answers "who is this?", and it is mandatory in the US (*"a valid physical postal address of the sender"* [S60]) and Canada (*"the mailing address"* [S61]) if those markets follow. Use a business address where post is actually received, not a home address. UK company-law trading-disclosure rules were not checked for a non-UK sole trader (**UNKNOWN**).
+
+### 7.3 Subject lines
+
+**INFERENCE** from reg. 23, the E-Commerce Regs and the 2008 Regulations:
+
+- No "Re:" or "Fwd:" on a first email; no pretence of an existing relationship.
+- No wording that reads as official: "Contract award notification", "Find a Tender notice", "Action required".
+- Say what it is, and that it is from a business.
+
+Acceptable patterns: `[Company]: your public contract awards on one page` · `A page about [Company]'s Find a Tender awards (from [Brand])`.
+
+### 7.4 Template skeleton (structure only — not sales copy)
+
+```
+From:     [First name Last name] <first@[outreach-domain]>      ← real person, real mailbox
+Reply-To: same mailbox (monitored daily)
+Subject:  [Company]: your public contract awards on one page
+Headers:  List-Unsubscribe: <https://[domain]/u/[token]>, <mailto:unsubscribe@[outreach-domain]?subject=unsubscribe>
+          List-Unsubscribe-Post: List-Unsubscribe=One-Click
+
+[1] WHY YOU, WHY NOW (1–2 sentences, factual)
+    "[Company] was named as the supplier on [contract title] for [buyer], published on
+     Find a Tender on [date]."
+
+[2] WHAT THIS IS (1 sentence, plainly commercial)
+    "I run [Brand], a paid software service for public-sector suppliers. I have put
+     [Company]'s published awards, matching open tenders and related contracts nearing
+     their end date on one page:"
+
+[3] ONE LINK
+    https://[product-domain]/suppliers/[company-slug]
+
+[4] SOFT QUESTION (1 sentence) — optional
+
+[5] SIGNATURE / IDENTITY
+    [Full name], [Brand]
+    [Brand] is operated by [Full legal name], sole proprietor registered in Ukraine
+    ([register reference]). [Postal address]. [Contact email].
+    UK data-protection representative: [Name, UK address].
+
+[6] OPT-OUT — its own paragraph, visually separate
+    "You have the right to object to marketing from us at any time. To stop these
+     emails, reply 'stop' or use this link: [one-click link]. We will not contact
+     [Company] again."
+
+[7] DATA NOTICE — its own paragraph (named recipients; harmless for generic mailboxes)
+    "Where we got your details: this address appears as the supplier contact in the
+     public contract notice above (Find a Tender, published under the Open Government
+     Licence v3.0). We use it only to send this message and at most [one/two]
+     follow-ups, on the basis of our legitimate interest in telling suppliers about
+     our service, and delete it after 90 days if you do not reply. Full privacy
+     notice, your rights, and how to complain: [link]."
+
+[8] INDEPENDENCE LINE
+    "[Brand] is independent and is not affiliated with the UK Government or
+     Find a Tender. Contains public sector information licensed under the Open
+     Government Licence v3.0."
+```
+
+Follow-ups repeat blocks [5]–[6] and link to the notice; they do not need block [7] in full again.
+
+### 7.5 Privacy notice — the Art. 14 section should state
+
+Controller name, country and contact · UK representative · what is held (work email address, employer, the notice it came from; name only if stored) · source: Find a Tender public notices, a publicly accessible source · purpose: one introductory message and limited follow-ups · lawful basis: legitimate interests, with the interest stated · recipients: named processors (mailbox host, sending tool, verification service) · transfers outside the UK and the safeguard used · retention (the table in 2.6) · rights, with objection to marketing first and unconditional · how to complain to you (form, 30-day acknowledgement) · how to complain to the Information Commission · no automated decision-making about individuals.
+
+---
+
+## 8. One-page operating checklist
+
+### Must exist before the first email
+
+| # | Item | Owner check |
+|---|---|---|
+| 1 | **Paddle's written reply** to the question in 5.3 | Saved |
+| 2 | **UK representative** appointed in writing; named in the privacy notice | Mandate on file |
+| 3 | **ICO data-protection fee** paid (£52), or ICO's written confirmation that it is not due | Registration number |
+| 4 | **Privacy notice** live, with the Art. 14 section (7.5) | URL in email template |
+| 5 | **Legitimate-interests assessment** written, dated, signed (2.3) | PDF on file |
+| 6 | **Corporate-subscriber gate** implemented: Companies House lookup, entity-type allow-list, webmail-domain block list, LP/NL exclusion (1.3) | Tested on a sample of 100 |
+| 7 | **Suppression list** (address and domain level), checked automatically before every send; never purged | Tested |
+| 8 | **Opt-out mechanism**: one-click link, reply handling, `List-Unsubscribe` headers; processed within 2 days at most, same day in practice | Tested end to end |
+| 9 | **Identity block** and postal address in the template; website shows name, address, contact, register reference | Reviewed |
+| 10 | **Attribution and independence lines** on pages and in email (4.1) | Reviewed |
+| 11 | **Retention rule** automated: delete non-responders at 90 days; keep suppression | Job scheduled |
+| 12 | **One-month rule**: no named address held more than a month before first contact (2.4) | Pipeline check |
+| 13 | **Complaint handling**: web form, 30-day acknowledgement, log; one inbox for objections, errors and page removals | Tested |
+| 14 | **Page hygiene**: no names or emails shown; `noindex`; "report an error / remove" link; source links not paywalled | Reviewed |
+| 15 | **Records**: send log, record of processing, processor contracts, this document's sources | Folder exists |
+| 16 | **Sending set-up**: separate domains, SPF/DKIM/DMARC passing, mailboxes aged, **open tracking off** | Seed tests in inbox |
+| 17 | A solicitor's one-hour review of items 2–6 and the LP, fee and transfer questions | Note on file |
+
+### Red lines
+
+- **No sole traders, ordinary partnerships or unverified entities.** No Companies House match, no email.
+- **No personal or consumer addresses** — gmail.com, googlemail.com, outlook.com, hotmail.*, live.*, yahoo.*, icloud.com, btinternet.com, aol.com, sky.com and similar — even when the supplier is a limited company.
+- **No purchased, rented or third-party lists.** The only source is the supplier's own published notice.
+- **No cold calls, no call-backs to non-requesters, no SMS, no LinkedIn or WhatsApp automation.** Calls breach Paddle's terms outright; the other channels count as "electronic mail" under PECR.
+- **No more than one email plus two follow-ups**, ever, per company; a reply or opt-out ends it.
+- **No named contacts or addresses on public pages.**
+- **No official look**, no government marks, no "notification" wording.
+- **No tracking pixels.**
+- **No sending after an objection** — to the person, and by policy to the whole company domain.
+- **No statements about a company that the source notice does not support.**
+
+---
+
+## 9. Expansion scan — comparable lawful B2B cold email elsewhere
+
+Each paragraph gives the governing rule. Whether procurement award data in each market carries supplier email addresses was **not verified** and is the practical gating question everywhere outside the UK.
+
+**Ireland.** **FACT** — S.I. 336/2011 reg. 13(1) requires consent for unsolicited marketing email to a natural person, but reg. 13(2) carves out *"an email address that reasonably appears to the sender to be an email address used mainly by the subscriber or user in the context of their commercial or official activity and the unsolicited communication relates solely to that commercial or official activity"*, and reg. 13(4) makes email to a subscriber *"other than a natural person"* lawful unless it *"has notified the person that [it] does not consent"*. The sender must include *"a valid address at which that person may be contacted"*, must not disguise identity, and must give a valid opt-out address. Each message is a separate offence; fines on indictment up to *"€250,000"* for a body corporate and *"€50,000"* for a natural person. [S62] **INFERENCE:** comparable to the UK and slightly wider (work addresses of individuals qualify if the message relates solely to their work), but EU GDPR applies to named addresses and an EU representative is needed (3.6).
+
+**Australia.** **FACT** — The Spam Act 2003 has no business exemption; commercial electronic messages need consent, but Schedule 2 cl. 4 deems consent where a work-related address *"has been conspicuously published"*, publication is *"not accompanied by … a statement to the effect that the relevant electronic account-holder does not want to receive unsolicited commercial electronic messages"*, and the message is *"relevant to … the work-related business, functions or duties"* of the person, or to the office, function or role. Merely being published is not enough (cl. 4(1)). Withdrawal of consent takes effect within *"5 business days"*. Part 3 bans the supply, acquisition and use of *"address-harvesting software and harvested-address lists"*. [S63] (Text read is a 2016 compilation; later amendments not checked.) **INFERENCE:** workable for tender-related messages to published procurement contacts, but the harvesting rules make automated collection the point to clear with an Australian lawyer first.
+
+**New Zealand.** **FACT** — Unsolicited Electronic Messages Act 2007: *"A person must not send, or cause to be sent, an unsolicited commercial electronic message that has a New Zealand link."* Consent includes deemed consent where *"an electronic address has been conspicuously published by a person in a business or official capacity"*, the publication carries no statement refusing unsolicited messages, and *"the message sent to that address is relevant to the business, role, functions, or duties of the person in a business or official capacity"*. Messages need accurate sender information and an unsubscribe facility; withdrawal takes effect 5 working days after use. [S64] **INFERENCE:** same model as Australia; small market.
+
+**Canada.** **FACT** — CASL s. 10(9)(b) implies consent where the recipient *"has conspicuously published … the electronic address"*, the publication *"is not accompanied by a statement that the person does not wish to receive unsolicited commercial electronic messages"*, and *"the message is relevant to the person's business, role, functions or duties in a business or official capacity"*. Every message must identify the sender with *"the mailing address, and either a telephone number … an email address or a web address"*, and carry an unsubscribe mechanism. Maximum penalty *"$1,000,000 in the case of an individual, and $10,000,000 in the case of any other person"*. [S61] Privacy law excludes *"business contact information … solely for the purpose of communicating … in relation to their employment, business or profession"*, but removes the consent exceptions where an address *"is collected by the use of a computer program that is designed or marketed primarily for use in generating or searching for, and collecting, electronic addresses"*. [S65] **INFERENCE:** lawful in principle; the burden of proving implied consent is on the sender, and the address-harvesting provision needs a Canadian opinion before any automated extraction.
+
+**United States.** **FACT** — CAN-SPAM is an opt-out regime with no consent requirement and no B2B exemption. It prohibits header information that is *"materially false or materially misleading"* and deceptive subject headings; requires an opt-out honoured within *"10 business days"*, *"clear and conspicuous identification that the message is an advertisement or solicitation"*, and *"a valid physical postal address of the sender"*. [S60] Civil penalty currently *"$53,088"* per violation under FTC Act s. 5(m)(1)(A). [S66] **INFERENCE:** the most permissive market legally; deliverability and reputation, not law, are the constraint. State privacy laws were not reviewed.
+
+**France.** **FACT** — CNIL (page dated 10 June 2026): for professionals the rule is information plus a simple, free right to object; *"La prospection à l'égard de professionnels peut être fondée sur l'intérêt légitime de l'organisme lorsque l'objet de la sollicitation est en rapport avec la profession de la personne démarchée"*. Where data were acquired from third parties the sender must make sure the person *"a été informée"* and can object. Generic addresses (*"info@…, contact@…"*) *"ne sont pas soumises aux principes rappelés ci-dessus"*. [S67] **INFERENCE:** comparable to the UK for work-relevant messages; EU GDPR and an EU representative apply; write in French.
+
+**Sweden.** **FACT** — Marknadsföringslagen (2008:486) § 19 requires prior consent only for marketing email to *"en fysisk person"* (a natural person); § 20 requires every marketing email to contain a valid opt-out address, and *"Detta gäller även vid marknadsföring till en juridisk person"* (this also applies to marketing to a legal person). [S68] **INFERENCE:** email to legal persons is permitted on an opt-out basis; sole traders (*enskild firma*) are natural persons, so consent is needed. Whether a named employee address counts as the legal person's is contested in secondary sources (**UNKNOWN**) — start with generic addresses.
+
+**Finland.** **FACT** — Act 917/2014 s. 200: email marketing *"may only be directed at natural persons who have given their prior consent"*. s. 202: *"Direct marketing to legal persons is allowed if the recipient has not specifically prohibited it"*, with an easy, free way to prohibit and clear notice of it. s. 203: the message must be recognisable as marketing, with the sender's identity not concealed and a valid opt-out address. [S69] (Unofficial translation; later amendments not checked.) **INFERENCE:** same model as Sweden. The regulator's position on named work addresses could not be read this session (site blocked) — **UNKNOWN**.
+
+**Not comparable (ASSUMPTION, from memory — not verified):** Germany treats unsolicited B2B email as requiring prior express consent; the Netherlands, Denmark, Austria, Italy and Poland are also consent-based or materially stricter. Do not extend the model there without local advice.
+
+**Order of attack (INFERENCE):** Ireland first (same language, near-identical rule, similar procurement notices), then the US (if a usable public source of supplier contacts exists), then France. Australia, New Zealand and Canada only after a local opinion on address harvesting.
+
+---
+
+## 10. What could not be verified, and questions for the lawyer
+
+### Not verified this session
+
+| # | Item | Why | Effect on the plan |
+|---|---|---|---|
+| 1 | Whether FTS OCDS award records carry supplier emails and Companies House identifiers in the proportions stated | The brief forbade calling the API; taken from the brief | Sizing in 1.3 and 6.4 depends on it |
+| 2 | Whether PECR applies to a sender with no UK presence | No territorial clause in the Regulations; not addressed in the ICO guidance read | Treated as applying |
+| 3 | Whether an overseas controller must pay the ICO fee | ICO's internal guidance withheld under FOI [S35] | Recommend paying £52 |
+| 4 | Whether English/Welsh/NI limited partnerships are "individual subscribers" | My reading of the definitions; no ICO statement found | Excluded |
+| 5 | Whether any new storage/access exemption (2025 Act, Sch. 12) covers email open-tracking | ICO storage-and-access guidance not read | Pixels off |
+| 6 | Paddle's actual attitude to lawful cold email | No public statement found | Ask (5.3) |
+| 7 | Current Google Workspace and Microsoft 365 list prices | Not extractable from the pricing pages | ±$20/month |
+| 8 | Whether the Smartlead price shown ($32, $78) is the monthly or the yearly-billed rate | Page has a monthly/yearly toggle; rendered state unclear | ±$10/month |
+| 9 | Per-mailbox volume and warm-up norms | Vendor blogs only; no provider publishes a number | Treated as rules of thumb |
+| 10 | Mail platforms used by UK SME recipients | No source read | Affects which filters matter |
+| 11 | Regulator guidance pages for Ireland (DPC), Australia (ACMA), Canada (CRTC), Finland, and the FTC's CAN-SPAM guide | Sites blocked automated access; statutes read instead | Section 9 rests on statute text |
+| 12 | Whether award data in other countries exposes supplier email addresses | Not researched | Decides whether section 9 is usable at all |
+| 13 | Germany, Netherlands and other "strict" markets | From memory | Flagged as no-go without advice |
+| 14 | Ukrainian data-protection and marketing law applying to the FOP | Out of scope | Lawyer in Ukraine |
+| 15 | UK transfer rules for a non-UK controller using US processors | Not researched | Lawyer question |
+| 16 | Statutory response time for erasure/objection requests; previous £500,000 PECR cap; the abandoned Bill's proposal on Art. 27 | From memory, not re-read | Background only |
+| 17 | Australian and Finnish statute texts are older compilations/translations | Later amendments not checked | Section 9 |
+
+### Questions to put to a UK data-protection solicitor (about one hour)
+
+1. Confirm that UK GDPR Art. 3(2)(a) applies and that the Art. 27(2)(a) exemption is unavailable; review the representative's mandate.
+2. Confirm the corporate-subscriber gate, especially: LP/NL partnerships, charities and societies without a Companies House number, overseas companies, and company staff using webmail addresses.
+3. Review the LIA and the Art. 14 wording, including whether the short in-email notice plus link meets *"proactively make individuals aware"* [S17].
+4. Is the ICO fee payable by a controller with no UK establishment, and how is registration completed?
+5. Does keeping FTS source links inside a paid product need Cabinet Office permission under the FTS linking term [S39]?
+6. Any database-right issue in extracting the personal-data fields that the OGL does not license?
+7. Transfer mechanism for processors outside the UK; processor contract terms.
+8. Whether any UK trading-disclosure rule requires a postal address in the email itself for a non-UK sole trader.
+9. Does PECR reg. 6 (storage and access) reach per-recipient link tokens as used here?
+
+### Method note
+
+- WebSearch calls used: **9 of 20** (UK representative guidance; ICO fee for overseas controllers; UK representative pricing; Australian Spam Act; cold-email volume norms; ICO PECR fines 2026; Companies House prefixes; Paddle and cold email; Swedish marketing act).
+- Everything else was read directly from the source URL on 2026-11-13. The Find a Tender API was not called.
+- legislation.gov.uk texts were the "latest available (revised)" versions, which already show 2026 amendments and their commencement notes.
+
+---
+
+## 11. Sources and quotations
+
+All accessed 2026-11-13. Quotes are verbatim; "…" marks an omission.
+
+### UK legislation
+
+| ID | Source | Key quotation(s) |
+|---|---|---|
+| S1 | PECR 2003 reg. 22 — https://www.legislation.gov.uk/uksi/2003/2426/regulation/22 | "This regulation applies to the transmission of unsolicited communications by means of electronic mail to individual subscribers." · "Words in reg. 22(2) inserted (5.2.2026) by Data (Use and Access) Act 2025 (c. 18), ss. 114(2), 142(1); S.I. 2026/82, reg. 2(x)" |
+| S1b | PECR 2003 reg. 23 — https://www.legislation.gov.uk/uksi/2003/2426/regulation/23 | "A person shall neither transmit, nor instigate the transmission of, a communication for the purposes of direct marketing by means of electronic mail— (a) where the identity of the person on whose behalf the communication has been sent has been disguised or concealed; (b) where a valid address to which the recipient of the communication may send a request that such communications cease has not been provided; (c) where that electronic mail would contravene regulation 7 of the Electronic Commerce (EC Directive) Regulations 2002; or (d) where that electronic mail encourages recipients to visit websites which contravene that regulation." |
+| S2 | PECR 2003 reg. 2 — https://www.legislation.gov.uk/uksi/2003/2426/regulation/2 | Definitions of "corporate subscriber", "individual", "subscriber", "electronic mail", "direct marketing" (quoted in 1.1) |
+| S7 | UK GDPR Art. 6 — https://www.legislation.gov.uk/eur/2016/679/article/6 | "11. For the purposes of paragraph 1(f), examples of types of processing that may be processing that is necessary for the purposes of a legitimate interest include— (a) processing that is necessary for the purposes of direct marketing" |
+| S9 | UK GDPR Art. 14 — https://www.legislation.gov.uk/eur/2016/679/article/14 | Art. 14(3)(a)–(b) (quoted in 2.4) · "Art. 14(2)(da) inserted (19.6.2026) by Data (Use and Access) Act 2025 (c. 18), s. 142(1), Sch. 10 para. 4(2); S.I. 2026/82, reg. 3(b)" |
+| S10 | Electronic Commerce (EC Directive) Regulations 2002 regs 6, 7, 8 — https://www.legislation.gov.uk/uksi/2002/2013/regulation/6 · /regulation/7 · /regulation/8 | Reg. 7: "be clearly identifiable as a commercial communication; clearly identify the person on whose behalf the commercial communication is made" · Reg. 8: "any unsolicited commercial communication sent by him by electronic mail is clearly and unambiguously identifiable as such as soon as it is received" |
+| S11 | Data (Use and Access) Act 2025 s. 115 — https://www.legislation.gov.uk/ukpga/2025/18/section/115 | "For regulation 31 substitute— '31. Information Commissioner's enforcement powers (1) Schedule 1 provides for certain provisions of Parts 5 to 7 of the Data Protection Act 2018 to apply with modifications for the purposes of enforcing these Regulations.'" · "S. 115 in force at 5.2.2026 in so far as not already in force by S.I. 2026/82, reg. 2(y) (with regs. 8-11)" |
+| S12 | Data (Use and Access) Act 2025 Sch. 13 — https://www.legislation.gov.uk/ukpga/2025/18/schedule/13 | "18. Section 157 has effect as if— … (ii) in paragraph (a), for the words from 'section 35' to 'or 78' there were substituted 'regulation 5, 6, 7, 8, 14, 19, 20, 21, 21A, 21B, 22, 23 or 24'" · "Sch. 13 in force at 5.2.2026 by S.I. 2026/82, reg. 2(z14)" |
+| S13 | S.I. 2026/82, DUAA Commencement No. 6 — https://www.legislation.gov.uk/uksi/2026/82/made | "2. The following provisions of the 2025 Act … come into force on 5th February 2026— … (c) section 70 (lawfulness of processing); … (x) section 114 …; (y) section 115 (Commissioner's enforcement powers); … (z14) Schedule 13" · "3. … come into force on 19th June 2026— (a) section 103 (complaints by data subjects)" · reg. 11(2) (quoted in 1.4) |
+| S14 | Data Protection Act 2018 s. 157 — https://www.legislation.gov.uk/ukpga/2018/12/section/157 | "(5) The 'higher maximum amount' is— (a) in the case of an undertaking, £17,500,000 or 4% of the undertaking's total annual worldwide turnover in the preceding financial year, whichever is higher, or (b) in any other case, £17,500,000." |
+| S14b | UK GDPR Art. 83 — https://www.legislation.gov.uk/eur/2016/679/article/83 | Art. 83(4)(a) (quoted in 3.2) |
+| S15 | S.I. 2026/1015, DUAA Commencement No. 9 — https://www.legislation.gov.uk/uksi/2026/1015/made | "The following provisions … come into force on 30th September 2026— (a) section 117(4)(a) …; (b) section 118 (abolition of the office of Information Commissioner); (c) section 119 (transfer of functions to the Information Commission)." |
+| S18 | Data Protection Act 2018 s. 164A — https://www.legislation.gov.uk/ukpga/2018/12/section/164A | "(2) A controller must facilitate the making of complaints under this section by taking steps such as providing a complaint form which can be completed electronically and by other means. (3) … must acknowledge receipt of the complaint within the period of 30 days beginning when the complaint is received." |
+| S19 | UK GDPR Art. 21 — https://www.legislation.gov.uk/eur/2016/679/article/21 | Art. 21(2)–(4) (quoted in 2.5) |
+| S23 | UK GDPR Art. 3 — https://www.legislation.gov.uk/eur/2016/679/article/3 | Art. 3(2) (quoted in 3.1) |
+| S25 | UK GDPR Art. 27 — https://www.legislation.gov.uk/eur/2016/679/article/27 | Art. 27(1)–(2) (quoted in 3.2) · "Word in Art. 27(4) substituted (30.9.2026) by … S.I. 2026/386 … ; S.I. 2026/1015, reg. 2(c)" — the only 2026 amendment shown |
+| S32 | Data Protection (Charges and Information) Regulations 2018 reg. 2 — https://www.legislation.gov.uk/uksi/2018/480/regulation/2 | "(1) A data controller must comply with the requirements of this regulation unless all of the processing of personal data they undertake is exempt processing." · "(5)(b) the address of a person (other than a registered company) carrying on a business is that of the person's principal place of business in the UK." |
+| S34 | Data Protection Act 2018 s. 207 — https://www.legislation.gov.uk/ukpga/2018/12/section/207 | "(1A) In the case of the processing of personal data to which Part 2 (the UK GDPR) applies, it applies to the types of such processing to which the UK GDPR applies by virtue of Article 3 of the UK GDPR." |
+| S40 | Defamation Act 2013 ss. 1–2 — https://www.legislation.gov.uk/ukpga/2013/26/section/1 · /section/2 | Quoted in 4.4 |
+| S41 | Business Protection from Misleading Marketing Regulations 2008 reg. 3 — https://www.legislation.gov.uk/uksi/2008/1276/regulation/3 | "3.—(1) Advertising which is misleading is prohibited." |
+
+### ICO (Information Commission) guidance
+
+| ID | Source | Key quotation(s) |
+|---|---|---|
+| S3 | Business-to-business marketing — https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/business-to-business-marketing/ | Quoted throughout sections 1–2. Banner: "Due to changes made by the Data (Use and Access) Act, this guidance is under review and may be subject to change." |
+| S4 | Guide to PECR: Electronic mail marketing — https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guide-to-pecr/electronic-and-telephone-marketing/electronic-mail-marketing/ | "You can email or text any corporate body (a company, Scottish partnership, limited liability partnership or government body). However, it is good practice – and good business sense – to keep a 'do not email or text' list of any businesses that object or opt out" |
+| S5 | Direct marketing using electronic mail: How do we comply with the PECR electronic mail marketing rules? — https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guidance-on-direct-marketing-using-electronic-mail/how-do-we-comply-with-the-pecr-electronic-mail-marketing-rules/ | "You can send unsolicited electronic mail marketing to corporate subscribers without consent or a soft opt-in. You must not disguise or hide your identity in messages to either type of subscriber. You must provide a valid contact address for recipients to opt out or unsubscribe." · "However, using a webmail service or bulk-email platform does not normally make that service responsible… You remain responsible for complying with PECR." |
+| S6 | Same guidance: What else do we need to consider? — …/guidance-on-direct-marketing-using-electronic-mail/what-else-do-we-need-to-consider/ | "20 August 2025 - The Data Use and Access Act added the definition of direct marketing in the DPA into PECR" · tracking-pixel text quoted in 1.2 · "You should keep a 'do not contact' or suppression list" |
+| S6a | Same guidance: Key concepts — …/guidance-on-direct-marketing-using-electronic-mail/key-concepts-for-direct-marketing-using-electronic-mail/ | "individual subscribers (people, sole traders, ordinary partnerships); and corporate subscribers (organisations with their own legal personality, for example limited companies, LLPs and Scottish partnerships)" · "They apply even if you only hold a generic or role-based address." |
+| S8 | Legitimate interests: When can we rely on legitimate interests? — https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/lawful-basis/legitimate-interests/when-can-we-rely-on-legitimate-interests/ | Quoted in 2.2–2.3 |
+| S16 | The Data (Use and Access) Act 2025: what does it mean for organisations? — https://ico.org.uk/about-the-ico/what-we-do/legislation-we-cover/data-use-and-access-act-2025/the-data-use-and-access-act-2025-what-does-it-mean-for-organisations/ | "19 June 2026 - We have updated this guidance to reflect that all data protection provisions in the Data (Use and Access) Act 2025 are now in force." · "it clarifies that direct marketing can be a legitimate interest" |
+| S17 | Right to be informed: When should we provide privacy information? — https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/the-right-to-be-informed/when-should-we-provide-privacy-information/ | Quoted in 2.4 |
+| S24 | Knowledge hub: Territorial scope (PDF) — https://ico.org.uk/media2/migrated/4031113/ic-327905-y2y5-knowledge-hub-territorial-scope.pdf | "Organisations who don't have a UK establishment but who target people in the UK … generally need to appoint someone to act as their representative in the UK… There is an exemption for public authorities, and for occasional low-risk processing." (undated; appears to be internal ICO guidance released through its disclosure process) |
+| S32b | Data protection fee: legal definitions — https://ico.org.uk/for-organisations/data-protection-fee/legal-definitions-fees/ | "Data subject: The identified or identifiable living individual to whom personal data relates." · "Only controllers need to pay the data protection fee." |
+| S33 | Data protection fee — https://ico.org.uk/for-organisations/data-protection-fee/data-protection-fee/ and FAQs — https://ico.org.uk/for-organisations/data-protection-fee/faqs-data-protection-fee-payment-and-online-registration/ | "You have a maximum turnover of £632,000 for your financial year or no more than 10 members of staff. The fee for tier 1 is £52." · "Fines range from £400 to £4,000." · "The cost is reduced by £5 if you pay by direct debit." |
+| S35 | Disclosure log IC-389257-H7R0 — https://cy.ico.org.uk/about-the-ico/our-information/disclosure-log/2025/05/ic-389257-h7r0/ | "Date 28 May 2025 … Outcome Information withheld. Request for copies of internal guidance etc on whether data controllers established outside of the UK have to pay the data protection fee." |
+| S70 | News, 20 January 2026: Fines of £225,000 for nuisance marketing messages — https://ico.org.uk/about-the-ico/media-centre/news-and-blogs/2026/01/fines-of-225-000-for-nuisance-marketing-messages | "ZMLUK Limited … has been fined £105,000 for sending over 67 million marketing emails between January and July 2023 without valid consent." · "Public reporting plays a crucial role in our work" |
+
+### Open data, licensing, Companies House
+
+| ID | Source | Key quotation(s) |
+|---|---|---|
+| S20 | Open Government Licence v3.0 — https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/ | Quoted in 2.7, 4.1, 4.2 |
+| S21 | The National Archives: Open Government Licence (UK Government Licensing Framework) — https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/open-government-licence/ | "The OGL does not cover the use of personal data. Anyone re-using personal data must comply with the Data Protection Principles set out in Article 5 of the UK GDPR." · "The OGL requires you to attribute the information provider and source of the information." |
+| S22 | Find a Tender supplier-information privacy notice — https://supplier-information.find-tender.service.gov.uk/privacy-notice?language=en_GB | "The purpose of FTS is to publish procurement notices and related information as required by the Procurement Act 2023 and Procurement Regulations 2024" |
+| S38 | Find a Tender: Data and API documentation — https://www.find-tender.service.gov.uk/Developer/Documentation | "The UK is committed to open contracting. Notice data is available under the Open Government Licence." · "You can download notices in Open Contracting Data Standard (OCDS) JSON format using our API." |
+| S39 | Find a Tender: Terms and conditions ("Last updated 24 February 2025") — https://www.find-tender.service.gov.uk/Home/TermsAndConditions | Linking, content, disclaimer and removal clauses quoted in section 4 · "We make most of the content on Find a Tender available through feeds for other websites and applications to use." |
+| S37 | Companies House: URI customer guide (PDF, v1.1) — https://assets.publishing.service.gov.uk/media/5d08c0f340f0b6094a379078/uniformResourceIdentifiersCustomerGuide.pdf | Prefix table quoted in 1.3 |
+| S42 | Companies House data products — https://www.gov.uk/guidance/companies-house-data-products | Quoted in 4.7 |
+| S43 | Companies House API developer guidelines — https://developer.company-information.service.gov.uk/developer-guidelines | Quoted in 4.7 |
+
+### Representatives, EDPB
+
+| ID | Source | Key quotation(s) |
+|---|---|---|
+| S26 | EDPB Guidelines 3/2018 on the territorial scope of the GDPR (Version 2.1, adopted 12 November 2019) — https://www.edpb.europa.eu/sites/default/files/files/file1/edpb_guidelines_3_2018_territorial_scope_after_public_consultation_en_1.pdf | Quoted in 3.2 and 3.6. Not binding in the UK; the ICO cites the same test |
+| S27 | Prighter, UK GDPR Representation (page dated 2026-10-14) — https://prighter.com/privacy-representation/uk-gdpr.md | "Small — €79/mo — €71/mo (€852/yr)" · "Growth — €39/mo — €35/mo (€420/yr)" |
+| S28 | DPO Consulting, GDPR Representative Basic — https://www.dpo-consulting.com/gdpr-representative-basic | "€49 per month excluding VAT, billed monthly" |
+| S29 | GDPR Local rate card — https://gdprlocal.com/terms/rate-card/ | "UK Representative (Art. 27 UK GDPR) £99 [<10 FTE] £149 £199 £350" — monthly fees |
+| S30 | VeraSafe UK Data Protection Representative Program — https://info.verasafe.com/uk-data-protection-representative-program | "$0 to $25 million — $1,200/year" |
+| S31 | IT Governance, GDPR UK Representative — https://www.itgovernance.eu/shop/product/gdpr-uk-representative | "Our service operates on an annual subscription basis" (price from search result only) |
+| S36 | Osborne Clarke, ICO fees for data controllers (2018) — https://www.osborneclarke.com/insights/update-to-uk-information-commissioners-office-fees-for-data-controllers-when-and-what-to-pay | "There is no separate jurisdictional ambit to this requirement. Consequently … data controllers outside the UK would be required to pay where either: they process personal data in the context of an establishment in the UK; or … the processing relates to … the offering of goods or services to data subjects in the UK" (secondary source) |
+
+### Paddle
+
+| ID | Source | Key quotation(s) |
+|---|---|---|
+| S44 | Acceptable Use Policy ("Last Updated 13 April 2026") — https://www.paddle.com/help/start/intro-to-paddle/what-am-i-not-allowed-to-sell-on-paddle | Quoted in 5.1 |
+| S45 | Paddle Master Services Agreement ("Last updated: 6 October 2026") — https://www.paddle.com/legal/terms | Quoted in 5.1 (definitions; cl. 11.1(xi), (xv); 14.2; 16.3; 17.2) |
+| S46 | Retain and Metrics Acceptable Use Policy ("Last Updated: 1 February 2023") — https://www.paddle.com/legal/retain-and-metrics-acceptable-use-policy | "You may not use our Services to directly or indirectly send … (a) unsolicited email ('Spam' or 'Spamming') in violation of the CAN SPAM Act of 2003 or any Applicable Data Protection Laws; (b) an email to an address obtained via internet harvesting methods or otherwise without the consent of the contactee (e.g. scraping or harvesting)" |
+| S47 | Which countries are supported by Paddle? — https://www.paddle.com/help/start/intro-to-paddle/which-countries-are-supported-by-paddle | "Paddle works with software businesses anywhere in the world with the exception of the unsupported countries listed below." |
+
+### Mailbox providers and tools
+
+| ID | Source | Key quotation(s) |
+|---|---|---|
+| S48 | Google: Email sender guidelines — https://support.google.com/a/answer/81126?hl=en | Quoted in 6.1, 6.2, 6.6 |
+| S49 | Google: Email sender guidelines FAQ — https://support.google.com/a/answer/14229414?hl=en | "The Email sender guidelines don't apply to messages sent to Google Workspace accounts. Sender requirements and Google enforcement apply only when sending email to personal Gmail accounts." · "Bulk sender status doesn't have an expiration date." |
+| S50 | Yahoo Sender Hub: Sender Requirements & Recommendations — https://senders.yahooinc.com/best-practices/ | Quoted in 6.1 and 6.5 · "Don't purchase mailing lists" |
+| S51 | Microsoft: Strengthening Email Ecosystem — Outlook's New Requirements for High-Volume Senders — https://techcommunity.microsoft.com/blog/microsoftdefenderforoffice365blog/strengthening-email-ecosystem-outlook%E2%80%99s-new-requirements-for-high%E2%80%90volume-senders/4399730 | Quoted in 6.1 |
+| S52 | Google Workspace Acceptable Use Policy ("Last modified: October 12, 2026") — https://workspace.google.com/terms/use_policy.html | Quoted in 6.2 |
+| S53 | Microsoft Learn: Exchange Online limits — https://learn.microsoft.com/en-us/office365/servicedescriptions/exchange-online-service-description/exchange-online-limits | Quoted in 6.2–6.3 |
+| S54 | Google Workspace: Gmail sending limits — https://support.google.com/a/answer/166852?hl=en | Quoted in 6.3 |
+| S55 | Microsoft: Exchange Online to introduce External Recipient Rate Limit ("Updated Jan 06, 2026") — https://techcommunity.microsoft.com/blog/exchange/exchange-online-to-introduce-external-recipient-rate-limit/4114733 | Quoted in 6.3 |
+| S56 | Vendor blogs returned by one web search on cold-email limits, e.g. https://leadhaste.com/blog/cold-email-sending-limits-2026 · https://www.unifygtm.com/explore/cold-email-daily-sending-limits-deliverability · https://salesforge.ai/blog/best-practices-for-domain-warm-up | Search summary only; pages not individually read. Secondary, commercially interested sources |
+| S57 | Smartlead pricing — https://www.smartlead.ai/pricing | "Base $32 /month … 2,000 contacts, 6,000 Email sends" · "Pro $78 /month … 30,000 contacts, 90,000 Email sends" · "Google Provider … $13/domain/year, $4.5/mailbox/month" |
+| S58 | Instantly pricing — https://instantly.ai/pricing | "Growth $47/monthly … 1000 Uploaded Contacts, 5000 Emails Monthly" · "Hypergrowth $107/monthly … 25 000 Uploaded Contacts, 125 000 Emails Monthly" |
+| S59 | lemlist pricing — https://www.lemlist.com/pricing | "Email … $69 / $55 / MONTH … 50,000 emails/mo … Unlimited users & Email senders" |
+
+### Other jurisdictions
+
+| ID | Source | Key quotation(s) |
+|---|---|---|
+| S60 | USA: 15 U.S.C. § 7704 (CAN-SPAM) — https://www.law.cornell.edu/uscode/text/15/7704 | Quoted in 7.2 and 9 |
+| S61 | Canada: CASL (S.C. 2010, c. 23) ss. 6, 10(9), 20(4) — https://laws-lois.justice.gc.ca/eng/acts/E-1.6/page-2.html · /page-3.html; Electronic Commerce Protection Regulations (CRTC) SOR/2012-36 — https://laws-lois.justice.gc.ca/eng/regulations/SOR-2012-36/FullText.html | Quoted in 9 |
+| S62 | Ireland: S.I. No. 336/2011 reg. 13 — https://www.irishstatutebook.ie/eli/2011/si/336/made/en/print | Quoted in 9 |
+| S63 | Australia: Spam Act 2003, compilation of 10 March 2016, Sch. 2 cl. 4 and Part 3 — https://www.legislation.gov.au/C2004A01214/2016-03-10/2016-03-10/text/original/epub/OEBPS/document_1/document_1.html | Quoted in 9 |
+| S64 | New Zealand: Unsolicited Electronic Messages Act 2007 ss. 4, 9–11 — https://www.legislation.govt.nz/act/public/2007/0007/latest/whole.html | Quoted in 9 |
+| S65 | Canada: PIPEDA ss. 4.01 and 7.1 — https://laws-lois.justice.gc.ca/eng/acts/P-8.6/section-4.01.html · /section-7.1.html | Quoted in 9 |
+| S66 | USA: 16 CFR § 1.98 (current eCFR text; also at Cornell LII) — https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-16?part=1&section=1.98 · https://www.law.cornell.edu/cfr/text/16/1.98 | "(d) Section 5(m)(1)(A) of the FTC Act, 15 U.S.C. 45(m)(1)(A)—$53,088" |
+| S67 | France: CNIL, La prospection commerciale par courrier électronique (10 juin 2026) — https://www.cnil.fr/fr/la-prospection-commerciale-par-courrier-electronique | Quoted in 9 |
+| S68 | Sweden: Marknadsföringslag (2008:486) §§ 19–21 — https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/marknadsforingslag-2008486_sfs-2008-486/ | "19 § En näringsidkare får vid marknadsföring till en fysisk person använda elektronisk post … bara om den fysiska personen har samtyckt till det på förhand." |
+| S69 | Finland: Act on Electronic Communications Services 917/2014 ss. 200, 202, 203 (unofficial translation, Finlex) — https://www.finlex.fi/en/legislation/translations/2014/eng/917 | Quoted in 9 |

@@ -2,11 +2,12 @@ import { UsageMeter } from "@/components/app/usage-meter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { UsageSummary } from "@/server/usage";
 
-const usd = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+/** The AI allowance is tracked as an estimated cost; people only need to know how much of it is used. */
+const aiPercent = (spent: number, limit: number) => (limit <= 0 ? 100 : Math.min(100, Math.round((spent / limit) * 100)));
 
 /** Usage vs. plan limits. Rendered on /app/usage and inside Settings → Billing. */
 export function UsagePanel({ usage, planName }: { usage: UsageSummary; planName: string }) {
-  const resets = usage.resetsAt.toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "UTC" });
+  const resets = usage.resetsAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
   return (
     <Card data-testid="usage-panel">
       <CardHeader>
@@ -34,7 +35,13 @@ export function UsagePanel({ usage, planName }: { usage: UsageSummary; planName:
             limit={metric.limit}
           />
         ))}
-        <UsageMeter label="AI allowance this month" used={usage.ai.spentUsd} limit={usage.ai.limitUsd} format={usd} hint="Estimated cost of AI-assisted features." />
+        <UsageMeter
+          label="AI fair-use allowance this month"
+          used={aiPercent(usage.ai.spentUsd, usage.ai.limitUsd)}
+          limit={100}
+          valueText={`${aiPercent(usage.ai.spentUsd, usage.ai.limitUsd)}% used`}
+          hint="Reading tender packs, drafting and marking all count towards it. It is sized well above what the bids in your plan need."
+        />
       </CardContent>
     </Card>
   );

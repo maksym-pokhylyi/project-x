@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AccountDangerZone } from "@/components/app/danger-zone";
 import { PageHeader } from "@/components/app/page-header";
 import { ProfileForm } from "@/components/app/profile-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,8 +10,8 @@ export const metadata: Metadata = { title: "Profile" };
 export default async function ProfilePage() {
   const ctx = await requireOrgForPage();
   return (
-    <div className="space-y-6">
-      <PageHeader title="Profile" description="Your personal account details." />
+    <>
+      <PageHeader level={2} title="Profile" description="Your personal account details." />
       <Card>
         <CardHeader>
           <CardTitle>Personal information</CardTitle>
@@ -20,6 +21,15 @@ export default async function ProfilePage() {
           <ProfileForm name={ctx.user.name} email={ctx.user.email} />
         </CardContent>
       </Card>
-    </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Delete account</CardTitle>
+          <CardDescription>Remove your account and personal data.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AccountDangerZone email={ctx.user.email} />
+        </CardContent>
+      </Card>
+    </>
   );
 }

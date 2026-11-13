@@ -1,12 +1,9 @@
 import "server-only";
-import { sql } from "drizzle-orm";
-import { db } from "@/db";
+import { reconcileSubscriptions } from "@/lib/billing/reconcile";
 import { deliverOutboxEmail } from "@/lib/email/deliver";
 import { log } from "@/lib/logger";
-import { purgeExpiredRateLimits } from "@/lib/rate-limit";
-import { processBidJob } from "@/features/bids/server/pipeline/runner";
-import { processLibraryDocJob } from "@/features/library/server/process";
-import { purgeFinishedJobs, type JobPayloads, type JobType } from "./queue";
+import { runMaintenance } from "@/lib/maintenance";
+import type { JobPayloads, JobType } from "./queue";
 
 export type JobContext = { jobId: string; attempt: number };
 export type JobHandler<T extends JobType> = (payload: JobPayloads[T], context: JobContext) => Promise<void>;
@@ -23,19 +20,32 @@ export const jobHandlers: { [T in JobType]: JobHandler<T> } = {
     await deliverOutboxEmail(outboxId);
   },
 
-  "bids.process": processBidJob,
+  "billing.reconcile": async () => {
+    const summary = await reconcileSubscriptions();
+    if (summary.skipped) return; // no PADDLE_API_KEY: nothing to compare against
+    log.info("billing.reconcile done", summary);
+  },
 
-  "library.process": processLibraryDocJob,
+  "bids.process": async (payload, context) => {
+    // Imported lazily, like the other feature handlers, so the registry stays light.
+    const { processBidJob } = await import("@/features/bids/server/pipeline/runner");
+    await processBidJob(payload, context);
+  },
+
+  "library.process": async (payload, context) => {
+    const { processLibraryDocJob } = await import("@/features/library/server/process");
+    await processLibraryDocJob(payload, context);
+  },
 
   "maintenance.cleanup": async () => {
-    const rateLimits = await purgeExpiredRateLimits();
-    const finishedJobs = await purgeFinishedJobs(14);
-    // Unsent bodies of old failed e-mails still contain one-time links: drop them after 7 days.
-    const outboxBodies = await db.execute(sql`
-      update email_outbox set html = null, text = null
-      where created_at < now() - interval '7 days' and (html is not null or text is not null)
-      returning 1
-    `);
-    log.info("maintenance.cleanup done", { rateLimits, finishedJobs, outboxBodies: outboxBodies.length });
+    // Retention for every operational table: see src/config/retention.ts.
+    const summary = await runMaintenance();
+    log.info("maintenance.cleanup done", summary);
+  },
+
+  "procurement.backfill": async (payload) => {
+    // Imported lazily so the job registry does not pull the ingestion module into every bundle.
+    const { runBackfillSlice } = await import("@/features/procurement/ingest/run");
+    await runBackfillSlice(payload);
   },
 };

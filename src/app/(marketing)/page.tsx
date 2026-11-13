@@ -1,139 +1,198 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { landingIcons } from "@/components/marketing/icons";
-import { Button } from "@/components/ui/button";
+import { PlanTick } from "@/components/billing/pricing-table";
+import { CompanySearch } from "@/components/marketing/company-search";
+import { CtaBand, IndependenceBand } from "@/components/marketing/cta-band";
+import { Faq } from "@/components/marketing/faq";
+import { JsonLd, faqJsonLd, softwareApplicationJsonLd } from "@/components/marketing/json-ld";
+import { MarketingPricing } from "@/components/marketing/marketing-pricing";
+import { Eyebrow, Point, Section, SectionHeading } from "@/components/marketing/section";
+import { DocumentExcerpt, ProofBridge, RequirementCard } from "@/components/marketing/visuals/proof-visuals";
+import { stepVisuals } from "@/components/marketing/visuals/step-visuals";
+import { SupplierPreview } from "@/components/marketing/visuals/supplier-preview";
 import { landing } from "@/config/landing";
-import { PLANS, PLAN_KEYS, formatPrice } from "@/config/plans";
+import { site } from "@/config/site";
+import { appUrl } from "@/env";
 
-/** Placeholder landing page. All copy lives in src/config/landing.ts. */
+export const metadata: Metadata = {
+  title: { absolute: `${site.name}: know which public contracts are worth your time` },
+  description: site.description,
+  alternates: { canonical: "/" },
+};
+
+/** The landing page, built to docs/design/handoff/Landing-1440 and Landing-390. Copy: src/config/landing.ts. */
 export default function LandingPage() {
-  const { hero, problem, howItWorks, features, pricingTeaser, faq, finalCta } = landing;
+  const { hero, strip, how, proof, pricing, straightAnswers, questions } = landing;
+
   return (
     <>
-      <section className="mx-auto max-w-6xl px-4 pb-16 pt-14 text-center sm:pt-20">
-        <p className="text-sm font-medium text-muted-foreground">{hero.eyebrow}</p>
-        <h1 className="mx-auto mt-3 max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-5xl">{hero.title}</h1>
-        <p className="mx-auto mt-4 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">{hero.subtitle}</p>
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button asChild size="lg" className="w-full sm:w-auto">
-            <Link href={hero.primaryCta.href}>{hero.primaryCta.label}</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-            <Link href={hero.secondaryCta.href}>{hero.secondaryCta.label}</Link>
-          </Button>
-        </div>
-        <p className="mt-3 text-xs text-muted-foreground">{hero.note}</p>
-      </section>
+      <JsonLd data={softwareApplicationJsonLd(appUrl)} />
+      <JsonLd data={faqJsonLd([...questions.items])} />
 
-      <section aria-labelledby="problem-title" className="border-y bg-muted/30">
-        <div className="mx-auto max-w-6xl px-4 py-14">
-          <h2 id="problem-title" className="text-center text-2xl font-semibold tracking-tight">
-            {problem.title}
-          </h2>
-          <ul className="mt-8 grid gap-4 md:grid-cols-3">
-            {problem.points.map((point) => (
-              <li key={point.title} className="rounded-xl border bg-card p-5">
-                <h3 className="font-semibold">{point.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{point.body}</p>
-              </li>
-            ))}
-          </ul>
+      {/* Hero ---------------------------------------------------------------------------- */}
+      <section aria-labelledby="hero-title">
+        <div className="container-content grid gap-y-9 pt-7 pb-10 md:gap-y-10 md:pt-14 md:pb-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:items-center lg:gap-x-12 lg:pt-16 lg:pb-[5.5rem] xl:grid-cols-[33.75rem_minmax(0,1fr)] xl:gap-x-14">
+          <div className="flex max-w-[38rem] flex-col gap-5 md:gap-6">
+            <Eyebrow>{hero.eyebrow}</Eyebrow>
+            <h1 id="hero-title" className="type-hero text-ink">
+              {hero.titleLead} <span className="text-brand">— {hero.titleRest}</span>
+            </h1>
+            <p className="type-lead text-ink">
+              <span className="sm:hidden">{hero.leadShort}</span>
+              <span className="hidden sm:inline">{hero.lead}</span>
+            </p>
+            <CompanySearch id="hero-company" className="mt-1 md:mt-2">
+              <p className="text-13 text-ink-2">
+                {hero.note} {hero.sampleLink.before}
+                <Link href={hero.sampleLink.href} className="link">
+                  {hero.sampleLink.label}
+                </Link>
+                .
+              </p>
+            </CompanySearch>
+          </div>
+          <SupplierPreview className="w-full max-w-[38rem] lg:max-w-none" />
         </div>
       </section>
 
-      <section aria-labelledby="how-title" className="mx-auto max-w-6xl px-4 py-14">
-        <h2 id="how-title" className="text-center text-2xl font-semibold tracking-tight">
-          {howItWorks.title}
-        </h2>
-        <ol className="mt-8 grid gap-6 md:grid-cols-3">
-          {howItWorks.steps.map((step, index) => (
-            <li key={step.title} className="flex gap-4">
-              <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                {index + 1}
-              </span>
-              <div>
-                <h3 className="font-semibold">{step.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{step.body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section aria-labelledby="features-title" className="border-y bg-muted/30">
-        <div className="mx-auto max-w-6xl px-4 py-14">
-          <h2 id="features-title" className="text-center text-2xl font-semibold tracking-tight">
-            {features.title}
-          </h2>
-          <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-muted-foreground">{features.subtitle}</p>
-          <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {features.items.map((item) => {
-              const Icon = landingIcons[item.icon];
-              return (
-                <li key={item.title} className="rounded-xl border bg-card p-5">
-                  <Icon aria-hidden className="size-5 text-muted-foreground" />
-                  <h3 className="mt-3 font-semibold">{item.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </section>
-
-      <section aria-labelledby="pricing-title" className="mx-auto max-w-6xl px-4 py-14 text-center">
-        <h2 id="pricing-title" className="text-2xl font-semibold tracking-tight">
-          {pricingTeaser.title}
-        </h2>
-        <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">{pricingTeaser.subtitle}</p>
-        <ul className="mx-auto mt-8 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
-          {PLAN_KEYS.map((key) => {
-            const plan = PLANS[key];
-            return (
-              <li key={key} className="rounded-xl border bg-card p-4">
-                <p className="text-sm font-medium">{plan.name}</p>
-                <p className="mt-1 text-xl font-semibold">{plan.prices ? formatPrice(plan.prices.month) : "$0"}</p>
-                <p className="text-xs text-muted-foreground">per month</p>
-              </li>
-            );
-          })}
-        </ul>
-        <Button asChild variant="outline" className="mt-6">
-          <Link href={pricingTeaser.cta.href}>{pricingTeaser.cta.label}</Link>
-        </Button>
-      </section>
-
-      <section aria-labelledby="faq-title" className="border-t bg-muted/30">
-        <div className="mx-auto max-w-3xl px-4 py-14">
-          <h2 id="faq-title" className="text-center text-2xl font-semibold tracking-tight">
-            {faq.title}
-          </h2>
-          <div className="mt-8 divide-y rounded-xl border bg-card">
-            {faq.items.map((item) => (
-              <details key={item.question} className="group p-4">
-                <summary className="cursor-pointer list-none font-medium marker:hidden">
-                  <span className="flex items-center justify-between gap-4">
-                    {item.question}
-                    <span aria-hidden className="text-muted-foreground transition-transform group-open:rotate-45">
-                      +
-                    </span>
-                  </span>
-                </summary>
-                <p className="mt-2 text-sm text-muted-foreground">{item.answer}</p>
-              </details>
-            ))}
+      {/* Open data and independence ------------------------------------------------------ */}
+      <section aria-label="About the data">
+        <div className="container-content">
+          <div className="flex flex-wrap justify-between gap-x-12 gap-y-2 border-y border-line py-5 text-sm leading-[1.3125rem] text-ink">
+            <p className="max-w-[40rem] min-w-0 flex-[1_1_24rem]">
+              <strong className="font-semibold">{strip.data.strong}</strong> {strip.data.text}
+            </p>
+            <p className="lg:shrink-0">
+              <strong className="font-semibold">{strip.independent.strong}</strong> {strip.independent.text}{" "}
+              <a href={strip.independent.link.href} className="link">
+                {strip.independent.link.label}
+              </a>
+            </p>
           </div>
         </div>
       </section>
 
-      <section aria-labelledby="cta-title" className="mx-auto max-w-6xl px-4 py-16 text-center">
-        <h2 id="cta-title" className="text-2xl font-semibold tracking-tight">
-          {finalCta.title}
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">{finalCta.subtitle}</p>
-        <Button asChild size="lg" className="mt-6">
-          <Link href={finalCta.cta.href}>{finalCta.cta.label}</Link>
-        </Button>
-      </section>
+      {/* How it works -------------------------------------------------------------------- */}
+      <Section id="how" labelledBy="how-title" containerClassName="flex flex-col gap-8 md:gap-12">
+        <SectionHeading id="how-title" eyebrow={how.eyebrow} title={how.title} className="max-w-[30rem]" />
+        <ol className="grid gap-y-8 md:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
+          {how.steps.map((step, index) => {
+            const visual = stepVisuals[index]!;
+            return (
+              <li
+                key={step.title}
+                className="flex flex-col border-t border-line pt-6 md:grid md:grid-cols-2 md:items-center md:gap-x-8 md:border-t-0 md:pt-0 lg:flex lg:items-stretch"
+              >
+                <div className="hidden md:block">{visual.card}</div>
+                <div className="lg:mt-5">
+                  <p className="font-mono text-13 text-ink-2">{String(index + 1).padStart(2, "0")}</p>
+                  <h3 className="type-h3 mt-2 text-ink">{step.title}</h3>
+                  <p className="type-reading mt-2 text-ink">{step.body}</p>
+                </div>
+                <div className="mt-4 md:hidden">{visual.chip}</div>
+              </li>
+            );
+          })}
+        </ol>
+      </Section>
+
+      {/* Proof: every requirement, quoted and cited -------------------------------------- */}
+      <Section id="proof" labelledBy="proof-title" tone="deep" containerClassName="flex flex-col gap-9 md:gap-14">
+        <SectionHeading id="proof-title" eyebrow={proof.eyebrow} title={proof.title} lead={proof.lead} />
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-10">
+          <DocumentExcerpt className="min-w-0 lg:flex-[1_1_27.5rem]" />
+          <ProofBridge className="lg:hidden">{proof.bridge}</ProofBridge>
+          <RequirementCard className="min-w-0 lg:flex-[1.25_1_31.25rem]" />
+        </div>
+
+        <ul className="divide-y divide-line border-y border-line md:hidden">
+          {proof.points.map((point) => (
+            <li key={point.title} className="flex gap-2.5 py-3.5">
+              <PlanTick className="mt-1 text-brand" />
+              <div>
+                <h3 className="font-sans text-15 font-semibold text-ink">{point.title}</h3>
+                <p className="mt-0.5 text-sm leading-[1.3125rem] text-ink">{point.short}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <ul className="hidden gap-x-8 gap-y-7 md:grid md:grid-cols-3">
+          {proof.points.map((point) => (
+            <li key={point.title}>
+              <Point title={point.title}>{point.body}</Point>
+            </li>
+          ))}
+        </ul>
+
+        <p className="text-15 text-ink">
+          <Link href={proof.sampleLink.href} className="link font-medium">
+            {proof.sampleLink.label}
+          </Link>
+          <span className="text-ink-2"> · {proof.note}</span>
+        </p>
+      </Section>
+
+      {/* Pricing ------------------------------------------------------------------------- */}
+      <Section id="pricing" labelledBy="pricing-title" containerClassName="flex flex-col gap-8 md:gap-10">
+        <SectionHeading id="pricing-title" eyebrow={pricing.eyebrow} title={pricing.title} lead={pricing.lead} />
+        <MarketingPricing
+          toggle={false}
+          smallPrint={
+            <>
+              {pricing.smallPrint}{" "}
+              <Link href={pricing.compare.href} className="link">
+                {pricing.compare.label}
+              </Link>
+            </>
+          }
+        />
+      </Section>
+
+      {/* Straight answers ---------------------------------------------------------------- */}
+      <Section id="straight-answers" labelledBy="answers-title" tone="deep" containerClassName="flex flex-wrap gap-x-20 gap-y-9">
+        <div className="flex min-w-0 flex-[1_1_18.75rem] flex-col gap-3">
+          <Eyebrow>{straightAnswers.eyebrow}</Eyebrow>
+          <h2 id="answers-title" className="type-h2 text-ink">
+            {straightAnswers.title}
+          </h2>
+          <p className="type-reading mt-1 text-ink">{straightAnswers.lead}</p>
+        </div>
+        <dl className="grid min-w-0 flex-[2_1_35rem] gap-x-8 gap-y-7 sm:grid-cols-2">
+          {straightAnswers.items.map((item) => (
+            <div key={item.question} className="flex flex-col gap-1.5 border-t-2 border-ink pt-[1.125rem]">
+              <dt className="text-17 font-semibold text-ink">{item.question}</dt>
+              <dd className="text-15 leading-[1.45rem] text-ink">{item.answer}</dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
+
+      {/* Questions ----------------------------------------------------------------------- */}
+      <Section
+        id="questions"
+        labelledBy="questions-title"
+        tone="surface"
+        containerClassName="flex flex-wrap gap-x-20 gap-y-8"
+        className="border-t-0"
+      >
+        <div className="flex min-w-0 flex-[1_1_18.75rem] flex-col gap-3">
+          <Eyebrow>{questions.eyebrow}</Eyebrow>
+          <h2 id="questions-title" className="type-h2 text-ink">
+            {questions.title}
+          </h2>
+          <p className="type-reading mt-1 text-ink-2">
+            {questions.contact.before}
+            <a href={`mailto:${site.supportEmail}`}>{site.supportEmail}</a>
+            {questions.contact.after}
+          </p>
+        </div>
+        <div className="min-w-0 flex-[2_1_35rem]">
+          <Faq items={questions.items} openFirst />
+        </div>
+      </Section>
+
+      <CtaBand id="final-cta-title" />
+      <IndependenceBand />
     </>
   );
 }

@@ -1,0 +1,86 @@
+{
+ "buyerID": [],
+ "id": "085897-2026",
+ "tag": [
+  "contractTermination"
+ ],
+ "date": "2026-09-10T13:41:45+01:00",
+ "initiationType": "tender",
+ "ocid": "ocds-h6vhtk-06f6d8",
+ "parties": [
+  {
+   "name": "London Borough of Islington",
+   "id": "GB-PPON-PBMD-2513-CWJJ",
+   "identifier": {
+    "scheme": "GB-PPON",
+    "id": "PBMD-2513-CWJJ"
+   },
+   "address": {
+    "streetAddress": "Islington Town Hall, Upper Street, Islington",
+    "locality": "London",
+    "postalCode": "N1 2UD",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI43"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@islington.gov.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "url": "https://www.islington.gov.uk",
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicAuthoritySubCentralGovernment",
+      "description": "Public authority - sub-central government"
+     }
+    ]
+   }
+  }
+ ],
+ "tender": {
+  "id": "ocds-h6vhtk-06f6d8",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "2627-0047 Atrium works-Prior Weston Primary School"
+ },
+ "contracts": [
+  {
+   "id": "1",
+   "awardID": "1",
+   "status": "terminated",
+   "terminationRationaleClassifications": [
+    {
+     "id": "contractCompleted"
+    }
+   ],
+   "implementation": {
+    "endDate": "2026-08-11T00:00:00+01:00",
+    "finalValue": {
+     "amountGross": 179988,
+     "amount": 149990,
+     "currency": "GBP"
+    }
+   },
+   "statusDetails": null,
+   "documents": [
+    {
+     "id": "085897-2026",
+     "documentType": "contractTerminationNotice",
+     "noticeType": "UK11",
+     "description": "Contract termination notice on Find a Tender",
+     "url": "https://www.find-tender.service.gov.uk/Notice/085897-2026",
+     "datePublished": "2026-09-10T13:41:45+01:00",
+     "format": "text/html"
+    }
+   ]
+  }
+ ],
+ "language": "en"
+}

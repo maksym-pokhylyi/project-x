@@ -14,9 +14,14 @@ import { renderEmail, type EmailTemplate } from "./templates";
  * together with an `email.send` job in ONE transaction, then delivered right after the
  * response (and retried with backoff by the cron worker if that fails).
  *
- * Without it: the message is only stored (status "outbox") and a one-line notice is
- * logged. Read it at /dev/outbox — that is how sign-up, reset and invite flows are
- * exercised locally and in e2e tests.
+ * Without it, where dev tools are on (local development, tests, e2e): the message is only
+ * stored (status "outbox") and a one-line notice is logged. Read it at /dev/outbox — that
+ * is how sign-up, reset and invite flows are exercised locally and in e2e tests.
+ *
+ * With neither (a production build that cannot deliver mail): nothing can reach the
+ * recipient, so the row is stored as "failed" WITHOUT its body (no one-time links at rest)
+ * and an error is logged. The flows that depend on e-mail are disabled upstream
+ * (see `features.signUpEnabled` / `passwordResetEnabled`).
  *
  * Returns the outbox row id.
  */
@@ -24,7 +29,16 @@ export async function sendEmail(to: string, template: EmailTemplate): Promise<st
   const rendered = await renderEmail(template);
   const recipient = to.trim().toLowerCase();
 
-  if (!features.emailConfigured) {
+  if (features.mailDelivery === "none") {
+    const [row] = await db
+      .insert(emailOutbox)
+      .values({ toEmail: recipient, subject: rendered.subject, template: template.name, html: null, text: null, status: "failed", error: "no e-mail provider configured" })
+      .returning({ id: emailOutbox.id });
+    log.error("[email] NOT delivered: RESEND_API_KEY / EMAIL_FROM are not configured", { template: template.name });
+    return row!.id;
+  }
+
+  if (features.mailDelivery === "outbox") {
     const [row] = await db
       .insert(emailOutbox)
       .values({ toEmail: recipient, subject: rendered.subject, template: template.name, html: rendered.html, text: rendered.text, status: "outbox" })

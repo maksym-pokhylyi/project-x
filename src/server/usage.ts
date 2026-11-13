@@ -1,7 +1,7 @@
 import "server-only";
 import { QUOTA_METRICS, QUOTA_METRIC_KEYS, type QuotaMetric } from "@/config/plans";
 import { getAiSpendUsd, startOfUtcMonth } from "@/lib/ai";
-import { getUsage, quotaPeriodStart } from "@/lib/billing/quota";
+import { getUsage } from "@/lib/billing/quota";
 import { getSeatUsage, type SeatUsage } from "./members";
 import type { OrgContext } from "./session";
 
@@ -46,5 +46,3 @@ export async function getUsageSummary(ctx: OrgContext, now: Date = new Date()): 
     resetsAt: new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 1)),
   };
 }
-
-export { quotaPeriodStart };

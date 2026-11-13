@@ -1,0 +1,528 @@
+{
+ "id": "083799-2026",
+ "tag": [
+  "tender"
+ ],
+ "date": "2026-09-04T10:48:46+01:00",
+ "initiationType": "tender",
+ "ocid": "ocds-h6vhtk-06e0a9",
+ "parties": [
+  {
+   "name": "NATIONAL GRID UK LIMITED",
+   "id": "GB-COH-04508773",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "04508773"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PGTR-4481-CJPQ"
+    }
+   ],
+   "address": {
+    "streetAddress": "1-3 Strand",
+    "locality": "London",
+    "postalCode": "WC2N 5EH",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI32"
+   },
+   "contactPoint": {
+    "name": "Redacted Name",
+    "email": "firstname.lastname@nationalgrid.co.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "privateUtility",
+      "description": "Private utility"
+     }
+    ]
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-COH-04508773",
+  "name": "NATIONAL GRID UK LIMITED"
+ },
+ "tender": {
+  "id": "WS1245025457",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Framework for Traffic Management for NGED and NGET",
+  "description": "To provide full Traffic Management, Traffic Control, and the hire of Traffic Light systems.\nThe Contractor must adhere to and fully comply with the following:\n•\tNew Roads and Street Works Act 1991\n•\tTraffic Management Act 2004\n•\tTraffic Signs Manual Chapter 8\n•\tSafety at Street Works and Road Works Code of Practice (COP) as amended\n•\tPermit schemes (especially conditions relating to traffic management)\n•\tHighway Authority and Utilities Committee (HAUC) Advice Notes as applicable\n•\tARTSM (Association for Road Traffic Safety and Management) Edition 1.1\nThe Contractor must be able to support all specified geographical areas of National Grid UK with sufficient resources to provide Plant, Product and Design & Services to enable safe working for all road traffic scenarios. \nThe Contractor must provide a 24-hour 365-day service, with the ability to respond and be on-site within 2 hours of  receipt of notification from NGED / NGET.",
+  "status": "active",
+  "items": [
+   {
+    "id": "1",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "63712700",
+      "description": "Traffic control services"
+     },
+     {
+      "scheme": "CPV",
+      "id": "63712710",
+      "description": "Traffic monitoring services"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKD",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     },
+     {
+      "region": "UKL",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     }
+    ],
+    "relatedLot": "1"
+   },
+   {
+    "id": "2",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "63712700",
+      "description": "Traffic control services"
+     },
+     {
+      "scheme": "CPV",
+      "id": "63712710",
+      "description": "Traffic monitoring services"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKC",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     }
+    ],
+    "relatedLot": "2"
+   },
+   {
+    "id": "3",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "63712700",
+      "description": "Traffic control services"
+     },
+     {
+      "scheme": "CPV",
+      "id": "63712710",
+      "description": "Traffic monitoring services"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKK",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     }
+    ],
+    "relatedLot": "3"
+   },
+   {
+    "id": "4",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "63712700",
+      "description": "Traffic control services"
+     },
+     {
+      "scheme": "CPV",
+      "id": "63712710",
+      "description": "Traffic monitoring services"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKJ",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     }
+    ],
+    "relatedLot": "4"
+   },
+   {
+    "id": "5",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "63712700",
+      "description": "Traffic control services"
+     },
+     {
+      "scheme": "CPV",
+      "id": "63712710",
+      "description": "Traffic monitoring services"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKF",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     },
+     {
+      "region": "UKG",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     }
+    ],
+    "relatedLot": "5"
+   }
+  ],
+  "value": {
+   "amountGross": 10080000,
+   "amount": 8400000,
+   "currency": "GBP"
+  },
+  "procurementMethod": "selective",
+  "procurementMethodDetails": "Competitive flexible procedure",
+  "procedure": {
+   "features": "Publication of ITT - 18th Sept 2026\nBidder acknowledgment of receipt of ITT through ARIBA  - 25th Sept 2026\nLast date for submission of Bidder TQs relating to Initial Tenders - 16th October 2026\nFinal NG responses to Bidder TQs relating to Initial Tenders\t- 26th October \nInitial Tender Closing Time - 2nd Nov 2026\nBidder Evaluation / Shortlisting - 10th Nov 2026\nTender negotiations (if required) - Late Nov 2026\nCall for Final Tenders (if required)\t- Early Dec 2026\nLast date for submission of Bidder TQs relating to Final Tenders (if required) - Dec 2026\nFinal NG responses to Bidder TQs relating to Final Tenders (if required) -Dec 2026\nFinal Tender Closing Time (if required) - Dec 2026\nNotification of contract award decision- Dec 2026"
+  },
+  "mainProcurementCategory": "services",
+  "specialRegime": [
+   "utilities"
+  ],
+  "aboveThreshold": true,
+  "techniques": {
+   "hasFrameworkAgreement": true,
+   "frameworkAgreement": {
+    "method": "withAndWithoutReopeningCompetition",
+    "type": "closed",
+    "description": "Rates to be fixed and firm and / direct allocation on best for task basis, this via Work Instruction and / or Purchase Order."
+   }
+  },
+  "submissionMethodDetails": "www.ariba.com",
+  "submissionTerms": {
+   "electronicSubmissionPolicy": "allowed",
+   "languages": [
+    "en"
+   ]
+  },
+  "expressionOfInterestDeadline": "2026-09-07T23:59:59+01:00",
+  "enquiryPeriod": {
+   "endDate": "2026-09-07T23:59:59+01:00"
+  },
+  "awardPeriod": {
+   "endDate": "2026-12-10T23:59:59Z"
+  },
+  "lots": [
+   {
+    "id": "1",
+    "title": "Lot 1 / Area 1 Wales and North West of England",
+    "description": "Wales and North West of England - Traffic Management Services as described in the Specification. \nTo provide full Traffic Management, Traffic Control, and the hire of Traffic Light systems.\nThe Contractor must adhere to and fully comply with the following:\n•\tNew Roads and Street Works Act 1991\n•\tTraffic Management Act 2004\n•\tTraffic Signs Manual Chapter 8\n•\tSafety at Street Works and Road Works Code of Practice (COP) as amended\n•\tPermit schemes (especially conditions relating to traffic management)\n•\tHighway Authority and Utilities Committee (HAUC) Advice Notes as applicable\n•\tARTSM (Association for Road Traffic Safety and Management) Edition 1.1\nThe Contractor must be able to support all specified geographical areas of National Grid UK with sufficient resources to provide Plant, Product and Design & Services to enable safe working for all road traffic scenarios. \nThe Contractor must provide a 24-hour 365-day service, with the ability to respond and be on-site within 2 hours of  receipt of notification from NGED / NGET.\nAll Staff should be legally qualified to support Street Works legislation.\nThe rates are to include complying with the 'Traffic Management Act 2004' and all associated secondary legislation and codes of practice, and are deemed to include for supply, delivery, installation, and collection of all apparatus.",
+    "status": "active",
+    "value": {
+     "amountGross": 2280000,
+     "amount": 1900000,
+     "currency": "GBP"
+    },
+    "awardCriteria": {
+     "criteria": [
+      {
+       "type": "quality",
+       "name": "Technical",
+       "description": "Technical evaluations of Bids shall be undertaken which shall encompass levels of applicable expertise, quality of systems and capability in terms of operational service levels",
+       "numbers": [
+        {
+         "number": 60,
+         "weight": "percentageExact"
+        }
+       ]
+      },
+      {
+       "type": "price",
+       "name": "Commercial",
+       "description": "Price score to be calculated by use of a mathematical formula which ensures that the lowest bid (pricewise) shall receive the highest score",
+       "numbers": [
+        {
+         "number": 40,
+         "weight": "percentageExact"
+        }
+       ]
+      }
+     ]
+    },
+    "selectionCriteria": {
+     "criteria": [
+      {
+       "description": "Technical 60%\nCommercial 40% (Price 40% / Terms and Conditions PASS/FAIL)",
+       "forReduction": true
+      }
+     ]
+    },
+    "contractPeriod": {
+     "startDate": "2027-01-02T00:00:00Z",
+     "endDate": "2031-12-31T23:59:59Z",
+     "maxExtentDate": "2034-12-31T23:59:59Z"
+    },
+    "hasRenewal": true,
+    "renewal": {
+     "description": "Contract term advertised is 5 plus 3 years (Optional 3 year extension at the sole discretion of National Grid)."
+    }
+   },
+   {
+    "id": "2",
+    "title": "Lot 2 / Area 2 North East of England",
+    "description": "North East of England as described in the Specification.\nTo provide full Traffic Management, Traffic Control, and the hire of Traffic Light systems.\nThe Contractor must adhere to and fully comply with the following:\n•\tNew Roads and Street Works Act 1991\n•\tTraffic Management Act 2004\n•\tTraffic Signs Manual Chapter 8\n•\tSafety at Street Works and Road Works Code of Practice (COP) as amended\n•\tPermit schemes (especially conditions relating to traffic management)\n•\tHighway Authority and Utilities Committee (HAUC) Advice Notes as applicable\n•\tARTSM (Association for Road Traffic Safety and Management) Edition 1.1\nThe Contractor must be able to support all specified geographical areas of National Grid UK with sufficient resources to provide Plant, Product and Design & Services to enable safe working for all road traffic scenarios. \nThe Contractor must provide a 24-hour 365-day service, with the ability to respond and be on-site within 2 hours of  receipt of notification from NGED / NGET.\nAll Staff should be legally qualified to support Street Works legislation.\nThe rates are to include complying with the 'Traffic Management Act 2004' and all associated secondary legislation and codes of practice, and are deemed to include for supply, delivery, installation, and collection of all apparatus.",
+    "status": "active",
+    "value": {
+     "amountGross": 480000,
+     "amount": 400000,
+     "currency": "GBP"
+    },
+    "awardCriteria": {
+     "criteria": [
+      {
+       "type": "quality",
+       "name": "Technical",
+       "description": "Technical evaluations of Bids shall be undertaken which shall encompass levels of applicable expertise, quality of systems and capability in terms of operational service levels",
+       "numbers": [
+        {
+         "number": 60,
+         "weight": "percentageExact"
+        }
+       ]
+      },
+      {
+       "type": "price",
+       "name": "Commercial",
+       "description": "Price score to be calculated by use of a mathematical formula which ensures that the lowest bid (pricewise) shall receive the highest score",
+       "numbers": [
+        {
+         "number": 40,
+         "weight": "percentageExact"
+        }
+       ]
+      }
+     ]
+    },
+    "selectionCriteria": {
+     "criteria": [
+      {
+       "description": "60% Technical \n40% Commercial (Price 40% / Terms and Conditions PASS/FAIL)",
+       "forReduction": true
+      }
+     ]
+    },
+    "contractPeriod": {
+     "startDate": "2027-01-02T00:00:00Z",
+     "endDate": "2031-12-31T23:59:59Z",
+     "maxExtentDate": "2034-12-31T23:59:59Z"
+    },
+    "hasRenewal": true,
+    "renewal": {
+     "description": "Contract term advertised is 5 plus 3 years (Optional 3 year extension at the sole discretion of National Grid)."
+    }
+   },
+   {
+    "id": "3",
+    "title": "Lot 3 / Area 3 South West of England",
+    "description": "South West of England as described in the Specification.\nTo provide full Traffic Management, Traffic Control, and the hire of Traffic Light systems.\nThe Contractor must adhere to and fully comply with the following:\n•\tNew Roads and Street Works Act 1991\n•\tTraffic Management Act 2004\n•\tTraffic Signs Manual Chapter 8\n•\tSafety at Street Works and Road Works Code of Practice (COP) as amended\n•\tPermit schemes (especially conditions relating to traffic management)\n•\tHighway Authority and Utilities Committee (HAUC) Advice Notes as applicable\n•\tARTSM (Association for Road Traffic Safety and Management) Edition 1.1\nThe Contractor must be able to support all specified geographical areas of National Grid UK with sufficient resources to provide Plant, Product and Design & Services to enable safe working for all road traffic scenarios. \nThe Contractor must provide a 24-hour 365-day service, with the ability to respond and be on-site within 2 hours of  receipt of notification from NGED / NGET.\nAll Staff should be legally qualified to support Street Works legislation.\nThe rates are to include complying with the 'Traffic Management Act 2004' and all associated secondary legislation and codes of practice, and are deemed to include for supply, delivery, installation, and collection of all apparatus.",
+    "status": "active",
+    "value": {
+     "amountGross": 2280000,
+     "amount": 1900000,
+     "currency": "GBP"
+    },
+    "awardCriteria": {
+     "criteria": [
+      {
+       "type": "quality",
+       "name": "Technical",
+       "description": "Technical evaluations of Bids shall be undertaken which shall encompass levels of applicable expertise, quality of systems and capability in terms of operational service levels",
+       "numbers": [
+        {
+         "number": 60,
+         "weight": "percentageExact"
+        }
+       ]
+      },
+      {
+       "type": "price",
+       "name": "Commercial",
+       "description": "Price score to be calculated by use of a mathematical formula which ensures that the lowest bid (pricewise) shall receive the highest score",
+       "numbers": [
+        {
+         "number": 40,
+         "weight": "percentageExact"
+        }
+       ]
+      }
+     ]
+    },
+    "selectionCriteria": {
+     "criteria": [
+      {
+       "description": "Technical 60%\nCommercial (Price 40% / Terms and Conditions)",
+       "forReduction": true
+      }
+     ]
+    },
+    "contractPeriod": {
+     "startDate": "2027-01-02T00:00:00Z",
+     "endDate": "2031-12-31T23:59:59Z",
+     "maxExtentDate": "2034-12-31T23:59:59Z"
+    },
+    "hasRenewal": true,
+    "renewal": {
+     "description": "Contract term advertised is 5 plus 3 years (Optional 3 year extension at the sole discretion of National Grid)."
+    }
+   },
+   {
+    "id": "4",
+    "title": "Lot 4 / Area 4 South East of England",
+    "description": "South East of England as per Specification.\nTo provide full Traffic Management, Traffic Control, and the hire of Traffic Light systems.\nThe Contractor must adhere to and fully comply with the following:\n•\tNew Roads and Street Works Act 1991\n•\tTraffic Management Act 2004\n•\tTraffic Signs Manual Chapter 8\n•\tSafety at Street Works and Road Works Code of Practice (COP) as amended\n•\tPermit schemes (especially conditions relating to traffic management)\n•\tHighway Authority and Utilities Committee (HAUC) Advice Notes as applicable\n•\tARTSM (Association for Road Traffic Safety and Management) Edition 1.1\nThe Contractor must be able to support all specified geographical areas of National Grid UK with sufficient resources to provide Plant, Product and Design & Services to enable safe working for all road traffic scenarios. \nThe Contractor must provide a 24-hour 365-day service, with the ability to respond and be on-site within 2 hours of  receipt of notification from NGED / NGET.\nAll Staff should be legally qualified to support Street Works legislation.\nThe rates are to include complying with the 'Traffic Management Act 2004' and all associated secondary legislation and codes of practice, and are deemed to include for supply, delivery, installation, and collection of all apparatus.",
+    "status": "active",
+    "value": {
+     "amountGross": 960000,
+     "amount": 800000,
+     "currency": "GBP"
+    },
+    "awardCriteria": {
+     "criteria": [
+      {
+       "type": "quality",
+       "name": "Technical",
+       "description": "Technical evaluations of Bids shall be undertaken which shall encompass levels of applicable expertise, quality of systems and capability in terms of operational service levels",
+       "numbers": [
+        {
+         "number": 60,
+         "weight": "percentageExact"
+        }
+       ]
+      },
+      {
+       "type": "price",
+       "name": "Commercial",
+       "description": "Price score to be calculated by use of a mathematical formula which ensures that the lowest bid (pricewise) shall receive the highest score",
+       "numbers": [
+        {
+         "number": 40,
+         "weight": "percentageExact"
+        }
+       ]
+      }
+     ]
+    },
+    "selectionCriteria": {
+     "criteria": [
+      {
+       "description": "Technical 60%\nCommercial 40% (Price 40% / Term and Conditions PASS / FAIL)",
+       "forReduction": true
+      }
+     ]
+    },
+    "contractPeriod": {
+     "startDate": "2027-01-02T00:00:00Z",
+     "endDate": "2031-12-31T23:59:59Z",
+     "maxExtentDate": "2034-12-31T23:59:59Z"
+    },
+    "hasRenewal": true,
+    "renewal": {
+     "description": "Contract term advertised is 5 plus 3 years (Optional 3 year extension at the sole discretion of National Grid)."
+    }
+   },
+   {
+    "id": "5",
+    "title": "Lot 5 / Area 5 West and East Midlands of England",
+    "description": "West and East Midlands of England as described in the Specification.\nTo provide full Traffic Management, Traffic Control, and the hire of Traffic Light systems.\nThe Contractor must adhere to and fully comply with the following:\n•\tNew Roads and Street Works Act 1991\n•\tTraffic Management Act 2004\n•\tTraffic Signs Manual Chapter 8\n•\tSafety at Street Works and Road Works Code of Practice (COP) as amended\n•\tPermit schemes (especially conditions relating to traffic management)\n•\tHighway Authority and Utilities Committee (HAUC) Advice Notes as applicable\n•\tARTSM (Association for Road Traffic Safety and Management) Edition 1.1\nThe Contractor must be able to support all specified geographical areas of National Grid UK with sufficient resources to provide Plant, Product and Design & Services to enable safe working for all road traffic scenarios. \nThe Contractor must provide a 24-hour 365-day service, with the ability to respond and be on-site within 2 hours of  receipt of notification from NGED / NGET.\nAll Staff should be legally qualified to support Street Works legislation.\nThe rates are to include complying with the 'Traffic Management Act 2004' and all associated secondary legislation and codes of practice, and are deemed to include for supply, delivery, installation, and collection of all apparatus.",
+    "status": "active",
+    "value": {
+     "amountGross": 4080000,
+     "amount": 3400000,
+     "currency": "GBP"
+    },
+    "awardCriteria": {
+     "criteria": [
+      {
+       "type": "quality",
+       "name": "Technical",
+       "description": "Technical evaluations of Bids shall be undertaken which shall encompass levels of applicable expertise, quality of systems and capability in terms of operational service levels",
+       "numbers": [
+        {
+         "number": 60,
+         "weight": "percentageExact"
+        }
+       ]
+      },
+      {
+       "type": "price",
+       "name": "Commercial",
+       "description": "Price score to be calculated by use of a mathematical formula which ensures that the lowest bid (pricewise) shall receive the highest score",
+       "numbers": [
+        {
+         "number": 40,
+         "weight": "percentageExact"
+        }
+       ]
+      }
+     ]
+    },
+    "selectionCriteria": {
+     "criteria": [
+      {
+       "description": "Technical 60%\nCommercial 40% (Price 40% / Term and Conditions PASS / FAIL)",
+       "forReduction": true
+      }
+     ]
+    },
+    "contractPeriod": {
+     "startDate": "2027-01-02T00:00:00Z",
+     "endDate": "2031-12-31T23:59:59Z",
+     "maxExtentDate": "2034-12-31T23:59:59Z"
+    },
+    "hasRenewal": true,
+    "renewal": {
+     "description": "Contract term advertised is 5 plus 3 years (Optional 3 year extension at the sole discretion of National Grid)."
+    }
+   }
+  ],
+  "documents": [
+   {
+    "id": "conflictOfInterest",
+    "documentType": "conflictOfInterest",
+    "description": "Not published"
+   },
+   {
+    "id": "L-1",
+    "documentType": "technicalSpecifications",
+    "url": "www.ariba.com"
+   },
+   {
+    "id": "A-21924",
+    "documentType": "biddingDocuments",
+    "url": "https://www.find-tender.service.gov.uk/Notice/Attachment/A-21924",
+    "format": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+   },
+   {
+    "id": "083799-2026",
+    "documentType": "tenderNotice",
+    "noticeType": "UK4",
+    "description": "Tender notice on Find a Tender",
+    "url": "https://www.find-tender.service.gov.uk/Notice/083799-2026",
+    "datePublished": "2026-09-04T10:48:46+01:00",
+    "format": "text/html"
+   }
+  ]
+ },
+ "language": "en"
+}

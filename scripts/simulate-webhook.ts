@@ -4,6 +4,9 @@
  *
  *   pnpm paddle:simulate <organizationId> [plan=pro] [interval=month] [status=active]
  *
+ *   The event carries checkout data signed for the workspace's first owner, exactly like a
+ *   checkout started from Settings → Billing (unsigned data is ignored by the webhook).
+ *
  *   status: active | trialing | past_due | paused | canceled
  *   Requires PADDLE_WEBHOOK_SECRET and the PADDLE_PRICE_* variables in .env.local (any
  *   placeholder values work locally, e.g. PADDLE_PRICE_PRO_MONTHLY=pri_local_pro_monthly).
@@ -27,6 +30,13 @@ async function main() {
   const { isBillingInterval, isPlanKey } = await import("../src/config/plans");
   const { getPriceId } = await import("../src/lib/billing/prices");
   const { signPaddlePayload } = await import("../src/lib/billing/webhook-signature");
+  const { signCheckoutData } = await import("../src/lib/billing/checkout-signature");
+  const { db, pg } = await import("../src/db");
+  const { members } = await import("../src/db/schema");
+  const { and, eq } = await import("drizzle-orm");
+  const [owner] = await db.select({ userId: members.userId }).from(members).where(and(eq(members.organizationId, organizationId), eq(members.role, "owner"))).limit(1);
+  await pg.end({ timeout: 5 });
+  if (!owner) throw new Error(`Workspace ${organizationId} not found (or it has no owner) in the database of DATABASE_URL`);
   if (!isPlanKey(plan) || plan === "free" || !isBillingInterval(interval)) throw new Error("Unknown plan or interval");
   const priceId = getPriceId(plan, interval);
   if (!priceId) throw new Error(`No price id configured for ${plan}/${interval}`);
@@ -43,7 +53,7 @@ async function main() {
       id: `sub_sim_${suffix}`,
       status,
       customer_id: `ctm_sim_${suffix}`,
-      custom_data: { organization_id: organizationId },
+      custom_data: signCheckoutData({ organizationId, userId: owner.userId }),
       items: [{ quantity: 1, price: { id: priceId, product_id: "pro_sim" }, trial_dates: null }],
       billing_cycle: { interval, frequency: 1 },
       current_billing_period: { starts_at: now.toISOString(), ends_at: periodEnd.toISOString() },

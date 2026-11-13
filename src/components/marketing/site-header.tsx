@@ -1,24 +1,39 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
+import { HeaderSessionLink } from "./header-session-link";
+import { MobileNav } from "./mobile-nav";
+import { findCompany, primaryNav } from "./site-nav";
 
-/** Marketing header. Static (no session read) so marketing pages stay cacheable. */
+const navLink = "link-quiet inline-flex min-h-11 items-center rounded-sm text-15 font-medium";
+
+/**
+ * Public header, as in the landing artboard: the lockup on the left; on the right the
+ * links, "Sign in" and the one green button. 72 px tall on a hairline (56 px on phones,
+ * where the links move into the menu).
+ *
+ * Static (no session read on the server) so public pages stay cacheable; the sign-in link
+ * is a small client island that becomes "Open your radar" for people who are signed in.
+ */
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4">
+    <header data-slot="site-header" className="sticky top-0 z-40 border-b border-line bg-paper">
+      <div className="container-content flex min-h-14 items-center justify-between gap-4 max-md:pr-2 md:min-h-[4.5rem]">
         <Logo />
-        <nav aria-label="Main" className="flex items-center gap-1 sm:gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-            <Link href="/pricing">Pricing</Link>
+        <div className="hidden items-center gap-8 md:flex">
+          <nav aria-label="Main" className="flex items-center gap-8">
+            {primaryNav.map((item) => (
+              <Link key={item.href} href={item.href} className={navLink}>
+                {item.label}
+              </Link>
+            ))}
+            <HeaderSessionLink className={navLink} />
+          </nav>
+          <Button asChild>
+            <Link href={findCompany.href}>{findCompany.label}</Link>
           </Button>
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/sign-in">Sign in</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/sign-up">Start free</Link>
-          </Button>
-        </nav>
+        </div>
+        <MobileNav />
       </div>
     </header>
   );

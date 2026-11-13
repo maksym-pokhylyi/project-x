@@ -1,0 +1,166 @@
+{
+ "ocid": "ocds-h6vhtk-07b926",
+ "buyerID": [],
+ "id": "106944-2026",
+ "tag": [
+  "award",
+  "contract"
+ ],
+ "date": "2026-11-11T09:37:42Z",
+ "initiationType": "tender",
+ "parties": [
+  {
+   "name": "Mayor's Office for Policing and Crime",
+   "id": "GB-PPON-PTMT-7816-YCQG",
+   "identifier": {
+    "scheme": "GB-PPON",
+    "id": "PTMT-7816-YCQG"
+   },
+   "address": {
+    "streetAddress": "169 Union Street",
+    "locality": "London",
+    "postalCode": "SE1 0LL",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKI44"
+   },
+   "contactPoint": {
+    "email": "firstname.lastname@met.police.uk"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicAuthoritySubCentralGovernment",
+      "description": "Public authority - sub-central government"
+     }
+    ]
+   }
+  },
+  {
+   "name": "BIFFA WASTE SERVICES LIMITED",
+   "id": "GB-COH-00946107",
+   "identifier": {
+    "scheme": "GB-COH",
+    "id": "00946107"
+   },
+   "additionalIdentifiers": [
+    {
+     "scheme": "GB-PPON",
+     "id": "PRQC-5121-CMBL"
+    }
+   ],
+   "address": {
+    "streetAddress": "Coronation Road",
+    "locality": "High Wycombe",
+    "postalCode": "HP12 3TZ",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKJ13"
+   },
+   "contactPoint": {
+    "email": "tendering@biffa.co.uk"
+   },
+   "roles": [
+    "supplier"
+   ],
+   "details": {
+    "url": "http://www.biffa.co.uk",
+    "scale": "large",
+    "vcse": false
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-PPON-PTMT-7816-YCQG",
+  "name": "Mayor's Office for Policing and Crime"
+ },
+ "tender": {
+  "id": "ocds-h6vhtk-07b926",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Canisters",
+  "description": "5 tonnes of larger canisters",
+  "status": "complete",
+  "procurementMethodDetails": "Below threshold - unknown",
+  "lots": [
+   {
+    "id": "1",
+    "status": "complete",
+    "description": null
+   }
+  ]
+ },
+ "awards": [
+  {
+   "id": "1",
+   "status": "active",
+   "mainProcurementCategory": "services",
+   "suppliers": [
+    {
+     "id": "GB-COH-00946107",
+     "name": "BIFFA WASTE SERVICES LIMITED"
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "additionalClassifications": [
+      {
+       "scheme": "CPV",
+       "id": "90500000",
+       "description": "Refuse and waste related services"
+      }
+     ],
+     "deliveryAddresses": [
+      {
+       "region": "UK",
+       "country": "GB",
+       "countryName": "United Kingdom"
+      }
+     ],
+     "relatedLot": "1"
+    }
+   ],
+   "relatedLots": [
+    "1"
+   ]
+  }
+ ],
+ "contracts": [
+  {
+   "id": "1",
+   "awardID": "1",
+   "status": "active",
+   "period": {
+    "startDate": "2025-09-03T00:00:00+01:00",
+    "endDate": "2025-10-03T23:59:59+01:00"
+   },
+   "value": {
+    "amountGross": 53412,
+    "currency": "GBP"
+   },
+   "aboveThreshold": false,
+   "dateSigned": "2025-09-03T00:00:00+01:00",
+   "statusDetails": null,
+   "documents": [
+    {
+     "id": "106944-2026",
+     "documentType": "contractNotice",
+     "noticeType": "UK7",
+     "description": "Contract details notice on Find a Tender",
+     "url": "https://www.find-tender.service.gov.uk/Notice/106944-2026",
+     "datePublished": "2026-11-11T09:37:42Z",
+     "format": "text/html"
+    }
+   ]
+  }
+ ],
+ "language": "en"
+}

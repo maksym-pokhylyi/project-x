@@ -2,6 +2,7 @@ import "server-only";
 import { eq, sql } from "drizzle-orm";
 import { db, type DbOrTx } from "@/db";
 import { jobs } from "@/db/schema";
+import { scrubText } from "@/lib/describe-error";
 
 /**
  * Durable background jobs on Postgres.
@@ -15,8 +16,12 @@ import { jobs } from "@/db/schema";
 export type JobPayloads = {
   /** Deliver one e-mail from email_outbox through the provider. */
   "email.send": { outboxId: string };
-  /** Housekeeping: expired rate-limit windows, old finished jobs, old outbox bodies. */
+  /** Housekeeping: data retention for every operational table (src/config/retention.ts). */
   "maintenance.cleanup": Record<string, never>;
+  /** Find a Tender backfill: one slice of one week (src/features/procurement/ingest/run.ts). */
+  "procurement.backfill": { weekStart: string; until: string; part?: number };
+  /** Compare open subscriptions with the Paddle API (no-op without PADDLE_API_KEY). */
+  "billing.reconcile": Record<string, never>;
   /** Run the next step of a bid's pack pipeline (src/features/bids/server/pipeline). */
   "bids.process": { bidId: string; runId: string };
   /** Extract and summarise an evidence-library document (src/features/library/server). */
@@ -118,7 +123,7 @@ export async function markJobFailed(
   options: { retry?: boolean } = {},
 ): Promise<"pending" | "failed"> {
   const exhausted = options.retry === false || job.attempts >= job.maxAttempts;
-  const message = errorMessage.slice(0, 2000);
+  const message = scrubText(errorMessage, 2000);
   if (exhausted) {
     await db.execute(sql`
       update jobs
