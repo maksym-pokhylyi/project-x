@@ -3,7 +3,7 @@ import { sql, type SQL } from "drizzle-orm";
 import { scoreCpv, type RadarSpec } from "../domain/profile";
 import { NATIONWIDE } from "../domain/regions";
 import { AWARD_DATE_SQL, CONTRACT_VALUE_SQL, WON_STATUSES_SQL } from "../ingest/upsert";
-import { awardTradeCondition, db, getSupplierSpec, int, iso, num, queryRows, str, UNPUBLISHED_SUPPLIER_LABEL } from "./shared";
+import { awardTradeCondition, db, getSupplierSpec, int, iso, num, queryRows, str, textArrayParam, UNPUBLISHED_SUPPLIER_LABEL } from "./shared";
 
 /**
  * Contracts: current award rows rolled up per procurement and supplier. A framework
@@ -147,7 +147,17 @@ export type EndingSoonItem = ContractRow & {
   tradeScore: number;
 };
 
-export type EndingSoonOptions = { limit?: number; offset?: number; now?: Date; region?: string | null };
+export type EndingSoonOptions = {
+  limit?: number;
+  offset?: number;
+  now?: Date;
+  region?: string | null;
+  /** Bounds on the contract value a single supplier can be credited with; a contract without one fails either bound. */
+  valueMin?: number | null;
+  valueMax?: number | null;
+  /** "relevance" (default): same region and closest trade first. "end": soonest end date first — the order of a work list. */
+  order?: "relevance" | "end";
+};
 
 /**
  * Other suppliers' contracts in the same trade (CPV group) whose stated end date falls
@@ -183,8 +193,11 @@ export async function getEndingSoonForSpec(spec: RadarSpec, months = 9, options:
   // Drop distant relatives (same division only, different line of work).
   items = items.filter((item) => item.tradeScore >= 0.3);
   if (options.region) items = items.filter((item) => item.regions.includes(options.region!) || item.regions.includes(NATIONWIDE));
+  if (options.valueMin != null) items = items.filter((item) => item.valueAmount !== null && item.valueAmount >= options.valueMin!);
+  if (options.valueMax != null) items = items.filter((item) => item.valueAmount !== null && item.valueAmount <= options.valueMax!);
   const rank = (item: EndingSoonItem) => item.tradeScore * (item.sameRegion ? 1 : item.regions.includes(NATIONWIDE) || item.regions.length === 0 ? 0.8 : 0.6);
-  items.sort((a, b) => rank(b) - rank(a) || (a.contractEnd ?? "").localeCompare(b.contractEnd ?? "") || a.ocid.localeCompare(b.ocid));
+  const byEnd = (a: EndingSoonItem, b: EndingSoonItem) => (a.contractEnd ?? "").localeCompare(b.contractEnd ?? "") || a.ocid.localeCompare(b.ocid) || a.supplierId.localeCompare(b.supplierId);
+  items.sort(options.order === "end" ? byEnd : (a, b) => rank(b) - rank(a) || byEnd(a, b));
   const offset = options.offset ?? 0;
   return { items: items.slice(offset, offset + (options.limit ?? 25)), total: items.length };
 }
@@ -206,6 +219,38 @@ export async function getOwnRenewals(supplierId: string, months = 12, now: Date 
     group by a.ocid, a.supplier_id
   `;
   const rows = await queryRows<Record<string, unknown>>(db, contractsSelect(inner, sql`order by k.contract_end asc limit 50`));
+  return rows.map(toContractRow);
+}
+
+/**
+ * "Who won similar work from this buyer": contracts the same buyer awarded in the last
+ * `years` whose CPV codes share a class (four digits) with the given codes — or a group
+ * (three digits) where a code is stated no deeper. Newest first. Real award notices only;
+ * an empty list means the section is left out.
+ */
+export async function getSimilarAwardsFromBuyer(
+  buyerId: string,
+  cpvCodes: readonly string[],
+  options: { limit?: number; years?: number; now?: Date; excludeOcid?: string } = {},
+): Promise<ContractRow[]> {
+  const stems = cpvCodes.filter((code) => /^\d{8}$/.test(code)).map((code) => code.replace(/0+$/, ""));
+  const classes = [...new Set(stems.filter((stem) => stem.length >= 4).map((stem) => stem.slice(0, 4)))];
+  const groups = [...new Set(stems.filter((stem) => stem.length === 3))];
+  const parts: SQL[] = [];
+  if (classes.length > 0) parts.push(sql`a.cpv_classes && ${textArrayParam(classes)}`);
+  if (groups.length > 0) parts.push(sql`a.cpv_groups && ${textArrayParam(groups)}`);
+  if (parts.length === 0) return [];
+  const now = options.now ?? new Date();
+  const inner = sql`
+    select ${CONTRACT_COLUMNS}
+    from awards a
+    where a.buyer_id = ${buyerId} and a.is_current and a.effective_status in ${WON_STATUSES_SQL}
+      and ${AWARD_DATE_SQL} >= ${now.toISOString()}::timestamptz - make_interval(years => ${options.years ?? 5}::int)
+      and (${sql.join(parts, sql` or `)})
+      ${options.excludeOcid ? sql`and a.ocid <> ${options.excludeOcid}` : sql``}
+    group by a.ocid, a.supplier_id
+  `;
+  const rows = await queryRows<Record<string, unknown>>(db, contractsSelect(inner, sql`order by k.awarded_at desc nulls last, k.ocid, k.supplier_id limit ${options.limit ?? 8}`));
   return rows.map(toContractRow);
 }
 

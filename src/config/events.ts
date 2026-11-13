@@ -60,6 +60,9 @@ export type EventMap = {
   radar_viewed: { tab: string; source: "supplier" | "manual" | "none" };
   tender_saved: { ocid: string };
   tender_dismissed: { ocid: string };
+  /** Trades and regions of a radar were set up or changed (completes step 1 of the first-run guide). */
+  radar_profile_saved: { source: "supplier" | "manual"; created: boolean };
+  radar_first_run_dismissed: { source: "supplier" | "manual" };
 
   // Bid desk (names as in SPEC §7)
   bid_created: { source: "upload" | "notice"; allowance: string };

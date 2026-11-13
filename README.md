@@ -239,6 +239,10 @@ real production deployment.
 | `AI_GATEWAY_API_KEY` | no | Vercel → AI Gateway (not needed on Vercel: OIDC) | AI calls from local machines |
 | `AI_DAILY_BUDGET_USD` | no (10) | — | Global daily ceiling for estimated AI spend (hard limit; `0` disables AI) |
 | `AI_FREE_DAILY_BUDGET_USD` | no (25 % of the above) | — | Daily pool shared by ALL free-plan workspaces, so they cannot use up the global budget |
+| `PUBLIC_DATA_PAGES_INDEXABLE` | no (off) | — | `true` lets search engines index `/suppliers/*` and `/buyers/*` and lists them in the sitemap. Off at launch: those pages are served `noindex`. Tender pages, `/find` and `/about-the-data` are always indexable |
+| `AI_MODEL_MATCH_REASON` | no (`google/gemini-2.5-flash-lite`) | AI Gateway model id | The model that writes the one-sentence reason of a radar match (rule-based reasons are used whenever AI is off) |
+| `FTS_API_BASE` | no (`https://www.find-tender.service.gov.uk`) | — | Origin of the Find a Tender OCDS API. Override only to point ingestion at a test double |
+| `FTS_USER_AGENT` | no (`procurement-data-client/1.0`) | — | `User-Agent` sent to the Find a Tender API: name the service and a contact address in production |
 | `NEXT_PUBLIC_POSTHOG_KEY` / `NEXT_PUBLIC_POSTHOG_HOST` | no | PostHog project settings | Page views + forwarding of server events |
 | `SENTRY_DSN` | no | Sentry project → Client keys | Forwarding server errors |
 | `LOG_LEVEL` | no (info) | — | Log verbosity |

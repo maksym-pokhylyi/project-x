@@ -11,7 +11,6 @@ import {
   num,
   queryRows,
   str,
-  strArray,
   textArrayParam,
   toNoticeCard,
   UNPUBLISHED_SUPPLIER_LABEL,
@@ -20,18 +19,16 @@ import {
 
 /** Everything the tender page shows about one procurement. Company-level data only. */
 export type TenderDetail = NoticeCard & {
+  /** How `valueAmount` is stated: net of VAT unless the notice gave only a VAT-inclusive figure. Null when no value is published. */
+  valueBasis: "net" | "gross" | null;
   description: string | null;
   procedure: string | null;
   competition: string;
   category: string | null;
   regime: string;
-  regionCodes: string[];
   enquiryDeadlineAt: string | null;
-  contractStart: string | null;
-  contractEnd: string | null;
   awardCriteria: { criteria: AwardCriterionSummary[]; description: string | null } | null;
   lots: LotSummary[];
-  lotsCount: number;
   cpv: Array<{ code: string; label: string | null }>;
   bidsCount: number | null;
   /** True when this is an open tender whose deadline has not passed. */
@@ -65,8 +62,8 @@ export async function getTender(idOrOcid: string, now: Date = new Date()): Promi
   const [row] = await queryRows<Record<string, unknown>>(
     db,
     sql`
-      select ${NOTICE_CARD_COLUMNS}, n.description, n.procedure, n.competition, n.category, n.regime, n.region_codes, n.enquiry_deadline_at,
-             n.contract_start, n.contract_end, n.award_criteria, n.lots, n.lots_count, n.bids_count, b.region as buyer_region
+      select ${NOTICE_CARD_COLUMNS}, n.value_gross, n.description, n.procedure, n.competition, n.category, n.regime, n.enquiry_deadline_at,
+             n.award_criteria, n.lots, n.bids_count, b.region as buyer_region
       from notices n left join buyers b on b.id = n.buyer_id
       where n.ocid = ${ocid} and n.is_latest
       order by (n.stage = 'tender') desc, (n.stage = 'planning') desc, n.published_at desc
@@ -96,20 +93,19 @@ export async function getTender(idOrOcid: string, now: Date = new Date()): Promi
   ]);
   const criteria = row.award_criteria as TenderDetail["awardCriteria"];
   const deadline = card.deadlineAt ? Date.parse(card.deadlineAt) : null;
+  const gross = num(row.value_gross);
   return {
     ...card,
+    // The stored figure is the net one when the notice gives it, otherwise the gross one (domain/money.ts).
+    valueBasis: card.valueAmount === null ? null : gross !== null && Math.abs(gross - card.valueAmount) < 0.005 ? "gross" : "net",
     description: str(row.description),
     procedure: str(row.procedure),
     competition: String(row.competition ?? "unknown"),
     category: str(row.category),
     regime: String(row.regime),
-    regionCodes: strArray(row.region_codes),
     enquiryDeadlineAt: iso(row.enquiry_deadline_at),
-    contractStart: iso(row.contract_start),
-    contractEnd: iso(row.contract_end),
     awardCriteria: criteria && typeof criteria === "object" ? criteria : null,
     lots: Array.isArray(row.lots) ? (row.lots as LotSummary[]) : [],
-    lotsCount: int(row.lots_count),
     cpv: card.cpvCodes.map((code) => ({ code, label: labels.get(code) ?? null })),
     bidsCount: row.bids_count === null || row.bids_count === undefined ? null : int(row.bids_count),
     isLive: card.stage === "tender" && card.noticeType !== "UK12" && (card.status ?? "active") === "active" && deadline !== null && deadline > now.getTime(),

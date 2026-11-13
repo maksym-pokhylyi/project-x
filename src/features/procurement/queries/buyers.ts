@@ -1,9 +1,10 @@
 import "server-only";
 import { sql } from "drizzle-orm";
+import { tidyPlace } from "../domain/format";
 import type { RadarSpec } from "../domain/profile";
 import { NATIONWIDE } from "../domain/regions";
 import { AWARD_DATE_SQL, CONTRACT_VALUE_SQL, WON_STATUSES_SQL } from "../ingest/upsert";
-import { awardTradeCondition, db, getSupplierSpec, int, iso, num, queryRows, str } from "./shared";
+import { awardTradeCondition, db, getSupplierSpec, int, iso, num, queryRows, str, textArrayParam } from "./shared";
 
 /**
  * Buyers awarding in a supplier's trade.
@@ -21,6 +22,16 @@ export type BuyerInsight = {
   /** Contracts awarded in the profile's trade within the window. */
   awards: number;
   totalValue: number | null;
+  /** Median of the contract values a single supplier can be credited with; null when none was published. */
+  medianValue: number | null;
+  /**
+   * Of the contracts whose supplier's size was published, how many went to small or
+   * medium-sized businesses (a contract shared by several suppliers counts by its share of
+   * SMEs). The buyer states the size in the notice: `scale` is "sme" or "large".
+   */
+  smeAwards: number;
+  /** Contracts with at least one supplier of a published size: the denominator of `smeAwards`. */
+  sizedAwards: number;
   /** Awarded directly, with no competition. */
   direct: number;
   /** Awarded after inviting selected suppliers only. */
@@ -36,9 +47,26 @@ export type BuyerInsight = {
   ownAwards: number;
   lastAwardAt: string | null;
   sameRegion: boolean;
+  /** The buyer's tenders that are open now (any trade): the link to its page. */
+  openTenders: number;
 };
 
-export type BuyerOptions = { limit?: number; offset?: number; months?: number; now?: Date; region?: string | null };
+/** How a list of buyers can be ordered. */
+export type BuyerSort = "awards" | "own" | "median" | "open";
+
+export type BuyerOptions = {
+  limit?: number;
+  offset?: number;
+  months?: number;
+  now?: Date;
+  region?: string | null;
+  /**
+   * "awards" (default): buyers in the profile's regions first, then by contracts awarded in
+   * its trade. "own": most contracts won by the profile's supplier. "median": largest median
+   * value. "open": most open tenders.
+   */
+  sort?: BuyerSort;
+};
 
 export async function getBuyersForSpec(spec: RadarSpec, options: BuyerOptions = {}): Promise<{ items: BuyerInsight[]; total: number }> {
   const trade = awardTradeCondition(spec);
@@ -51,8 +79,11 @@ export async function getBuyersForSpec(spec: RadarSpec, options: BuyerOptions = 
       with k as (
         -- One row per procurement: a framework with forty suppliers is one award decision, not forty.
         select a.buyer_id, a.ocid, ${CONTRACT_VALUE_SQL} as value, min(a.competition) as competition, max(${AWARD_DATE_SQL}) as award_date,
-               count(distinct a.supplier_id) as suppliers, bool_or(a.supplier_id = ${spec.supplierId ?? ""}) as own
+               count(distinct a.supplier_id) as suppliers, bool_or(a.supplier_id = ${spec.supplierId ?? ""}) as own,
+               count(distinct a.supplier_id) filter (where sup.scale = 'sme') as sme_suppliers,
+               count(distinct a.supplier_id) filter (where sup.scale in ('sme', 'large')) as sized_suppliers
         from awards a
+        join suppliers sup on sup.id = a.supplier_id
         where a.is_current and a.effective_status in ${WON_STATUSES_SQL} and a.buyer_id is not null
           and ${AWARD_DATE_SQL} >= ${now.toISOString()}::timestamptz - make_interval(months => ${months}::int)
           and ${trade}
@@ -61,6 +92,9 @@ export async function getBuyersForSpec(spec: RadarSpec, options: BuyerOptions = 
       select k.buyer_id, b.name, b.slug, b.region, b.buyer_type,
              count(*) as awards,
              sum(k.value) filter (where k.value < 1000000000) as total_value,
+             percentile_cont(0.5) within group (order by k.value) filter (where k.value < 1000000000) as median_value,
+             coalesce(sum(k.sme_suppliers::numeric / nullif(k.sized_suppliers, 0)), 0) as sme_awards,
+             count(*) filter (where k.sized_suppliers > 0) as sized_awards,
              count(*) filter (where k.competition = 'direct') as direct,
              count(*) filter (where k.competition = 'limited') as limited,
              count(*) filter (where k.competition = 'framework') as framework,
@@ -87,6 +121,9 @@ export async function getBuyersForSpec(spec: RadarSpec, options: BuyerOptions = 
       buyerType: str(row.buyer_type),
       awards,
       totalValue: num(row.total_value),
+      medianValue: num(row.median_value),
+      smeAwards: num(row.sme_awards) ?? 0,
+      sizedAwards: int(row.sized_awards),
       direct,
       limited,
       framework: int(row.framework),
@@ -97,11 +134,34 @@ export async function getBuyersForSpec(spec: RadarSpec, options: BuyerOptions = 
       ownAwards: int(row.own_awards),
       lastAwardAt: iso(row.last_award_at),
       sameRegion: region !== null && specific.includes(region),
+      openTenders: 0,
     };
   });
   if (options.region) items = items.filter((item) => item.region === options.region);
-  // Nearby buyers first, then by how much they award in the trade.
-  items.sort((a, b) => Number(b.sameRegion) - Number(a.sameRegion) || b.awards - a.awards || (b.totalValue ?? 0) - (a.totalValue ?? 0) || a.name.localeCompare(b.name));
+  if (items.length > 0) {
+    const open = await queryRows<{ buyer_id: string; n: unknown }>(
+      db,
+      sql`
+        select n.buyer_id, count(*) as n from notices n
+        where n.buyer_id = any(${textArrayParam(items.map((item) => item.buyerId))})
+          and n.stage = 'tender' and n.is_latest and n.notice_type is distinct from 'UK12' and coalesce(n.status, 'active') = 'active'
+          and n.deadline_at > ${now.toISOString()}::timestamptz
+        group by n.buyer_id
+      `,
+    );
+    const byBuyer = new Map(open.map((row) => [row.buyer_id, int(row.n)]));
+    for (const item of items) item.openTenders = byBuyer.get(item.buyerId) ?? 0;
+  }
+  // Default: nearby buyers first, then by how much they award in the trade.
+  const byAwards = (a: BuyerInsight, b: BuyerInsight) =>
+    Number(b.sameRegion) - Number(a.sameRegion) || b.awards - a.awards || (b.totalValue ?? 0) - (a.totalValue ?? 0) || a.name.localeCompare(b.name);
+  const orders: Record<BuyerSort, (a: BuyerInsight, b: BuyerInsight) => number> = {
+    awards: byAwards,
+    own: (a, b) => b.ownAwards - a.ownAwards || byAwards(a, b),
+    median: (a, b) => (b.medianValue ?? -1) - (a.medianValue ?? -1) || byAwards(a, b),
+    open: (a, b) => b.openTenders - a.openTenders || byAwards(a, b),
+  };
+  items.sort(orders[options.sort ?? "awards"]);
   const offset = options.offset ?? 0;
   return { items: items.slice(offset, offset + (options.limit ?? 25)), total: items.length };
 }
@@ -153,7 +213,7 @@ export async function getBuyerBySlug(slug: string): Promise<BuyerRecord | null> 
     buyerType: str(row.buyer_type),
     devolved: str(row.devolved),
     region: str(row.region),
-    locality: str(row.locality),
+    locality: tidyPlace(str(row.locality)),
     website: str(row.website),
     noticesCount: int(row.notices_count),
     awardsCount: int(row.awards_count),

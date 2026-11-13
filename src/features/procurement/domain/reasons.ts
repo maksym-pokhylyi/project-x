@@ -53,6 +53,15 @@ function strength(closeness: Closeness): "strong" | "related" | "broad" | "none"
   return "none";
 }
 
+/**
+ * "Same work" on a chip is stricter than `strength`: the same CPV class (four digits) as
+ * the same line of work, or the same five-digit category. A shared group ("Building
+ * installation work", "Health services") is too wide to call the same work.
+ */
+function isSameWork(closeness: Closeness): boolean {
+  return closeness.depth >= 5 || (closeness.line && closeness.depth >= 4);
+}
+
 /** The past award closest to a notice by CPV (same buyer first), or null when nothing is related. */
 export function closestReference(notice: Pick<ReasonNotice, "cpvCodes" | "buyerId">, references: readonly ReferenceAward[]): ReferenceAward | null {
   let best: { reference: ReferenceAward; rank: number } | null = null;
@@ -143,6 +152,104 @@ export function explainMatch(
   }
   const keyword = keywordInTitle(spec.keywords, notice.title);
   return keyword ? `Mentions "${keyword}" from your keywords` : "Matches the keywords on your radar";
+}
+
+// ---------------------------------------------------------------------------
+// Reason chips: counted facts, never a judgement
+// ---------------------------------------------------------------------------
+
+/**
+ * The facts behind the chips on a match row (docs/design/handoff/README.md: "only facts we
+ * actually have — same category, a buyer you have won from, region; no distances").
+ * Everything here is counted from published notices; nothing is estimated.
+ */
+export type MatchFacts = {
+  /** The supplier's own contracts considered (0 for a manually described radar). */
+  wins: number;
+  /** How many of them were awarded by this notice's buyer. */
+  buyerWins: number;
+  /** The supplier has contract history and none of it is with this buyer. */
+  newBuyer: boolean;
+  /** Contracts in the same line of work: the same CPV class as the same line, or the same five-digit category. */
+  sameWorkWins: number;
+  /** Contracts in a neighbouring category (same CPV group) that are not counted as the same work. */
+  relatedWorkWins: number;
+  /** Manually described radars: the trade of the profile this notice falls in, in plain words. */
+  trade: string | null;
+  /** A profile keyword found in the notice title, as the profile spells it. */
+  keyword: string | null;
+  /** The supplier's contracts with this notice's buyer, newest first (at most five), for the tender page. */
+  buyerContracts: Array<{ title: string; valueAmount: number | null; year: string }>;
+  /** The notice's own categories that are the same work as one of the supplier's contracts, in plain words. */
+  sameWorkLabels: string[];
+};
+
+export function matchFacts(
+  spec: Pick<RadarSpec, "keywords" | "supplierId">,
+  notice: ReasonNotice,
+  breakdown: Pick<ScoreBreakdown, "cpvPrefix" | "cpv"> & { keywordHits?: string[] },
+  references: readonly ReferenceAward[],
+  cpvLabels: ReadonlyMap<string, string>,
+): MatchFacts {
+  let buyerWins = 0;
+  let sameWorkWins = 0;
+  let relatedWorkWins = 0;
+  const buyerContracts: MatchFacts["buyerContracts"] = [];
+  const sameWorkCodes = new Set<string>();
+  for (const reference of references) {
+    if (notice.buyerId && reference.buyerId === notice.buyerId) {
+      buyerWins += 1;
+      if (buyerContracts.length < 5) buyerContracts.push({ title: reference.title, valueAmount: reference.valueAmount, year: yearOf(reference.date) });
+    }
+    const closeness = closest(notice.cpvCodes, reference.cpvCodes);
+    if (isSameWork(closeness)) {
+      sameWorkWins += 1;
+      for (const code of notice.cpvCodes) if (isCpvCode(code) && isSameWork(closest([code], reference.cpvCodes))) sameWorkCodes.add(code);
+    } else if (closeness.depth >= 3) relatedWorkWins += 1;
+  }
+  const sameWorkLabels = [...new Set([...sameWorkCodes].map((code) => shortCpvLabel(cpvLabels.get(code))).filter((label): label is string => Boolean(label)))].slice(0, 4);
+  const keyword = breakdown.keywordHits?.[0] ?? keywordInTitle(spec.keywords, notice.title);
+  let trade: string | null = null;
+  if (references.length === 0 && breakdown.cpv > 0) {
+    const prefix = breakdown.cpvPrefix;
+    const exact = prefix ? notice.cpvCodes.find((code) => code.startsWith(prefix)) : undefined;
+    const label = prefix && prefix.length >= 3 ? shortCpvLabel(exact ? cpvLabels.get(exact) : null) : null;
+    trade = label ?? cpvDivisionLabel(prefix ?? notice.cpvCodes[0] ?? "").toLowerCase();
+  }
+  return {
+    wins: references.length,
+    buyerWins,
+    newBuyer: references.length > 0 && Boolean(notice.buyerId) && buyerWins === 0,
+    sameWorkWins,
+    relatedWorkWins,
+    trade,
+    keyword,
+    buyerContracts,
+    sameWorkLabels,
+  };
+}
+
+export type ReasonChip = { kind: "buyer" | "work" | "new_buyer" | "trade" | "keyword"; label: string; strong: boolean };
+
+/**
+ * The chips of a match row, strongest first: the three kinds the design allows, each a
+ * counted fact — wins from this buyer, wins in the same work, "New buyer for you". The
+ * place of delivery is a fourth, separate chip (see `placeLabel`).
+ * A manually described radar has no wins to count, so it says which of the owner's own
+ * choices the notice met: the trade, or the keyword found in its title.
+ */
+export function reasonChips(facts: MatchFacts): ReasonChip[] {
+  const chips: ReasonChip[] = [];
+  if (facts.buyerWins > 0) {
+    chips.push({ kind: "buyer", strong: true, label: `You have won ${facts.buyerWins} ${facts.buyerWins === 1 ? "contract" : "contracts"} from this buyer` });
+  }
+  if (facts.sameWorkWins > 0) {
+    chips.push({ kind: "work", strong: false, label: facts.wins === 1 ? "Same work as your contract win" : `Same work as ${facts.sameWorkWins} of your wins` });
+  }
+  if (facts.newBuyer) chips.push({ kind: "new_buyer", strong: false, label: "New buyer for you" });
+  if (facts.wins === 0 && facts.trade) chips.push({ kind: "trade", strong: false, label: `Your trade: ${facts.trade}` });
+  if (facts.wins === 0 && facts.keyword && !facts.trade) chips.push({ kind: "keyword", strong: false, label: `Mentions “${facts.keyword}”` });
+  return chips;
 }
 
 /** Guards for model-written reasons before they are cached or shown. */

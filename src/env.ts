@@ -120,6 +120,16 @@ const serverSchema = z.object({
   /** Daily pool shared by ALL free-plan workspaces, in USD. Default: 25% of AI_DAILY_BUDGET_USD. */
   AI_FREE_DAILY_BUDGET_USD: optional(z.coerce.number().min(0)),
 
+  // --- Procurement data (Find a Tender); read through src/features/procurement/config.ts ---
+  /** "true" or "1" lets search engines index /suppliers/* and /buyers/* and lists them in the sitemap. Default: noindex. */
+  PUBLIC_DATA_PAGES_INDEXABLE: optional(z.string()),
+  /** AI Gateway model id for match reasons. Default: google/gemini-2.5-flash-lite. */
+  AI_MODEL_MATCH_REASON: optional(z.string()),
+  /** Origin of the Find a Tender API. Default: https://www.find-tender.service.gov.uk (override in tests). */
+  FTS_API_BASE: optional(z.string().trim().pipe(z.url())),
+  /** User-Agent sent to the Find a Tender API. Default: procurement-data-client/1.0. */
+  FTS_USER_AGENT: optional(z.string()),
+
   // --- Dev tooling ---
   /** "1" exposes /dev/outbox on a production BUILD (used by e2e). Ignored when VERCEL_ENV=production. */
   DEV_TOOLS: optional(z.enum(["0", "1"])),

@@ -60,6 +60,30 @@ const HALF_LIFE_MONTHS = 18;
 const MONTH_MS = 30.4375 * 86_400_000;
 /** Weight of an award's additional CPV codes relative to its first (main) code. */
 const SECONDARY_CODE_WEIGHT = 0.35;
+/**
+ * An award counts in full for its codes while they stay within this many CPV classes
+ * (four digits). Beyond it the award is a multi-trade framework lot — "Repairs, maintenance
+ * and planned works" with 33 codes in 28 classes, shared by 167 suppliers — which says
+ * little about any one of its codes: one such award used to turn every open tender in 13
+ * divisions into a "match" for a roofing firm.
+ */
+const FOCUSED_CLASSES = 4;
+
+/**
+ * How much an award says about each of its codes (1 = in full), main code first.
+ * `focus` is 1 up to FOCUSED_CLASSES and FOCUSED_CLASSES / classes beyond. Past that point
+ *  - the main code's share falls with the square of the focus until it meets the secondary
+ *    weight, then in proportion: in a list of thirty the first code is as likely the lowest
+ *    number as the heart of the contract;
+ *  - every other code's share falls with the square of the focus, so the additional codes
+ *    of a broad award never outweigh its main code and cannot define a trade on their own.
+ * A focused award is untouched: 1 for the main code, SECONDARY_CODE_WEIGHT for the rest.
+ */
+export function awardCodeShares(codes: readonly string[]): number[] {
+  const classes = new Set(codes.map((code) => cpvStem(code).slice(0, 4))).size;
+  const focus = classes > FOCUSED_CLASSES ? FOCUSED_CLASSES / classes : 1;
+  return codes.map((_, index) => (index === 0 ? Math.max(SECONDARY_CODE_WEIGHT, focus) : SECONDARY_CODE_WEIGHT * focus) * focus);
+}
 
 export function recencyWeight(dateIso: string, now: Date): number {
   const ageMonths = Math.max(0, (now.getTime() - Date.parse(dateIso)) / MONTH_MS);
@@ -91,7 +115,9 @@ function round(value: number, digits = 3): number {
  * classes (4 digits) where it has them, groups (3) only where no class sits beneath, and
  * divisions (2) only where no group does. "Same trade" queries OR the three together.
  */
-export function tradeLevels(cpvWeights: Record<string, number>): { classes: string[]; groups: string[]; divisions: string[] } {
+export type TradeLevels = { classes: string[]; groups: string[]; divisions: string[] };
+
+export function tradeLevels(cpvWeights: Record<string, number>): TradeLevels {
   const strong = (length: number, floor: number, ratio: number) => {
     const entries = Object.entries(cpvWeights).filter(([prefix]) => prefix.length === length);
     const top = Math.max(0, ...entries.map(([, weight]) => weight));
@@ -123,8 +149,9 @@ export function buildSupplierProfile(
     const codes = [...new Set(award.cpvCodes.filter(isCpvCode))];
     // Per award, each prefix counts once, at the weight of the strongest code that carries it.
     const perAward = new Map<string, number>();
+    const shares = awardCodeShares(codes);
     codes.forEach((code, index) => {
-      const share = index === 0 ? 1 : SECONDARY_CODE_WEIGHT;
+      const share = shares[index]!;
       for (const prefix of cpvPrefixes(code)) perAward.set(prefix, Math.max(perAward.get(prefix) ?? 0, share));
       codeWeight.set(code, (codeWeight.get(code) ?? 0) + weight * share);
     });
@@ -255,6 +282,16 @@ export type RadarSpec = {
   regions: string[];
   valueLow: number | null;
   valueHigh: number | null;
+  /**
+   * The trade the profile's own awards define, at the depth they are coded (tradeLevels of
+   * the award-derived weights). Read from `cpvWeights` when absent.
+   */
+  trades?: TradeLevels;
+  /**
+   * CPV stems the owner picked by hand — the codes of a manual radar, trades added to a
+   * claimed company: their trade at exactly the depth they chose.
+   */
+  chosen?: string[];
 };
 
 /** Spec for a manually described radar: every chosen code counts fully at each of its depths. */
@@ -268,7 +305,8 @@ export function specFromManualProfile(profile: {
   valueMax: number | null;
 }): RadarSpec {
   const cpvWeights: Record<string, number> = {};
-  for (const code of profile.cpvCodes.filter(isCpvCode)) for (const prefix of cpvPrefixes(code)) cpvWeights[prefix] = 1;
+  const codes = profile.cpvCodes.filter(isCpvCode);
+  for (const code of codes) for (const prefix of cpvPrefixes(code)) cpvWeights[prefix] = 1;
   const prefixes = Object.keys(cpvWeights);
   return {
     key: `r:${profile.id}`,
@@ -281,6 +319,8 @@ export function specFromManualProfile(profile: {
     regions: profile.regions,
     valueLow: profile.valueMin,
     valueHigh: profile.valueMax,
+    trades: { classes: [], groups: [], divisions: [] },
+    chosen: [...new Set(codes.map(cpvStem))],
   };
 }
 
@@ -304,8 +344,12 @@ const SIBLING_FACTOR = 0.55;
 const BROAD_DIVISIONS = new Set(["33", "34", "42", "44", "45", "50", "71", "72", "73", "75", "79", "85", "90", "98"]);
 const BROAD_DIVISION_FACTOR = 0.28;
 
-/** How closely a set of CPV codes matches a profile's trade. */
-export function scoreCpv(cpvWeights: Record<string, number>, codes: readonly string[]): CpvMatch {
+/**
+ * How closely a set of CPV codes matches a profile's trade. `chosen` are the stems the owner
+ * picked by hand: a broad division they named as their trade ("IT services", 72) is not the
+ * weak signal it is when it merely turns up in an award.
+ */
+export function scoreCpv(cpvWeights: Record<string, number>, codes: readonly string[], chosen: readonly string[] = []): CpvMatch {
   let best: CpvMatch = { score: 0, prefix: null, relation: null };
   const keys = Object.keys(cpvWeights);
   for (const code of codes) {
@@ -318,7 +362,7 @@ export function scoreCpv(cpvWeights: Record<string, number>, codes: readonly str
       const noticeIsDeeper = index < prefixes.length - 1;
       const profileIsDeeper = keys.some((key) => key.length > prefix.length && key.startsWith(prefix));
       const relation: CpvMatch["relation"] = noticeIsDeeper && profileIsDeeper ? "sibling" : "line";
-      const depthFactor = prefix.length === 2 && BROAD_DIVISIONS.has(prefix) ? BROAD_DIVISION_FACTOR : DEPTH_FACTOR[prefix.length]!;
+      const depthFactor = prefix.length === 2 && BROAD_DIVISIONS.has(prefix) && !chosen.includes(prefix) ? BROAD_DIVISION_FACTOR : DEPTH_FACTOR[prefix.length]!;
       const score = depthFactor * (relation === "sibling" ? SIBLING_FACTOR : 1) * (0.4 + 0.6 * Math.sqrt(Math.min(1, weight)));
       if (score > best.score) best = { score, prefix, relation };
       break; // shallower prefixes of this code can only score lower
@@ -391,7 +435,7 @@ function keywordHits(keywords: readonly string[], title: string): string[] {
 }
 
 export function scoreNotice(spec: RadarSpec, notice: ScoreInput): ScoreBreakdown {
-  const cpvMatch = scoreCpv(spec.cpvWeights, notice.cpvCodes);
+  const cpvMatch = scoreCpv(spec.cpvWeights, notice.cpvCodes, spec.chosen);
   const cpv = cpvMatch.score;
 
   // Title hits carry the text score; the SQL rank adds a little for matches in the description.
@@ -453,6 +497,57 @@ export function scoreNotice(spec: RadarSpec, notice: ScoreInput): ScoreBreakdown
     regionMatch,
     oversized,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Match tiers
+// ---------------------------------------------------------------------------
+
+export type MatchTier = "strong" | "wider";
+
+/** A CPV class: the depth at which "the same line of work" starts to mean something. */
+const CLASS_DEPTH = 4;
+
+/**
+ * Which tier a match belongs to (PURE). Every notice at or above MIN_MATCH_SCORE is a match;
+ * the tier says whether it belongs on the list a small firm reads first.
+ *
+ * "strong" — the profile's own line of work, where it works. One of:
+ *   - the same line of work (one code is the other, or a broader or narrower form of it) at
+ *     CPV class depth (four digits) or deeper, inside a class the profile's awards
+ *     concentrate in (`tradeLevels`);
+ *   - a trade the owner picked by hand, at the depth they picked it;
+ *   - a buyer that has already awarded the supplier a contract, for work in or next to its
+ *     trade (a neighbouring code, or a trade its awards only state at group level);
+ *   and never a notice delivered where the profile does not work.
+ * "wider" — the rest: a neighbouring category, a trade the awards barely touch, an overlap
+ *   stated only at group or division level, a keyword in the title, another region.
+ *
+ * Why class depth: measured on 120 real suppliers, a group-level overlap makes
+ * "Teleradiology reporting" a match for a carers' centre whose one award is coded "Health
+ * services" (851), and "Street lighting replacement" one for a bathroom fitter coded
+ * "Building installation work" (453). Classes are where roofing parts from plumbing.
+ * The score itself is untouched: tiers only sort its matches into two lists.
+ */
+export function matchTier(
+  spec: Pick<RadarSpec, "cpvWeights" | "trades" | "chosen">,
+  breakdown: Pick<ScoreBreakdown, "cpvPrefix" | "cpvRelation" | "regionMatch">,
+  buyerWins = 0,
+): MatchTier {
+  const prefix = breakdown.cpvPrefix;
+  if (!prefix || breakdown.regionMatch === "elsewhere") return "wider";
+  const own = spec.trades ?? tradeLevels(spec.cpvWeights);
+  const chosen = spec.chosen ?? [];
+  const sameLine = breakdown.cpvRelation === "line";
+  // At or below a picked code, or a class-level notice that is a broader form of one.
+  const picked = chosen.some((stem) => prefix.startsWith(stem) || (prefix.length >= CLASS_DEPTH && stem.startsWith(prefix)));
+  const inClass = own.classes.some((level) => prefix.startsWith(level));
+  if (sameLine && (picked || inClass)) return "strong";
+  if (buyerWins > 0) {
+    const nearTrade = picked || inClass || own.groups.some((level) => prefix.startsWith(level)) || chosen.some((stem) => prefix.length >= 3 && stem.startsWith(prefix));
+    if (nearTrade) return "strong";
+  }
+  return "wider";
 }
 
 /** Division of the profile's strongest trade, for labels. */

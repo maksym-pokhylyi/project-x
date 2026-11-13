@@ -1,3 +1,4 @@
+import { procurementConfig } from "../config";
 import type { OcdsReleasePackage } from "../domain/ocds";
 
 /**
@@ -55,7 +56,7 @@ export function parseRetryAfter(header: string | null): number {
 export const fetchFtsPage: FetchFtsPage = async (url) => {
   try {
     const response = await fetch(url, {
-      headers: { accept: "application/json", "user-agent": process.env.FTS_USER_AGENT?.trim() || "procurement-data-client/1.0" },
+      headers: { accept: "application/json", "user-agent": procurementConfig.ftsUserAgent },
       signal: AbortSignal.timeout(45_000),
       cache: "no-store",
     });

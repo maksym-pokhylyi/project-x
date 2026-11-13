@@ -15,22 +15,34 @@ function valid(value: string | Date | null | undefined): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+/**
+ * A town as a notice gives it, without the stray comma or full stop some buyers type after
+ * it ("Cambridge," → "Cambridge"). Null when nothing is left.
+ */
+export function tidyPlace(value: string | null | undefined): string | null {
+  const cleaned = (value ?? "").replace(/^[\s,;.·-]+/u, "").replace(/[\s,;.·-]+$/u, "");
+  return cleaned || null;
+}
+
+/** Months are three letters in every date: the en-GB locale alone writes September as "Sept". */
+const threeLetterMonth = (text: string) => text.replace("Sept", "Sep");
+
 /** "22 Nov 2026" */
 export function formatDate(value: string | Date | null | undefined): string | null {
   const date = valid(value);
-  return date ? DATE.format(date) : null;
+  return date ? threeLetterMonth(DATE.format(date)) : null;
 }
 
 /** "22 Nov 2026, 12:00" */
 export function formatDateTime(value: string | Date | null | undefined): string | null {
   const date = valid(value);
-  return date ? DATE_TIME.format(date).replace(" at ", ", ") : null;
+  return date ? threeLetterMonth(DATE_TIME.format(date).replace(" at ", ", ")) : null;
 }
 
 /** "Nov 2026" */
 export function formatMonth(value: string | Date | null | undefined): string | null {
   const date = valid(value);
-  return date ? MONTH.format(date) : null;
+  return date ? threeLetterMonth(MONTH.format(date)) : null;
 }
 
 /** Whole calendar days between two instants, counted in UK time (today -> 0, tomorrow -> 1). */
@@ -64,7 +76,7 @@ export function describeDeadline(deadline: string | Date | null | undefined, now
   return { label, absolute, urgency: days <= 3 ? "urgent" : days <= 14 ? "soon" : "neutral", days };
 }
 
-/** "in 5 months", "in 3 weeks", "in 4 days", "today" — for contract end dates. */
+/** "in 5 months", "in 4½ months", "in 3 weeks", "in 4 days", "today" — for contract end dates. */
 export function describeTimeUntil(value: string | Date | null | undefined, now: Date = new Date()): string | null {
   const date = valid(value);
   if (!date) return null;
@@ -74,10 +86,92 @@ export function describeTimeUntil(value: string | Date | null | undefined, now: 
   if (days === 1) return "tomorrow";
   if (days < 21) return `in ${days} days`;
   if (days < 70) return `in ${Math.round(days / 7)} weeks`;
-  const months = Math.round(days / 30.4375);
-  return months < 24 ? `in ${months} months` : `in ${Math.round(months / 12)} years`;
+  // To the nearest half month: "in 4½ months" says more than "in 5 months" when a re-tender is being timed.
+  const halves = Math.round((days / 30.4375) * 2);
+  if (halves < 48) return `in ${Math.floor(halves / 2)}${halves % 2 === 1 ? "½" : ""} months`;
+  return `in ${Math.round(halves / 24)} years`;
 }
 
 export function pluralise(count: number, singular: string, plural = `${singular}s`): string {
   return `${count.toLocaleString("en-GB")} ${count === 1 ? singular : plural}`;
+}
+
+// ---------------------------------------------------------------------------
+// Closing dates, as the artboards write them
+// ---------------------------------------------------------------------------
+
+const CLOCK = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: TIME_ZONE });
+
+/** "12:00", "17:00" — UK time. */
+export function formatClock(value: string | Date | null | undefined): string | null {
+  const date = valid(value);
+  return date ? CLOCK.format(date) : null;
+}
+
+/** "12:00 noon", "17:00" — midday is spelled out, because "12:00" alone is read both ways. */
+export function formatTime(value: string | Date | null | undefined): string | null {
+  const clock = formatClock(value);
+  if (!clock) return null;
+  return clock === "12:00" ? "12:00 noon" : clock;
+}
+
+export type ClosingInfo = {
+  /** open: the deadline is ahead. closed: it has passed. unknown: the notice gives none. */
+  state: "open" | "closed" | "unknown";
+  /** ISO instant, for <time dateTime>. */
+  iso: string | null;
+  /** "27 Nov 2026" */
+  date: string | null;
+  /** "12:00 noon" */
+  time: string | null;
+  /** "27 Nov 2026, 12:00" — the one-line form. */
+  dateTime: string | null;
+  /** "14 days left", "Tomorrow", "Today"; null once closed or when unknown. Always shown NEXT TO the date. */
+  left: string | null;
+  /** Whole calendar days to the deadline in UK time (today = 0); null when unknown. */
+  days: number | null;
+};
+
+/**
+ * Everything a deadline marker needs (DESIGN.md §1.3: an amber marker, the absolute date,
+ * the time left in a small pill). Days are calendar days in UK time, so a tender closing
+ * tomorrow at noon says "Tomorrow" at any hour today.
+ */
+export function describeClosing(deadline: string | Date | null | undefined, now: Date = new Date()): ClosingInfo {
+  const date = valid(deadline);
+  if (!date) return { state: "unknown", iso: null, date: null, time: null, dateTime: null, left: null, days: null };
+  const days = calendarDaysBetween(now, date);
+  const open = date.getTime() > now.getTime();
+  return {
+    state: open ? "open" : "closed",
+    iso: date.toISOString(),
+    date: threeLetterMonth(DATE.format(date)),
+    time: formatTime(date),
+    dateTime: `${threeLetterMonth(DATE.format(date))}, ${CLOCK.format(date)}`,
+    left: !open ? null : days <= 0 ? "Today" : days === 1 ? "Tomorrow" : `${days} days left`,
+    days,
+  };
+}
+
+/**
+ * Length of a contract as a buyer would say it: "9 months", "18 months", "4 years",
+ * "2 years 6 months". Null when either date is missing or the period is not positive.
+ */
+export function formatTerm(start: string | Date | null | undefined, end: string | Date | null | undefined): string | null {
+  const from = valid(start);
+  const to = valid(end);
+  if (!from || !to) return null;
+  // Periods are published inclusive ("1 Apr 2027 to 31 Mar 2031" is four years): count the last day.
+  const days = calendarDaysBetween(from, to) + 1;
+  if (days <= 1) return null;
+  if (days < 14) return `${days} days`;
+  if (days < 50) return `${Math.round(days / 7)} weeks`;
+  const months = Math.round(days / 30.4375);
+  if (months < 24) return months === 1 ? "1 month" : `${months} months`;
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  if (rest === 0) return `${years} years`;
+  if (rest === 11) return `${years + 1} years`;
+  if (rest === 1) return `${years} years`;
+  return `${years} years ${rest} months`;
 }

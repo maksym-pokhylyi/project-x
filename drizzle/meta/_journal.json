@@ -50,6 +50,13 @@
       "when": 1794590570166,
       "tag": "0006_outreach",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794598069507,
+      "tag": "0007_radar_first_run",
+      "breakpoints": true
     }
   ]
 }

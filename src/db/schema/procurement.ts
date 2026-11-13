@@ -494,6 +494,20 @@ export const orgSupplierLinks = pgTable(
     createdBy: text("created_by"),
     /** self_declared | email_domain (the claimant's e-mail domain matches the supplier's published domain) */
     method: text("method").notNull().default("self_declared"),
+    /**
+     * The workspace's own choice of regions for this radar (top-level codes, e.g. UKE).
+     * Null = follow the regions of the company's published awards; empty = anywhere in the UK.
+     */
+    regions: text("regions").array(),
+    /** Trades the workspace added to the ones its awards show (CPV codes, 8 digits). */
+    extraCpvCodes: textArray("extra_cpv_codes"),
+    /**
+     * Trades its awards show that the workspace switched off ("not our work"): CPV codes
+     * (8 digits) of the class, group or division; everything beneath one stops counting.
+     */
+    excludedCpvCodes: textArray("excluded_cpv_codes"),
+    /** The first-run guide is still to be shown for this radar (set by the claim, cleared when dismissed). */
+    firstRunPending: boolean("first_run_pending").notNull().default(false),
     createdAt: createdAt(),
   },
   (t) => [uniqueIndex("org_supplier_links_org_supplier_key").on(t.organizationId, t.supplierId), index("org_supplier_links_supplier_idx").on(t.supplierId)],
@@ -515,6 +529,8 @@ export const radarProfiles = pgTable(
     regions: textArray("regions"),
     valueMin: money("value_min"),
     valueMax: money("value_max"),
+    /** The first-run guide is still to be shown for this radar (set on creation, cleared when dismissed). */
+    firstRunPending: boolean("first_run_pending").notNull().default(false),
     createdBy: text("created_by"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
