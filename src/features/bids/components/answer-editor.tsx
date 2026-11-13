@@ -343,7 +343,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
   const buyer = bid.buyerName ?? "the buyer";
 
   return (
-    <div className="bid-scope @container flex flex-col" data-testid="answer-editor">
+    <div className="bid-scope bid-toolbar @container flex flex-col" data-testid="answer-editor">
       {/* --- Sub-header ------------------------------------------------------------------------ */}
       <div className={cn("flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-b border-(--bid-line) pb-3", embedded ? "hidden" : "")}>
         <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1">

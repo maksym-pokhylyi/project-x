@@ -6,9 +6,9 @@ import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { libraryDocs } from "@/db/schema";
 import { BreadcrumbTrail } from "@/components/app/breadcrumbs";
-import { getBidAccess, type BidAccessSummary } from "@/features/bids/access";
+import { getBidAccess, getFreeCheckUse, type BidAccessSummary } from "@/features/bids/access";
 import { NewBidForm, type ExistingFile } from "@/features/bids/components/new-bid-form";
-import { UpgradeNotice } from "@/features/bids/components/ui";
+import { UpgradePanel } from "@/features/bids/components/upgrade-panel";
 import { getBid, listBidFiles } from "@/features/bids/server/bids";
 import { factsConfirmed } from "@/features/bids/server/page-data";
 import { lookupTender } from "@/features/bids/server/tender";
@@ -81,6 +81,7 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
     }
   }
   const tender = noticeId ? await lookupTender(noticeId) : null;
+  const freeCheckUse = access.next ? null : await getFreeCheckUse(ctx.organization.id);
   const plan = usage(access);
   const documents = docCount?.count ?? 0;
   const full = access.next?.level === "full";
@@ -91,18 +92,11 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
       <h1 className="bid-h1">New bid check</h1>
       <p className="mt-2 max-w-[760px] text-[17px] leading-[1.45]">Upload the tender pack as the buyer sent it. You get every requirement quoted and cited, checked against your company, with a plain verdict.</p>
 
-      {!access.next ? (
-        <UpgradeNotice title="You have used your bid checks" className="mt-6">
-          <span data-testid="quota-reached">
-            {access.planName === "Free" ? "The Free plan includes one cited bid check." : `${access.planName} includes ${access.checks.limit ?? 0} cited bid check${access.checks.limit === 1 ? "" : "s"} a month.`} Bid Desk (£149 a month) includes 3
-            full bids a month: the check, grounded first drafts, evaluator-style marking and Word export. A Bid Pass (£99) covers one full bid on any plan.
-          </span>
-        </UpgradeNotice>
-      ) : null}
 
       <div className="mt-9 flex flex-wrap items-start gap-x-8 gap-y-10">
         <div className="min-w-0 flex-[999_1_640px]">
           <NewBidForm
+            notice={access.next ? null : <UpgradePanel access={access} moment="none_left" freeCheckUse={freeCheckUse} tenderClosesAt={tender?.closesAt ?? null} />}
             initialBidId={initialBidId}
             initialFiles={existing}
             noticeId={noticeId}

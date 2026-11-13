@@ -102,15 +102,32 @@
   border-top: 1px solid var(--bid-line);
 }
 
-/* Buttons: 44px targets. */
+/*
+ * Control sizes (Foundations: "Control sizes") — ONE height scale for fields and buttons:
+ *   44 px  toolbars, tables and filters      .bid-btn-sm, .bid-filter, anything in .bid-toolbar
+ *   48 px  forms                              .bid-btn, .bid-input
+ *   52 px  the same forms on phones
+ * A button beside a field takes the field's height and a form's submit button the height
+ * of its fields: both read the same variable, so a row cannot disagree.
+ */
+.bid-scope {
+  --bid-control: 3rem;
+  --bid-control-compact: 2.75rem;
+}
+@media (width < 48rem) {
+  .bid-scope {
+    --bid-control: 3.25rem;
+  }
+}
 .bid-btn {
   box-sizing: border-box;
-  min-height: 44px;
+  height: var(--bid-control, 3rem);
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 0 16px;
   font-size: 15px;
   font-weight: 600;
   line-height: 1.2;
@@ -139,9 +156,15 @@
   border-color: var(--bid-brand);
   filter: brightness(0.92);
 }
-.bid-btn-sm {
-  padding: 10px 14px;
+.bid-btn-sm,
+.bid-toolbar .bid-btn {
+  height: var(--bid-control-compact, 2.75rem);
+  padding: 0 14px;
   font-size: 14px;
+}
+.bid-toolbar input.bid-input,
+.bid-toolbar select.bid-input {
+  height: var(--bid-control-compact, 2.75rem);
 }
 .bid-btn-quiet {
   border-color: transparent;
@@ -154,7 +177,7 @@
 
 /* Filter chips (pressed = ink). */
 .bid-filter {
-  min-height: 44px;
+  height: var(--bid-control-compact, 2.75rem);
   padding: 0 14px;
   font-size: 14px;
   font-weight: 500;
@@ -343,10 +366,15 @@
   white-space: nowrap;
 }
 
+input.bid-input,
+select.bid-input {
+  height: var(--bid-control, 3rem);
+  padding-block: 0;
+}
 .bid-input {
   box-sizing: border-box;
   width: 100%;
-  min-height: 44px;
+  min-height: var(--bid-control-compact, 2.75rem);
   font: inherit;
   color: var(--bid-ink);
   background: var(--bid-surface);

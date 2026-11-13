@@ -4,7 +4,7 @@ import "./bid-theme.css";
 import { Check, Loader2, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 import { createBidAction, planUploadAction, registerFileAction, removeFileAction, startProcessingAction, updateBidAction } from "@/features/bids/actions";
 import { ACCEPT_ATTRIBUTE, fileExtension, formatBytes, MAX_BID_BYTES, MAX_BID_FILES, MAX_FILE_BYTES, unsupportedFileReason } from "@/features/bids/constants";
 import { tenderReferenceFromInput, type TenderSummary } from "@/features/bids/tender-lookup";
@@ -65,6 +65,7 @@ export function NewBidForm({
   noticeId,
   tender,
   disabled,
+  notice,
 }: {
   initialBidId: string | null;
   initialFiles: ExistingFile[];
@@ -74,6 +75,8 @@ export function NewBidForm({
   tender: (Omit<TenderSummary, "closesAt"> & { closesAt: string | null }) | null;
   /** True when the workspace has no check left: the form is shown but cannot be used. */
   disabled: boolean;
+  /** Shown between the two steps: the upgrade panel when there is nothing left to start a check with. */
+  notice?: ReactNode;
 }) {
   const router = useRouter();
   const [rows, setRows] = useState<Row[]>(initialFiles.map((file) => ({ key: file.id, name: file.name, size: file.size, status: "done", progress: 100, fileId: file.id })));
@@ -306,11 +309,14 @@ export function NewBidForm({
         </div>
       </section>
 
+      {notice}
+
       {/* --- 2 · Upload the tender pack --------------------------------------------------------- */}
       <section aria-labelledby="upload-h" className="flex flex-col gap-4">
         <h2 id="upload-h" className="bid-h2">
           2 · Upload the tender pack
         </h2>
+        {disabled ? <p className="text-[15px] text-(--bid-muted)">Upload opens once you have a bid to use.</p> : null}
         <div
           data-testid="dropzone"
           onDragOver={(event) => {

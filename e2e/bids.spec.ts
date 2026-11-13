@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { expect, test, type Page } from "@playwright/test";
 import postgres from "postgres";
 import { E2E_DEV_TOOLS_SECRET } from "../playwright.bids.config";
+import { expectAlignedControls } from "./control-heights";
 
 /**
  * The bid desk's main journey against a production build, offline:
@@ -169,6 +170,27 @@ test("upload a pack, get a cited check, draft and mark an answer, export", async
   const csv = await page.request.get(`${bidUrl.replace("/app/bids/", "/api/bids/")}/export/requirements-csv`);
   expect(csv.status()).toBe(200);
   expect(await csv.text()).toContain("Quote found in documents");
+
+  // --- the bids list: stage, verdict and the usage line ------------------------------------
+  await page.goto("/app/bids");
+  await expect(page.getByTestId("bid-row")).toHaveCount(1);
+  await expect(page.getByTestId("bid-row")).toContainText(/Drafting 1 of \d+ answers?/);
+  await expect(page.getByTestId("usage-line")).toContainText("1 of 3 full bids used this month");
+
+  // --- control sizes: a field and the button beside it share one height, phone and desktop ----
+  for (const [label, url] of [
+    ["bids list", "/app/bids"],
+    ["new bid check", "/app/bids/new"],
+    ["documents", "/app/library"],
+    ["requirements", `${bidUrl}/requirements`],
+    ["answers", `${bidUrl}/questions`],
+  ] as const) {
+    await page.goto(url);
+    await expectAlignedControls(page, label);
+  }
+  await page.locator('[data-testid="question-card"] a').last().click();
+  await expect(page.getByTestId("answer-editor")).toBeVisible();
+  await expectAlignedControls(page, "answer editor");
 
   // --- the page while a check is being built, with partial results -------------------------
   // The offline run is too quick to catch, so the state is set directly: the same rows, shown

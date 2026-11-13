@@ -1,28 +1,79 @@
-import { Plus } from "lucide-react";
+import "@/features/bids/components/bid-theme.css";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageHeader } from "@/components/app/page-header";
-import { Button } from "@/components/ui/button";
-import { getBidAccess } from "@/features/bids/access";
-import { DeadlineChip, Pill, UpgradeNotice, type Tone } from "@/features/bids/components/ui";
+import { getBidAccess, UPGRADE_URL, type BidAccessSummary } from "@/features/bids/access";
+import { daysLeftLabel, formatDeadline } from "@/features/bids/components/ui";
 import { isRecent } from "@/features/bids/locations";
-import { listBids } from "@/features/bids/server/bids";
+import { listBids, type BidListItem } from "@/features/bids/server/bids";
 import { VERDICT_LABELS, type VerdictKey } from "@/features/bids/types";
+import { cn } from "@/lib/utils";
 import { requireOrgForPage } from "@/server/session";
 
 export const metadata: Metadata = { title: "Bids" };
 export const dynamic = "force-dynamic";
 
-const STATUS: Record<string, { label: string; tone: Tone }> = {
-  draft: { label: "Uploading", tone: "neutral" },
-  processing: { label: "Checking", tone: "brand" },
-  ready: { label: "Ready", tone: "success" },
-  failed: { label: "Stopped — retry", tone: "danger" },
-  archived: { label: "Archived", tone: "neutral" },
-};
+const VERDICT_PILL: Record<VerdictKey, string> = { looks_biddable: "bid-pill-met", biddable_with_gaps: "bid-pill-amber", likely_not_eligible: "bid-pill-gap", not_enough_information: "bid-pill-neutral" };
+const day = (date: Date) => new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" }).format(date);
+const plural = (count: number, one: string, many = `${one}s`) => (count === 1 ? one : many);
 
-const VERDICT_TONE: Record<VerdictKey, Tone> = { looks_biddable: "success", biddable_with_gaps: "warning", likely_not_eligible: "danger", not_enough_information: "neutral" };
+/** Where the bid stands, from what is stored about it (nothing here is a guess). */
+function stageOf(bid: BidListItem): string {
+  if (bid.status === "draft") return "Not started";
+  if (bid.status === "processing") return "Check in progress";
+  if (bid.status === "failed") return "Check stopped";
+  if (bid.status === "archived") return "Archived";
+  if (bid.questionCount > 0 && bid.finalCount === bid.questionCount) return "Answers final";
+  if (bid.draftedCount > 0) return `Drafting ${bid.draftedCount} of ${bid.questionCount} ${plural(bid.questionCount, "answer")}`;
+  return "Check ready";
+}
 
+function lastActivity(date: Date, now: Date): string {
+  const time = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit" }).format(date);
+  return day(date) === day(now) ? `Today, ${time}` : day(date);
+}
+
+/** The usage line beside "New bid check": what the plan includes, what is used, what was carried over. */
+function UsageLine({ access }: { access: BidAccessSummary }) {
+  const { fullBids, checks } = access;
+  let lead: string;
+  let rest: string | null = null;
+  if (access.drafting && fullBids.limit !== null) {
+    lead = `${fullBids.used} of ${fullBids.limit}`;
+    rest = fullBids.trial ? `full ${plural(fullBids.limit, "bid")} used in your trial` : "full bids used this month";
+  } else if (access.drafting) {
+    lead = `${fullBids.used}`;
+    rest = "full bids used this month";
+  } else if ((checks.limit ?? 0) > 0) {
+    lead = `${checks.used} of ${checks.limit}`;
+    rest = `cited ${plural(checks.limit ?? 0, "check")} used this month`;
+  } else {
+    lead = access.freeCheckAvailable ? "1 free" : "Free";
+    rest = access.freeCheckAvailable ? "cited bid check to use" : "cited bid check used";
+  }
+  return (
+    <p className="text-sm" data-testid="usage-line">
+      <span className="bid-serif text-[19px] font-semibold">{lead}</span> <span>{rest}</span>
+      {fullBids.rolledOver ? (
+        <span className="text-(--bid-muted)">
+          {" · "}
+          {fullBids.rolledOver.count} unused {plural(fullBids.rolledOver.count, "bid")} rolled over from {fullBids.rolledOver.fromLabel}: use {fullBids.rolledOver.count === 1 ? "it" : "them"} by {day(fullBids.rolledOver.useBy)}
+        </span>
+      ) : null}
+      {access.bidPasses > 0 ? (
+        <span className="text-(--bid-muted)">
+          {" · "}
+          {access.bidPasses} Bid {plural(access.bidPasses, "Pass", "Passes")}
+        </span>
+      ) : null}
+      {" · "}
+      <Link href={UPGRADE_URL} className="bid-link text-(--bid-ink)">
+        Billing
+      </Link>
+    </p>
+  );
+}
+
+/** Bids list (design handoff: Bids, BidsEmpty). */
 export default async function BidsPage({ searchParams }: { searchParams: Promise<{ archived?: string }> }) {
   const ctx = await requireOrgForPage({ returnTo: "/app/bids" });
   const { archived } = await searchParams;
@@ -30,100 +81,110 @@ export default async function BidsPage({ searchParams }: { searchParams: Promise
   const [bids, access] = await Promise.all([listBids(ctx, { includeArchived: showArchived }), getBidAccess(ctx.organization.id)]);
   // Abandoned upload drafts drop off the list after a day.
   const visible = bids.filter((bid) => bid.status !== "draft" || isRecent(bid.createdAt, 86_400_000));
+  const now = new Date();
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Bids"
-        description="Upload a tender pack to get a cited bid check: every requirement, deadline and question quoted from the buyer's documents."
-        actions={
-          <Button asChild>
-            <Link href="/app/bids/new" data-testid="new-bid">
-              <Plus aria-hidden className="size-4" />
-              New bid
-            </Link>
-          </Button>
-        }
-      />
-
-      {!access.next ? (
-        <UpgradeNotice title="You have used your cited bid checks">
-          {access.planName} includes {access.checks.limit ? `${access.checks.limit} check${access.checks.limit === 1 ? "" : "s"} a month` : "one free check"}. Bid Desk (£149/month) includes 3 full bids a month with drafting, marking and export; a Bid Pass
-          (£99) covers one full bid.
-        </UpgradeNotice>
-      ) : null}
+    <div className="bid-scope flex flex-col">
+      <div className="bid-toolbar flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
+        <h1 className="bid-h1">Bids</h1>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <UsageLine access={access} />
+          <Link href="/app/bids/new" className="bid-btn bid-btn-primary" data-testid="new-bid">
+            New bid check
+          </Link>
+        </div>
+      </div>
 
       {visible.length === 0 ? (
-        <div className="rounded-xl border border-dashed px-6 py-12 text-center" data-testid="bids-empty">
-          <h2 className="text-base font-semibold">No bids yet</h2>
-          <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-            A bid starts with the tender pack. Upload the ITT and its appendices and, in a few minutes, see the deadline, the pass/fail requirements and every question — each with the quote, file and page it came from.
-          </p>
-          <Button asChild className="mt-4">
-            <Link href="/app/bids/new">Upload a tender pack</Link>
-          </Button>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Not sure what you get?{" "}
-            <Link href="/sample-check" className="underline underline-offset-4">
-              See a sample check on a real council tender
+        <section className="bid-card mt-7 flex flex-col items-start gap-4 px-6 py-9 sm:px-9" data-testid="bids-empty">
+          <h2 className="bid-h2">No bids yet</h2>
+          <p className="max-w-[620px] text-[17px] leading-[1.45]">Upload a tender pack and get every requirement quoted and cited, checked against your company, with a plain verdict.</p>
+          <div className="bid-toolbar flex flex-wrap items-center gap-x-5 gap-y-3">
+            <Link href="/app/bids/new" className="bid-btn bid-btn-primary">
+              New bid check
             </Link>
-            .
-          </p>
-        </div>
-      ) : (
-        <ul className="divide-y rounded-lg border bg-card" data-testid="bids-list">
-          {visible.map((bid) => {
-            const status = STATUS[bid.status] ?? STATUS.ready!;
-            const href = bid.status === "draft" ? `/app/bids/new?bid=${bid.id}` : `/app/bids/${bid.id}`;
-            return (
-              <li key={bid.id} className="flex flex-col gap-2 px-4 py-3.5 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:gap-4">
-                <div className="min-w-0 flex-1">
-                  <h2 className="line-clamp-2 text-sm font-semibold">
-                    <Link href={href} className="underline-offset-4 hover:underline">
-                      {bid.title}
-                    </Link>
-                  </h2>
-                  <p className="mt-0.5 truncate text-sm text-muted-foreground">
-                    {[bid.buyerName, bid.reference ? `Ref ${bid.reference}` : null].filter(Boolean).join(" · ") || "Buyer not read yet"}
-                  </p>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                    <Pill tone={status.tone}>{bid.status === "processing" ? `${status.label} · ${bid.processingProgress}%` : status.label}</Pill>
-                    {bid.status === "ready" || bid.status === "archived" ? <DeadlineChip deadline={bid.submissionDeadline} /> : null}
-                    {bid.verdict && bid.status === "ready" ? <Pill tone={VERDICT_TONE[bid.verdict.verdict]}>{VERDICT_LABELS[bid.verdict.verdict]}</Pill> : null}
-                    {bid.accessLevel === "brief" && bid.status !== "draft" ? <Pill>Check only</Pill> : null}
-                  </div>
-                </div>
-                {bid.status !== "draft" ? (
-                  <dl className="flex shrink-0 gap-5 text-right text-xs text-muted-foreground">
-                    <div>
-                      <dt>Requirements</dt>
-                      <dd className="text-sm font-medium text-foreground tabular-nums">{bid.requirementCount}</dd>
-                    </div>
-                    <div>
-                      <dt>Answers</dt>
-                      <dd className="text-sm font-medium text-foreground tabular-nums">
-                        {bid.draftedCount}/{bid.questionCount}
-                      </dd>
-                    </div>
-                  </dl>
-                ) : null}
+            <Link href="/sample-check" className="bid-link text-[15px] font-medium text-(--bid-ink)">
+              See a sample check
+            </Link>
+          </div>
+          <ol className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-[15px] text-(--bid-muted)">
+            {["Upload the pack", "Read the check", "Draft and mark your answers"].map((step, index) => (
+              <li key={step} className="flex items-center gap-2">
+                <span className="bid-mono flex size-6 items-center justify-center rounded-full border border-(--bid-line-strong) text-xs text-(--bid-ink)">{index + 1}</span>
+                {step}
               </li>
-            );
-          })}
-        </ul>
+            ))}
+          </ol>
+        </section>
+      ) : (
+        <div className="bid-card mt-7 overflow-hidden">
+          <div className="hidden grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,0.9fr)] gap-x-6 border-b border-(--bid-line) px-6 py-3 text-[13px] font-semibold text-(--bid-muted) min-[900px]:grid" aria-hidden>
+            <span>Tender</span>
+            <span>Deadline</span>
+            <span>Stage</span>
+            <span>Verdict</span>
+            <span>Last activity</span>
+          </div>
+          <ul data-testid="bids-list">
+            {visible.map((bid, index) => {
+              const href = bid.status === "draft" ? `/app/bids/new?bid=${bid.id}` : `/app/bids/${bid.id}`;
+              const left = bid.submissionDeadline ? daysLeftLabel(bid.submissionDeadline, now) : null;
+              const verdict = bid.verdict && (bid.status === "ready" || bid.status === "archived") ? bid.verdict.verdict : null;
+              return (
+                <li
+                  key={bid.id}
+                  className={cn(
+                    "grid grid-cols-1 gap-x-6 gap-y-2 px-5 py-4 sm:px-6 min-[900px]:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,0.9fr)] min-[900px]:items-center",
+                    index > 0 ? "bid-rule" : "",
+                  )}
+                  data-testid="bid-row"
+                >
+                  <div className="min-w-0">
+                    <h2 className="text-[15px] leading-[1.35] font-semibold">
+                      <Link href={href} className="bid-link text-(--bid-ink)">
+                        {bid.title}
+                      </Link>
+                    </h2>
+                    <p className="mt-0.5 truncate text-sm text-(--bid-muted)">{bid.buyerName ?? "Buyer not read yet"}</p>
+                  </div>
+                  <p className="text-sm">
+                    {bid.submissionDeadline && left ? (
+                      left.past ? (
+                        <span className="text-(--bid-muted)">Closed {formatDeadline(bid.submissionDeadline, false)}</span>
+                      ) : (
+                        <>
+                          <span className="font-medium">{formatDeadline(bid.submissionDeadline, false)}</span>
+                          <span className={cn("ml-2 text-[13px]", left.urgent ? "font-semibold text-(--bid-amber-ink)" : "text-(--bid-muted)")}>{left.label}</span>
+                        </>
+                      )
+                    ) : (
+                      <span className="text-(--bid-muted)">{bid.status === "ready" ? "Not read from the pack" : "—"}</span>
+                    )}
+                  </p>
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                    <span className={bid.status === "failed" ? "font-medium text-(--bid-danger)" : undefined}>{stageOf(bid)}</span>
+                    {bid.accessSource === "credit" ? <span className="bid-tag">Bid Pass</span> : null}
+                    {bid.accessLevel === "brief" && bid.status === "ready" ? <span className="bid-tag">Check only</span> : null}
+                  </p>
+                  <p className="text-sm">{verdict ? <span className={cn("bid-pill", VERDICT_PILL[verdict])}>{VERDICT_LABELS[verdict]}</span> : <span className="text-(--bid-muted)">No verdict yet</span>}</p>
+                  <p className="text-sm text-(--bid-muted)">{lastActivity(bid.updatedAt, now)}</p>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
 
-      <p className="text-sm text-muted-foreground">
-        {showArchived ? (
-          <Link href="/app/bids" className="underline underline-offset-4">
-            Hide archived bids
-          </Link>
-        ) : (
-          <Link href="/app/bids?archived=1" className="underline underline-offset-4">
-            Show archived bids
-          </Link>
-        )}
+      <p className="mt-5 text-sm text-(--bid-muted)">
+        A bid starts as a cited bid check. Drafts and marking are added as you work through it.{" "}
+        <Link href={showArchived ? "/app/bids" : "/app/bids?archived=1"} className="bid-link text-(--bid-ink)">
+          {showArchived ? "Hide archived bids" : "Show archived bids"}
+        </Link>
       </p>
+      <footer className="mt-10 rounded-[10px] bg-(--bid-paper-deep) px-5 py-4 text-[13px] text-(--bid-muted)">
+        <strong className="font-semibold text-(--bid-ink)">Where your files are kept.</strong> Your tender packs and company documents are stored in the EU (Frankfurt) and encrypted in transit and at rest. Only people in your workspace
+        can open them. They are never used to train AI models.
+      </footer>
     </div>
   );
 }

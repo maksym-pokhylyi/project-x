@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { bidFiles, bidQuestions, bidRequirements, bids, users } from "@/db/schema";
 import { appUrl } from "@/env";
 import { PIPELINE_STEPS, STEP_STAGE, VERDICT_LABELS, type Citation, type PackStats, type PipelineStep, type ProcessingState } from "@/features/bids/types";
+import { coverageSummary, isScoredQuestion } from "@/features/bids/view";
 import { AiBudgetExceededError } from "@/lib/ai";
 import { track } from "@/lib/analytics";
 import { sendEmail } from "@/lib/email/send";
@@ -220,9 +221,15 @@ async function finalise(bid: BidRow): Promise<void> {
     try {
       const [creator] = await db.select({ email: users.email, name: users.name }).from(users).where(eq(users.id, bid.createdBy));
       if (creator) {
+        const daysLeft = fresh.submissionDeadline ? Math.ceil((fresh.submissionDeadline.getTime() - Date.now()) / 86_400_000) : null;
         const deadline = fresh.submissionDeadline
-          ? `Closes ${new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(fresh.submissionDeadline)}`
+          ? `Closes ${new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(fresh.submissionDeadline)}` +
+            (daysLeft !== null && daysLeft > 0 ? ` · ${daysLeft} day${daysLeft === 1 ? "" : "s"} left` : "")
           : null;
+        const gating = requirements.filter((row) => row.isPassFail);
+        const gapRows = gating.filter((row) => row.companyStatus === "gap");
+        const met = gating.filter((row) => row.companyStatus === "met").length;
+        const shorten = (text: string) => (text.length > 80 ? `${text.slice(0, 77).trimEnd()}…` : text);
         await sendEmail(creator.email, {
           name: "brief-ready",
           props: {
@@ -235,6 +242,10 @@ async function finalise(bid: BidRow): Promise<void> {
             passFail,
             questions: questions.length,
             citations,
+            gates: { total: gating.length, met, confirm: gating.length - met - gapRows.length, gaps: gapRows.length },
+            gapNames: gapRows.slice(0, 3).map((row) => shorten(row.text)),
+            scoredQuestions: questions.filter((row) => isScoredQuestion(row)).length,
+            coverage: coverageSummary(files, packStats).headline || null,
             url: `${appUrl}/app/bids/${bid.id}`,
           },
         });

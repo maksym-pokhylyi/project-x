@@ -65,8 +65,8 @@ export default async function BidLayout({ children, params }: { children: ReactN
             {bid.accessLevel === "brief" ? <span className="bid-tag">Check only</span> : null}
           </p>
         </div>
-        <div className="bid-noprint flex flex-wrap items-center gap-2.5">
-          {done ? <ExportMenu bidId={bid.id} canExportAnswers={capabilities.exportAnswers} answersReady={answersReady} /> : null}
+        <div className="bid-noprint bid-toolbar flex flex-wrap items-center gap-2.5">
+          {done ? <ExportMenu bidId={bid.id} canExportAnswers={capabilities.exportAnswers} answersReady={answersReady} label={bid.accessLevel === "full" ? undefined : "Download the check (Word)"} /> : null}
           {done && questions.length > 0 ? (
             <Link href={firstScored ? `${base}/questions/${firstScored.id}` : `${base}/questions`} className="bid-btn bid-btn-primary" data-testid="open-answers">
               Open draft answers

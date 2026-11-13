@@ -250,6 +250,16 @@ export async function getBidAccess(organizationId: string): Promise<BidAccessSum
   };
 }
 
+/** The bid the workspace's one free check was used on (for "Your free check went on …"), or null. */
+export async function getFreeCheckUse(organizationId: string): Promise<{ bidId: string; title: string; usedAt: Date } | null> {
+  const [row] = await db
+    .select({ bidId: bids.id, title: bids.title, usedAt: bidCredits.consumedAt })
+    .from(bidCredits)
+    .innerJoin(bids, eq(bids.id, bidCredits.consumedBidId))
+    .where(and(eq(bidCredits.organizationId, organizationId), eq(bidCredits.kind, "free_brief")));
+  return row?.usedAt ? { bidId: row.bidId, title: row.title, usedAt: row.usedAt } : null;
+}
+
 /** Single seam for "may this workspace start (or unlock) a full bid now?". */
 export async function canStartFullBid(organizationId: string): Promise<boolean> {
   const plan = await planAccess(organizationId);

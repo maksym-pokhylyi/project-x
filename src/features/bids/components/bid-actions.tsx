@@ -8,14 +8,14 @@ import { useState, useTransition } from "react";
 import { deleteBidAction, setBidArchivedAction, unlockFullBidAction } from "@/features/bids/actions";
 
 /** "Export to Word": the downloads of one bid, as a menu next to the title. */
-export function ExportMenu({ bidId, canExportAnswers, answersReady }: { bidId: string; canExportAnswers: boolean; answersReady: number }) {
+export function ExportMenu({ bidId, canExportAnswers, answersReady, label = "Export to Word" }: { bidId: string; canExportAnswers: boolean; answersReady: number; label?: string }) {
   const base = `/api/bids/${bidId}/export`;
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
         <button type="button" className="bid-btn" data-testid="export-menu">
           <Download aria-hidden className="size-4" />
-          Export to Word
+          {label}
           <ChevronDown aria-hidden className="size-3.5" />
         </button>
       </Popover.Trigger>

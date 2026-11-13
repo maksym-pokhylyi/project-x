@@ -25,7 +25,7 @@ const CTA_HREF = "/sign-up?next=/app/bids/new";
 function Cta({ className }: { className?: string }) {
   return (
     <Link href={CTA_HREF} className={`bid-btn bid-btn-primary ${className ?? ""}`} data-testid="sample-cta">
-      Run this check on your own tender — free
+      Get a free cited bid check
       <ArrowRight aria-hidden className="size-4" />
     </Link>
   );
@@ -51,19 +51,32 @@ export default async function SampleCheckPage() {
 
   return (
     <div className="bg-(--bid-paper)" id="top">
+      <div className="bid-scope sticky top-0 z-20 border-b border-(--bid-line) bg-(--bid-surface)" data-testid="sample-cta-bar">
+        <div className="bid-toolbar mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2.5 sm:px-8">
+          <p className="text-sm">
+            <span className="font-semibold">A sample check.</span> <span className="text-(--bid-muted)">Yours takes a few minutes: upload the pack as the buyer sent it.</span>
+          </p>
+          <Link href={CTA_HREF} className="bid-btn bid-btn-primary">
+            Get a free cited bid check
+          </Link>
+        </div>
+      </div>
       <div className="bid-scope mx-auto flex max-w-[1280px] flex-col px-4 pt-8 pb-16 sm:px-8" data-testid="sample-check">
         <header className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
           <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-2">
+            <p className="self-start rounded-[6px] bg-(--bid-brand-tint) px-3 py-1.5 text-sm font-semibold text-(--bid-brand)" data-testid="sample-band">
+              A sample check, built from a real public tender pack
+            </p>
             <p className="bid-mono text-xs text-(--bid-muted)">
-              Sample cited bid check · read-only · {sample.files.filter((file) => file.kind !== "zip").length} files as published by the buyer
+              Read-only · {sample.files.filter((file) => file.kind !== "zip").length} files as published by the buyer
             </p>
             <h1 className="bid-h1">{source.title}</h1>
             <p className="text-[15px]">
               {source.buyer} <span className="text-(--bid-muted)">· {bid.title}</span>
             </p>
             <p className="max-w-[760px] text-sm">
-              This is a real check, produced by Bidfolio from the tender pack {source.buyer} published for this contract. Nothing about the tender has been edited. The bidder, <strong>{sample.bidderName}</strong>, is fictional: its
-              company facts and documents were invented so that the check has something to compare the requirements with.
+              This is a real check, produced by Bidfolio from the tender pack {source.buyer} published for this contract. Nothing about the tender has been edited. The bidder is <strong>the example company</strong>: a fictional
+              firm whose company facts and documents were made up so that the check has something to compare the requirements with.
             </p>
             <p className="text-[13px] text-(--bid-muted)" data-testid="sample-source">
               Source documents: published by {source.buyer} on{" "}
@@ -75,6 +88,13 @@ export default async function SampleCheckPage() {
                 the buyer&rsquo;s tender notice
               </a>{" "}
               · retrieved {new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${source.retrieved}T12:00:00Z`))}. This tender has closed.
+            </p>
+            <p className="text-[13px] text-(--bid-muted)" data-testid="sample-removal">
+              The tender documents belong to the buyer; we quote them to show how a check reads. Ask us to remove this sample:{" "}
+              <a href="mailto:hello@bidfolio.co.uk" className="bid-link">
+                hello@bidfolio.co.uk
+              </a>
+              .
             </p>
           </div>
           <Cta />
@@ -129,7 +149,7 @@ export default async function SampleCheckPage() {
                 One drafted answer, with the evaluator&rsquo;s view
               </h2>
               <p className="max-w-[760px] text-sm text-(--bid-muted)">
-                A first draft written only from {sample.bidderName}&rsquo;s (fictional) company facts and documents. Where they hold no evidence the draft leaves a gap instead of inventing a fact, and the marking says what an
+                A first draft written only from the example company&rsquo;s (fictional) company facts and documents. Where they hold no evidence the draft leaves a gap instead of inventing a fact, and the marking says what an
                 evaluator would want to see.
                 {sample.draftedToWords && !question.wordLimit ? ` The pack sets no word limit for this question; the draft was written to ${sample.draftedToWords} words.` : ""}
               </p>
