@@ -14,6 +14,7 @@ import { UPLOAD_FAILED_MESSAGE, UploadError, uploadFile } from "./upload-client"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FileInput } from "@/features/bids/components/ui/file-input";
+import { Progress } from "@/components/ui/progress";
 
 type Row = {
   key: string;
@@ -429,9 +430,7 @@ export function NewBidForm({
                         ) : (
                           <>
                             <span className="font-semibold tabular-nums">Uploading {row.progress}%</span>
-                            <span className="flex h-1 w-40 max-w-full rounded-full bg-line" role="progressbar" aria-valuenow={row.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Uploading ${row.name}`}>
-                              <span className="rounded-full bg-ink transition-[width]" style={{ width: `${row.progress}%` }} />
-                            </span>
+                            <Progress value={row.progress} aria-label={`Uploading ${row.name}`} className="h-1 w-40 max-w-full" />
                           </>
                         )}
                       </>

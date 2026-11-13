@@ -7,6 +7,7 @@ import { CitationMark, SourceLegend, type SourceLinks } from "./citation";
 import type { QuestionItem } from "./questions-view";
 import type { RequirementItem } from "./requirements-view";
 import { StatusPill } from "./ui";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * What a check has found while it is still being built (design handoff: Processing).
@@ -53,9 +54,9 @@ export function PartialResults({
           <div className="bid-card">
             {shown.length === 0 ? (
               <ul aria-hidden className="flex flex-col">
-                {[72, 56, 64].map((width, index) => (
+                {["w-3/4", "w-3/5", "w-2/3"].map((width, index) => (
                   <li key={index} className={cn("flex flex-col gap-3 px-4 py-5 sm:px-6", index > 0 ? "bid-rule" : "")}>
-                    <span className="h-3.5 rounded bg-paper-deep" style={{ width: `${width}%` }} />
+                    <Skeleton className={cn("h-3.5", width)} />
                     <span className="h-3 w-40 rounded bg-paper-deep" />
                   </li>
                 ))}
@@ -117,10 +118,10 @@ export function PartialResults({
                   ))}
                   {questionsListed
                     ? null
-                    : [44, 28].map((width, index) => (
+                    : ["w-2/5", "w-1/4"].map((width, index) => (
                         <tr key={`skeleton-${index}`} aria-hidden>
                           <td className={cn("py-4 pr-3 pl-6", index === 0 ? "border-b border-line" : "")}>
-                            <span className="block h-3 rounded bg-paper-deep" style={{ width: `${width}%` }} />
+                            <Skeleton className={cn("h-3", width)} />
                           </td>
                           <td className={cn("px-3 py-4", index === 0 ? "border-b border-line" : "")}>
                             <span className="ml-auto block h-3 w-8 rounded bg-paper-deep" />

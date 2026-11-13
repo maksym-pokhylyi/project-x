@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { ScoreBars } from "@/components/ui/score-bars";
 
 /**
  * Answer editor, following the design handoff (Editor-1440 / Editor-390).
@@ -317,9 +319,7 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
       </span>
       {question.limit ? (
         <>
-          <span aria-hidden className="flex h-1.5 w-[140px] max-w-[30vw] rounded-full bg-line">
-            <span style={{ width: `${Math.min(100, (words / question.limit) * 100)}%` }} className={cn("rounded-full", limitState === "over" ? "bg-danger" : "bg-ink")} />
-          </span>
+          <Progress aria-hidden value={Math.min(100, (words / question.limit) * 100)} tone={limitState === "over" ? "danger" : "brand"} className="w-36 max-w-[30vw]" />
           <span className={limitState === "over" ? "font-semibold text-danger" : "text-ink-2"}>
             {limitState === "over" ? `${(words - question.limit).toLocaleString("en-GB")} over` : `${(question.limit - words).toLocaleString("en-GB")} left`}
           </span>
@@ -730,10 +730,8 @@ export function AnswerEditor({ bidId, question, scale, scaleKind, links, locked,
                   </span>
                 </p>
                 {sortedScale && scoreIndex >= 0 && sortedScale.length <= 12 ? (
-                  <div role="img" aria-label={`${evaluation.score} of ${evaluation.maxScore}`} className="mt-2 grid gap-1" style={{ gridTemplateColumns: `repeat(${sortedScale.length - 1}, minmax(0, 1fr))` }}>
-                    {sortedScale.slice(1).map((row, index) => (
-                      <span key={row.score} className={cn("h-2 rounded", index < scoreIndex ? "bg-brand" : "bg-line")} />
-                    ))}
+                  <div role="img" aria-label={`${evaluation.score} of ${evaluation.maxScore}`} className="mt-2">
+                    <ScoreBars filled={scoreIndex} total={sortedScale.length - 1} />
                   </div>
                 ) : null}
                 {scoreRow?.descriptor ? (

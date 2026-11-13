@@ -15,6 +15,7 @@ import { lookupTender } from "@/features/bids/server/tender";
 import { cleanTenderReference } from "@/features/bids/tender-lookup";
 import { NotFoundError } from "@/lib/errors";
 import { requireOrgForPage } from "@/server/session";
+import { ScoreBars } from "@/components/ui/score-bars";
 
 export const metadata: Metadata = { title: "New bid check" };
 export const dynamic = "force-dynamic";
@@ -144,10 +145,8 @@ export default async function NewBidPage({ searchParams }: { searchParams: Promi
                 <span className="font-semibold">{plan.lead}</span> {plan.rest}
               </p>
               {plan.segments > 0 ? (
-                <div role="img" aria-label={`${Math.min(plan.filled, plan.segments)} of ${plan.segments} used with this check`} className="grid gap-1" style={{ gridTemplateColumns: `repeat(${plan.segments}, minmax(0, 1fr))` }}>
-                  {Array.from({ length: plan.segments }, (_, index) => (
-                    <span key={index} className={`h-1.5 rounded-chip ${index < plan.filled ? "bg-ink" : "bg-line"}`} />
-                  ))}
+                <div role="img" aria-label={`${Math.min(plan.filled, plan.segments)} of ${plan.segments} used with this check`}>
+                  <ScoreBars filled={Math.min(plan.filled, plan.segments)} total={plan.segments} />
                 </div>
               ) : null}
             </section>

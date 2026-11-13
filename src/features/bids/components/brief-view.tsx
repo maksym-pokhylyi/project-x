@@ -22,6 +22,7 @@ import { GateList } from "./gate-list";
 import type { QuestionItem } from "./questions-view";
 import type { RequirementItem } from "./requirements-view";
 import { Callout, daysLeftLabel, formatDeadline } from "./ui";
+import { StackedBar } from "@/features/bids/components/ui/stacked-bar";
 
 /**
  * The cited bid check on one page, following the design handoff (Brief-1440 / Brief-390):
@@ -288,11 +289,14 @@ export function BriefView(props: BriefViewProps) {
               <div className="mt-auto flex max-w-[660px] flex-col gap-2 pt-5">
                 {gates.total > 0 ? (
                   <>
-                    <div role="img" aria-label={`${gates.met} met, ${gates.confirm} to confirm, ${gates.gap} gaps`} className="flex h-2 gap-[3px] overflow-hidden rounded">
-                      {gates.met > 0 ? <span style={{ flex: `${gates.met} 1 0` }} className="bg-brand" /> : null}
-                      {gates.confirm > 0 ? <span style={{ flex: `${gates.confirm} 1 0` }} className="bg-info" /> : null}
-                      {gates.gap > 0 ? <span style={{ flex: `${gates.gap} 1 0` }} className="bg-danger" /> : null}
-                    </div>
+                    <StackedBar
+                      label={`${gates.met} met, ${gates.confirm} to confirm, ${gates.gap} gaps`}
+                      parts={[
+                        { count: gates.met, className: "bg-brand" },
+                        { count: gates.confirm, className: "bg-info" },
+                        { count: gates.gap, className: "bg-danger" },
+                      ]}
+                    />
                     <p className="flex flex-wrap gap-x-5 gap-y-1 text-13" data-testid="gate-counts">
                       <span>
                         <span className="font-semibold">{gates.met}</span> met

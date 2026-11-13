@@ -14,6 +14,7 @@ import { effectiveWordLimit, wordLimitState } from "@/features/bids/answer-text"
 import { QUESTION_STATUS_LABELS, QUESTION_STATUSES, type Citation, type Provenance, type QuestionStatus } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
 import { CitationMark, type SourceLinks } from "./citation";
+import { Progress } from "@/components/ui/progress";
 
 export type QuestionItem = {
   id: string;
@@ -153,9 +154,7 @@ export function QuestionsView({
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
                       {question.weighting !== null ? (
                         <span className="inline-flex items-center gap-2" title="Weighting">
-                          <span aria-hidden className="h-1.5 w-20 overflow-hidden rounded-full bg-paper-deep">
-                            <span className="block h-full rounded-full bg-brand" style={{ width: `${Math.min(100, question.weighting)}%` }} />
-                          </span>
+                          <Progress aria-hidden value={Math.min(100, question.weighting)} className="w-20" />
                           <span className="font-medium tabular-nums">{question.weighting}%</span>
                         </span>
                       ) : (
