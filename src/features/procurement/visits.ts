@@ -4,6 +4,7 @@ import { after } from "next/server";
 import { db } from "@/db";
 import { pageVisits } from "@/db/schema";
 import { track } from "@/lib/analytics";
+import { errorReason } from "@/lib/describe-error";
 import { log } from "@/lib/logger";
 
 /**
@@ -13,6 +14,12 @@ import { log } from "@/lib/logger";
  * optional `?r=` outreach code. No pixel, no script, no cookie, no IP address, no user
  * agent, no fingerprint (docs/research/round2/P2 §1.2: tracking pixels fall under PECR's
  * storage/access rules; counting a page request on the server does not).
+ *
+ * THE CODE STAYS FIRST-PARTY. One code belongs to one prospect — one company's mailbox —
+ * so it is personal data whenever that mailbox is a person's (P2 §1.2). It is written to
+ * `page_visits`, which the outreach results read, and to nothing else: the analytics event
+ * says only whether the visit came through an outreach link (`track()` may forward events
+ * to PostHog), and a failure is logged without its bound values.
  */
 
 const BOT_PATTERN = /bot|crawl|spider|slurp|preview|monitor|headless|lighthouse|curl|wget|python-requests|httpclient|facebookexternalhit|whatsapp|telegram/i;
@@ -40,10 +47,11 @@ export async function recordPageVisit(input: PageVisitInput): Promise<void> {
     try {
       await db.insert(pageVisits).values({ pageType: input.pageType, entityId: input.entityId, refCode: input.refCode, isBot });
       if (!isBot && input.pageType === "supplier") {
-        await track("supplier_page_viewed", {}, { supplier: input.entityId, ref: input.refCode });
+        await track("supplier_page_viewed", {}, { supplier: input.entityId, via: input.refCode ? "outreach" : "direct" });
       }
     } catch (error) {
-      log.warn("page visit not recorded", { pageType: input.pageType, reason: error instanceof Error ? error.message : "unknown" });
+      // Never `error.message`: a failed insert quotes its parameters, the code among them.
+      log.warn("page visit not recorded", { pageType: input.pageType, reason: errorReason(error) });
     }
   });
 }

@@ -429,7 +429,7 @@ describe("analytics never sees the token or the e-mail marker", () => {
     expect(sanitizeAnalyticsUrl(`https://bidfolio.co.uk/unsubscribe?t=${tokenFor()}&done=all`)).toBe("https://bidfolio.co.uk/unsubscribe");
     expect(sanitizeAnalyticsUrl("/unsubscribe?t=abc.def")).toBe("/unsubscribe");
     expect(sanitizeAnalyticsUrl("https://bidfolio.co.uk/tenders/ocds-h6vhtk-0123ab?d=69c5f7d7-146a-4a66-9068-a273a384c7ba")).toBe("https://bidfolio.co.uk/tenders/ocds-h6vhtk-0123ab");
-    expect(sanitizeAnalyticsUrl("/tenders/ocds-h6vhtk-0123ab?r=abc123&d=69c5f7d7-146a-4a66-9068-a273a384c7ba")).toBe("/tenders/ocds-h6vhtk-0123ab?r=abc123");
+    expect(sanitizeAnalyticsUrl("/tenders/ocds-h6vhtk-0123ab?r=abc123&d=69c5f7d7-146a-4a66-9068-a273a384c7ba")).toBe("/tenders/ocds-h6vhtk-0123ab");
     // Elsewhere a parameter called d is nobody's business.
     expect(sanitizeAnalyticsUrl("/find?d=1")).toBe("/find?d=1");
   });

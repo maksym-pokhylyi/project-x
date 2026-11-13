@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatPrice } from "@/config/plans";
 import { NotFoundError } from "@/lib/errors";
 import { entitlementsFor } from "@/lib/billing/subscription";
 import { getAdminOrganization, monthlyRevenueCents } from "@/server/admin";
@@ -49,7 +50,7 @@ export default async function AdminOrganizationPage({ params }: { params: Promis
                 <dd>{subscription.status}</dd>
                 <dt className="text-muted-foreground">Plan</dt>
                 <dd>
-                  {subscription.planKey} · {subscription.billingInterval ?? "—"} · MRR {usd(monthlyRevenueCents(subscription) / 100)}
+                  {subscription.planKey} · {subscription.billingInterval ?? "—"} · MRR {formatPrice(monthlyRevenueCents(subscription))}
                 </dd>
                 <dt className="text-muted-foreground">Period</dt>
                 <dd>

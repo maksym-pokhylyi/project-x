@@ -57,7 +57,7 @@ export default async function SupplierPage({ params, searchParams }: Props) {
   const data = await loadSupplierPage(slug);
   if (!data) notFound();
   const { supplier } = data;
-  if (supplier.mergedIntoSlug) permanentRedirect(`/suppliers/${supplier.mergedIntoSlug}`);
+  if (supplier.mergedIntoSlug) permanentRedirect(`/suppliers/${supplier.mergedIntoSlug}${cleanRefCode(query.r) ? `?r=${cleanRefCode(query.r)}` : ""}`); // an outreach link keeps its code, so the visit is still counted
   // Sole traders, unidentified names and removed companies have no public page.
   if (!supplier.isPublic) notFound();
 

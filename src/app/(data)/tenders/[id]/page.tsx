@@ -40,7 +40,7 @@ export default async function TenderPage({ params, searchParams }: Props) {
   const tender = await loadTenderPage(id);
   if (!tender) notFound();
   // The canonical id is the ocid; a Find a Tender notice id redirects to it.
-  if (id !== tender.ocid) permanentRedirect(`/tenders/${tender.ocid}`);
+  if (id !== tender.ocid) permanentRedirect(`/tenders/${tender.ocid}${cleanRefCode(query.r) ? `?r=${cleanRefCode(query.r)}` : ""}`); // a link with a code keeps it, so the visit is still counted
   await recordPageVisit({ pageType: "tender", entityId: tender.ocid, refCode: cleanRefCode(query.r) });
   await recordDigestClick({ ocid: tender.ocid, notification: query.d }); // opened from a scheduled e-mail (?d=…)
   const now = new Date();
