@@ -59,6 +59,22 @@ export const RETENTION_DAYS = {
    * (notification_log). 13 months covers an annual renewal reminder and year-over-year counts.
    */
   notificationLog: 395,
+  /**
+   * Outreach prospects (src/db/schema/outreach.ts): this long after a campaign was created,
+   * the e-mail address, its fingerprint and the merge fields of every prospect in it are
+   * erased. The rows stay (status, dates, link code) so the funnel counts remain. The
+   * suppression list is never purged: it is what stops us writing to someone again.
+   */
+  outreachProspects: 365,
+  /**
+   * A prospect address that identifies a person is erased this long after the first letter
+   * was sent — the letter and the privacy notice promise it ("delete it after 90 days if you
+   * do not reply"). One that was listed but never written to is erased as soon as its
+   * one-month first-contact window has passed (UK GDPR Art. 14(3)).
+   */
+  outreachNamedAddresses: 90,
+  /** Outreach audit trail: who built, exported or marked a list as sent, and changes to the suppression list. */
+  outreachAudit: 730,
 } as const;
 
 export type RetentionKey = keyof typeof RETENTION_DAYS;

@@ -3,12 +3,16 @@ import { cn } from "@/lib/utils"
 
 /*
  * Disclosure built on the native <details>/<summary>: works without JavaScript, is findable
- * with in-page search, and prints open. Used for FAQs and "show more" sections.
+ * with in-page search, and prints open. Three looks, one chevron that turns over:
  *
- *   size   question  (default) as in the artboards: a serif question on a hairline, a
- *                    chevron at the right that turns over, the answer in ink at reading width
- *          sm        a quiet "show more" line inside a card: 14 px, the chevron after the
- *                    words, 44 px tall
+ *   (default)          a question, as in the artboards: serif on a hairline, the chevron at
+ *                      the right, the answer in ink at reading width. For FAQs.
+ *   size="sm"          a quiet "show more" line inside a card: 14 px ink, the chevron after
+ *                      the words, 44 px tall ("1 file was not read", "Plain-text body").
+ *   variant="inline"   a secondary STEP tucked into a card or a table row ("Remove",
+ *                      "Marked the wrong rows?"): the summary reads as a link, is as wide as
+ *                      its words with a 40 px hit area, and what it reveals follows in the
+ *                      text size of its surroundings.
  *
  * Give several in a row the same `name` to make them an exclusive accordion.
  */
@@ -32,9 +36,26 @@ function Disclosure({
   className,
   summary,
   size = "question",
+  variant = "default",
   children,
   ...props
-}: Omit<React.ComponentProps<"details">, "children"> & { summary: React.ReactNode; size?: "question" | "sm"; children: React.ReactNode }) {
+}: Omit<React.ComponentProps<"details">, "children"> & {
+  summary: React.ReactNode
+  size?: "question" | "sm"
+  variant?: "default" | "inline"
+  children: React.ReactNode
+}) {
+  if (variant === "inline") {
+    return (
+      <details data-slot="disclosure" data-variant="inline" className={cn("group", className)} {...props}>
+        <summary className="link hit-40 inline-flex w-fit items-center gap-1.5 rounded-sm text-sm font-medium">
+          <span className="text-pretty">{summary}</span>
+          <Chevron className="size-3.5" />
+        </summary>
+        <div className="pt-3 text-sm text-ink [&>*+*]:mt-3">{children}</div>
+      </details>
+    )
+  }
   if (size === "sm") {
     return (
       <details data-slot="disclosure" data-size="sm" className={cn("group", className)} {...props}>

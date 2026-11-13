@@ -7,9 +7,11 @@
  * - ./procurement.ts  Find a Tender data platform + Radar tenant tables.
  * - ./bids.ts  Bid desk + evidence library (bids, files, requirements, questions, library, credits).
  * - ./notifications.ts  Scheduled e-mails: preferences per member and the send log.
+ * - ./outreach.ts  Founder outreach tooling: suppressions, campaigns, prospects, audit (no tenant data).
  */
 export * from "./auth";
 export * from "./app";
 export * from "./procurement";
 export * from "./bids";
 export * from "./notifications";
+export * from "./outreach";

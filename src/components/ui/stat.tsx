@@ -28,7 +28,8 @@ import { cn } from "@/lib/utils"
  * between its text and a divider on BOTH sides (in a flush row the first tile has none on
  * its outer edge and the last none on its right), labels wrap and are never clipped, and
  * numerals are lining and tabular. Markup is a <dl>: label = <dt>, figure = <dd>; an
- * optional `hint` is a second, smaller <dd> under the label ("published since Mar 2021").
+ * optional `hint` is a second, smaller <dd> under the label ("published since Mar 2021"),
+ * and an optional `action` a link on a line of its own under that ("Open ingestion").
  *
  * No context and no client code: the row says its frame and size in data attributes and
  * the tiles read them through the `group/stats` selector, so both work in server components.
@@ -102,6 +103,7 @@ function Stat({
   value,
   label,
   hint,
+  action,
   className,
   ...props
 }: Omit<React.ComponentProps<"div">, "children"> & {
@@ -111,6 +113,8 @@ function Stat({
   label: React.ReactNode
   /** One more muted line under the label: where the figure comes from, or its period. */
   hint?: React.ReactNode
+  /** Where the figure is acted on: one text link (`className="link"`) on a line of its own. */
+  action?: React.ReactNode
 }) {
   // The term comes first in the markup; the figure is shown above it.
   return (
@@ -118,6 +122,7 @@ function Stat({
       <dt className={cn("order-2", labelText)}>{label}</dt>
       <dd className={cn("order-1", numeral)}>{value}</dd>
       {hint ? <dd className="order-3 text-xs leading-[1.5] text-ink-2">{hint}</dd> : null}
+      {action ? <dd className="order-4 text-13 leading-[1.5]">{action}</dd> : null}
     </div>
   )
 }

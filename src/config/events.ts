@@ -78,6 +78,8 @@ export type EventMap = {
   /** A tender link in a scheduled e-mail was opened; counted once per e-mail and tender. */
   digest_clicked: { kind: string; ocid: string };
   notification_unsubscribed: { kind: string; scope: "kind" | "all"; via: "one_click" | "page" | "settings" };
+  // Outreach (SPEC §7). Never an e-mail address: `campaign` is the id of the list, null for the form without a link.
+  optout: { via: "link" | "form"; campaign: string | null };
 };
 
 export type EventName = keyof EventMap;

@@ -4,20 +4,45 @@ import { ReplayWebhookButton, RetryJobButton } from "@/components/admin/admin-bu
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Stat, StatRow } from "@/components/ui/stat";
-import { formatPrice } from "@/config/plans";
 import { getAdminActivity, getAdminConfigWarnings, getAdminMetrics } from "@/server/admin";
+import { getFounderKpis, type Windowed } from "@/server/admin-kpis";
 import { requireAdminForPage } from "@/server/session";
 
 export const metadata: Metadata = { title: "Overview" };
 
 /** AI spend is an estimated cost in US dollars; revenue is in the catalogue's pounds. */
 const usd = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+const money = (minor: number, currency: string) => new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(minor / 100);
 const when = (date: Date) => `${date.toISOString().replace("T", " ").slice(0, 16)} UTC`;
+const count = (value: number) => value.toLocaleString("en-GB");
+/** "—" is "not measurable here" (a module that is not installed), never zero. */
+const DASH = "—";
+const inWindows = (figure: Windowed) => `${count(figure.last7Days)} in 7 days · ${count(figure.last30Days)} in 30 days`;
 
 const list = "divide-y divide-line text-sm";
 const row = "py-3 first:pt-0 last:pb-0";
 const meta = "text-13 text-ink-2";
 const empty = "text-sm text-ink-2";
+
+/** "12 minutes ago", "3 hours ago", "2 days ago". */
+function ago(date: Date | null, now: Date): string {
+  if (!date) return "never";
+  const minutes = Math.max(0, Math.round((now.getTime() - date.getTime()) / 60_000));
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 48) return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  const days = Math.round(hours / 24);
+  return `${days} days ago`;
+}
+
+/** Marks a key number for the tests and the founder's scripts: every cell, and its name. */
+const kpi = (name?: string) => ({ "data-testid": "admin-stat", "data-kpi": name });
+const open = (href: string, label: string) => (
+  <Link href={href} className="link">
+    {label}
+  </Link>
+);
 
 /**
  * Founder overview: what needs attention first (configuration warnings), the key numbers,
@@ -27,8 +52,13 @@ const empty = "text-sm text-ink-2";
 export default async function AdminOverviewPage() {
   // Pages render in parallel with their layout, so each admin page guards itself.
   await requireAdminForPage();
-  const [metrics, activity, configWarnings] = await Promise.all([getAdminMetrics(), getAdminActivity(), getAdminConfigWarnings()]);
-  const conversion = metrics.trials.conversionRate === null ? "—" : `${Math.round(metrics.trials.conversionRate * 100)}%`;
+  const now = new Date();
+  const [metrics, activity, configWarnings, kpis] = await Promise.all([getAdminMetrics(now), getAdminActivity(), getAdminConfigWarnings(), getFounderKpis(now)]);
+  const conversion = metrics.trials.conversionRate === null ? DASH : `${Math.round(metrics.trials.conversionRate * 100)}%`;
+  const byPlan = kpis.paying.byPlan.map((plan) => `${plan.name} ${plan.paying}${plan.trialing > 0 ? ` (+${plan.trialing} trialing)` : ""}`).join(" · ");
+  const aiBudget = kpis.aiSpendUsd.dailyBudget;
+  const aiShare = aiBudget > 0 ? ` (${Math.round((kpis.aiSpendUsd.today / aiBudget) * 100)}%)` : "";
+  const funnel = kpis.outreach;
 
   return (
     <div className="flex flex-col gap-7 md:gap-8">
@@ -45,21 +75,76 @@ export default async function AdminOverviewPage() {
         </section>
       ) : null}
 
-      <StatRow frame="card" columns={4} aria-label="Key numbers">
-        <Stat data-testid="admin-stat" value={String(metrics.signups.total)} label="Sign-ups" hint={`${metrics.signups.last7Days} in 7 days · ${metrics.signups.last30Days} in 30 days`} />
-        <Stat data-testid="admin-stat" value={String(metrics.organizations.activated)} label="Activated workspaces" hint={`of ${metrics.organizations.total} workspaces`} />
-        <Stat
-          data-testid="admin-stat"
-          value={String(metrics.subscriptions.paying)}
-          label="Paying workspaces"
-          hint={`${metrics.subscriptions.pastDue} past due · ${metrics.subscriptions.trialing} trialing`}
-        />
-        <Stat data-testid="admin-stat" value={formatPrice(metrics.mrrCents)} label="MRR (estimate)" hint="Catalogue prices, before tax and discounts" />
-        <Stat data-testid="admin-stat" value={conversion} label="Trial to paid" hint={`${metrics.trials.converted} of ${metrics.trials.started} trials`} />
-        <Stat data-testid="admin-stat" value={String(metrics.subscriptions.churnedLast30Days)} label="Churned (30 days)" hint="Subscriptions cancelled" />
-        <Stat data-testid="admin-stat" value={usd(metrics.aiSpendUsd.today)} label="AI spend today" hint="Estimated, UTC day" />
-        <Stat data-testid="admin-stat" value={usd(metrics.aiSpendUsd.month)} label="AI spend this month" hint="Estimated, UTC month" />
-      </StatRow>
+      <section aria-label="Key numbers" data-testid="founder-kpis">
+        {/* Sixteen cells in the library's stat card: every row is full at two and at four columns. */}
+        <StatRow frame="card" columns={4}>
+          <Stat {...kpi("signups")} label="Sign-ups" value={count(kpis.signups.total)} hint={inWindows(kpis.signups)} />
+          <Stat {...kpi("verified")} label="Verified accounts" value={count(kpis.verifiedAccounts.total)} hint={`${inWindows(kpis.verifiedAccounts)} (by sign-up date)`} />
+          <Stat {...kpi("workspaces")} label="Workspaces" value={count(kpis.workspaces.total)} hint={inWindows(kpis.workspaces)} />
+          <Stat {...kpi("claimed")} label="Claimed companies" value={count(kpis.claimedCompanies.total)} hint={inWindows(kpis.claimedCompanies)} />
+          <Stat
+            {...kpi("activated")}
+            label="Activated workspaces"
+            value={kpis.activatedWorkspaces ? count(kpis.activatedWorkspaces.total) : DASH}
+            hint={kpis.activatedWorkspaces ? `First bid check built · ${inWindows(kpis.activatedWorkspaces)}` : "First bid check built — the bid desk is not installed here yet"}
+          />
+          <Stat
+            {...kpi("paying")}
+            label="Paying workspaces"
+            value={count(kpis.paying.total)}
+            hint={`${byPlan || "No paid plans yet"} · ${kpis.paying.pastDue} past due · ${kpis.paying.trialing} trialing`}
+          />
+          <Stat {...kpi("mrr")} label="MRR" value={money(kpis.mrr.minor, kpis.mrr.currency)} hint="Active subscriptions at catalogue prices, annual ÷ 12, before tax and discounts" />
+          <Stat
+            {...kpi("bid-pass")}
+            label="Bid Pass sales"
+            value={count(kpis.bidPassSales.total)}
+            hint={`${inWindows(kpis.bidPassSales)}${kpis.bidPassSales.refunded > 0 ? ` · ${count(kpis.bidPassSales.refunded)} more refunded or disputed` : ""}`}
+          />
+          <Stat {...kpi()} label="Trial → paid" value={conversion} hint={`${metrics.trials.converted} of ${metrics.trials.started} trials`} />
+          <Stat {...kpi()} label="Churned (30 days)" value={String(metrics.subscriptions.churnedLast30Days)} hint="Subscriptions canceled" />
+          <Stat
+            {...kpi("ai-spend")}
+            label="AI spend today"
+            value={usd(kpis.aiSpendUsd.today)}
+            hint={`of ${usd(aiBudget)} a day${aiShare} · 7 days ${usd(kpis.aiSpendUsd.last7Days)} · 30 days ${usd(kpis.aiSpendUsd.last30Days)} · estimated`}
+          />
+          <Stat
+            {...kpi("jobs")}
+            label="Job queue"
+            value={`${count(kpis.jobs.pending)} pending`}
+            hint={`${kpis.jobs.failedLast24Hours} failed in 24 hours · ${kpis.jobs.running} running${kpis.jobs.oldestPendingAt ? ` · oldest due ${ago(kpis.jobs.oldestPendingAt, now)}` : ""}`}
+          />
+          <Stat
+            {...kpi("ingestion")}
+            label="Data ingestion"
+            value={ago(kpis.ingestion.lastSuccessAt, now)}
+            hint={kpis.ingestion.lastError ? "Last run reported an error" : kpis.ingestion.lastSuccessAt ? `Last successful run ${when(kpis.ingestion.lastSuccessAt)}` : "No successful run recorded"}
+            action={open("/admin/ingestion", "Open ingestion")}
+          />
+          <Stat
+            {...kpi("outreach")}
+            label="Outreach"
+            value={`${count(funnel.sent)} sent`}
+            hint={`${count(funnel.visited)} opened their page · ${count(funnel.claimed)} claimed · ${funnel.bidChecks === null ? DASH : count(funnel.bidChecks)} bid checks · ${count(funnel.optedOut)} opted out`}
+            action={open("/admin/outreach", "Open outreach")}
+          />
+          <Stat
+            {...kpi("suppressions")}
+            label="Do-not-contact list"
+            value={count(funnel.suppressions)}
+            hint="Addresses and domains that are never listed or exported"
+            action={open("/admin/suppressions", "Open the list")}
+          />
+          <Stat
+            {...kpi("data-requests")}
+            label="Correction and removal requests"
+            value={`${count(funnel.openDataRequests)} open`}
+            hint={funnel.openDataRequests > 0 ? `Oldest received ${ago(funnel.oldestDataRequestAt, now)}. Act within five working days.` : "Nothing waiting"}
+            action={open("/admin/suppressions#requests", "Open the requests")}
+          />
+        </StatRow>
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

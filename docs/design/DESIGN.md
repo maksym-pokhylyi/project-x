@@ -374,6 +374,8 @@ Notes on the ones that differ from the shadcn originals:
 - `Dialog`: a form inside wraps fields AND footer in `<Form>`, so the footer buttons take the fields' height; on phones the
   footer buttons are full width at 48 px. The close button is 44 px.
 - `Table`: `framed`, `containerClassName` (give it a max height for the sticky header), `numeric` on `TableHead` / `TableCell`.
+- `Disclosure`: `variant="inline"` for a secondary step inside a card or a table row — a link-styled summary with the chevron
+  (the default stays the serif question of the FAQ).
 - `Progress`: `tone` = `brand` | `warning` | `danger`.
 
 ### 8.3 App shell patterns
