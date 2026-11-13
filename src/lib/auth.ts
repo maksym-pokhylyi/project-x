@@ -1,10 +1,10 @@
 import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
+import { APIError, createAuthMiddleware, createEmailVerificationToken, getSessionFromCtx } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins";
-import { count, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { site } from "@/config/site";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
@@ -12,9 +12,12 @@ import { appUrl, env, features, trustedOrigins } from "@/env";
 import { track } from "@/lib/analytics";
 import { recordAudit } from "@/lib/audit";
 import { getOrgEntitlements } from "@/lib/billing/subscription";
+import { emailKey } from "@/lib/crypto";
 import { sendEmail } from "@/lib/email/send";
 import { log } from "@/lib/logger";
+import { rateLimit } from "@/lib/rate-limit";
 import { reportError } from "@/lib/report-error";
+import { SIGNUP_BINDING_COOKIE, issueSignupBinding, signupBindingCookieOptions, signupBindingMatches } from "@/lib/signup-binding";
 import { createPersonalWorkspace, defaultOrganizationIdForUser } from "@/server/workspaces";
 
 /**
@@ -22,6 +25,10 @@ import { createPersonalWorkspace, defaultOrganizationIdForUser } from "@/server/
  *
  * - E-mail + password with verification (see `features.requireEmailVerification`),
  *   password reset, optional Google OAuth.
+ * - Pre-registration takeover protection: a verification link completes directly only in
+ *   the browser that created the account (sign-up binding cookie). Anywhere else the
+ *   mailbox owner is asked to choose a password, which replaces the stored one
+ *   (src/lib/signup-binding.ts, `confirmEmailAction`). A password reset also verifies.
  * - Organization plugin = workspaces (roles owner/admin/member, e-mail invitations).
  * - Every new user gets a personal workspace; every new session starts in a workspace.
  * - Seat limits come from the workspace's plan (entitlements), enforced server-side.
@@ -32,6 +39,9 @@ import { createPersonalWorkspace, defaultOrganizationIdForUser } from "@/server/
  */
 
 const UNLIMITED_SEATS = 100_000;
+const VERIFICATION_LINK_TTL_SECONDS = 24 * 60 * 60;
+/** Notices triggered by a repeated sign-up, per target address: enough for a real user, useless for mail-bombing. */
+const EXISTING_SIGN_UP_NOTICES = { limit: 3, windowSeconds: 60 * 60 };
 
 async function seatLimit(organizationId: string): Promise<number> {
   const entitlements = await getOrgEntitlements(organizationId);
@@ -76,15 +86,73 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url }) => {
       await sendEmail(user.email, { name: "reset-password", props: { name: user.name, url } });
     },
+    // Completing a reset proves control of the mailbox (and has just replaced the password
+    // and revoked every session), so it is an equally good proof for verification.
+    onPasswordReset: async ({ user }) => {
+      const updated = await db
+        .update(schema.users)
+        .set({ emailVerified: true })
+        .where(and(eq(schema.users.id, user.id), eq(schema.users.emailVerified, false)))
+        .returning({ id: schema.users.id });
+      if (updated.length > 0) await track("user.email_verified", { userId: user.id });
+    },
+    /**
+     * A second sign-up for an address that already exists changes NOTHING about the account
+     * (the caller gets the same generic answer as a first sign-up). The mailbox gets a
+     * message so the real owner is never at a dead end:
+     *  - verified account   -> "you already have an account" (no token)
+     *  - unverified account -> a fresh verification link. Opened anywhere but the browser
+     *    that created the account, it asks the visitor to choose a new password.
+     */
+    onExistingUserSignUp: async ({ user }) => {
+      const allowed = await rateLimit(`auth:existing-sign-up:${emailKey(user.email)}`, EXISTING_SIGN_UP_NOTICES);
+      if (!allowed.ok) return;
+      if (user.emailVerified) {
+        await sendEmail(user.email, {
+          name: "account-exists",
+          props: { signInUrl: `${appUrl}/sign-in`, resetUrl: `${appUrl}/forgot-password` },
+        });
+        return;
+      }
+      const token = await createEmailVerificationToken(env.BETTER_AUTH_SECRET, user.email, undefined, VERIFICATION_LINK_TTL_SECONDS, {
+        userId: user.id,
+      });
+      const url = `${appUrl}/api/auth/verify-email?token=${token}&callbackURL=${encodeURIComponent("/app")}`;
+      // The stored name was typed by whoever registered first: do not greet with it.
+      await sendEmail(user.email, { name: "verify-email", props: { name: "", url } });
+    },
   },
 
   emailVerification: {
     sendOnSignUp: features.requireEmailVerification,
     sendOnSignIn: features.requireEmailVerification,
     autoSignInAfterVerification: true,
-    expiresIn: 24 * 60 * 60,
+    expiresIn: VERIFICATION_LINK_TTL_SECONDS,
     sendVerificationEmail: async ({ user, url }) => {
       await sendEmail(user.email, { name: "verify-email", props: { name: user.name, url } });
+    },
+    /**
+     * Runs for a valid link of a still-unverified account, before anything is changed.
+     * Only the browser that created the account (sign-up binding cookie) may complete the
+     * verification with the existing password. Every other visitor holds the link — so
+     * they control the mailbox — but did not necessarily choose the password: they are sent
+     * to /verify-email/confirm to choose one. Nothing happens on this GET, so link scanners
+     * and mail previews cannot verify an account or burn the link.
+     */
+    beforeEmailVerification: async (user, request) => {
+      if (await signupBindingMatches(user.id, request?.headers.get("cookie"))) return;
+      if (!request) {
+        throw new APIError("FORBIDDEN", {
+          code: "EMAIL_CONFIRMATION_REQUIRED",
+          message: "Open the verification link in a browser to confirm this e-mail address.",
+        });
+      }
+      const requestUrl = new URL(request.url);
+      const confirm = new URL("/verify-email/confirm", appUrl);
+      confirm.searchParams.set("token", requestUrl.searchParams.get("token") ?? "");
+      const callbackURL = requestUrl.searchParams.get("callbackURL");
+      if (callbackURL) confirm.searchParams.set("redirect", callbackURL);
+      throw new APIError("FOUND", undefined, { location: confirm.toString(), "cache-control": "no-store" });
     },
     afterEmailVerification: async (user) => {
       await track("user.email_verified", { userId: user.id });
@@ -144,6 +212,15 @@ export const auth = betterAuth({
       try {
         if (ctx.path === "/sign-in/email" && ctx.context.newSession) {
           await track("user.signed_in", { userId: ctx.context.newSession.user.id }, { method: "email" });
+          return;
+        }
+        if (ctx.path === "/sign-up/email") {
+          // Bind the new account to this browser (or set an indistinguishable decoy when
+          // the address was already registered). See src/lib/signup-binding.ts.
+          const signedUp = ctx.context.returned;
+          if (!signedUp || signedUp instanceof APIError || signedUp instanceof Response) return;
+          const userId = str(record(record(signedUp).user).id);
+          if (userId) ctx.setCookie(SIGNUP_BINDING_COOKIE, await issueSignupBinding(userId), signupBindingCookieOptions);
           return;
         }
         if (!ctx.path.startsWith("/organization/")) return;

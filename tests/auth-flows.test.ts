@@ -53,7 +53,15 @@ describe("authentication flows (dev outbox mode)", () => {
   });
 
   it("sign-up requires e-mail verification; the outbox link verifies and signs in", async () => {
-    await auth.api.signUpEmail({ body: { email: "new@example.com", name: "New User", password: PASSWORD, callbackURL: "/app" } });
+    const signUp = await auth.api.signUpEmail({
+      body: { email: "new@example.com", name: "New User", password: PASSWORD, callbackURL: "/app" },
+      returnHeaders: true,
+    });
+    // The sign-up binding cookie: the link below completes directly only in this browser (F-01).
+    const browser = signUp.headers
+      .getSetCookie()
+      .map((value) => value.split(";")[0])
+      .join("; ");
     expect(await db.select().from(sessions)).toHaveLength(0);
 
     const email = await latestEmail("new@example.com", "verify-email");
@@ -65,7 +73,7 @@ describe("authentication flows (dev outbox mode)", () => {
     const link = firstLink(email!.text, "/api/auth/verify-email");
     expect(link.startsWith("http://localhost:3000/api/auth/verify-email?token=")).toBe(true);
 
-    const response = await auth.handler(new Request(link));
+    const response = await auth.handler(new Request(link, { headers: { cookie: browser } }));
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("/app");
     expect(cookieFrom(response)).toContain("better-auth.session_token=");

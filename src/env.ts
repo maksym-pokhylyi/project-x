@@ -38,6 +38,8 @@ const serverSchema = z.object({
   GOOGLE_CLIENT_ID: optional(z.string()),
   GOOGLE_CLIENT_SECRET: optional(z.string()),
   ADMIN_EMAILS: optional(z.string()),
+  /** Optional pin: when set, /admin additionally requires the user id to be listed (comma-separated). */
+  ADMIN_USER_IDS: optional(z.string()),
   /** Extra origins allowed to call the auth API (comma-separated), e.g. the *.vercel.app alias before the custom domain is live. */
   AUTH_TRUSTED_ORIGINS: optional(z.string()),
 
@@ -170,5 +172,16 @@ export const adminEmails: ReadonlySet<string> = new Set(
   (env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
+);
+
+/**
+ * Optional second factor for /admin: the exact user ids allowed in. Empty = not pinned
+ * (a verified ADMIN_EMAILS address is enough). Set it after the founder's first sign-in.
+ */
+export const adminUserIds: ReadonlySet<string> = new Set(
+  (env.ADMIN_USER_IDS ?? "")
+    .split(",")
+    .map((id) => id.trim())
     .filter(Boolean),
 );

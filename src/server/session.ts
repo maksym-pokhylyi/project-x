@@ -6,7 +6,7 @@ import { cache } from "react";
 import type { Plan } from "@/config/plans";
 import { db } from "@/db";
 import { members, organizations, sessions } from "@/db/schema";
-import { adminEmails } from "@/env";
+import { adminEmails, adminUserIds } from "@/env";
 import { auth } from "@/lib/auth";
 import type { Entitlements } from "@/lib/billing/entitlements";
 import { entitlementsFor, getSubscription, type SubscriptionRow } from "@/lib/billing/subscription";
@@ -30,7 +30,7 @@ export type CurrentUser = {
   email: string;
   image: string | null;
   emailVerified: boolean;
-  /** Founder/admin access to /admin (ADMIN_EMAILS + a VERIFIED e-mail). */
+  /** Founder/admin access to /admin (ADMIN_EMAILS + a VERIFIED e-mail, + ADMIN_USER_IDS when pinned). */
   isAdmin: boolean;
 };
 
@@ -65,9 +65,21 @@ function toCurrentUser(user: { id: string; name: string; email: string; image?: 
     email: user.email,
     image: user.image ?? null,
     emailVerified: user.emailVerified,
-    // An unverified address proves nothing, so it never grants admin access.
-    isAdmin: user.emailVerified && adminEmails.has(user.email.toLowerCase()),
+    isAdmin: isAdminUser(user),
   };
+}
+
+/**
+ * Founder access. Three conditions, all required:
+ *  - the address is listed in ADMIN_EMAILS,
+ *  - it is VERIFIED — which only the mailbox owner can achieve, and which always replaces a
+ *    password chosen by anyone else (see src/lib/signup-binding.ts), so registering the
+ *    founder's address first does not lead here,
+ *  - when ADMIN_USER_IDS is set, the account is one of the pinned ids.
+ */
+export function isAdminUser(user: { id: string; email: string; emailVerified: boolean }): boolean {
+  if (!user.emailVerified || !adminEmails.has(user.email.toLowerCase())) return false;
+  return adminUserIds.size === 0 || adminUserIds.has(user.id);
 }
 
 function isPersonalWorkspace(metadata: string | null): boolean {
