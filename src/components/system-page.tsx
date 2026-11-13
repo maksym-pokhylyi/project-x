@@ -3,9 +3,11 @@ import type { ReactNode } from "react";
 import { Logo } from "@/components/logo";
 import { CompanySearch } from "@/components/marketing/company-search";
 import { IdentityLine } from "@/components/marketing/identity-line";
+import { NavLink } from "@/components/ui/nav-link";
 import { site } from "@/config/site";
 
-const headerLink = "link inline-flex min-h-11 items-center rounded-sm text-sm font-medium whitespace-nowrap md:link-quiet md:text-15 md:no-underline";
+/* Phones have no menu here: the two links stay in the bar, smaller and underlined, as on NotFound-390. */
+const headerLink = "whitespace-nowrap max-md:border-b-0 max-md:text-sm max-md:underline max-md:decoration-brand max-md:decoration-1 max-md:underline-offset-[3px]";
 
 /**
  * Frame for the pages nobody wants to see, as in the NotFound artboards: not found, no
@@ -41,12 +43,12 @@ export function SystemPage({
         <div className="container-content flex min-h-14 items-center justify-between gap-4 md:min-h-[4.5rem]">
           <Logo />
           <nav aria-label="Main" className="flex items-center gap-[1.125rem] md:gap-8">
-            <Link href="/" className={headerLink}>
+            <NavLink href="/" variant="header" match="exact" className={headerLink}>
               What is {site.name}?
-            </Link>
-            <Link href="/sign-in" className={headerLink}>
+            </NavLink>
+            <NavLink href="/sign-in" variant="header" match="exact" className={headerLink}>
               Sign in
-            </Link>
+            </NavLink>
           </nav>
         </div>
       </header>

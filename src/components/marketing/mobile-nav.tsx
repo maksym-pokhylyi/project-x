@@ -6,6 +6,8 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import { useState } from "react";
 import { Wordmark } from "@/components/logo";
 import { ButtonLink } from "@/components/ui/button-link";
+import { NavLink } from "@/components/ui/nav-link";
+import { navLinkVariants } from "@/components/ui/nav-link-variants";
 import { authClient } from "@/lib/auth-client";
 import { findCompany, navHref, primaryNav } from "./site-nav";
 
@@ -23,7 +25,8 @@ function MenuIcon({ open = false }: { open?: boolean }) {
 /**
  * Public navigation below 768 px: a sheet that drops from the header.
  * Built on Radix Dialog, so focus is trapped while it is open, Escape closes it and focus
- * returns to the menu button. Every row is at least 48 px tall.
+ * returns to the menu button. Every row is 52 px tall; the page you are on is marked by
+ * NavLink (semibold, with a dot at the end of the row).
  */
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -62,18 +65,14 @@ export function MobileNav() {
             <ul className="divide-y divide-line border-b border-line">
               {primaryNav.map((item) => (
                 <li key={item.href}>
-                  <Link
-                    href={navHref(item.href, pathname)}
-                    onClick={close}
-                    aria-current={item.href === pathname ? "page" : undefined}
-                    className="link-quiet flex min-h-[3.25rem] items-center text-17 font-medium aria-[current=page]:font-semibold"
-                  >
+                  <NavLink href={navHref(item.href, pathname)} variant="menu" match="exact" onClick={close}>
                     {item.label}
-                  </Link>
+                  </NavLink>
                 </li>
               ))}
               <li>
-                <Link href={signedIn ? "/app" : "/sign-in"} onClick={close} className="link-quiet flex min-h-[3.25rem] items-center text-17 font-medium">
+                {/* Not a place you can already be on: a plain link with the look of its neighbours. */}
+                <Link href={signedIn ? "/app" : "/sign-in"} onClick={close} className={navLinkVariants({ variant: "menu" })}>
                   {signedIn ? "Open your radar" : "Sign in"}
                 </Link>
               </li>

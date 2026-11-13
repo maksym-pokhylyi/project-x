@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Tabs as TabsPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { tabListClasses, tabTriggerClasses } from "./tab-classes"
 
 /*
  * Tabs: the underline style of the supplier page and the bid brief. Labels are ink, 15 px
@@ -14,10 +15,8 @@ function Tabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive
   return <TabsPrimitive.Root data-slot="tabs" className={cn("flex flex-col gap-6", className)} {...props} />
 }
 
-/** Shared classes so link-based navigation (settings, a bid's sections) looks identical to Tabs. */
-export const tabListClasses = "flex gap-x-7 overflow-x-auto border-b border-line md:gap-x-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-export const tabTriggerClasses =
-  "relative -mb-px inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 border-b-2 border-transparent text-15 font-medium whitespace-nowrap text-ink -outline-offset-2 transition-colors duration-150 hover:text-brand disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-ink data-[state=active]:hover:text-ink aria-[current=page]:border-ink aria-[current=page]:hover:text-ink md:min-h-12 [&_svg]:size-4 [&_svg]:shrink-0"
+// The class recipes live in ./tab-classes (no "use client") so server components can use them too.
+export { tabListClasses, tabTriggerClasses }
 
 function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return <TabsPrimitive.List data-slot="tabs-list" className={cn(tabListClasses, className)} {...props} />

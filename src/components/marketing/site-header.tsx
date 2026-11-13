@@ -1,11 +1,8 @@
 import { Logo } from "@/components/logo";
 import { ButtonLink } from "@/components/ui/button-link";
-import { HeaderSessionLink } from "./header-session-link";
 import { MobileNav } from "./mobile-nav";
+import { SiteHeaderNav } from "./site-header-nav";
 import { findCompany } from "./site-nav";
-import { SiteNavLinks } from "./site-nav-links";
-
-const navLink = "link-quiet inline-flex min-h-11 items-center rounded-sm text-15 font-medium";
 
 /**
  * Public header, as in the landing and pricing artboards: the lockup on the left; on the
@@ -13,8 +10,8 @@ const navLink = "link-quiet inline-flex min-h-11 items-center rounded-sm text-15
  * phones, where the links move into the menu).
  *
  * Static (no session read on the server) so public pages stay cacheable; the links (which
- * mark the current page) and the sign-in link (which becomes "Open your radar" for people
- * who are signed in) are small client islands.
+ * mark the current page through NavLink) and the sign-in link (which becomes "Open your
+ * radar" for people who are signed in) are a small client island, SiteHeaderNav.
  */
 export function SiteHeader() {
   return (
@@ -22,10 +19,7 @@ export function SiteHeader() {
       <div className="container-content flex min-h-14 items-center justify-between gap-4 max-md:pr-2 md:min-h-[4.5rem]">
         <Logo />
         <div className="hidden items-center gap-8 md:flex">
-          <nav aria-label="Main" className="flex items-center gap-8">
-            <SiteNavLinks className={navLink} />
-            <HeaderSessionLink className={navLink} />
-          </nav>
+          <SiteHeaderNav />
           <ButtonLink href={findCompany.href}>{findCompany.label}</ButtonLink>
         </div>
         <MobileNav />

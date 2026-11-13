@@ -4,6 +4,7 @@ import { WorkspaceDangerZone } from "@/components/app/danger-zone";
 import { PageHeader } from "@/components/app/page-header";
 import { WorkspaceForm } from "@/components/app/workspace-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CopyField } from "@/components/ui/copy-field";
 import { PLANS } from "@/config/plans";
 import { listAuditLog } from "@/server/audit";
 import { requireOrgForPage } from "@/server/session";
@@ -27,6 +28,7 @@ export default async function WorkspaceSettingsPage() {
         </CardHeader>
         <CardContent>
           <WorkspaceForm name={ctx.organization.name} logo={ctx.organization.logo} canEdit={canEdit} />
+          <CopyField className="mt-6 border-t border-line pt-6" label="Workspace ID" value={ctx.organization.id} hint="Identifies this workspace. Quote it when you write to support." data-testid="workspace-id" />
         </CardContent>
       </Card>
 

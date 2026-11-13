@@ -14,14 +14,18 @@ export default function AppNotFound() {
       <div className="mt-6 flex flex-col gap-2.5 sm:flex-row md:mt-8">
         <ButtonLink href="/app">Go to your radar</ButtonLink>
       </div>
-      <nav aria-label="Other pages" className="mt-3 flex flex-wrap gap-x-6 md:mt-4 md:gap-x-7">
-        <Link href="/app/settings/workspace" className="link inline-flex min-h-11 items-center rounded-sm text-15">
-          Workspace settings
-        </Link>
-        <Link href="/contact" className="link inline-flex min-h-11 items-center rounded-sm text-15">
-          Contact us
-        </Link>
-      </nav>
+      <ul className="mt-3 flex flex-wrap gap-x-6 md:mt-4 md:gap-x-7">
+        <li>
+          <Link href="/app/settings/workspace" className="link inline-flex min-h-11 items-center rounded-sm text-15">
+            Workspace settings
+          </Link>
+        </li>
+        <li>
+          <Link href="/contact" className="link inline-flex min-h-11 items-center rounded-sm text-15">
+            Contact us
+          </Link>
+        </li>
+      </ul>
     </div>
   );
 }
