@@ -285,6 +285,8 @@ test("the Free plan has a single seat; Radar Pro has two", async () => {
   // Design-system rule: in a form row the controls line up exactly — field, select and button share
   // one top and one bottom edge (no margin offsets), at desktop width.
   const inviteRow = page.getByTestId("invite-form").locator('[data-slot="form-row"]');
+  await expect(inviteRow.getByRole("button")).toBeVisible();
+  await expect(inviteRow.getByLabel("E-mail address")).toBeVisible();
   const edges = await Promise.all([inviteRow.getByLabel("E-mail address"), inviteRow.locator("#invite-role"), inviteRow.getByRole("button")].map(async (control) => (await control.boundingBox())!));
   for (const box of edges.slice(1)) {
     expect(Math.abs(box.y - edges[0]!.y), "controls in a form row share a top edge").toBeLessThanOrEqual(0.5);

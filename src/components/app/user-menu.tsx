@@ -58,9 +58,9 @@ export function UserMenu({ name, email, workspaceName, plan, isAdmin }: { name: 
           type="button"
           className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full transition-colors duration-150 hover:bg-paper-deep"
           data-testid="user-menu"
-          aria-label={`Open account menu: ${name || email}`}
         >
           <UserInitial name={name} email={email} />
+          <span className="sr-only">Open account menu: {name || email}</span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={4} className="w-72">
