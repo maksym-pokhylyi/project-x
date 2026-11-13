@@ -4,7 +4,7 @@ import "@/features/bids/components/bid-theme.css";
 import { Loader2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { uploadFile } from "@/features/bids/components/upload-client";
+import { UPLOAD_FAILED_MESSAGE, UploadError, uploadFile } from "@/features/bids/components/upload-client";
 import { fileKindFromName, MAX_LIBRARY_FILE_BYTES, unsupportedFileReason } from "@/features/bids/constants";
 import { LIBRARY_DOC_KIND_LABELS, LIBRARY_DOC_KINDS, type LibraryDocKind } from "@/features/bids/types";
 import { cn } from "@/lib/utils";
@@ -30,7 +30,7 @@ export type LibraryDocItem = {
   usedIn: number;
 };
 
-type UploadRow = { key: string; name: string; progress: number; error?: string };
+type UploadRow = { key: string; name: string; /** null: uploading without progress events */ progress: number | null; error?: string; /** kept for "Try again" */ file?: File; replace?: LibraryDocItem | null };
 
 const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
@@ -74,7 +74,7 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
       setUploads((current) => [...current, { key, name: file.name, progress: 1 }]);
       try {
         const plan = await planLibraryUploadAction({ name: file.name, size: file.size });
-        if (!plan.ok) throw new Error(plan.error.message);
+        if (!plan.ok) throw new UploadError(plan.error.message, false);
         await uploadFile({
           file,
           target: plan.data,
@@ -83,13 +83,16 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
           onProgress: (progress) => setUploads((current) => current.map((row) => (row.key === key ? { ...row, progress } : row))),
         });
         const registered = await registerLibraryDocAction({ docId: plan.data.docId, name: file.name, ...(replace ? { kind: replace.kind } : {}) });
-        if (!registered.ok) throw new Error(registered.error.message);
+        if (!registered.ok) throw new UploadError(registered.error.message, false);
         // The old file goes only once its replacement is safely in.
         if (replace) await deleteLibraryDocAction(replace.id);
         setUploads((current) => current.filter((row) => row.key !== key));
         router.refresh();
       } catch (caught) {
-        setUploads((current) => current.map((row) => (row.key === key ? { ...row, error: caught instanceof Error ? caught.message : "The upload failed. Try again." } : row)));
+        // Never left "uploading": a connection failure keeps the file at hand so the row can be tried again.
+        const retryable = caught instanceof UploadError ? caught.retryable : true;
+        const message = caught instanceof UploadError ? caught.message : UPLOAD_FAILED_MESSAGE;
+        setUploads((current) => current.map((row) => (row.key === key ? { ...row, error: message, ...(retryable ? { file, replace: replace ?? null } : {}) } : row)));
       }
     }
   };
@@ -156,6 +159,20 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
                   <span role="alert" className="flex-[2_1_240px] text-13 text-danger">
                     {row.error}
                   </span>
+                  {row.file ? (
+                    <Button variant="link"
+                      type="button"
+                      className="text-13"
+                      data-testid="retry-upload"
+                      onClick={() => {
+                        const { file, replace } = row;
+                        setUploads((current) => current.filter((item) => item.key !== row.key));
+                        if (file) void add([file], replace ?? undefined);
+                      }}
+>
+                      Try again
+                    </Button>
+                  ) : null}
                   <Button variant="link" type="button" className="text-13" onClick={() => setUploads((current) => current.filter((item) => item.key !== row.key))}>
                     Dismiss
                   </Button>
@@ -163,7 +180,7 @@ export function DocsPanel({ docs, now }: { docs: LibraryDocItem[]; now: number }
               ) : (
                 <span className="inline-flex items-center gap-2 text-13 font-semibold tabular-nums">
                   <Loader2 aria-hidden className="size-3.5 animate-spin" />
-                  Uploading {row.progress}%
+                  {row.progress === null ? "Uploading…" : `Uploading ${row.progress}%`}
                 </span>
               )}
             </li>

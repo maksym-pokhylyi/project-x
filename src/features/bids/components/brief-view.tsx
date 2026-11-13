@@ -165,7 +165,7 @@ function DateFact({ fact, exact, links, now }: { fact: BriefFact | undefined; ex
   const left = date ? daysLeftLabel(date, now) : null;
   return (
     <span className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold tabular-nums">
-      {left ? <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-paper-deep")} /> : null}
+      {left ? <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-(--accent)")} /> : null}
       <span className={left?.past ? "line-through" : undefined}>{exact ? formatDeadline(exact) : fact.value}</span>
       {left ? <span className={cn("rounded px-1.5 py-px text-xs", left.urgent && !left.past ? "bg-danger-tint text-danger" : left.past ? "bg-paper-deep" : "bg-accent-tint")}>{left.label}</span> : null}
       {fact.status === "ambiguous" ? <span className="bid-pill bid-pill-amber text-xs">Ambiguous — check</span> : null}

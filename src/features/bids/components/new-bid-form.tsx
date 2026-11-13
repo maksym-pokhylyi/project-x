@@ -10,7 +10,7 @@ import { ACCEPT_ATTRIBUTE, fileExtension, formatBytes, MAX_BID_BYTES, MAX_BID_FI
 import { tenderReferenceFromInput, type TenderSummary } from "@/features/bids/tender-lookup";
 import { cn } from "@/lib/utils";
 import { daysLeftLabel } from "./ui";
-import { uploadFile } from "./upload-client";
+import { UPLOAD_FAILED_MESSAGE, UploadError, uploadFile } from "./upload-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FileInput } from "@/features/bids/components/ui/file-input";
@@ -21,8 +21,11 @@ type Row = {
   size: number;
   /** skipped = a file we do not read (a drawing or photo): listed, never uploaded, no action needed. */
   status: "queued" | "uploading" | "done" | "error" | "skipped";
-  progress: number;
+  /** Percent sent; null while the upload runs in a way that cannot report progress. */
+  progress: number | null;
   error?: string;
+  /** The upload failed on the connection, and the file is still at hand: "Try again" re-sends it. */
+  retryable?: boolean;
   fileId?: string;
 };
 
@@ -41,14 +44,17 @@ const word = (n: number, lower = false) => {
 function notReadyReason(rows: Row[]): string | null {
   const uploading = rows.filter((row) => row.status === "uploading").length;
   const waiting = rows.filter((row) => row.status === "queued").length;
-  const failed = rows.filter((row) => row.status === "error").length;
+  // A file that did not get through can be sent again; one that was refused has to be replaced.
+  const unsent = rows.filter((row) => row.status === "error" && row.retryable).length;
+  const failed = rows.filter((row) => row.status === "error" && !row.retryable).length;
   const ready = rows.filter((row) => row.status === "done").length;
   const parts = [
     uploading > 0 ? `${word(uploading, true)} ${uploading === 1 ? "is" : "are"} uploading` : null,
     waiting > 0 ? `${word(waiting, true)} ${waiting === 1 ? "is" : "are"} waiting` : null,
+    unsent > 0 ? `${word(unsent, true)} could not be uploaded (try again, or remove ${unsent === 1 ? "it" : "them"})` : null,
     failed > 0 ? `${word(failed, true)} ${failed === 1 ? "needs" : "need"} replacing or removing` : null,
   ].filter((part): part is string => Boolean(part));
-  const total = uploading + waiting + failed;
+  const total = uploading + waiting + unsent + failed;
   if (total > 0) {
     const list = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : parts[0]!;
     return `${word(total)} ${total === 1 ? "file is" : "files are"} not ready: ${list}.`;
@@ -115,6 +121,48 @@ export function NewBidForm({
     return creating.current;
   }, [noticeId]);
 
+  /** The files of rows that are not uploaded yet, so a failed row can be tried again without choosing the file anew. */
+  const pendingFiles = useRef(new Map<string, File>());
+
+  /** Uploads one file and registers it. Never leaves a row "uploading": it ends as done or as an error. */
+  const uploadRow = useCallback(
+    async (id: string, row: Row, file: File) => {
+      pendingFiles.current.set(row.key, file);
+      patch(row.key, { status: "uploading", progress: 1, error: undefined, retryable: false });
+      try {
+        const plan = await planUploadAction(id, { name: file.name, size: file.size });
+        if (!plan.ok) throw new UploadError(plan.error.message, false);
+        await uploadFile({
+          file,
+          target: plan.data,
+          tokenUrl: "/api/bids/upload-token",
+          clientPayload: { scope: "bid", bidId: id, fileId: plan.data.fileId, name: file.name },
+          // null: a step that cannot report progress is running (shown as "Uploading…").
+          onProgress: (progress) => patch(row.key, { progress: progress === null ? null : Math.max(1, Math.min(99, progress)) }),
+        });
+        const registered = await registerFileAction(id, { fileId: plan.data.fileId, name: file.name });
+        if (!registered.ok) throw new UploadError(registered.error.message, false);
+        pendingFiles.current.delete(row.key);
+        patch(row.key, { status: "done", progress: 100, fileId: registered.data.id });
+      } catch (error) {
+        const retryable = error instanceof UploadError ? error.retryable : true;
+        if (!retryable) pendingFiles.current.delete(row.key);
+        patch(row.key, { status: "error", retryable, error: error instanceof UploadError ? error.message : UPLOAD_FAILED_MESSAGE });
+      }
+    },
+    [patch],
+  );
+
+  const retry = useCallback(
+    async (row: Row) => {
+      const file = pendingFiles.current.get(row.key);
+      if (!file || disabled) return;
+      const id = await ensureBid();
+      if (id) await uploadRow(id, row, file);
+    },
+    [disabled, ensureBid, uploadRow],
+  );
+
   const addFiles = useCallback(
     async (files: File[]) => {
       if (disabled || files.length === 0) return;
@@ -157,30 +205,11 @@ export function NewBidForm({
       // Three at a time keeps slow connections responsive.
       const queue = [...accepted];
       const worker = async () => {
-        for (let next = queue.shift(); next; next = queue.shift()) {
-          const { row, file } = next;
-          patch(row.key, { status: "uploading", progress: 1 });
-          try {
-            const plan = await planUploadAction(id, { name: file.name, size: file.size });
-            if (!plan.ok) throw new Error(plan.error.message);
-            await uploadFile({
-              file,
-              target: plan.data,
-              tokenUrl: "/api/bids/upload-token",
-              clientPayload: { scope: "bid", bidId: id, fileId: plan.data.fileId, name: file.name },
-              onProgress: (progress) => patch(row.key, { progress: Math.max(1, Math.min(99, progress)) }),
-            });
-            const registered = await registerFileAction(id, { fileId: plan.data.fileId, name: file.name });
-            if (!registered.ok) throw new Error(registered.error.message);
-            patch(row.key, { status: "done", progress: 100, fileId: registered.data.id });
-          } catch (error) {
-            patch(row.key, { status: "error", error: error instanceof Error ? error.message : "The upload failed. Try again." });
-          }
-        }
+        for (let next = queue.shift(); next; next = queue.shift()) await uploadRow(id, next.row, next.file);
       };
       await Promise.all([worker(), worker(), worker()]);
     },
-    [disabled, ensureBid, patch, rows],
+    [disabled, ensureBid, patch, rows, uploadRow],
   );
 
   const remove = async (row: Row) => {
@@ -257,7 +286,7 @@ export function NewBidForm({
               <div className="flex flex-col gap-0.5">
                 <span className="text-xs text-ink-2">Closes</span>
                 <span className="flex items-center gap-2 text-17 font-semibold tabular-nums">
-                  <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-paper-deep")} />
+                  <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-(--accent)")} />
                   {new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" }).format(closes)}
                 </span>
                 <span className="flex items-center gap-2 text-13 text-ink-2">
@@ -392,10 +421,19 @@ export function NewBidForm({
                       </span>
                     ) : row.status === "uploading" ? (
                       <>
-                        <span className="font-semibold tabular-nums">Uploading {row.progress}%</span>
-                        <span className="flex h-1 w-40 max-w-full rounded-full bg-line" role="progressbar" aria-valuenow={row.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Uploading ${row.name}`}>
-                          <span className="rounded-full bg-ink transition-[width]" style={{ width: `${row.progress}%` }} />
-                        </span>
+                        {row.progress === null ? (
+                          // A step without progress events (plain upload behind a proxy): say so, do not show a number.
+                          <span className="font-semibold" role="status">
+                            Uploading…
+                          </span>
+                        ) : (
+                          <>
+                            <span className="font-semibold tabular-nums">Uploading {row.progress}%</span>
+                            <span className="flex h-1 w-40 max-w-full rounded-full bg-line" role="progressbar" aria-valuenow={row.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Uploading ${row.name}`}>
+                              <span className="rounded-full bg-ink transition-[width]" style={{ width: `${row.progress}%` }} />
+                            </span>
+                          </>
+                        )}
                       </>
                     ) : row.status === "queued" ? (
                       <span className="text-ink-2">Waiting</span>
@@ -412,6 +450,11 @@ export function NewBidForm({
                           </span>
                           {row.error}
                         </span>
+                        {row.retryable ? (
+                          <Button variant="outline" size="sm" type="button"  onClick={() => void retry(row)} data-testid="retry-upload">
+                            Try again
+                          </Button>
+                        ) : null}
                         <Button variant="outline" size="sm"
                           type="button"
                           

@@ -96,7 +96,7 @@ export function citationLabel(citation: Citation, short = false): string {
 /** Tick = verified, amber dot = check, hollow dot = unverified (shape and colour both differ). */
 function StateGlyph({ state }: { state: VerificationState }) {
   if (state === "verified") return <Check aria-hidden className="size-3 shrink-0 text-brand" strokeWidth={2.6} />;
-  if (state === "check") return <span aria-hidden className="size-[7px] shrink-0 rounded-full bg-paper-deep" />;
+  if (state === "check") return <span aria-hidden className="size-[7px] shrink-0 rounded-full bg-(--accent)" />;
   return <span aria-hidden className="size-[7px] shrink-0 rounded-full border-[1.5px] border-ink-2" />;
 }
 

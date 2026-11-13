@@ -176,7 +176,7 @@ export function DeadlineChip({ deadline, now = new Date(), className, prefix = "
   const left = daysLeftLabel(deadline, now);
   return (
     <span className={cn("inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium tabular-nums", className)}>
-      <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-paper-deep")} />
+      <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-(--accent)")} />
       <span className={left.past ? "line-through" : undefined}>
         {prefix} {formatDeadline(deadline)}
       </span>

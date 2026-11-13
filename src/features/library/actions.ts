@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { nudgeWorker } from "@/features/bids/server/pipeline/dispatch";
-import { storageBackend } from "@/lib/storage";
 import { runAction, type ActionResult } from "@/server/http";
 import { requireOrg } from "@/server/session";
 import { deleteLibraryDoc, planLibraryUpload, registerLibraryDoc, updateLibraryDoc } from "./server/docs";
 import { discardFactsDraft, draftCompanyFactsFromWebsite, saveCompanyFacts } from "./server/facts";
+import { browserUploadMode } from "@/features/bids/server/direct-upload";
 
 /** Server Actions of the evidence library. The workspace always comes from the session. */
 
@@ -48,7 +48,7 @@ export async function planLibraryUploadAction(file: { name: string; size: number
       docId: plan.docId,
       pathname: plan.storageKey,
       contentType: plan.contentType,
-      mode: storageBackend === "vercel-blob" ? ("blob" as const) : ("direct" as const),
+      mode: await browserUploadMode(),
       directUrl: `/api/library/upload?docId=${plan.docId}&name=${encodeURIComponent(file.name)}`,
     };
   });

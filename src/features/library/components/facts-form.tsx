@@ -373,7 +373,7 @@ export function CompanyFactsForm({
                       </span>
                     ) : state.kind === "soon" ? (
                       <span className="inline-flex items-center gap-2 text-accent-ink">
-                        <span aria-hidden className="size-2 rounded-full bg-paper-deep" />
+                        <span aria-hidden className="size-2 rounded-full bg-(--accent)" />
                         {state.label}
                       </span>
                     ) : state.kind === "expired" ? (
