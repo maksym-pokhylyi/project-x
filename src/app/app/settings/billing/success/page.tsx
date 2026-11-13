@@ -11,7 +11,7 @@ export default async function CheckoutSuccessPage() {
   const planNames = Object.fromEntries(PLAN_KEYS.map((key) => [key, PLANS[key].name]));
   return (
     <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-4">
-      <TestModeNotice />
+      <TestModeNotice inline />
       <CheckoutStatus planNames={planNames} />
     </div>
   );

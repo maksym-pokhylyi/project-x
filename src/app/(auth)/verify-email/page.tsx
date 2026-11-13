@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AuthCard } from "@/components/auth/auth-card";
 import { ResendVerification } from "@/components/auth/resend-verification";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { features } from "@/env";
 import { safeRedirect } from "@/lib/redirects";
 
@@ -23,27 +24,26 @@ export default async function VerifyEmailPage({
       description={
         <>
           {params.resent ? "Your e-mail address is not verified yet. " : ""}We sent a verification link to{" "}
-          <strong className="text-foreground">{email || "your e-mail address"}</strong>. Open it to activate your account.
+          <strong className="font-semibold text-ink">{email || "your e-mail address"}</strong>. Open it to activate your account.
         </>
       }
       footer={
-        <Link className="underline-offset-4 hover:underline" href="/sign-in">
-          Back to sign in
-        </Link>
+        <Link href="/sign-in">Back to sign in</Link>
       }
     >
       <div className="space-y-4">
         {showDevHint ? (
-          <p className="rounded-md border border-warning/40 bg-warning/10 p-3 text-sm" data-testid="dev-outbox-hint">
-            <strong>Development mode:</strong> e-mail delivery is not configured (no <code>RESEND_API_KEY</code>). Open the{" "}
-            <Link href="/dev/outbox" className="font-medium underline underline-offset-4">
-              dev outbox
-            </Link>{" "}
-            to read the message.
-          </p>
+          <Alert variant="warning" role="note" data-testid="dev-outbox-hint">
+            <AlertTitle>Development mode</AlertTitle>
+            <AlertDescription>
+              <p>
+                E-mail delivery is not configured (no <code>RESEND_API_KEY</code>). Open the <Link href="/dev/outbox">dev outbox</Link> to read the message.
+              </p>
+            </AlertDescription>
+          </Alert>
         ) : null}
         {email ? <ResendVerification email={email} callbackURL={redirectTo} /> : null}
-        <p className="text-xs text-muted-foreground">The link is valid for 24 hours. Check your spam folder if you cannot find it.</p>
+        <p className="text-13 text-ink-2">The link is valid for 24 hours. Check your spam folder if you cannot find it.</p>
       </div>
     </AuthCard>
   );

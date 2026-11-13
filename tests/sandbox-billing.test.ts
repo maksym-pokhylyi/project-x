@@ -74,7 +74,8 @@ describe("sandbox billing on production (F-11)", () => {
     // The flag the UI reads: the server component renders the notice…
     const notice = app.notice.TestModeNotice();
     expect(notice).not.toBeNull();
-    expect(JSON.stringify(notice)).toContain("Test mode — no real payments.");
+    expect(JSON.stringify(notice)).toContain("Test mode.");
+    expect(JSON.stringify(notice)).toContain("no card is charged");
     expect(JSON.stringify(notice)).toContain("billing-test-mode");
     // …and the status endpoint reports it to client code.
     const owner = await createTestUser({ email: "owner@example.com" });

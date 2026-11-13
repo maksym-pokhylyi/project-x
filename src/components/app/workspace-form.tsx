@@ -71,7 +71,7 @@ export function WorkspaceForm({ name, logo, canEdit }: { name: string; logo: str
       <div className="space-y-2">
         <Label htmlFor="workspace-logo">Logo</Label>
         <div className="flex items-center gap-3">
-          <WorkspaceAvatar name={name} logo={logo} className="size-12 text-base" />
+          <WorkspaceAvatar name={name} logo={logo} className="size-12 rounded-card text-lg" />
           <input
             id="workspace-logo"
             ref={fileInput}
@@ -81,11 +81,11 @@ export function WorkspaceForm({ name, logo, canEdit }: { name: string; logo: str
             onChange={onLogoSelected}
             disabled={!canEdit || uploading}
           />
-          <Button type="button" variant="outline" size="sm" disabled={!canEdit || uploading} onClick={() => fileInput.current?.click()}>
+          <Button type="button" variant="outline" size="sm" disabled={!canEdit} loading={uploading} onClick={() => fileInput.current?.click()}>
             {uploading ? "Uploading…" : logo ? "Replace logo" : "Upload logo"}
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground">PNG, JPEG or WebP, up to 1 MB.</p>
+        <p className="text-13 text-ink-2">PNG, JPEG or WebP, up to 1 MB.</p>
       </div>
 
       <form onSubmit={onSubmit} noValidate className="space-y-4">
@@ -99,7 +99,7 @@ export function WorkspaceForm({ name, logo, canEdit }: { name: string; logo: str
           hint={canEdit ? undefined : "Only owners and admins can change workspace settings."}
         />
         {canEdit ? (
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" loading={pending}>
             {pending ? "Saving…" : "Save changes"}
           </Button>
         ) : null}

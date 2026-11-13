@@ -21,8 +21,9 @@ export default async function MembersPage() {
   const seatsAvailable = seats.limit === null || used < seats.limit;
 
   return (
-    <div className="space-y-6">
+    <>
       <PageHeader
+        level={2}
         title="Members"
         description={
           <span data-testid="seat-usage">
@@ -30,7 +31,7 @@ export default async function MembersPage() {
             {ctx.role === "owner" && !seatsAvailable ? (
               <>
                 {" "}
-                <Link href="/app/settings/billing" className="font-medium text-foreground underline underline-offset-4">
+                <Link href="/app/settings/billing" className="link font-medium">
                   Upgrade for more seats
                 </Link>
               </>
@@ -81,6 +82,6 @@ export default async function MembersPage() {
           </CardContent>
         </Card>
       ) : null}
-    </div>
+    </>
   );
 }

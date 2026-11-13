@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("next/headers", () => import("./helpers/next-headers"));
 
 import { db } from "@/db";
-import { emailOutbox, invitations, sessions, users } from "@/db/schema";
+import { emailOutbox, invitations, sessions, subscriptions, users } from "@/db/schema";
 import { createTestUser, headersFor } from "./helpers/auth";
 import { resetDatabase } from "./helpers/db";
 
@@ -80,6 +80,8 @@ describe("e-mail delivery and the security posture (F-04)", () => {
 
     it("existing verified users can still sign in; invitations cannot be sent into the void", async () => {
       const owner = await createTestUser({ email: "owner@example.com" });
+      // Radar Pro has a second seat: without it the invitation would stop at the seat limit of the Free plan, not at e-mail delivery.
+      await db.insert(subscriptions).values({ organizationId: owner.organizationId, status: "active", planKey: "starter", paddleSubscriptionId: "sub_posture" });
       const app = await loadApp(PRODUCTION);
       expect((await post(app, "/sign-in/email", { email: owner.email, password: "correct-horse-battery" })).status).toBe(200);
 

@@ -37,7 +37,7 @@ export function ProfileForm({ name, email }: { name: string; email: string }) {
     <form onSubmit={onSubmit} noValidate className="max-w-md space-y-4">
       <FormField label="Name" name="name" defaultValue={name} autoComplete="name" required error={errors.name?.[0]} />
       <FormField label="E-mail" name="email" type="email" defaultValue={email} disabled hint="Contact support to change your e-mail address." />
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" loading={pending}>
         {pending ? "Saving…" : "Save changes"}
       </Button>
     </form>

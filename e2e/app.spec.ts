@@ -1,11 +1,13 @@
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import postgres from "postgres";
 import { E2E_DEV_TOOLS_SECRET } from "../playwright.config";
 
 /**
  * One serial journey through the critical paths, against a production build:
  *
  *   public pages → sign up → verify e-mail (dev outbox) → app with auto-created workspace
- *   → rename workspace → invite a member → invitee accepts in a second browser
+ *   → rename workspace → (workspace moves to a two-seat plan) → invite a member
+ *   → invitee accepts in a second browser
  *   → member is locked out of owner/admin surfaces → sign out / sign in → data persisted
  *   → password reset → founder admin → verification in a foreign browser (takeover
  *   protection) → export, workspace deletion and account deletion.
@@ -27,6 +29,14 @@ let memberPage: Page;
 /** CSP violations reported by any page of a context created through newContext(). */
 const cspViolations: string[] = [];
 
+/** The plan badge is in the account menu (opened from the avatar in the top bar). */
+async function expectPlanBadge(page: Page, plan: string) {
+  await page.getByTestId("user-menu").first().click();
+  await expect(page.getByTestId("plan-badge")).toHaveText(plan);
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("plan-badge")).toHaveCount(0);
+}
+
 async function newContext(browser: Browser): Promise<BrowserContext> {
   const context = await browser.newContext();
   await context.exposeFunction("__reportCspViolation", (violation: string) => void cspViolations.push(violation));
@@ -37,6 +47,24 @@ async function newContext(browser: Browser): Promise<BrowserContext> {
     });
   });
   return context;
+}
+
+/**
+ * Gives a workspace an active subscription the way a Paddle webhook would: a row in
+ * `subscriptions`. The Free plan has a single seat, so the invitation journey needs a paid
+ * plan, and there is no Paddle in e2e to buy one with.
+ */
+async function subscribeWorkspace(workspaceName: string, planKey: "starter" | "pro" | "business") {
+  const sql = postgres(process.env.E2E_DATABASE_URL ?? "postgres://app:app@localhost:5432/app_e2e", { prepare: false, max: 1, onnotice: () => {} });
+  try {
+    const rows = await sql`
+      insert into subscriptions (organization_id, status, plan_key, paddle_subscription_id)
+      select id, 'active', ${planKey}, ${`sub_e2e_${planKey}`} from organizations where name = ${workspaceName}
+      returning id`;
+    expect(rows, `workspace "${workspaceName}" not found`).toHaveLength(1);
+  } finally {
+    await sql.end({ timeout: 5 });
+  }
 }
 
 /** Opens the dev outbox and follows the first link of the newest e-mail for `to`. */
@@ -149,15 +177,19 @@ test("pricing page renders the plan catalogue with a monthly/annual toggle", asy
   await expect(page.getByRole("heading", { level: 1, name: "Pricing" })).toBeVisible();
   for (const plan of ["free", "starter", "pro", "business"]) await expect(page.getByTestId(`plan-${plan}`)).toBeVisible();
 
-  await expect(page.getByTestId("price-starter")).toHaveText("$29");
+  // Radar Pro (plan key "starter"): £29 a month, £290 a year (two months free).
+  await expect(page.getByTestId("plan-starter")).toContainText("Radar Pro");
+  await expect(page.getByTestId("price-starter")).toHaveText("£29");
   await expect(page.getByTestId("plan-starter")).toContainText("Billed monthly");
   await page.getByTestId("interval-year").click();
   await expect(page.getByTestId("interval-year")).toHaveAttribute("aria-checked", "true");
-  await expect(page.getByTestId("price-starter")).toHaveText("$24.17");
-  await expect(page.getByTestId("plan-starter")).toContainText("$290 billed annually");
-  await expect(page.getByTestId("price-free")).toHaveText("$0");
+  await expect(page.getByTestId("price-starter")).toHaveText("£290");
+  await expect(page.getByTestId("plan-starter")).toContainText("Two months free. Works out at £24.17 a month.");
+  await expect(page.getByTestId("price-free")).toHaveText("£0");
   await page.getByTestId("interval-month").click();
-  await expect(page.getByTestId("price-pro")).toHaveText("$79");
+  await expect(page.getByTestId("price-pro")).toHaveText("£149");
+  // The one-off Bid Pass sits next to the plans.
+  await expect(page.getByTestId("price-bid-pass")).toHaveText("£99");
 
   // Paid plans lead to sign-up with the plan carried along.
   await expect(page.getByTestId("plan-pro").getByRole("link")).toHaveAttribute("href", "/sign-up?plan=pro&interval=month");
@@ -200,7 +232,7 @@ test("sign up, verify e-mail through the dev outbox, land in an auto-created wor
   await expect(page).toHaveURL(/\/app$/);
   await expect(page.getByRole("heading", { level: 1, name: "Welcome, Olivia" })).toBeVisible();
   await expect(page.getByTestId("current-workspace-name").first()).toHaveText("Olivia's workspace");
-  await expect(page.getByTestId("plan-badge")).toHaveText("Free");
+  await expectPlanBadge(page, "Free");
   await expect(page.getByTestId("onboarding-checklist")).toContainText("0 of 3 steps completed");
 });
 
@@ -241,6 +273,18 @@ test("upload a workspace logo through the storage abstraction", async () => {
   await anonymous.close();
 });
 
+test("the Free plan has a single seat; Radar Pro has two", async () => {
+  const page = ownerPage;
+  await page.goto("/app/settings/members");
+  await expect(page.getByTestId("seat-usage")).toContainText("1 of 1 seats in use on the Free plan");
+  await expect(page.getByRole("button", { name: "Send invitation" })).toBeDisabled();
+
+  await subscribeWorkspace(WORKSPACE, "starter");
+  await page.reload();
+  await expectPlanBadge(page, "Radar Pro");
+  await expect(page.getByTestId("seat-usage")).toContainText("1 of 2 seats in use on the Radar Pro plan");
+});
+
 test("invite a member by e-mail", async () => {
   const page = ownerPage;
   await page.goto("/app/settings/members");
@@ -255,7 +299,7 @@ test("invite a member by e-mail", async () => {
   await page.getByRole("button", { name: "Send invitation" }).click();
   await expect(page.getByText(`Invitation sent to ${invitee.email}.`)).toBeVisible();
   await expect(page.getByTestId("invitations-list")).toContainText(invitee.email);
-  // Free plan has 2 seats: owner + pending invitation uses both.
+  // Radar Pro has 2 seats: owner + pending invitation uses both.
   await expect(page.getByTestId("seat-usage")).toContainText("2 of 2 seats in use");
   await expect(page.getByRole("button", { name: "Send invitation" })).toBeDisabled();
 });
@@ -332,14 +376,14 @@ test("the owner sees the new member and the billing page without Paddle configur
 
   const billing = await page.goto("/app/settings/billing");
   expect(billing?.status()).toBe(200);
-  await expect(page.getByTestId("current-plan")).toContainText("Free plan");
+  await expect(page.getByTestId("current-plan")).toContainText("Radar Pro plan");
   await expect(page.getByTestId("usage-panel")).toContainText("2 of 2");
   // No Paddle env in e2e: checkout is clearly disabled instead of crashing.
   await expect(page.getByTestId("billing-not-configured")).toHaveCount(3);
   await expect(page.getByTestId("billing-not-configured").first()).toContainText("Billing not configured");
 
   const status = await page.request.get("/api/billing/status");
-  expect(await status.json()).toMatchObject({ planKey: "free", isPaid: false });
+  expect(await status.json()).toMatchObject({ planKey: "starter", isPaid: true });
 });
 
 test("sign out and back in: workspace, members and settings persisted", async () => {

@@ -32,6 +32,10 @@ async function raw(user: TestUser | null, path: string, body: unknown) {
 
 const organizationOf = async (id: string) => (await db.select().from(organizations).where(eq(organizations.id, id)))[0]!;
 
+/** Gives a workspace an active subscription, as a Paddle webhook would. The Free plan has a single seat, so anything that invites needs one. */
+const subscribe = (organizationId: string, planKey: "starter" | "pro" | "business") =>
+  db.insert(subscriptions).values({ organizationId, status: "active", planKey, paddleSubscriptionId: `sub_${planKey}_${organizationId}` });
+
 describe("raw Better Auth endpoints obey the app's rules (F-13)", () => {
   let owner: TestUser;
 
@@ -104,6 +108,7 @@ describe("raw Better Auth endpoints obey the app's rules (F-13)", () => {
       expect((await db.select().from(users))[0]!.name).toBe("Olivia O'Brien-Smith");
       expect(await updateProfileAction({ name: "Join https://evil.example" })).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
 
+      await subscribe(owner.organizationId, "starter"); // Radar Pro: 2 seats, so there is room for one invitation
       await raw(owner, "/organization/invite-member", { email: "invitee@example.com", role: "member", organizationId: owner.organizationId });
       const [mail] = await db.select().from(emailOutbox).where(eq(emailOutbox.template, "invitation"));
       expect(mail!.subject).toBe("Olivia O'Brien-Smith invited you to Olivia's workspace on Bidfolio");
@@ -119,6 +124,7 @@ describe("raw Better Auth endpoints obey the app's rules (F-13)", () => {
 
   describe("invitations and roles", () => {
     it("only member/admin can be invited, even by an owner calling the endpoint directly", async () => {
+      await subscribe(owner.organizationId, "starter"); // Radar Pro: 2 seats
       const invite = (role: unknown, email = "invitee@example.com") => raw(owner, "/organization/invite-member", { email, role, organizationId: owner.organizationId });
       expect(await invite("owner")).toMatchObject({ status: 400, code: "VALIDATION" });
       expect(await invite(["member", "owner"])).toMatchObject({ status: 400, code: "VALIDATION" });
@@ -161,8 +167,8 @@ describe("seat limits after a downgrade (F-15)", () => {
   beforeEach(async () => {
     await resetDatabase();
     owner = await createTestUser({ email: "owner@example.com" });
-    // On Starter (5 seats) the workspace grows to 4 members…
-    await db.insert(subscriptions).values({ organizationId: owner.organizationId, status: "active", planKey: "starter", paddleSubscriptionId: "sub_seats" });
+    // On Bid Desk Plus (10 seats) the workspace grows to 4 members…
+    await db.insert(subscriptions).values({ organizationId: owner.organizationId, status: "active", planKey: "business", paddleSubscriptionId: "sub_seats" });
     extra = [];
     for (const [index, role] of (["admin", "member", "member"] as const).entries()) {
       const user = await createTestUser({ email: `member${index}@example.com` });
@@ -177,19 +183,19 @@ describe("seat limits after a downgrade (F-15)", () => {
   it("within the limit nothing is flagged", async () => {
     actAs(owner);
     const ctx = await requireOrg({ write: true });
-    expect(ctx.seats).toEqual({ used: 4, limit: 5, overLimit: false });
+    expect(ctx.seats).toEqual({ used: 4, limit: 10, overLimit: false });
   });
 
   it("after the plan ends: members keep read access, the workspace is flagged and read-only, nobody can be added", async () => {
-    await cancelPlan(); // back to Free: 2 seats, 4 members
+    await cancelPlan(); // back to Free: 1 seat, 4 members
 
     for (const user of [owner, ...extra]) {
       actAs(user);
       const ctx = await requireOrg(); // reading still works for everyone
       expect(ctx.organization.id).toBe(owner.organizationId);
-      expect(ctx.seats).toEqual({ used: 4, limit: 2, overLimit: true });
+      expect(ctx.seats).toEqual({ used: 4, limit: 1, overLimit: true });
       const error = await requireOrg({ write: true }).catch((caught: unknown) => caught);
-      expect(error).toMatchObject({ code: "SEAT_LIMIT_REACHED", status: 402, details: { limit: 2, used: 4, readOnly: true } });
+      expect(error).toMatchObject({ code: "SEAT_LIMIT_REACHED", status: 402, details: { limit: 1, used: 4, readOnly: true } });
       expect(() => assertWorkspaceWritable(ctx)).toThrow(/read-only/);
     }
 
@@ -203,11 +209,11 @@ describe("seat limits after a downgrade (F-15)", () => {
     await cancelPlan();
     actAs(owner);
     const rows = await db.select().from(members).where(eq(members.organizationId, owner.organizationId));
-    for (const user of extra.slice(1)) {
+    for (const user of extra) {
       expect(await removeMemberAction(rows.find((row) => row.userId === user.id)!.id)).toMatchObject({ ok: true });
     }
     const ctx = await requireOrg({ write: true });
-    expect(ctx.seats).toEqual({ used: 2, limit: 2, overLimit: false });
+    expect(ctx.seats).toEqual({ used: 1, limit: 1, overLimit: false });
 
     await addMember(owner.organizationId, extra[1]!, "member");
     await expect(requireOrg({ write: true })).rejects.toMatchObject({ code: "SEAT_LIMIT_REACHED" });
@@ -216,14 +222,14 @@ describe("seat limits after a downgrade (F-15)", () => {
   });
 
   it("two invitations accepted at the same moment cannot exceed the limit", async () => {
-    // Fresh workspace: Starter with the owner and two pending invitations, then the plan ends (2 seats).
+    // Fresh workspace: Bid Desk (3 seats) with the owner and two pending invitations, then a downgrade to Radar Pro (2 seats).
     const boss = await createTestUser({ email: "boss@example.com" });
-    await db.insert(subscriptions).values({ organizationId: boss.organizationId, status: "active", planKey: "starter", paddleSubscriptionId: "sub_race" });
+    await db.insert(subscriptions).values({ organizationId: boss.organizationId, status: "active", planKey: "pro", paddleSubscriptionId: "sub_race" });
     actAs(boss);
     const first = await inviteMemberAction({ email: "racer1@example.com", role: "member" });
     const second = await inviteMemberAction({ email: "racer2@example.com", role: "member" });
     expect(first.ok && second.ok).toBe(true);
-    await db.update(subscriptions).set({ status: "canceled" }).where(eq(subscriptions.organizationId, boss.organizationId));
+    await db.update(subscriptions).set({ planKey: "starter" }).where(eq(subscriptions.organizationId, boss.organizationId));
     const racers = [await createTestUser({ email: "racer1@example.com" }), await createTestUser({ email: "racer2@example.com" })];
     const ids = [first.ok ? first.data.invitationId : "", second.ok ? second.data.invitationId : ""];
 

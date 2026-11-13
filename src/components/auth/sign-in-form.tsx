@@ -59,12 +59,12 @@ export function SignInForm({ redirectTo, googleEnabled }: { redirectTo: string; 
           required
           error={errors.password?.[0]}
           trailing={
-            <Link href="/forgot-password" className="text-xs text-muted-foreground underline-offset-4 hover:underline">
+            <Link href="/forgot-password" className="link text-13">
               Forgot password?
             </Link>
           }
         />
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button type="submit" className="w-full" loading={pending}>
           {pending ? "Signing in…" : "Sign in"}
         </Button>
       </form>
