@@ -26,7 +26,7 @@ type Envelope = {
   event_type: string;
   occurred_at: string;
   notification_id: string;
-  data: Record<string, unknown> & { items?: Array<{ price: { id: string } }> };
+  data: Record<string, unknown> & { id: string; items?: Array<{ price: { id: string } }> };
 };
 
 let sequence = 0;

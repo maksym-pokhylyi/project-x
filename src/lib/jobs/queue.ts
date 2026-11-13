@@ -16,7 +16,7 @@ import { scrubText } from "@/lib/describe-error";
 export type JobPayloads = {
   /** Deliver one e-mail from email_outbox through the provider. */
   "email.send": { outboxId: string };
-  /** Housekeeping: expired rate-limit windows, old finished jobs, old outbox bodies. */
+  /** Housekeeping: data retention for every operational table (src/config/retention.ts). */
   "maintenance.cleanup": Record<string, never>;
   /** Compare open subscriptions with the Paddle API (no-op without PADDLE_API_KEY). */
   "billing.reconcile": Record<string, never>;
