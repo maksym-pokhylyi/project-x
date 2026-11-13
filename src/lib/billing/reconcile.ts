@@ -71,6 +71,7 @@ export async function reconcileSubscriptions(options: { fetchSubscription?: Fetc
       priceId: subscriptions.priceId,
       currentPeriodEnd: subscriptions.currentPeriodEnd,
       cancelAt: subscriptions.cancelAt,
+      pauseAt: subscriptions.pauseAt,
     })
     .from(subscriptions)
     .where(sql`${isNotNull(subscriptions.paddleSubscriptionId)} and ${inArray(subscriptions.status, OPEN_STATUSES)}`)
@@ -96,11 +97,14 @@ export async function reconcileSubscriptions(options: { fetchSubscription?: Fetc
 
       const remotePeriodEnd = remote.current_billing_period ? Date.parse(remote.current_billing_period.ends_at) : null;
       const remoteCancelAt = remote.scheduled_change?.action === "cancel" ? Date.parse(remote.scheduled_change.effective_at) : null;
+      const remotePauseAt = remote.scheduled_change?.action === "pause" ? Date.parse(remote.scheduled_change.effective_at) : null;
       const same =
         remote.status === row.status &&
         remote.items.some((item) => item.price.id === row.priceId) &&
         remotePeriodEnd === (row.currentPeriodEnd?.getTime() ?? null) &&
-        remoteCancelAt === (row.cancelAt?.getTime() ?? null);
+        remoteCancelAt === (row.cancelAt?.getTime() ?? null) &&
+        // A scheduled pause that was set or removed while a webhook was lost.
+        remotePauseAt === (row.pauseAt?.getTime() ?? null);
 
       if (!same) {
         // The entity's own `updated_at` orders this snapshot against webhooks we already applied.
