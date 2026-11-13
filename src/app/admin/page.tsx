@@ -98,8 +98,8 @@ export default async function AdminOverviewPage() {
           <Stat
             testId="bid-pass"
             label="Bid Pass sales"
-            value={kpis.bidPassSales ? count(kpis.bidPassSales.total) : DASH}
-            hint={kpis.bidPassSales ? inWindows(kpis.bidPassSales) : "The bid desk is not installed here yet"}
+            value={count(kpis.bidPassSales.total)}
+            hint={`${inWindows(kpis.bidPassSales)}${kpis.bidPassSales.refunded > 0 ? ` · ${count(kpis.bidPassSales.refunded)} more refunded or disputed` : ""}`}
           />
           <Stat label="Trial → paid" value={conversion} hint={`${metrics.trials.converted} of ${metrics.trials.started} trials`} />
           <Stat label="Churned (30 days)" value={String(metrics.subscriptions.churnedLast30Days)} hint="Subscriptions canceled" />

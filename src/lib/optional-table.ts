@@ -6,7 +6,7 @@ import { log } from "./logger";
 
 /**
  * Reading a table that ANOTHER module owns and that may not be installed in this
- * deployment yet (the bid desk's `bids` and `bid_credits` arrive with their own migration).
+ * deployment yet (the bid desk's `bids` arrives with its own migration).
  *
  *   const started = await queryOptionalTable("bids", () => db.execute(sql`select count(*) from bids`));
  *   // null -> the module is absent: show "—", never a made-up zero

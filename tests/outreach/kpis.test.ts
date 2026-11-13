@@ -13,7 +13,7 @@ import { aiUsage, dataRequests, ingestState, jobs, organizations, orgSupplierLin
 import { addSuppressionEntry } from "@/features/outreach/server/suppression-store";
 import { getFounderKpis } from "@/server/admin-kpis";
 import { actAs, createTestUser, type TestUser } from "../helpers/auth";
-import { bidDeskInstalled, FIVE_ELIGIBLE, pageText as text, resetOutreach, seed, signInFounder, withBidDeskTables } from "./helpers";
+import { bidDeskInstalled, FIVE_ELIGIBLE, pageText as text, recordPurchase, resetOutreach, seed, signInFounder, withBidDeskTables } from "./helpers";
 
 /**
  * The founder's numbers on /admin. Every figure is a query: on an empty database they are
@@ -68,7 +68,7 @@ describe("founder KPIs", () => {
       activatedWorkspaces: installed ? none : null,
       paying: { total: 0, trialing: 0, pastDue: 0, byPlan: [] },
       mrr: { minor: 0, currency: "GBP" },
-      bidPassSales: installed ? none : null,
+      bidPassSales: { ...none, refunded: 0 },
       aiSpendUsd: { today: 0, last7Days: 0, last30Days: 0, dailyBudget: 1 },
       jobs: { pending: 0, running: 0, failedLast24Hours: 0, oldestPendingAt: null },
       ingestion: { lastSuccessAt: null, lastRunAt: null, lastError: null },
@@ -90,9 +90,9 @@ describe("founder KPIs", () => {
     expect(shown.outreach).toMatch(/^Outreach 0 sent 0 opened their page · 0 claimed · (—|0) bid checks · 0 opted out Open outreach$/);
     expect(shown.suppressions).toBe("Do-not-contact list 0 Addresses and domains that are never listed or exported Open the list");
     expect(shown["data-requests"]).toBe("Correction and removal requests 0 open Nothing waiting Open the requests");
+    expect(shown["bid-pass"]).toBe("Bid Pass sales 0 0 in 7 days · 0 in 30 days");
     if (!(await bidDeskInstalled())) {
       expect(shown.activated).toBe("Activated workspaces — First bid check built — the bid desk is not installed here yet");
-      expect(shown["bid-pass"]).toBe("Bid Pass sales — The bid desk is not installed here yet");
     }
     // Each link says where it goes, and looks like a link (the design system's `link`).
     for (const href of ["/admin/ingestion", "/admin/outreach", "/admin/suppressions", "/admin/suppressions#requests"]) {
@@ -216,7 +216,7 @@ describe("founder KPIs", () => {
     expect(html).not.toMatch(/acmegrounds|company\.example/);
   });
 
-  it("with the bid desk installed: activated workspaces and Bid Pass sales", async () => {
+  it("with the bid desk installed: activated workspaces", async () => {
     const [a, b, c] = await customerWorkspaces(["a", "b", "c"]);
     actAs(founder);
     await withBidDeskTables(async () => {
@@ -228,19 +228,30 @@ describe("founder KPIs", () => {
           (${b}, 'An old check', ${iso(ago(40 * DAY))}::timestamptz, ${iso(ago(40 * DAY))}::timestamptz),
           (${c}, 'Still processing', ${iso(ago(1 * HOUR))}::timestamptz, null)
       `);
-      await db.execute(sql`
-        insert into bid_credits (organization_id, kind, source, granted_at) values
-          (${a}, 'bid_pass', 'paddle', ${iso(ago(1 * DAY))}::timestamptz),
-          (${b}, 'bid_pass', 'paddle', ${iso(ago(10 * DAY))}::timestamptz),
-          (${c}, 'bid_pass', 'admin', ${iso(ago(1 * DAY))}::timestamptz),
-          (${c}, 'free_brief', 'signup', ${iso(ago(1 * DAY))}::timestamptz)
-      `);
       const kpis = await getFounderKpis(now);
       expect(kpis.activatedWorkspaces).toEqual({ total: 2, last7Days: 1, last30Days: 1 }); // by each workspace's FIRST ready check
-      expect(kpis.bidPassSales).toEqual({ total: 2, last7Days: 1, last30Days: 2 }); // bought through Paddle only
       const shown = cells(renderToStaticMarkup(await AdminOverviewPage()));
       expect(shown.activated).toBe("Activated workspaces 2 First bid check built · 1 in 7 days · 1 in 30 days");
-      expect(shown["bid-pass"]).toBe("Bid Pass sales 2 1 in 7 days · 2 in 30 days");
     });
+  });
+
+  it("Bid Pass sales are the passes of purchases still paid for; refunds are named, not counted", async () => {
+    const [a, b, c] = await customerWorkspaces(["a", "b", "c"]);
+    actAs(founder);
+    await recordPurchase(a!, { at: ago(1 * DAY) });
+    await recordPurchase(a!, { at: ago(3 * DAY), quantity: 2 }); // two passes in one purchase
+    await recordPurchase(b!, { at: ago(10 * DAY), status: "partially_refunded" }); // the pass stayed with the customer
+    await recordPurchase(b!, { at: ago(40 * DAY) });
+    await recordPurchase(c!, { at: ago(2 * DAY), status: "refunded" });
+    await recordPurchase(c!, { at: ago(2 * DAY), status: "disputed", quantity: 2 });
+    // A pass given by hand is not a sale: it has no purchase behind it.
+    if (await bidDeskInstalled()) {
+      await db.execute(sql`insert into bid_credits (organization_id, kind, source) values (${c}, 'bid_pass', 'admin')`);
+    }
+
+    const kpis = await getFounderKpis(now);
+    expect(kpis.bidPassSales).toEqual({ total: 5, last7Days: 3, last30Days: 4, refunded: 3 });
+    const shown = cells(renderToStaticMarkup(await AdminOverviewPage()));
+    expect(shown["bid-pass"]).toBe("Bid Pass sales 5 3 in 7 days · 4 in 30 days · 3 more refunded or disputed");
   });
 });

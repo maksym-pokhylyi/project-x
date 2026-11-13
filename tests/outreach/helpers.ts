@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
+import { billingPurchases } from "@/db/schema";
 import type { OcdsRelease } from "@/features/procurement/domain/ocds";
 import { DEFAULT_SEGMENT, type OutreachSegment } from "@/features/outreach/domain/segment";
 import { forgetOptionalTables } from "@/lib/optional-table";
@@ -198,22 +199,16 @@ const tableExists = async (table: string): Promise<boolean> => {
 export const bidDeskInstalled = (): Promise<boolean> => tableExists("bids");
 
 /**
- * Runs `run` with the bid desk's tables present. Where its migration is not installed,
- * stand-ins are created with the columns the outreach results and the founder's numbers
- * read (named as in that migration: `bids.organization_id/title/created_at/ready_at`,
- * `bid_credits.organization_id/kind/source/granted_at`) and dropped again afterwards.
+ * Runs `run` with the bid desk's table present. Where its migration is not installed, a
+ * stand-in is created with the columns the outreach results and the founder's numbers read
+ * (named as in that migration: `bids.organization_id/title/created_at/ready_at`) and
+ * dropped again afterwards.
  */
 export async function withBidDeskTables<T>(run: () => Promise<T>): Promise<T> {
   const created: string[] = [];
   if (!(await tableExists("bids"))) {
     await db.execute(sql`create table bids (id uuid primary key default gen_random_uuid(), organization_id text not null, title text not null, created_at timestamptz not null default now(), ready_at timestamptz)`);
     created.push("bids");
-  }
-  if (!(await tableExists("bid_credits"))) {
-    await db.execute(
-      sql`create table bid_credits (id uuid primary key default gen_random_uuid(), organization_id text not null, kind text not null default 'bid_pass', source text not null default 'admin', granted_at timestamptz not null default now())`,
-    );
-    created.push("bid_credits");
   }
   forgetOptionalTables();
   try {
@@ -222,6 +217,29 @@ export async function withBidDeskTables<T>(run: () => Promise<T>): Promise<T> {
     for (const table of created.reverse()) await db.execute(sql.raw(`drop table if exists "${table}"`));
     forgetOptionalTables();
   }
+}
+
+let purchases = 0;
+
+/**
+ * A one-off purchase as the billing webhook records it: one Bid Pass, paid in full, unless
+ * said otherwise. `status` is completed | partially_refunded | refunded | disputed.
+ */
+export async function recordPurchase(organizationId: string, options: { at: Date; quantity?: number; status?: string }): Promise<void> {
+  purchases += 1;
+  const quantity = options.quantity ?? 1;
+  await db.insert(billingPurchases).values({
+    organizationId,
+    kind: "bid_pass",
+    paddleTransactionId: `txn_test_outreach_${purchases}`,
+    priceId: "pri_test_bid_pass",
+    quantity,
+    amountMinor: 9_900 * quantity,
+    currency: "GBP",
+    status: options.status ?? "completed",
+    paddleEnvironment: "sandbox",
+    createdAt: options.at,
+  });
 }
 
 export const count = async (table: string): Promise<number> => {

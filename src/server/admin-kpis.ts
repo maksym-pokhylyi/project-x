@@ -4,9 +4,10 @@ import { PLAN_CURRENCY, PLANS, isPlanKey } from "@/config/plans";
 import { db } from "@/db";
 import { env } from "@/env";
 import { countOpenDataRequests } from "@/features/outreach/server/data-requests";
-import { getOutreachResults } from "@/features/outreach/server/results";
+import { getOutreachResults, paidPurchaseStatuses } from "@/features/outreach/server/results";
 import { iso } from "@/features/procurement/ingest/sql";
 import { getAiSpendUsd, startOfUtcDay } from "@/lib/ai";
+import type { OneOffKind } from "@/lib/billing/one-off";
 import { queryOptionalTable } from "@/lib/optional-table";
 import { monthlyRevenueCents } from "./admin";
 import { requireAdmin } from "./session";
@@ -15,9 +16,13 @@ import { requireAdmin } from "./session";
  * The founder's numbers on /admin. Every figure is a query — nothing is estimated beyond
  * what its label says. Cross-tenant BY DESIGN, so the function starts with requireAdmin().
  *
- * Two figures depend on the bid desk, whose tables (`bids`, `bid_credits`) arrive with their
- * own migration: they are read through `queryOptionalTable` and are `null` — shown as "—",
- * never as a made-up zero — while those tables are absent.
+ * One figure depends on the bid desk, whose table (`bids`) arrives with its own migration:
+ * it is read through `queryOptionalTable` and is `null` — shown as "—", never as a made-up
+ * zero — while that table is absent.
+ *
+ * Subscriptions and purchases are counted as the billing tables hold them. Should rows of
+ * the other Paddle environment be among them (test mode left over after going live), the
+ * warning above these numbers says so (getAdminConfigWarnings, BILLING_ENVIRONMENT_MIX).
  */
 export type Windowed = { total: number; last7Days: number; last30Days: number };
 
@@ -33,8 +38,12 @@ export type FounderKpis = {
   paying: { total: number; trialing: number; pastDue: number; byPlan: Array<{ planKey: string; name: string; paying: number; trialing: number }> };
   /** Monthly recurring revenue at catalogue prices (annual plans ÷ 12), in minor units of `currency`. */
   mrr: { minor: number; currency: string };
-  /** Bid Passes bought through Paddle. Null without the bid desk. */
-  bidPassSales: Windowed | null;
+  /**
+   * Bid Passes sold: the units of one-off purchases (`billing_purchases`) that are still
+   * paid for, windows by the day the purchase was recorded. `refunded` counts the units of
+   * purchases refunded in full or under dispute — they are in none of the other figures.
+   */
+  bidPassSales: Windowed & { refunded: number };
   aiSpendUsd: { today: number; last7Days: number; last30Days: number; dailyBudget: number };
   jobs: { pending: number; running: number; failedLast24Hours: number; oldestPendingAt: Date | null };
   ingestion: { lastSuccessAt: Date | null; lastRunAt: Date | null; lastError: string | null };
@@ -59,6 +68,7 @@ const date = (value: unknown): Date | null => {
 const windowed = (row: Row | undefined): Windowed => ({ total: n(row?.total), last7Days: n(row?.d7), last30Days: n(row?.d30) });
 
 const DAY_MS = 86_400_000;
+const BID_PASS: OneOffKind = "bid_pass";
 
 export async function getFounderKpis(now: Date = new Date()): Promise<FounderKpis> {
   await requireAdmin();
@@ -67,8 +77,10 @@ export async function getFounderKpis(now: Date = new Date()): Promise<FounderKpi
   const d1 = new Date(now.getTime() - DAY_MS).toISOString();
   /** "… as d7, … as d30": rows created in the last 7 and 30 days. */
   const createdInWindows = sql`count(*) filter (where created_at >= ${d7}::timestamptz)::int as d7, count(*) filter (where created_at >= ${d30}::timestamptz)::int as d30`;
+  /** A purchase that is still paid for (not refunded in full, not under dispute). */
+  const paidFor = sql`status in (${paidPurchaseStatuses()})`;
 
-  const [users, organizations, claims, subscriptionRows, jobs, ingestion, suppressionCount, aiToday, ai7, ai30, results, requests] = await Promise.all([
+  const [users, organizations, claims, subscriptionRows, bidPasses, jobs, ingestion, suppressionCount, aiToday, ai7, ai30, results, requests] = await Promise.all([
     db.execute(sql`
       select count(*)::int as total, ${createdInWindows},
              count(*) filter (where email_verified)::int as verified,
@@ -84,6 +96,13 @@ export async function getFounderKpis(now: Date = new Date()): Promise<FounderKpi
       from (select supplier_id, min(created_at) as first_claim from org_supplier_links group by supplier_id) claimed
     `),
     db.execute(sql`select status, plan_key, billing_interval, quantity from subscriptions`),
+    db.execute(sql`
+      select coalesce(sum(quantity) filter (where ${paidFor}), 0)::int as total,
+             coalesce(sum(quantity) filter (where ${paidFor} and created_at >= ${d7}::timestamptz), 0)::int as d7,
+             coalesce(sum(quantity) filter (where ${paidFor} and created_at >= ${d30}::timestamptz), 0)::int as d30,
+             coalesce(sum(quantity) filter (where not (${paidFor})), 0)::int as refunded
+      from billing_purchases where kind = ${BID_PASS}
+    `),
     db.execute(sql`
       select count(*) filter (where status = 'pending')::int as pending,
              count(*) filter (where status = 'running')::int as running,
@@ -104,7 +123,7 @@ export async function getFounderKpis(now: Date = new Date()): Promise<FounderKpi
     countOpenDataRequests(),
   ]);
 
-  // The bid desk: null (shown as "—") until its tables exist.
+  // The bid desk: null (shown as "—") until its table exists.
   const activatedWorkspaces = await queryOptionalTable("bids", async () => {
     const [row] = (await db.execute(sql`
       select count(*)::int as total,
@@ -114,16 +133,8 @@ export async function getFounderKpis(now: Date = new Date()): Promise<FounderKpi
     `)) as unknown as Row[];
     return windowed(row);
   });
-  const bidPassSales = await queryOptionalTable("bid_credits", async () => {
-    const [row] = (await db.execute(sql`
-      select count(*)::int as total,
-             count(*) filter (where granted_at >= ${d7}::timestamptz)::int as d7,
-             count(*) filter (where granted_at >= ${d30}::timestamptz)::int as d30
-      from bid_credits where kind = 'bid_pass' and source = 'paddle'
-    `)) as unknown as Row[];
-    return windowed(row);
-  });
 
+  const bidPassRow = (bidPasses as unknown as Row[])[0];
   const userRow = (users as unknown as Row[])[0];
   const subscriptions = (subscriptionRows as unknown as Row[]).map((row) => ({
     status: String(row.status),
@@ -162,7 +173,7 @@ export async function getFounderKpis(now: Date = new Date()): Promise<FounderKpi
     },
     // Catalogue prices are in minor units of one currency (pence), despite the helper's older name.
     mrr: { minor: subscriptions.reduce((sum, subscription) => sum + monthlyRevenueCents(subscription), 0), currency: PLAN_CURRENCY },
-    bidPassSales,
+    bidPassSales: { ...windowed(bidPassRow), refunded: n(bidPassRow?.refunded) },
     aiSpendUsd: { today: aiToday, last7Days: ai7, last30Days: ai30, dailyBudget: env.AI_DAILY_BUDGET_USD },
     jobs: { pending: n(jobRow?.pending), running: n(jobRow?.running), failedLast24Hours: n(jobRow?.failed_24h), oldestPendingAt: date(jobRow?.oldest_pending) },
     ingestion: { lastSuccessAt: date(ingestRow?.last_success), lastRunAt: date(ingestRow?.last_run), lastError: typeof ingestRow?.last_error === "string" ? ingestRow.last_error : null },

@@ -18,9 +18,24 @@ import { readFunnel, type FunnelCounts, type FunnelReading } from "../domain/fun
  *  - claimed: of those, prospects whose company was linked to a workspace after that visit;
  *  - bid checks: of those, the claiming workspace created a bid afterwards (table `bids`,
  *             owned by the bid desk — null while that module is not installed);
- *  - paying:  the claiming workspace has a paid or trialling Paddle subscription, or bought
- *             a Bid Pass (`bid_credits`, same seam).
+ *  - paying:  the claiming workspace has a paid or trialling Paddle subscription, or made a
+ *             one-off purchase after the claim (a Bid Pass) that is still paid for
+ *             (`billing_purchases`; a pass given by hand is not a payment).
  */
+
+/**
+ * A one-off purchase that still counts as a payment: completed, or refunded only in part —
+ * the billing module's own rule for what stays handed over (src/lib/billing/fulfilment.ts).
+ * A purchase refunded in full or under dispute is not one.
+ */
+export const PAID_PURCHASE_STATUSES = ["completed", "partially_refunded"] as const;
+
+/** `'completed', 'partially_refunded'` for an SQL `in (…)`. */
+export const paidPurchaseStatuses = (): SQL =>
+  sql.join(
+    PAID_PURCHASE_STATUSES.map((status) => sql`${status}`),
+    sql`, `,
+  );
 
 type Row = Record<string, unknown>;
 
@@ -75,8 +90,12 @@ export async function getOutreachResults(campaignId: string | null = null, now: 
     claimed as (select distinct id from c),
     paying as (
       select distinct c.id from c
-      join subscriptions sub on sub.organization_id = c.organization_id
-       and sub.status in ('active', 'trialing', 'past_due') and sub.paddle_subscription_id is not null
+      where exists (
+        select 1 from subscriptions sub where sub.organization_id = c.organization_id
+          and sub.status in ('active', 'trialing', 'past_due') and sub.paddle_subscription_id is not null)
+        or exists (
+        select 1 from billing_purchases bp where bp.organization_id = c.organization_id
+          and bp.status in (${paidPurchaseStatuses()}) and bp.created_at >= c.claimed_at)
     )
     select
       count(*)::int as prospects,
@@ -114,19 +133,6 @@ export async function getOutreachResults(campaignId: string | null = null, now: 
     `)) as unknown as Row[];
     return n(row?.value);
   });
-  const payingWithPasses = await queryOptionalTable("bid_credits", async () => {
-    const [row] = (await db.execute(sql`
-      ${ctes}
-      select count(distinct c.id)::int as value from c
-      where exists (
-        select 1 from subscriptions sub where sub.organization_id = c.organization_id
-          and sub.status in ('active', 'trialing', 'past_due') and sub.paddle_subscription_id is not null)
-        or exists (
-        select 1 from bid_credits bc where bc.organization_id = c.organization_id
-          and bc.kind = 'bid_pass' and bc.source = 'paddle' and bc.granted_at >= c.claimed_at)
-    `)) as unknown as Row[];
-    return n(row?.value);
-  });
 
   const lastSent = iso(main?.last_sent_at);
   const counts: FunnelCounts = {
@@ -134,7 +140,7 @@ export async function getOutreachResults(campaignId: string | null = null, now: 
     visited: n(main?.visited),
     claimed: n(main?.claimed),
     bidChecks,
-    cardPayments: payingWithPasses ?? n(main?.paying),
+    cardPayments: n(main?.paying),
     optedOut: n(main?.opted_out),
     bounced: n(main?.bounced),
     complaints: n(main?.complaints),

@@ -704,7 +704,7 @@ in `src/app/admin/outreach` and `src/app/optout`, tables in `src/db/schema/outre
 | `/admin/outreach/campaigns/<id>` | Letter preview; CSV export (a POST; suppressions and contact-by dates are checked again every time); mark as sent by count or by ticked rows, and clear a wrong mark; results |
 | `/admin/suppressions` | The do-not-contact list: search, add an address or a domain, import a bounce list, export, remove (typed confirmation, logged). Also the queue of correction and removal requests |
 | `/optout?c=<code>` | Public. Opening it shows a confirmation that names the company and changes nothing; the one button (a Server Action) suppresses the address. Without a code: a form that answers every address alike, rate-limited. Works without JavaScript; `noindex` |
-| `/admin` | Founder's key numbers: sign-ups, workspaces, claimed companies, paying workspaces by plan, MRR, AI spend against the daily budget, job queue, ingestion freshness, outreach |
+| `/admin` | Founder's key numbers: sign-ups, verified accounts, workspaces, claimed companies, activated workspaces (first bid check built), paying workspaces by plan, MRR, Bid Pass sales (purchases still paid for), AI spend against the daily budget, job queue, ingestion freshness, outreach |
 
 **What the code enforces**
 

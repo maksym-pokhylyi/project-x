@@ -13,7 +13,7 @@ import { confirmOptOut } from "@/features/outreach/server/optout";
 import { getOutreachResults } from "@/features/outreach/server/results";
 import { addSuppressionEntry } from "@/features/outreach/server/suppression-store";
 import { actAs, createTestUser, type TestUser } from "../helpers/auth";
-import { bidDeskInstalled, DAY_MS, FIVE_ELIGIBLE, NOW, prospectOf, resetOutreach, seed, segment, signInFounder, withBidDeskTables, type AwardSpec } from "./helpers";
+import { bidDeskInstalled, DAY_MS, FIVE_ELIGIBLE, NOW, prospectOf, recordPurchase, resetOutreach, seed, segment, signInFounder, withBidDeskTables, type AwardSpec } from "./helpers";
 
 /**
  * What came of the letters, measured from the tables: sent -> opened their page -> claimed
@@ -146,7 +146,7 @@ describe("outreach results", () => {
     expect(results.reading.lines.find((line) => line.key === "packs")).toMatchObject({ value: "—", state: "unknown" });
   });
 
-  it("with the bid desk installed: bid checks started and Bid Passes bought after the claim", async () => {
+  it("with the bid desk installed: bid checks started after the claim", async () => {
     await withBidDeskTables(async () => {
       const zero = await getOutreachResults(campaignId, at(3));
       expect(zero.counts).toMatchObject({ bidChecks: 0, cardPayments: 0 });
@@ -155,16 +155,39 @@ describe("outreach results", () => {
       await db.execute(sql`insert into bids (organization_id, title, created_at) values (${org}, 'Before the claim', ${at(0.5).toISOString()}::timestamptz)`);
       expect((await getOutreachResults(campaignId, at(3))).counts.bidChecks).toBe(0);
       await db.execute(sql`insert into bids (organization_id, title, created_at) values (${org}, 'Grounds tender', ${at(2).toISOString()}::timestamptz), (${org}, 'Second tender', ${at(2.5).toISOString()}::timestamptz)`);
-      expect((await getOutreachResults(campaignId, at(3))).counts.bidChecks).toBe(1); // one company, however many checks
-
-      // A pass given by hand is not a payment; one bought through Paddle is.
-      await db.execute(sql`insert into bid_credits (organization_id, kind, source, granted_at) values (${org}, 'bid_pass', 'admin', ${at(2).toISOString()}::timestamptz)`);
-      expect((await getOutreachResults(campaignId, at(3))).counts.cardPayments).toBe(0);
-      await db.execute(sql`insert into bid_credits (organization_id, kind, source, granted_at) values (${org}, 'bid_pass', 'paddle', ${at(2).toISOString()}::timestamptz)`);
-      const paid = await getOutreachResults(campaignId, at(3));
-      expect(paid.counts).toMatchObject({ bidChecks: 1, cardPayments: 1 });
-      expect(paid.reading.lines.find((line) => line.key === "packs")).toMatchObject({ value: "1 of 4" });
+      const started = await getOutreachResults(campaignId, at(3));
+      expect(started.counts).toMatchObject({ bidChecks: 1, cardPayments: 0 }); // one company, however many checks
+      expect(started.reading.lines.find((line) => line.key === "packs")).toMatchObject({ value: "1 of 4" });
     });
+  });
+
+  it("a Bid Pass bought after the claim is a card payment — unless it was refunded, or given by hand", async () => {
+    const org = acmeOwner.organizationId;
+    const cardPayments = async () => (await getOutreachResults(campaignId, at(3))).counts.cardPayments;
+
+    // A pass given by hand has no purchase behind it.
+    if (await bidDeskInstalled()) {
+      await db.execute(sql`insert into bid_credits (organization_id, kind, source, granted_at) values (${org}, 'bid_pass', 'admin', ${at(2).toISOString()}::timestamptz)`);
+    }
+    expect(await cardPayments()).toBe(0);
+    // Bought before the company claimed its page: not because of the letter.
+    await recordPurchase(org, { at: at(0.5) });
+    expect(await cardPayments()).toBe(0);
+    // Refunded in full, or charged back: the money did not stay.
+    await recordPurchase(org, { at: at(2), status: "refunded" });
+    await recordPurchase(org, { at: at(2), status: "disputed" });
+    expect(await cardPayments()).toBe(0);
+    // Paid, and still paid for (a partial refund leaves the pass with the customer).
+    await recordPurchase(org, { at: at(2), status: "partially_refunded" });
+    expect(await cardPayments()).toBe(1);
+    await recordPurchase(org, { at: at(2.5), quantity: 2 });
+    expect(await cardPayments()).toBe(1); // one company, however many purchases
+
+    // A purchase by a workspace that did not come through a letter is none of the campaign's.
+    const stranger = await createTestUser({ email: "owner@stranger.example" });
+    await recordPurchase(stranger.organizationId, { at: at(2) });
+    actAs(founder);
+    expect(await cardPayments()).toBe(1);
   });
 
   it("adds campaigns up for the overall figures and keeps them apart otherwise", async () => {
