@@ -5,6 +5,9 @@ import { Logo } from "@/components/logo";
 import { HeaderSessionLink } from "@/components/marketing/header-session-link";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { NavLink } from "@/components/ui/nav-link";
+import { navLinkVariants } from "@/components/ui/nav-link-variants";
 import { site } from "@/config/site";
 import { KIND_LABELS, type NotificationKind } from "@/features/notifications/config";
 import { identityParts } from "@/features/notifications/emails/copy";
@@ -26,8 +29,8 @@ export const metadata: Metadata = { title: "Unsubscribe", robots: { index: false
 
 const ENDPOINT = "/api/notifications/unsubscribe";
 const SETTINGS = "/app/settings/notifications";
-const navLink = "link-quiet inline-flex min-h-11 items-center rounded-sm text-sm font-medium whitespace-nowrap max-md:underline max-md:decoration-brand max-md:decoration-1 max-md:underline-offset-[3px] md:text-15";
-const textButton = "link inline-flex min-h-11 cursor-pointer items-center rounded-sm text-left text-15 font-semibold";
+/** A question with its answer beside it ("Unsubscribed by mistake? Subscribe again"): one line, 44 px tall. */
+const aside = "flex min-h-11 flex-wrap items-center gap-x-1.5 text-15";
 
 type PageProps = { searchParams: Promise<{ t?: string | string[]; done?: string | string[] }> };
 
@@ -49,7 +52,7 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
           and we will do it for you.
         </p>
         <div className="mt-6 flex">
-          <ButtonLink href={`/sign-in?redirect=${encodeURIComponent(SETTINGS)}`} variant="outline" className="h-12 px-[1.375rem] text-base max-md:w-full">
+          <ButtonLink href={`/sign-in?redirect=${encodeURIComponent(SETTINGS)}`} variant="outline" size="lg" className="max-md:w-full">
             Sign in
           </ButtonLink>
         </div>
@@ -69,8 +72,8 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
         <p className="type-lead mt-2.5 md:mt-3.5">
           We will send {kind} to {address} as before.
         </p>
-        <p className="mt-1.5 flex min-h-11 items-center text-15 md:mt-2">
-          <Link href={SETTINGS} className="link inline-flex min-h-11 items-center font-semibold">
+        <p className={`${aside} mt-1.5 md:mt-2`}>
+          <Link href={SETTINGS} className="link font-semibold">
             Change what you get
           </Link>
         </p>
@@ -85,12 +88,14 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
         {view.email ? <p className="type-lead mt-2.5 font-semibold [overflow-wrap:anywhere] md:mt-3.5">{view.email}</p> : null}
         <form method="post" action={ENDPOINT} className="mt-6 flex flex-col items-start gap-1">
           <input type="hidden" name="t" value={token} />
-          <Button type="submit" name="scope" value="all" className="h-12 px-[1.375rem] text-base max-md:w-full">
+          <Button type="submit" name="scope" value="all" size="lg" className="max-md:w-full">
             Unsubscribe
           </Button>
-          <button type="submit" name="scope" value="kind" className={`${textButton} max-md:self-center`}>
-            Only stop {kind}
-          </button>
+          <div className={`${aside} max-md:self-center`}>
+            <Button type="submit" variant="link" name="scope" value="kind" className="self-stretch font-semibold">
+              Only stop {kind}
+            </Button>
+          </div>
         </form>
         <p className="mt-3 max-w-[35rem] text-sm text-ink-2">{whatStops(verified.kind)}</p>
       </Frame>
@@ -108,56 +113,64 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
       </p>
       {view.member ? <Mistake token={token} view={view} /> : null}
       {view.member && !view.all ? (
-        <form method="post" action={ENDPOINT} className="flex min-h-11 flex-wrap items-center gap-x-1.5 text-15">
+        <form method="post" action={ENDPOINT} className={aside}>
           <input type="hidden" name="t" value={token} />
           <span className="text-ink-2">Want to stop the rest as well?</span>
-          <button type="submit" name="scope" value="all" className={textButton}>
+          <Button type="submit" variant="link" name="scope" value="all" className="self-stretch font-semibold">
             Stop all emails
-          </button>
+          </Button>
         </form>
       ) : null}
 
-      {view.member ? (
-        <section aria-labelledby="hold-title" className="mt-5 flex flex-col rounded-card border border-line bg-surface p-5 md:mt-7 md:p-7">
-          <h2 id="hold-title" className={cardTitle}>
-            What we hold
-          </h2>
-          <ul className="mt-3 flex flex-col text-15 leading-[1.55] md:mt-3.5">
-            {HELD.map((line, index) => (
-              <li key={line} className={`border-t border-line pt-3 md:pt-3.5 ${index === HELD.length - 1 ? "" : "pb-3 md:pb-3.5"}`}>
-                {line}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <div className="mt-5 flex flex-col gap-3 md:mt-7 md:gap-4">
+        {view.member ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <h2>What we hold</h2>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="flex flex-col divide-y divide-line border-t border-line text-15">
+                {HELD.map((line) => (
+                  <li key={line} className="py-3 last:pb-0 md:py-3.5">
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        ) : null}
 
-      <section aria-labelledby="remove-title" className={`flex flex-col rounded-card border border-line bg-surface p-5 pb-2 md:p-7 ${view.member ? "mt-3 md:mt-4" : "mt-5 md:mt-7"}`}>
-        <h2 id="remove-title" className={cardTitle}>
-          Have it removed
-        </h2>
-        <p className="mt-2 text-15 leading-[1.55]">
-          {view.member ? "You can delete your account, and everything in it, from Settings. " : null}
-          Ask us to hide your company’s page or remove your details. We review every request and reply by email.
-        </p>
-        <div className="mt-4 flex flex-col gap-x-6 gap-y-1 md:flex-row md:flex-wrap md:items-center">
-          <ButtonLink href="/about-the-data#request" variant="outline" className="h-12 px-[1.375rem] text-base">
-            Send a request
-          </ButtonLink>
-          <p className="flex min-h-11 flex-wrap items-center text-sm text-ink-2 max-md:justify-center">
-            <span className="mr-1">Or write to</span>
-            <a href={`mailto:${site.supportEmail}`} className="link inline-flex min-h-11 items-center">
-              {site.supportEmail}
-            </a>
-            <span>.</span>
-          </p>
-        </div>
-      </section>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <h2>Have it removed</h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-15">
+              {view.member ? "You can delete your account, and everything in it, from Settings. " : null}
+              Ask us to hide your company’s page or remove your details. We review every request and reply by email.
+            </p>
+            <div className="mt-4 flex flex-col gap-x-6 gap-y-1 md:flex-row md:flex-wrap md:items-center">
+              <ButtonLink href="/about-the-data#request" variant="outline">
+                Send a request
+              </ButtonLink>
+              <p className="flex min-h-11 flex-wrap items-center text-sm text-ink-2 max-md:justify-center">
+                <span className="mr-1">Or write to</span>
+                <a href={`mailto:${site.supportEmail}`} className="link">
+                  {site.supportEmail}
+                </a>
+                <span>.</span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </Frame>
   );
 }
-
-const cardTitle = "font-display text-[1.3125rem] leading-tight font-semibold text-ink md:text-[1.375rem]";
 
 /** For an account holder. (The artboard's lines describe a contact without an account.) */
 const HELD = [
@@ -179,30 +192,30 @@ function whatStops(kind: NotificationKind): string {
 function Mistake({ token, view }: { token: string; view: Extract<UnsubscribeView, { member: true }> }) {
   if (!view.email) {
     return (
-      <p className="mt-1.5 flex min-h-11 flex-wrap items-center gap-x-1.5 text-15 md:mt-2">
+      <p className={`${aside} mt-1.5 md:mt-2`}>
         <span className="text-ink-2">Unsubscribed by mistake?</span>
-        <Link href={SETTINGS} className="link inline-flex min-h-11 items-center font-semibold">
+        <Link href={SETTINGS} className="link font-semibold">
           Sign in to turn emails back on
         </Link>
       </p>
     );
   }
   return (
-    <form method="post" action={ENDPOINT} className="mt-1.5 flex min-h-11 flex-wrap items-center gap-x-1.5 text-15 md:mt-2">
+    <form method="post" action={ENDPOINT} className={`${aside} mt-1.5 md:mt-2`}>
       <input type="hidden" name="t" value={token} />
       <span className="text-ink-2">Unsubscribed by mistake?</span>
-      <button type="submit" name="action" value="resubscribe" className={textButton}>
+      <Button type="submit" variant="link" name="action" value="resubscribe" className="self-stretch font-semibold">
         Subscribe again
-      </button>
+      </Button>
     </form>
   );
 }
 
 function Tick() {
   return (
-    <div aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-brand-tint md:size-11">
+    <div aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-brand-tint text-brand md:size-11">
       <svg viewBox="0 0 16 16" className="size-5 md:size-[1.375rem]">
-        <path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-brand" />
+        <path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
   );
@@ -213,13 +226,13 @@ function Frame({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="border-b border-line">
-        <div className="container-content flex min-h-14 items-center justify-between gap-x-8 md:min-h-[4.5rem]">
+        <div className="container-content flex min-h-14 flex-wrap items-center justify-between gap-x-8 md:min-h-[4.5rem]">
           <Logo />
-          <nav aria-label="Main" className="flex items-center gap-[1.125rem] md:gap-8">
-            <Link href="/" className={navLink}>
+          <nav aria-label="Main" className="flex items-center gap-5 whitespace-nowrap md:gap-8">
+            <NavLink href="/" variant="header" match="exact">
               What is {site.name}?
-            </Link>
-            <HeaderSessionLink className={navLink} />
+            </NavLink>
+            <HeaderSessionLink className={navLinkVariants({ variant: "header" })} />
           </nav>
         </div>
       </header>

@@ -6,6 +6,8 @@ vi.mock("next/headers", () => import("../helpers/next-headers"));
 vi.mock("next/cache", () => ({ revalidatePath: () => undefined, unstable_cache: (fn: unknown) => fn }));
 // The header's "Sign in / Open your radar" island is browser code; the page is tested without it.
 vi.mock("@/components/marketing/header-session-link", () => ({ HeaderSessionLink: () => null }));
+// The header's links are NavLinks, which ask the router where we are.
+vi.mock("next/navigation", async (importOriginal) => ({ ...(await importOriginal<typeof import("next/navigation")>()), usePathname: () => "/unsubscribe" }));
 
 import { GET, POST } from "@/app/api/notifications/unsubscribe/route";
 import UnsubscribePage from "@/app/unsubscribe/page";

@@ -2,7 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { FormRow, FormRowAction } from "@/components/forms/form-field";
+import { NativeSelect } from "@/components/forms/native-select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { sendNotificationPreviewAction } from "../actions";
 
 const KINDS = [
@@ -17,8 +21,6 @@ const MODES = [
   { value: "live", label: "Only what is new now" },
   { value: "sample", label: "Sample: everything on the radar" },
 ] as const;
-
-const field = "h-11 w-full min-w-0 rounded-md border bg-background px-3 text-sm";
 
 /**
  * /admin/notifications → "Send me a preview". The e-mail goes to the signed-in founder
@@ -48,54 +50,54 @@ export function NotificationPreviewForm({ workspaces, to, delivery }: { workspac
     toast.success("Preview sent.");
   }
 
-  if (workspaces.length === 0) return <p className="text-sm text-muted-foreground">No workspaces yet.</p>;
+  if (workspaces.length === 0) return <p className="text-sm text-ink-2">No workspaces yet.</p>;
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4" data-testid="notification-preview-form">
-      <div className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,2fr)]">
-        <label className="space-y-1 text-sm">
-          <span className="font-medium">Workspace</span>
-          <select name="organizationId" required className={field} defaultValue={workspaces[0]!.id}>
+    <form onSubmit={onSubmit} className="flex flex-col gap-4" data-testid="notification-preview-form">
+      <FormRow>
+        <div className="flex min-w-0 flex-[2] flex-col gap-2">
+          <Label htmlFor="preview-workspace">Workspace</Label>
+          <NativeSelect id="preview-workspace" name="organizationId" required defaultValue={workspaces[0]!.id} className="w-full">
             {workspaces.map((workspace) => (
               <option key={workspace.id} value={workspace.id}>
                 {workspace.name}
               </option>
             ))}
-          </select>
-        </label>
-        <label className="space-y-1 text-sm">
-          <span className="font-medium">E-mail</span>
-          <select name="kind" className={field} defaultValue="digest">
+          </NativeSelect>
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <Label htmlFor="preview-kind">E-mail</Label>
+          <NativeSelect id="preview-kind" name="kind" defaultValue="digest" className="w-full">
             {KINDS.map((kind) => (
               <option key={kind.value} value={kind.value}>
                 {kind.label}
               </option>
             ))}
-          </select>
-        </label>
-        <label className="space-y-1 text-sm">
-          <span className="font-medium">Content</span>
-          <select name="mode" className={field} defaultValue="auto">
+          </NativeSelect>
+        </div>
+        <div className="flex min-w-0 flex-[2] flex-col gap-2">
+          <Label htmlFor="preview-mode">Content</Label>
+          <NativeSelect id="preview-mode" name="mode" defaultValue="auto" className="w-full">
             {MODES.map((mode) => (
               <option key={mode.value} value={mode.value}>
                 {mode.label}
               </option>
             ))}
-          </select>
-        </label>
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" loading={pending} disabled={delivery === "none"} data-testid="send-preview">
-          {pending ? "Sending…" : "Send me a preview"}
-        </Button>
-        <p className="text-sm text-muted-foreground">
-          {delivery === "resend" ? `Goes to ${to} only.` : delivery === "outbox" ? "No mail provider is configured: it is written to the dev outbox." : "This deployment cannot deliver e-mail."}
-        </p>
-      </div>
+          </NativeSelect>
+        </div>
+        <FormRowAction>
+          <Button type="submit" loading={pending} disabled={delivery === "none"} data-testid="send-preview">
+            {pending ? "Sending…" : "Send me a preview"}
+          </Button>
+        </FormRowAction>
+      </FormRow>
+      <p className="text-sm text-ink-2">
+        {delivery === "resend" ? `Goes to ${to} only.` : delivery === "outbox" ? "No mail provider is configured: it is written to the dev outbox." : "This deployment cannot deliver e-mail."}
+      </p>
       {outcome ? (
-        <p role="status" className="rounded-md border bg-muted/40 p-3 text-sm" data-testid="preview-outcome">
-          {outcome}
-        </p>
+        <Alert role="status" icon={false} data-testid="preview-outcome">
+          <AlertDescription>{outcome}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );

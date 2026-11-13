@@ -18,6 +18,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "src");
 const EXCLUDED = [
   /^components\/ui\//,
   /^emails\//,
+  /^features\/notifications\/emails\//,
   /^lib\/email\//,
   /^app\/styleguide\//,
   /^components\/styleguide\//,
