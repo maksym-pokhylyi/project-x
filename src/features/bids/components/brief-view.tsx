@@ -90,7 +90,7 @@ function RefLinks({ items }: { items: RequirementItem[] }) {
       {shown.map((item, index) => (
         <span key={item.id}>
           {index > 0 ? ", " : ""}
-          <a href={`#req-${item.ref}`} className="bid-mono bid-link-quiet text-[13px]">
+          <a href={`#req-${item.ref}`} className="bid-mono bid-link-quiet text-13">
             {displayRef(item.ref)}
           </a>
         </span>
@@ -104,7 +104,7 @@ function Line({ tone, lead, children }: { tone: "met" | "gap" | "info"; lead: st
   const Icon = tone === "met" ? CircleCheck : tone === "gap" ? CircleAlert : Info;
   return (
     <li className="flex gap-2.5">
-      <Icon aria-hidden className={cn("mt-px size-5 shrink-0", tone === "met" ? "text-(--bid-brand)" : tone === "gap" ? "text-(--bid-danger)" : "text-(--bid-info)")} strokeWidth={1.8} />
+      <Icon aria-hidden className={cn("mt-px size-5 shrink-0", tone === "met" ? "text-brand" : tone === "gap" ? "text-danger" : "text-info")} strokeWidth={1.8} />
       <span>
         <span className="font-semibold">{lead}</span> {children}
       </span>
@@ -131,15 +131,15 @@ function dateOf(fact: BriefFact | undefined): Date | null {
 
 function FactRow({ label, testId, status, children }: { label: string; testId?: string; status?: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-0.5 border-t border-(--bid-line) py-3 first:border-t-0" data-testid={testId} data-fact-status={status}>
-      <dt className="text-xs text-(--bid-muted)">{label}</dt>
-      <dd className="text-[15px]">{children}</dd>
+    <div className="flex flex-col gap-0.5 border-t border-line py-3 first:border-t-0" data-testid={testId} data-fact-status={status}>
+      <dt className="text-xs text-ink-2">{label}</dt>
+      <dd className="text-15">{children}</dd>
     </div>
   );
 }
 
 function NotStated() {
-  return <span className="text-(--bid-muted)">Not stated in the pack.</span>;
+  return <span className="text-ink-2">Not stated in the pack.</span>;
 }
 
 /** A dated fact: dot, date, days left, source. Two readings that disagree are both shown. */
@@ -165,9 +165,9 @@ function DateFact({ fact, exact, links, now }: { fact: BriefFact | undefined; ex
   const left = date ? daysLeftLabel(date, now) : null;
   return (
     <span className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold tabular-nums">
-      {left ? <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-(--bid-line-strong)" : left.urgent ? "bg-(--bid-danger)" : "bg-(--bid-amber)")} /> : null}
+      {left ? <span aria-hidden className={cn("size-[9px] rounded-full", left.past ? "bg-line-strong" : left.urgent ? "bg-danger" : "bg-(--accent)")} /> : null}
       <span className={left?.past ? "line-through" : undefined}>{exact ? formatDeadline(exact) : fact.value}</span>
-      {left ? <span className={cn("rounded px-1.5 py-px text-xs", left.urgent && !left.past ? "bg-(--bid-danger-tint) text-(--bid-danger)" : left.past ? "bg-(--bid-paper-deep)" : "bg-(--bid-amber-tint)")}>{left.label}</span> : null}
+      {left ? <span className={cn("rounded px-1.5 py-px text-xs", left.urgent && !left.past ? "bg-danger-tint text-danger" : left.past ? "bg-paper-deep" : "bg-accent-tint")}>{left.label}</span> : null}
       {fact.status === "ambiguous" ? <span className="bid-pill bid-pill-amber text-xs">Ambiguous — check</span> : null}
       <CitationMark citation={fact.citation} links={links} variant="ref" className="ml-auto" />
     </span>
@@ -179,7 +179,7 @@ function TextFact({ fact, links, strong = false }: { fact: BriefFact | undefined
   return (
     <span>
       <span className={strong ? "font-semibold" : undefined}>{fact.value}</span>
-      {fact.status === "conflicting" && fact.alternatives?.length ? <span className="text-(--bid-danger)"> (another reading: {fact.alternatives.map((item) => item.value).join("; ")} — check)</span> : null}{" "}
+      {fact.status === "conflicting" && fact.alternatives?.length ? <span className="text-danger"> (another reading: {fact.alternatives.map((item) => item.value).join("; ")} — check)</span> : null}{" "}
       <CitationMark citation={fact.citation} links={links} variant="ref" />
     </span>
   );
@@ -226,16 +226,16 @@ export function BriefView(props: BriefViewProps) {
       ) : null}
 
       {brief?.overview ? (
-        <p className="-mb-4 max-w-[820px] text-[15px]" data-testid="brief-overview">
+        <p className="-mb-4 max-w-[820px] text-15" data-testid="brief-overview">
           {brief.overview}
         </p>
       ) : null}
 
       {/* --- Verdict + key facts ------------------------------------------------------------ */}
-      <section aria-labelledby="verdict-h" className="flex flex-wrap items-stretch gap-x-10 gap-y-7 rounded-xl bg-(--bid-brand-tint) px-5 py-6 sm:px-8 sm:py-7">
+      <section aria-labelledby="verdict-h" className="flex flex-wrap items-stretch gap-x-10 gap-y-7 rounded-card bg-brand-tint px-5 py-6 sm:px-8 sm:py-7">
         <div className="flex min-w-0 flex-[1.5_1_520px] flex-col" data-testid={verdict ? "verdict" : undefined} data-verdict={verdict?.verdict}>
-          <p className="flex flex-wrap items-center gap-2.5 text-[13px]">
-            <span className="rounded bg-(--bid-brand) px-2 py-0.5 font-semibold text-white">Verdict</span>
+          <p className="flex flex-wrap items-center gap-2.5 text-13">
+            <span className="rounded bg-brand px-2 py-0.5 font-semibold text-white">Verdict</span>
             <span>
               Based on the {coverage.read} {plural(coverage.read, "file")} of the pack that we read
               {verdict?.factsConfirmed ? " and your confirmed company facts" : ""}
@@ -243,10 +243,10 @@ export function BriefView(props: BriefViewProps) {
           </p>
           {verdict ? (
             <>
-              <h2 id="verdict-h" className="bid-serif mt-3 text-[26px] leading-[1.15] font-semibold tracking-[-0.015em] text-balance sm:text-[32px]">
+              <h2 id="verdict-h" className="bid-serif mt-3 text-3xl leading-[1.15] font-semibold tracking-[-0.015em] text-balance sm:text-4xl">
                 {headline(verdict, gates)}
               </h2>
-              <ul className="mt-4 flex max-w-[660px] flex-col gap-2.5 text-[15px] leading-[1.5]">
+              <ul className="mt-4 flex max-w-[660px] flex-col gap-2.5 text-15 leading-[1.5]">
                 {verdict.factsConfirmed && gates.total > 0 && gates.met > 0 ? (
                   <Line tone="met" lead={`${gates.met} of the ${gates.total} pass-or-fail ${plural(gates.total, "requirement")} look met.`}>
                     Checked against your confirmed company facts, not against the buyer&rsquo;s judgement.
@@ -289,11 +289,11 @@ export function BriefView(props: BriefViewProps) {
                 {gates.total > 0 ? (
                   <>
                     <div role="img" aria-label={`${gates.met} met, ${gates.confirm} to confirm, ${gates.gap} gaps`} className="flex h-2 gap-[3px] overflow-hidden rounded">
-                      {gates.met > 0 ? <span style={{ flex: `${gates.met} 1 0` }} className="bg-(--bid-brand)" /> : null}
-                      {gates.confirm > 0 ? <span style={{ flex: `${gates.confirm} 1 0` }} className="bg-(--bid-info)" /> : null}
-                      {gates.gap > 0 ? <span style={{ flex: `${gates.gap} 1 0` }} className="bg-(--bid-danger)" /> : null}
+                      {gates.met > 0 ? <span style={{ flex: `${gates.met} 1 0` }} className="bg-brand" /> : null}
+                      {gates.confirm > 0 ? <span style={{ flex: `${gates.confirm} 1 0` }} className="bg-info" /> : null}
+                      {gates.gap > 0 ? <span style={{ flex: `${gates.gap} 1 0` }} className="bg-danger" /> : null}
                     </div>
-                    <p className="flex flex-wrap gap-x-5 gap-y-1 text-[13px]" data-testid="gate-counts">
+                    <p className="flex flex-wrap gap-x-5 gap-y-1 text-13" data-testid="gate-counts">
                       <span>
                         <span className="font-semibold">{gates.met}</span> met
                       </span>
@@ -303,13 +303,13 @@ export function BriefView(props: BriefViewProps) {
                       <span>
                         <span className="font-semibold">{gates.gap}</span> {plural(gates.gap, "gap")}
                       </span>
-                      <span className="text-(--bid-muted)">
+                      <span className="text-ink-2">
                         of {gates.total} pass-or-fail {plural(gates.total, "requirement")}
                       </span>
                     </p>
                   </>
                 ) : null}
-                <details className="text-[13px]">
+                <details className="text-13">
                   <summary className="bid-link inline-flex min-h-9 cursor-pointer items-center font-medium">What this check cannot tell you</summary>
                   <ul className="mt-1 flex list-disc flex-col gap-1 pl-5" data-testid="not-assessed">
                     {verdict.notAssessed.map((item) => (
@@ -322,15 +322,15 @@ export function BriefView(props: BriefViewProps) {
             </>
           ) : (
             <>
-              <h2 id="verdict-h" className="bid-serif mt-3 text-[26px] leading-[1.15] font-semibold tracking-[-0.015em] sm:text-[32px]">
+              <h2 id="verdict-h" className="bid-serif mt-3 text-3xl leading-[1.15] font-semibold tracking-[-0.015em] sm:text-4xl">
                 {partial ? "Still reading the pack." : "No verdict yet."}
               </h2>
-              <p className="mt-3 max-w-[620px] text-[15px]">{partial ? "What has been found so far is shown below. The verdict appears when every file has been read and checked against your company." : "The check did not finish."}</p>
+              <p className="mt-3 max-w-[620px] text-15">{partial ? "What has been found so far is shown below. The verdict appears when every file has been read and checked against your company." : "The check did not finish."}</p>
             </>
           )}
         </div>
 
-        <dl className="box-border flex min-w-0 flex-[1_1_360px] flex-col rounded-lg bg-(--bid-surface) px-5 py-1.5" data-testid="key-facts">
+        <dl className="box-border flex min-w-0 flex-[1_1_360px] flex-col rounded-card bg-surface px-5 py-1.5" data-testid="key-facts">
           <FactRow label="Tender deadline" testId="fact-submission_deadline" status={summary?.submission_deadline?.status ?? "not_stated"}>
             <DateFact fact={summary?.submission_deadline} exact={props.submissionDeadline} links={links} now={now} />
           </FactRow>
@@ -367,7 +367,7 @@ export function BriefView(props: BriefViewProps) {
         </dl>
       </section>
 
-      <p className="bid-mono -mt-6 text-xs text-(--bid-muted)" data-testid="coverage">
+      <p className="bid-mono -mt-6 text-xs text-ink-2" data-testid="coverage">
         Coverage: {coverage.headline}
         {coverage.citations ? ` · ${coverage.citations.verified} of ${coverage.citations.total} quotes found word for word in the pack` : ""}
         {coverage.transcribedPages > 0 ? ` · ${coverage.transcribedPages} scanned ${plural(coverage.transcribedPages, "page")} transcribed by AI` : ""}
@@ -390,7 +390,7 @@ export function BriefView(props: BriefViewProps) {
               <h2 id="req-h" className="bid-h2">
                 Pass-or-fail requirements
               </h2>
-              <p className="text-sm text-(--bid-muted)">Each line is quoted word for word from the pack. Open a reference to read it on the page. Gaps come first.</p>
+              <p className="text-sm text-ink-2">Each line is quoted word for word from the pack. Open a reference to read it on the page. Gaps come first.</p>
               <SourceLegend className="mt-1" />
             </div>
             <GateList bidId={bidId} items={gating} links={links} readOnly={readOnly} libraryHref={libraryHref} factsConfirmed={factsConfirmed} />
@@ -403,7 +403,7 @@ export function BriefView(props: BriefViewProps) {
                 ) : (
                   <span className="font-medium">{props.requirements.length} requirements in all.</span>
                 )}{" "}
-                <span className="text-(--bid-muted)">
+                <span className="text-ink-2">
                   {others} more {plural(others, "is", "are")} not pass-or-fail: forms to sign, submission rules and other things the pack asks for.
                 </span>
               </p>
@@ -416,7 +416,7 @@ export function BriefView(props: BriefViewProps) {
               <h2 id="q-h" className="bid-h2">
                 Scored questions
               </h2>
-              <p className="text-sm text-(--bid-muted)">
+              <p className="text-sm text-ink-2">
                 {props.locked && scored.length > 0
                   ? `${count(scored.length)} scored ${plural(scored.length, "question")} found${evaluationModel?.qualityWeight != null ? `, carrying ${evaluationModel.qualityWeight}% of the marks` : ""}. Titles are shown; the matrix, drafts and marking are part of a full bid.`
                   : scored.length === 0
@@ -429,8 +429,8 @@ export function BriefView(props: BriefViewProps) {
             {scored.length > 0 && props.locked ? (
               <ol className="bid-card" data-testid="scored-questions-locked">
                 {scored.map((question, index) => (
-                  <li key={question.id} className={cn("flex items-baseline gap-4 px-5 py-3 text-[15px] sm:px-6", index > 0 ? "bid-rule" : "")}>
-                    <span className="bid-mono w-14 shrink-0 text-xs text-(--bid-muted)">{question.ref}</span>
+                  <li key={question.id} className={cn("flex items-baseline gap-4 px-5 py-3 text-15 sm:px-6", index > 0 ? "bid-rule" : "")}>
+                    <span className="bid-mono w-14 shrink-0 text-xs text-ink-2">{question.ref}</span>
                     <span className="min-w-0">{question.title ?? question.text}</span>
                   </li>
                 ))}
@@ -440,24 +440,24 @@ export function BriefView(props: BriefViewProps) {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[720px] border-collapse text-sm" data-testid="scored-questions">
                     <thead>
-                      <tr className="text-left text-xs font-semibold text-(--bid-muted)">
-                        <th scope="col" className="border-b border-(--bid-line) py-3 pr-3 pl-6 font-semibold">Question</th>
-                        <th scope="col" className="border-b border-(--bid-line) p-3 text-right font-semibold">Weight</th>
-                        <th scope="col" className="border-b border-(--bid-line) p-3 text-right font-semibold">Word limit</th>
-                        <th scope="col" className="border-b border-(--bid-line) py-3 pr-3 pl-6 font-semibold">Draft</th>
-                        <th scope="col" className="border-b border-(--bid-line) py-3 pr-6 pl-3 font-semibold">Marked</th>
+                      <tr className="text-left text-xs font-semibold text-ink-2">
+                        <th scope="col" className="border-b border-line py-3 pr-3 pl-6 font-semibold">Question</th>
+                        <th scope="col" className="border-b border-line p-3 text-right font-semibold">Weight</th>
+                        <th scope="col" className="border-b border-line p-3 text-right font-semibold">Word limit</th>
+                        <th scope="col" className="border-b border-line py-3 pr-3 pl-6 font-semibold">Draft</th>
+                        <th scope="col" className="border-b border-line py-3 pr-6 pl-3 font-semibold">Marked</th>
                       </tr>
                     </thead>
                     <tbody>
                       {scored.map((question, index) => {
                         const href = props.questionHref ? props.questionHref(question) : basePath ? `${basePath}/questions/${question.id}` : null;
-                        const cell = cn("py-3.5", index < scored.length - 1 ? "border-b border-(--bid-line)" : "");
+                        const cell = cn("py-3.5", index < scored.length - 1 ? "border-b border-line" : "");
                         const title = question.title ?? question.text.slice(0, 90);
                         const over = question.wordLimit !== null && question.wordCount > question.wordLimit;
                         return (
                           <tr key={question.id}>
                             <td className={cn(cell, "pr-3 pl-6")}>
-                              {question.ref ? <span className="bid-mono mr-2.5 text-[13px] text-(--bid-muted)">{question.ref}</span> : null}
+                              {question.ref ? <span className="bid-mono mr-2.5 text-13 text-ink-2">{question.ref}</span> : null}
                               {href ? (
                                 <Link href={href} className="bid-link font-semibold">
                                   {title}
@@ -470,18 +470,18 @@ export function BriefView(props: BriefViewProps) {
                             <td className={cn(cell, "px-3 text-right tabular-nums")}>{question.wordLimit ? question.wordLimit.toLocaleString("en-GB") : question.pageLimit ? `${question.pageLimit} pp` : "—"}</td>
                             <td className={cn(cell, "pr-3 pl-6 whitespace-nowrap tabular-nums")}>
                               {question.status === "not_started" ? (
-                                <span className="text-(--bid-muted)">Not started</span>
+                                <span className="text-ink-2">Not started</span>
                               ) : question.gaps > 0 ? (
-                                <span className="font-semibold text-(--bid-danger)">
+                                <span className="font-semibold text-danger">
                                   {question.gaps} {plural(question.gaps, "gap")} to fill
                                 </span>
                               ) : over ? (
-                                <span className="font-semibold text-(--bid-danger)">Over the limit · {question.wordCount} words</span>
+                                <span className="font-semibold text-danger">Over the limit · {question.wordCount} words</span>
                               ) : (
                                 `${QUESTION_STATUS_LABELS[question.status]} · ${question.wordCount} words`
                               )}
                             </td>
-                            <td className={cn(cell, "pr-6 pl-3 whitespace-nowrap", question.score ? "font-semibold" : "text-(--bid-muted)")}>
+                            <td className={cn(cell, "pr-6 pl-3 whitespace-nowrap", question.score ? "font-semibold" : "text-ink-2")}>
                               {question.score ? `${question.score} of ${question.maxEvaluated}` : "Not marked"}
                             </td>
                           </tr>
@@ -493,7 +493,7 @@ export function BriefView(props: BriefViewProps) {
               </div>
             ) : null}
             {evaluationModel?.priceWeight != null ? (
-              <p className="text-[13px] text-(--bid-muted)">Price carries {evaluationModel.priceWeight}% of the marks. Complete the pricing documents yourself: Bidfolio does not price bids.</p>
+              <p className="text-13 text-ink-2">Price carries {evaluationModel.priceWeight}% of the marks. Complete the pricing documents yourself: Bidfolio does not price bids.</p>
             ) : null}
             {forms > 0 ? (
               <p className="text-sm">
@@ -506,7 +506,7 @@ export function BriefView(props: BriefViewProps) {
                     {forms} {plural(forms, "form or declaration", "forms and declarations")} to complete
                   </span>
                 )}{" "}
-                <span className="text-(--bid-muted)">— confirmations and details the pack asks you to supply, listed so nothing is missed.</span>
+                <span className="text-ink-2">— confirmations and details the pack asks you to supply, listed so nothing is missed.</span>
               </p>
             ) : null}
             {scale.length > 0 || (evaluationModel?.criteria.length ?? 0) > 0 || (evaluationModel?.minimumThresholds.length ?? 0) > 0 ? (
@@ -516,7 +516,7 @@ export function BriefView(props: BriefViewProps) {
                   {evaluationModel && evaluationModel.criteria.length > 0 ? (
                     <ul className="flex flex-col">
                       {evaluationModel.criteria.map((item, index) => (
-                        <li key={`${item.name}-${index}`} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-(--bid-line) py-2 first:border-t-0">
+                        <li key={`${item.name}-${index}`} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-line py-2 first:border-t-0">
                           <span className={cn("font-medium", item.parent ? "pl-4 font-normal" : "")}>{item.name}</span>
                           {item.weight !== null ? <span className="tabular-nums">{item.weight}%</span> : null}
                           <CitationMark citation={item.citation} links={links} variant="ref" className="ml-auto" />
@@ -537,7 +537,7 @@ export function BriefView(props: BriefViewProps) {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-(--bid-muted)">The pack does not publish a scoring scale. Marking in Bidfolio then uses a typical public-sector 0 to 5 scale and says so.</p>
+                    <p className="text-ink-2">The pack does not publish a scoring scale. Marking in Bidfolio then uses a typical public-sector 0 to 5 scale and says so.</p>
                   )}
                   {evaluationModel?.minimumThresholds.map((item, index) => (
                     <p key={index} className="flex flex-wrap items-baseline gap-x-2">
@@ -555,7 +555,7 @@ export function BriefView(props: BriefViewProps) {
           <section aria-labelledby="files-h" className="bid-card px-5 pt-[18px] pb-2" data-testid="pack-files-card">
             <h2 id="files-h" className="bid-h3">
               Coverage{" "}
-              <span className="font-normal text-(--bid-muted)">
+              <span className="font-normal text-ink-2">
                 · {coverage.read} {plural(coverage.read, "file")} read{files.length - coverage.read > 0 ? `, ${files.length - coverage.read} not read` : ""}
               </span>
             </h2>
@@ -563,7 +563,7 @@ export function BriefView(props: BriefViewProps) {
               {files.map((file) => {
                 const href = props.fileHref ? props.fileHref(file) : links.kind === "app" && file.read ? `/api/bids/${links.bidId}/files/${file.id}` : links.kind === "public" ? (links.urls[file.id] ?? null) : null;
                 return (
-                  <li key={file.id} className="flex min-h-10 items-center justify-between gap-3 border-t border-(--bid-line)">
+                  <li key={file.id} className="flex min-h-10 items-center justify-between gap-3 border-t border-line">
                     {href ? (
                       <a href={href} target="_blank" rel="noopener noreferrer" className="bid-mono bid-link-quiet min-w-0 truncate" title={file.name}>
                         {file.name}
@@ -573,7 +573,7 @@ export function BriefView(props: BriefViewProps) {
                         {file.name}
                       </span>
                     )}
-                    <span className={cn("shrink-0", file.read && file.analysed ? "text-(--bid-muted)" : "font-semibold text-(--bid-danger)")}>{file.read && !file.analysed ? "not analysed" : file.size}</span>
+                    <span className={cn("shrink-0", file.read && file.analysed ? "text-ink-2" : "font-semibold text-danger")}>{file.read && !file.analysed ? "not analysed" : file.size}</span>
                   </li>
                 );
               })}
@@ -584,11 +584,11 @@ export function BriefView(props: BriefViewProps) {
             <h2 id="read-h" className="bid-h3">
               Read these yourself
             </h2>
-            <p className="mt-0.5 text-[13px] text-(--bid-muted)">Terms that change your price or your risk.</p>
+            <p className="mt-0.5 text-13 text-ink-2">Terms that change your price or your risk.</p>
             {flags.length > 0 ? (
               <ul className="mt-2.5 flex flex-col">
                 {flags.map((flag, index) => (
-                  <li key={index} className="flex flex-col items-start gap-1.5 border-t border-(--bid-line) py-3">
+                  <li key={index} className="flex flex-col items-start gap-1.5 border-t border-line py-3">
                     <p className="text-sm leading-[1.5]">
                       <span className="font-semibold">{RED_FLAG_LABELS[flag.type] ?? "Other"}.</span> {flag.description}
                     </p>
@@ -597,7 +597,7 @@ export function BriefView(props: BriefViewProps) {
                 ))}
               </ul>
             ) : (
-              <p className="mt-2.5 border-t border-(--bid-line) py-3 text-sm">{partial ? "Still reading." : "Nothing was flagged. Read the contract terms all the same: this list is not a legal review."}</p>
+              <p className="mt-2.5 border-t border-line py-3 text-sm">{partial ? "Still reading." : "Nothing was flagged. Read the contract terms all the same: this list is not a legal review."}</p>
             )}
           </section>
 
@@ -608,11 +608,11 @@ export function BriefView(props: BriefViewProps) {
               </h2>
               <ul className="mt-2.5 flex flex-col">
                 {brief.documentsToReturn.map((item, index) => (
-                  <li key={index} className="flex flex-col items-start gap-1 border-t border-(--bid-line) py-2.5">
+                  <li key={index} className="flex flex-col items-start gap-1 border-t border-line py-2.5">
                     <p className="text-sm">
                       <span className="font-medium">{item.name}</span>
-                      {item.mandatory ? <span className="bid-tag ml-2 text-[11px]">Required</span> : null}
-                      {item.formatNote ? <span className="text-(--bid-muted)"> · {item.formatNote}</span> : null}
+                      {item.mandatory ? <span className="bid-tag ml-2 text-xs">Required</span> : null}
+                      {item.formatNote ? <span className="text-ink-2"> · {item.formatNote}</span> : null}
                     </p>
                     <CitationMark citation={item.citation} links={links} variant="ref" short={false} />
                   </li>
@@ -628,8 +628,8 @@ export function BriefView(props: BriefViewProps) {
               </h2>
               <ul className="mt-2.5 flex flex-col">
                 {props.keyDates.map((item, index) => (
-                  <li key={index} className="flex flex-col items-start gap-0.5 border-t border-(--bid-line) py-2.5 text-sm">
-                    <span className={cn("font-semibold tabular-nums", isPastDate(item.dateIso, now.getTime()) ? "text-(--bid-muted) line-through" : "")}>
+                  <li key={index} className="flex flex-col items-start gap-0.5 border-t border-line py-2.5 text-sm">
+                    <span className={cn("font-semibold tabular-nums", isPastDate(item.dateIso, now.getTime()) ? "text-ink-2 line-through" : "")}>
                       {item.dateIso ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${item.dateIso}T12:00:00Z`)) : "Date not stated"}
                       {item.time ? `, ${item.time}` : ""}
                     </span>
@@ -646,12 +646,12 @@ export function BriefView(props: BriefViewProps) {
               <h2 id="unknown-h" className="bid-h3">
                 Not stated in the pack
               </h2>
-              <p className="mt-0.5 text-[13px] text-(--bid-muted)">Worth a clarification question.</p>
+              <p className="mt-0.5 text-13 text-ink-2">Worth a clarification question.</p>
               <ul className="mt-2.5 flex flex-col">
                 {brief.unknowns.map((item, index) => (
-                  <li key={index} className="border-t border-(--bid-line) py-2.5 text-sm">
+                  <li key={index} className="border-t border-line py-2.5 text-sm">
                     <span className="font-medium">{item.item}</span>
-                    {item.whyItMatters ? <span className="text-(--bid-muted)"> — {item.whyItMatters}</span> : null}
+                    {item.whyItMatters ? <span className="text-ink-2"> — {item.whyItMatters}</span> : null}
                   </li>
                 ))}
               </ul>

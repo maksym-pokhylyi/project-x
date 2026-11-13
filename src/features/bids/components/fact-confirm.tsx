@@ -37,7 +37,7 @@ export function FactConfirm({ bidId, field, confirmedAt, readOnly }: { bidId: st
       }
       className={cn(
         "inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs font-medium transition-colors",
-        confirmed ? "border-success/30 bg-success/10 text-success" : "border-dashed text-muted-foreground hover:border-solid hover:text-foreground",
+        confirmed ? "border-success/30 bg-success/10 text-success" : "border-dashed text-ink-2 hover:border-solid hover:text-ink",
       )}
     >
       <Check aria-hidden className={cn("size-3", confirmed ? "" : "opacity-40")} />

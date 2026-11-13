@@ -1,10 +1,10 @@
 "use client";
 
 import { ArrowRight, Pencil, Plus, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fragment, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,10 +46,10 @@ export function StatusStepper({ status }: { status: QuestionStatus }) {
     <span className="inline-flex items-center gap-1.5" title={`Status: ${QUESTION_STATUS_LABELS[status]}`}>
       <span aria-hidden className="inline-flex items-center gap-0.5">
         {QUESTION_STATUSES.map((step, position) => (
-          <span key={step} className={cn("h-1.5 w-4 rounded-full", position <= index && index > 0 ? (status === "final" ? "bg-success" : "bg-primary") : "bg-muted")} />
+          <span key={step} className={cn("h-1.5 w-4 rounded-full", position <= index && index > 0 ? (status === "final" ? "bg-success" : "bg-brand") : "bg-paper-deep")} />
         ))}
       </span>
-      <span className="text-xs text-muted-foreground">{QUESTION_STATUS_LABELS[status]}</span>
+      <span className="text-xs text-ink-2">{QUESTION_STATUS_LABELS[status]}</span>
     </span>
   );
 }
@@ -88,8 +88,8 @@ export function QuestionsView({
   return (
     <div className="space-y-4" data-testid="questions-view">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground" data-testid="questions-progress">
-          <span className="font-medium text-foreground tabular-nums">{questions.length}</span> question{questions.length === 1 ? "" : "s"}
+        <p className="text-sm text-ink-2" data-testid="questions-progress">
+          <span className="font-medium text-ink tabular-nums">{questions.length}</span> question{questions.length === 1 ? "" : "s"}
           {questions.length > 0 ? (
             <>
               {" · "}
@@ -110,15 +110,15 @@ export function QuestionsView({
         ) : null}
       </div>
       {error ? (
-        <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <p role="alert" className="rounded-control border border-destructive/30 bg-danger/5 px-3 py-2 text-sm text-danger">
           {error}
         </p>
       ) : null}
 
       {questions.length === 0 ? (
-        <div className="rounded-lg border border-dashed px-6 py-10 text-center">
+        <div className="rounded-card border border-dashed px-6 py-10 text-center">
           <h3 className="text-base font-semibold">No questions found</h3>
-          <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+          <p className="mx-auto mt-1 max-w-md text-sm text-ink-2">
             Some buyers keep the questions in their portal or in a response form that was not uploaded. Add each question here with its weighting and word limit, and you can draft and mark it as usual.
           </p>
           {!readOnly ? (
@@ -137,35 +137,35 @@ export function QuestionsView({
                 {position === answerable.length && forms.length > 0 ? (
                   <li className="pt-4" data-testid="forms-heading">
                     <h3 className="text-sm font-semibold">
-                      Forms, declarations and information to give <span className="font-normal text-muted-foreground tabular-nums">{forms.length}</span>
+                      Forms, declarations and information to give <span className="font-normal text-ink-2 tabular-nums">{forms.length}</span>
                     </h3>
-                    <p className="text-xs text-muted-foreground">Not scored written answers: confirmations, declarations and details the pack asks you to supply. Listed so nothing is missed.</p>
+                    <p className="text-xs text-ink-2">Not scored written answers: confirmations, declarations and details the pack asks you to supply. Listed so nothing is missed.</p>
                   </li>
                 ) : null}
-              <li data-testid="question-card" data-status={question.status} data-scored={question.scored} className="rounded-lg border bg-card p-4">
+              <li data-testid="question-card" data-status={question.status} data-scored={question.scored} className="rounded-card border bg-surface p-4">
                 <div className="flex gap-3">
-                  <span className="mt-0.5 w-12 shrink-0 font-mono text-xs break-words text-muted-foreground">{question.ref || "—"}</span>
+                  <span className="mt-0.5 w-12 shrink-0 font-mono text-xs break-words text-ink-2">{question.ref || "—"}</span>
                   <div className="min-w-0 flex-1 space-y-2">
                     <div>
                       {question.title ? <h3 className="text-sm font-semibold">{question.title}</h3> : null}
-                      <p className={cn("line-clamp-3 text-sm whitespace-pre-line", question.title ? "text-muted-foreground" : "")}>{question.text}</p>
+                      <p className={cn("line-clamp-3 text-sm whitespace-pre-line", question.title ? "text-ink-2" : "")}>{question.text}</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
                       {question.weighting !== null ? (
                         <span className="inline-flex items-center gap-2" title="Weighting">
-                          <span aria-hidden className="h-1.5 w-20 overflow-hidden rounded-full bg-muted">
-                            <span className="block h-full rounded-full bg-primary" style={{ width: `${Math.min(100, question.weighting)}%` }} />
+                          <span aria-hidden className="h-1.5 w-20 overflow-hidden rounded-full bg-paper-deep">
+                            <span className="block h-full rounded-full bg-brand" style={{ width: `${Math.min(100, question.weighting)}%` }} />
                           </span>
                           <span className="font-medium tabular-nums">{question.weighting}%</span>
                         </span>
                       ) : (
-                        <span className="text-muted-foreground">Weighting not stated</span>
+                        <span className="text-ink-2">Weighting not stated</span>
                       )}
-                      <span className="text-muted-foreground">
+                      <span className="text-ink-2">
                         {question.limitText ?? (limit ? `${limit} words` : "No limit stated")}
                         {fromPages && limit ? ` (≈ ${limit} words)` : ""}
                       </span>
-                      {question.section ? <span className="text-muted-foreground">{question.section}</span> : null}
+                      {question.section ? <span className="text-ink-2">{question.section}</span> : null}
                       <CitationMark citation={question.citation} links={links} />
                       {(question.provenance?.notes ?? []).map((note) => (
                         <span key={note} className="text-warning">
@@ -176,26 +176,24 @@ export function QuestionsView({
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
                       <StatusStepper status={question.status} />
                       {question.status !== "not_started" ? (
-                        <span className={cn("text-xs tabular-nums", limitState === "over" ? "font-medium text-destructive" : limitState === "near" ? "text-warning" : "text-muted-foreground")}>
+                        <span className={cn("text-xs tabular-nums", limitState === "over" ? "font-medium text-danger" : limitState === "near" ? "text-warning" : "text-ink-2")}>
                           {question.wordCount} words{limit ? ` of ${limit}` : ""}
                           {limitState === "over" ? " — over limit" : ""}
                         </span>
                       ) : null}
                       {question.gaps > 0 ? <span className="text-xs font-medium text-warning">{question.gaps} evidence gap{question.gaps === 1 ? "" : "s"}</span> : null}
                       {question.score !== null ? (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-ink-2">
                           Marked {question.score}/{question.maxEvaluated}
                         </span>
                       ) : null}
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1.5">
-                    <Button asChild size="sm" variant={question.status === "not_started" && canDraft ? "default" : "outline"}>
-                      <Link href={`${basePath}/questions/${question.id}`}>
-                        {question.status === "not_started" ? (canDraft ? "Draft" : "Open") : "Open"}
-                        <ArrowRight aria-hidden className="size-3.5" />
-                      </Link>
-                    </Button>
+                    <ButtonLink href={`${basePath}/questions/${question.id}`} size="sm" variant={question.status === "not_started" && canDraft ? "default" : "outline"}>
+                      {question.status === "not_started" ? (canDraft ? "Draft" : "Open") : "Open"}
+                      <ArrowRight aria-hidden className="size-3.5" />
+                    </ButtonLink>
                     {!readOnly ? (
                       <div className="flex gap-0.5">
                         <Button variant="ghost" size="icon-sm" onClick={() => setEditing({ mode: "edit", item: question })} aria-label={`Edit question ${question.ref || question.title || ""}`}>
@@ -305,7 +303,7 @@ function QuestionDialog({ editing, onClose, onSubmit }: { editing: NonNullable<E
             <Textarea id="question-guidance" value={guidance} onChange={(event) => setGuidance(event.target.value)} rows={3} maxLength={8000} />
           </div>
           {error ? (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-sm text-danger">
               {error}
             </p>
           ) : null}

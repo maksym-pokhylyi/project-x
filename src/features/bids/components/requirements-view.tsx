@@ -31,6 +31,8 @@ import {
 import { cn } from "@/lib/utils";
 import { CitationMark, type SourceLinks } from "./citation";
 import { Pill, StatusPill } from "./ui";
+import { FilterChip } from "@/components/ui/filter-chip";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export type RequirementItem = {
   id: string;
@@ -133,18 +135,9 @@ export function RequirementsView({
             {FILTERS.map((entry) => {
               const count = requirements.filter(entry.test).length;
               return (
-                <button
-                  key={entry.key}
-                  type="button"
-                  aria-pressed={filter === entry.key}
-                  onClick={() => setFilter(entry.key)}
-                  className={cn(
-                    "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                    filter === entry.key ? "border-primary bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {entry.label} <span className="tabular-nums opacity-80">{count}</span>
-                </button>
+                <FilterChip key={entry.key} pressed={filter === entry.key} count={count} onClick={() => setFilter(entry.key)}>
+                  {entry.label}
+                </FilterChip>
               );
             })}
           </div>
@@ -163,15 +156,15 @@ export function RequirementsView({
       ) : null}
 
       {!compact && passFail.length > 0 ? (
-        <p className="text-sm text-muted-foreground" data-testid="passfail-progress">
-          <span className="font-medium text-foreground tabular-nums">
+        <p className="text-sm text-ink-2" data-testid="passfail-progress">
+          <span className="font-medium text-ink tabular-nums">
             {passFailChecked} of {passFail.length}
           </span>{" "}
           pass/fail requirements checked against the documents by you. Tick each one once you have read its source.
         </p>
       ) : null}
       {!compact && !factsConfirmed && !readOnly ? (
-        <p className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm">
+        <p className="rounded-control border border-warning/40 bg-warning/10 px-3 py-2 text-sm">
           Your company facts are not confirmed yet, so every requirement shows as “Unknown”.{" "}
           <a href="/app/library" className="font-medium underline underline-offset-4">
             Confirm your company facts
@@ -180,7 +173,7 @@ export function RequirementsView({
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <p role="alert" className="rounded-control border border-destructive/30 bg-danger/5 px-3 py-2 text-sm text-danger">
           {error}
         </p>
       ) : null}
@@ -192,9 +185,9 @@ export function RequirementsView({
         return (
           <section key={category} aria-label={REQUIREMENT_CATEGORY_LABELS[category]}>
             <h3 className="flex items-center gap-2 border-b pb-1.5 text-sm font-semibold">
-              <Icon aria-hidden className="size-4 text-muted-foreground" />
+              <Icon aria-hidden className="size-4 text-ink-2" />
               {REQUIREMENT_CATEGORY_LABELS[category]}
-              <span className="font-normal text-muted-foreground tabular-nums">{rows.length}</span>
+              <span className="font-normal text-ink-2 tabular-nums">{rows.length}</span>
             </h3>
             <ul className="divide-y">
               {rows.map((item) => (
@@ -226,7 +219,7 @@ export function RequirementsView({
       })}
 
       {visible.length === 0 ? (
-        <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+        <p className="rounded-card border border-dashed px-4 py-8 text-center text-sm text-ink-2">
           {requirements.length === 0
             ? "No requirements were found in this pack. Check the documents, or add requirements by hand."
             : "No requirements match this filter."}
@@ -274,55 +267,48 @@ function RequirementRow({
   return (
     <li className="py-3" data-testid="requirement-row" data-pass-fail={item.isPassFail ? "true" : "false"} data-status={item.companyStatus}>
       <div className="flex gap-3">
-        <span className="mt-0.5 w-9 shrink-0 font-mono text-xs text-muted-foreground">{item.ref}</span>
+        <span className="mt-0.5 w-9 shrink-0 font-mono text-xs text-ink-2">{item.ref}</span>
         <div className="min-w-0 flex-1 space-y-1.5">
           <p className="text-sm leading-5">
             {item.text}
-            {item.threshold ? <span className="ml-1.5 rounded bg-muted px-1.5 py-0.5 font-mono text-xs whitespace-nowrap">{item.threshold}</span> : null}
+            {item.threshold ? <span className="ml-1.5 rounded bg-paper-deep px-1.5 py-0.5 font-mono text-xs whitespace-nowrap">{item.threshold}</span> : null}
           </p>
           <div className="flex flex-wrap items-center gap-1.5">
-            <Pill tone={item.isPassFail ? "danger" : item.kind === "minimum_score" ? "warning" : "neutral"} className={item.isPassFail ? "bg-background" : ""}>
+            <Pill tone={item.isPassFail ? "danger" : item.kind === "minimum_score" ? "warning" : "neutral"} className={item.isPassFail ? "bg-paper" : ""}>
               {REQUIREMENT_KIND_LABELS[item.kind] ?? item.kind}
             </Pill>
             <StatusPill status={item.companyStatus} />
             {item.citation ? (
               <CitationMark citation={item.citation} links={links} />
             ) : (
-              <span className="text-xs text-muted-foreground">No source — added by hand</span>
+              <span className="text-xs text-ink-2">No source — added by hand</span>
             )}
             {provenance ? (
-              <span title={provenance.hint} className="text-xs text-muted-foreground">
+              <span title={provenance.hint} className="text-xs text-ink-2">
                 {provenance.text}
               </span>
             ) : null}
           </div>
-          {item.companyNote ? <p className="text-xs text-muted-foreground">{item.companyNote}</p> : null}
+          {item.companyNote ? <p className="text-xs text-ink-2">{item.companyNote}</p> : null}
           {differing.map((note) => (
             <p key={note} className="text-xs text-warning">
               {note}
             </p>
           ))}
           {item.evidenceToProvide ? (
-            <p className="text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">Evidence to provide:</span> {item.evidenceToProvide}
+            <p className="text-xs text-ink-2">
+              <span className="font-medium text-ink">Evidence to provide:</span> {item.evidenceToProvide}
             </p>
           ) : null}
           {item.note ? (
-            <p className="rounded border-l-2 border-primary/40 bg-muted/60 px-2 py-1 text-xs">
+            <p className="rounded border-l-2 border-primary/40 bg-paper-deep/60 px-2 py-1 text-xs">
               <span className="font-medium">Your note:</span> {item.note}
             </p>
           ) : null}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <label className={cn("flex items-center gap-1.5 text-xs", readOnly ? "text-muted-foreground" : "cursor-pointer")}>
-            <input
-              type="checkbox"
-              className="size-4 accent-[var(--primary)]"
-              checked={item.checked}
-              disabled={readOnly}
-              onChange={(event) => onToggleChecked(event.target.checked)}
-              aria-label={`Requirement ${item.ref} checked against the documents`}
-            />
+          <label className={cn("flex items-center gap-1.5 text-xs", readOnly ? "text-ink-2" : "cursor-pointer")}>
+            <Checkbox checked={item.checked} disabled={readOnly} onCheckedChange={(checked) => onToggleChecked(checked === true)} aria-label={`Requirement ${item.ref} checked against the documents`} />
             Checked
           </label>
           {!readOnly ? (
@@ -412,7 +398,7 @@ function RequirementDialog({ editing, onClose, onSubmit }: { editing: NonNullabl
                   </option>
                 ))}
               </NativeSelect>
-              <p className="text-xs text-muted-foreground">A position you set by hand is not changed by later company checks.</p>
+              <p className="text-xs text-ink-2">A position you set by hand is not changed by later company checks.</p>
             </div>
           </div>
           <div className="space-y-1.5">
@@ -420,7 +406,7 @@ function RequirementDialog({ editing, onClose, onSubmit }: { editing: NonNullabl
             <Textarea id="requirement-note" value={note} onChange={(event) => setNote(event.target.value)} rows={2} maxLength={2000} />
           </div>
           {error ? (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-sm text-danger">
               {error}
             </p>
           ) : null}
