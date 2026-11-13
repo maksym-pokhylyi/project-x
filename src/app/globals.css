@@ -409,6 +409,22 @@
   }
 }
 
+/* Title of a section page of the app (Radar, Bids, Documents, Billing, Settings), as on the
+   artboards: 30 px × 1.12 on phones, 40 px × 1.15 from 768 px. */
+@utility type-page {
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  @media (width >= 48rem) {
+    font-size: 2.5rem;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+}
+
 /* Section heading on a public page: 28/32 on phones, 36/41 from 768 px, 40/45 from 1024 px. */
 @utility type-h2 {
   font-family: var(--font-display);

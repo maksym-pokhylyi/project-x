@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { PricingTable } from "@/components/billing/pricing-table";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { BID_PASS_DISPLAY } from "@/config/plan-display";
 
 /** Where a signed-out visitor starts a Bid Pass: an account first, then the new bid. */
@@ -59,11 +58,11 @@ export function BidPassBand({
           </span>
           <span className="text-13 leading-[1.5] sm:text-sm sm:leading-[1.5]">{BID_PASS_DISPLAY.period}</span>
         </p>
-        <div className="col-span-2 max-sm:[&>*]:h-[2.875rem] max-sm:[&>*]:w-full">
+        <div className="col-span-2 max-sm:[&>*]:w-full">
           {action ?? (
-            <Button asChild className="px-[1.1875rem]">
-              <Link href={href}>{BID_PASS_DISPLAY.cta}</Link>
-            </Button>
+            <ButtonLink href={href} className="px-[1.1875rem]">
+              {BID_PASS_DISPLAY.cta}
+            </ButtonLink>
           )}
         </div>
       </div>
@@ -96,9 +95,9 @@ export function MarketingPricing({
       smallPrint={smallPrint}
       after={<BidPassBand headingLevel={headingLevel} short={shortBidPass} />}
       renderAction={(plan, interval, { featured }) => (
-        <Button asChild className="w-full max-sm:h-[2.875rem]" variant={featured ? "inverse" : "outline"}>
-          <Link href={plan.key === "free" ? "/find" : `/sign-up?plan=${plan.key}&interval=${interval}`}>{plan.cta}</Link>
-        </Button>
+        <ButtonLink href={plan.key === "free" ? "/find" : `/sign-up?plan=${plan.key}&interval=${interval}`} className="w-full" variant={featured ? "inverse" : "outline"}>
+          {plan.cta}
+        </ButtonLink>
       )}
     />
   );

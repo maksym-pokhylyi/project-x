@@ -20,7 +20,9 @@ import { cn } from "@/lib/utils"
  *                       16 px · 22 px at 48 and 52
  *   sm         44 px    14 px · 14 px (compact)       row and toolbar actions in tables and lists
  *   md         48 px    16 px · 22 px                 a lone action that belongs to a form
- *   lg         52 px    16 px · 22 px                 a lone call to action on a public page
+ *   lg         52 px    16 px · 22 px                 a lone action in a search context
+ *   form       52 → 48  16 px · 22 px                 a lone call to action on a public page:
+ *                                                     52 px on phones, 48 px from 640 px
  *   icon…      square of the same heights             icon-only; always give an aria-label
  *
  * `sm` used to be 36 px tall. The artboards' row actions are 44 px with a 14 px label, so
@@ -51,6 +53,7 @@ const buttonVariants = cva(
         sm: compact,
         md: "controls-md",
         lg: "controls-lg",
+        form: "controls-form",
         icon: square,
         "icon-sm": cn("controls-sm", square),
         "icon-md": cn("controls-md", square),

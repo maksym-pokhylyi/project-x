@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useState } from "react";
 import { Wordmark } from "@/components/logo";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { authClient } from "@/lib/auth-client";
 import { findCompany, navHref, primaryNav } from "./site-nav";
 
@@ -79,16 +79,12 @@ export function MobileNav() {
               </li>
             </ul>
             <div className="mt-5 grid gap-2.5">
-              <Button asChild size="lg">
-                <Link href={findCompany.href} onClick={close}>
-                  {findCompany.label}
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/free-bid-check" onClick={close}>
-                  Get a free cited bid check
-                </Link>
-              </Button>
+              <ButtonLink href={findCompany.href} size="lg" onClick={close}>
+                {findCompany.label}
+              </ButtonLink>
+              <ButtonLink href="/free-bid-check" size="lg" variant="outline" onClick={close}>
+                Get a free cited bid check
+              </ButtonLink>
             </div>
           </nav>
         </DialogPrimitive.Content>

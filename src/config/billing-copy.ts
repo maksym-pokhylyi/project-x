@@ -18,6 +18,8 @@ export const billingCopy = {
   refund: `Your first subscription payment, or an unused ${BID_PASS.name}, is refunded on request within ${site.legal.refundWindowDays} days.`,
   paddle: "Payments are processed by Paddle.",
   bidPassExpiry: `A ${BID_PASS.name} does not expire while your account is open.`,
+  /** The same after a sentence that has just named the pass. */
+  bidPassExpiryIt: "It does not expire while your account is open.",
   /** What a change of plan costs or returns, as Billing says it next to the choice. */
   upgrade: "You pay the difference for the rest of your current billing period.",
 } as const;

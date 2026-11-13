@@ -12,16 +12,16 @@ export function ResendVerification({ email, callbackURL }: { email: string; call
       type="button"
       variant="outline"
       className="w-full"
-      disabled={pending}
+      loading={pending}
       onClick={async () => {
         setPending(true);
         const { error } = await authClient.sendVerificationEmail({ email, callbackURL });
         setPending(false);
         if (error) toast.error(error.message ?? "Could not send the email. Please try again.");
-        else toast.success("Verification email sent.");
+        else toast.success("Confirmation email sent.");
       }}
     >
-      {pending ? "Sending…" : "Resend verification email"}
+      {pending ? "Sending…" : "Send the email again"}
     </Button>
   );
 }

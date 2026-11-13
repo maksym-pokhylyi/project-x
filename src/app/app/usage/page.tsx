@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageHeader } from "@/components/app/page-header";
 import { SettingsFrame } from "@/components/app/settings-nav";
 import { UsagePanel } from "@/components/app/usage-panel";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { requireOrgForPage } from "@/server/session";
 import { getUsageSummary } from "@/server/usage";
 
@@ -20,9 +19,9 @@ export default async function UsagePage() {
         description="What this workspace has used against the limits of its plan."
         actions={
           ctx.role === "owner" ? (
-            <Button asChild variant="outline">
-              <Link href="/app/settings/billing">Change plan</Link>
-            </Button>
+            <ButtonLink href="/pricing" variant="outline">
+              Change plan
+            </ButtonLink>
           ) : null
         }
       />

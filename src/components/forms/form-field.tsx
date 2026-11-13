@@ -24,7 +24,9 @@ export function FieldError({ id, className, children }: { id?: string; className
 }
 
 /**
- * Label above, control, then helper or error below, with the right ARIA wiring.
+ * Label above, control, then helper or error below, with the right ARIA wiring: 6 px from
+ * label to field, as in the artboards. The field's height comes from the form around it
+ * (see <Form> and the control scale); pass `size` only for a field outside any group.
  * `error` is the first validation message for this field (client or server side).
  */
 export function FormField({
@@ -44,7 +46,7 @@ export function FormField({
   const id = `field-${name}`;
   const describedBy = [error ? `${id}-error` : null, hint ? `${id}-hint` : null].filter(Boolean).join(" ") || undefined;
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2">
         <Label htmlFor={id}>{label}</Label>
         {trailing}

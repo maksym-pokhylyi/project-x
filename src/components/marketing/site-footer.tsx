@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
-import { identity, site } from "@/config/site";
+import { site } from "@/config/site";
+import { IdentityLine } from "./identity-line";
 import { footerGroups, footerPhoneLinks } from "./site-nav";
-
-/** A link inside the muted identity line: it keeps the line's grey and takes a quiet underline. */
-const quietLink = "underline decoration-line-strong decoration-1 underline-offset-[3px] transition-colors duration-150 hover:text-ink hover:decoration-brand";
 
 /**
  * Footer of every public page, as in the artboards: paper-deep, the lockup and tagline on
@@ -13,8 +11,6 @@ const quietLink = "underline decoration-line-strong decoration-1 underline-offse
  * the data licence and the independence statement. All of it comes from src/config/site.ts.
  */
 export function SiteFooter() {
-  const { contact, licence } = identity;
-
   return (
     <footer data-slot="site-footer" className="bg-paper-deep">
       <div className="container-content flex flex-col gap-5 pt-9 pb-8 sm:gap-9 sm:pt-12 sm:pb-10">
@@ -59,17 +55,7 @@ export function SiteFooter() {
         </div>
 
         <div className="border-t border-line pt-4 sm:pt-5">
-          <p data-testid="site-identity" className="max-w-[61.25rem] text-13 leading-[1.6] text-ink-2">
-            {identity.operator} {contact.label}{" "}
-            <a href={`mailto:${contact.email}`} className={quietLink}>
-              {contact.email}
-            </a>{" "}
-            · {identity.ukRepresentative} · {identity.payments} · {licence.before}
-            <a href={licence.url} rel="license noopener" className={quietLink}>
-              {licence.name}
-            </a>
-            {licence.after} · {identity.independence}
-          </p>
+          <IdentityLine />
         </div>
       </div>
     </footer>

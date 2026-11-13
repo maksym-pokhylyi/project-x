@@ -69,7 +69,8 @@ export function PricingTable({
   const Heading = headingLevel === 2 ? "h2" : "h3";
 
   return (
-    <div className="flex flex-col gap-5">
+    /* Phones: the toggle and every action in the cards are 48 px (the 390 px boards); 44 px from 640 px. */
+    <div className="flex flex-col gap-5 max-sm:controls-md">
       {toggle ? (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <SegmentedToggle
@@ -77,7 +78,7 @@ export function PricingTable({
             value={interval}
             onValueChange={setInterval}
             options={INTERVAL_OPTIONS}
-            className="max-sm:w-full max-sm:[&>button]:min-h-[2.875rem] max-sm:[&>button]:min-w-0 max-sm:[&>button]:flex-1 max-sm:[&>button]:px-3"
+            className="max-sm:w-full max-sm:[&>button]:min-w-0 max-sm:[&>button]:flex-1 max-sm:[&>button]:px-3"
           />
           <p className="text-13 text-ink-2 sm:text-sm">Annual billing gives {ANNUAL_SAVING}.</p>
         </div>

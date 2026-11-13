@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { SystemPage } from "@/components/system-page";
 import { Button } from "@/components/ui/button";
 import { site } from "@/config/site";
@@ -15,15 +14,11 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
       code="Error"
       title="Something went wrong"
       actions={
-        <>
-          <Button size="lg" onClick={reset}>
-            Try again
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href="/">Back to the homepage</Link>
-          </Button>
-        </>
+        <Button size="form" onClick={reset}>
+          Try again
+        </Button>
       }
+      links={[{ label: "Go to the home page", href: "/" }]}
       reference={
         error.digest ? (
           <>

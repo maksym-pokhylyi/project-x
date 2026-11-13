@@ -52,7 +52,7 @@ export function ConfirmEmailForm({ token, redirectTo }: { token: string; redirec
         hint="At least 8 characters."
         error={errors.password?.[0]}
       />
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" className="w-full" loading={pending}>
         {pending ? "Confirming…" : "Confirm email and set password"}
       </Button>
     </form>

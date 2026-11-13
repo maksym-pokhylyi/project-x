@@ -1,4 +1,3 @@
-import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PlanTick } from "@/components/billing/pricing-table";
@@ -11,7 +10,8 @@ import { Eyebrow, Point, Section, SectionHeading } from "@/components/marketing/
 import { DocumentExcerpt, ProofBridge, RequirementCard } from "@/components/marketing/visuals/proof-visuals";
 import { stepVisuals } from "@/components/marketing/visuals/step-visuals";
 import { SupplierPreview } from "@/components/marketing/visuals/supplier-preview";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
+import { ArrowRightIcon } from "@/components/ui/icons";
 import { landing } from "@/config/landing";
 import { site } from "@/config/site";
 import { appUrl } from "@/env";
@@ -121,7 +121,7 @@ export default function LandingPage() {
         {/* Phones: the three claims as one ticked list. From 768 px: each under its ink rule, with its sentence. */}
         <ul className="-mt-2 rounded-card border border-line bg-surface text-15 font-semibold text-ink md:hidden">
           {proof.points.map((point) => (
-            <li key={point.title} className="flex min-h-[2.875rem] items-center gap-2.5 border-line px-4 not-first:border-t">
+            <li key={point.title} className="flex min-h-12 items-center gap-2.5 border-line px-4 not-first:border-t">
               <PlanTick className="mt-0 text-brand" />
               {point.title}
             </li>
@@ -136,11 +136,10 @@ export default function LandingPage() {
         </ul>
 
         <div className="-mt-2 flex flex-col gap-x-6 sm:flex-row sm:flex-wrap sm:items-center md:mt-0">
-          <Button asChild size="lg" className="sm:h-12">
-            <Link href={proof.cta.href}>
-              {proof.cta.label} <ArrowRight aria-hidden strokeWidth={2.2} />
-            </Link>
-          </Button>
+          <ButtonLink href={proof.cta.href} size="form">
+            {proof.cta.label}
+            <ArrowRightIcon />
+          </ButtonLink>
           <Link href={proof.sampleLink.href} className="link inline-flex min-h-11 items-center self-center text-15 font-medium sm:min-h-12 sm:text-base">
             {proof.sampleLink.label}
           </Link>

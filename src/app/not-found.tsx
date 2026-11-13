@@ -1,27 +1,21 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { SystemPage } from "@/components/system-page";
-import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = { title: "Page not found", robots: { index: false } };
+export const metadata: Metadata = { title: "This page is not here", robots: { index: false } };
 
+/** 404, as in the NotFound artboards: say what may have happened and offer the company search. */
 export default function NotFound() {
   return (
     <SystemPage
       code="404"
-      title="Page not found"
-      actions={
-        <>
-          <Button asChild size="lg">
-            <Link href="/">Back to the homepage</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href="/find">Find your company</Link>
-          </Button>
-        </>
-      }
+      title="This page is not here"
+      search
+      links={[
+        { label: "Go to the home page", href: "/" },
+        { label: "See a sample check", href: "/sample-check" },
+      ]}
     >
-      <p>The page you are looking for does not exist or has moved. If you followed a link in an email from us, the page may have been removed at the company’s request.</p>
+      <p>The link may be old, or the page may have been hidden at a company’s request.</p>
     </SystemPage>
   );
 }

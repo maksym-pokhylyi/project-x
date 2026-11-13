@@ -14,6 +14,16 @@ const eslintConfig = defineConfig([
       ],
       // All server logging goes through src/lib/logger.ts so output stays structured.
       "no-console": "error",
+      // Design system: a control that navigates is a <ButtonLink href>, one that acts is a
+      // <Button>. Button classes never go on a link by hand (docs/design/DESIGN.md §6).
+      // A warning while the remaining call sites are moved; then make it an error.
+      "no-restricted-syntax": [
+        "warn",
+        {
+          selector: 'JSXElement[openingElement.name.name="Button"] > JSXElement[openingElement.name.name=/^(Link|a)$/]',
+          message: "A link inside <Button asChild>: use <ButtonLink href=…> from @/components/ui/button-link instead.",
+        },
+      ],
     },
   },
   {

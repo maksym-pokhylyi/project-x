@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { HeaderSessionLink } from "./header-session-link";
 import { MobileNav } from "./mobile-nav";
 import { findCompany } from "./site-nav";
@@ -27,9 +26,7 @@ export function SiteHeader() {
             <SiteNavLinks className={navLink} />
             <HeaderSessionLink className={navLink} />
           </nav>
-          <Button asChild>
-            <Link href={findCompany.href}>{findCompany.label}</Link>
-          </Button>
+          <ButtonLink href={findCompany.href}>{findCompany.label}</ButtonLink>
         </div>
         <MobileNav />
       </div>

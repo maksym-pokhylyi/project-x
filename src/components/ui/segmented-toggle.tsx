@@ -52,7 +52,7 @@ function SegmentedToggle<T extends string>({
             data-testid={option.testId}
             onClick={() => onValueChange(option.value)}
             className={cn(
-              "relative -ml-px inline-flex h-(--control-h) min-w-[7.25rem] cursor-pointer items-center justify-center border px-5 text-15 whitespace-nowrap transition-colors duration-150 ease-out first:ml-0 first:rounded-l-control last:rounded-r-control focus-visible:z-20",
+              "relative -ml-px inline-flex h-(--control-h) min-w-[7.25rem] cursor-pointer items-center justify-center border px-5 text-(length:--control-text) whitespace-nowrap transition-colors duration-150 ease-out first:ml-0 first:rounded-l-control last:rounded-r-control focus-visible:z-20",
               stretch && "flex-1",
               pressed ? "z-10 border-ink bg-ink font-semibold text-white" : "border-line-strong bg-surface font-medium text-ink hover:bg-paper"
             )}

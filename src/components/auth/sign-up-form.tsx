@@ -8,6 +8,11 @@ import { authClient } from "@/lib/auth-client";
 import { fieldErrorsFrom, signUpSchema, type FieldErrors } from "@/lib/validation";
 import { GoogleButton, OrDivider } from "./google-button";
 
+/**
+ * The sign-up form, laid out as in the SignUp artboards: three fields and one button.
+ * (The artboard also draws an "Email me the weekly digest" tick box: there is no setting
+ * behind it yet, so it is not shown rather than shown and ignored.)
+ */
 export function SignUpForm({
   redirectTo,
   defaultEmail,
@@ -56,28 +61,31 @@ export function SignUpForm({
           <OrDivider />
         </>
       ) : null}
-      <form onSubmit={onSubmit} noValidate className="space-y-4">
-        <FormError message={formError} />
-        <FormField label="Name" name="name" autoComplete="name" required error={errors.name?.[0]} />
-        <FormField
-          label="Work email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          defaultValue={defaultEmail}
-          error={errors.email?.[0]}
-        />
-        <FormField
-          label="Password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          hint="At least 8 characters."
-          error={errors.password?.[0]}
-        />
-        <Button type="submit" className="w-full" loading={pending}>
+      <form onSubmit={onSubmit} noValidate className="flex flex-col">
+        <div className="space-y-4">
+          <FormError message={formError} />
+          <FormField label="Your name" name="name" autoComplete="name" required error={errors.name?.[0]} />
+          <FormField
+            label="Work email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="name@company.co.uk"
+            required
+            defaultValue={defaultEmail}
+            error={errors.email?.[0]}
+          />
+          <FormField
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            hint="At least 8 characters."
+            error={errors.password?.[0]}
+          />
+        </div>
+        <Button type="submit" className="mt-5 w-full" loading={pending}>
           {pending ? "Creating account…" : "Create account"}
         </Button>
       </form>
