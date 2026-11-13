@@ -35,8 +35,9 @@ describe("plan catalogue", () => {
       else expect(plan.prices!.year).toBeLessThan(plan.prices!.month * 12);
     }
     expect(planRank("business")).toBeGreaterThan(planRank("starter"));
-    expect(formatPrice(2900)).toBe("$29");
-    expect(formatPrice(2950)).toBe("$29.50");
+    expect(formatPrice(2900)).toBe("£29");
+    expect(formatPrice(2950)).toBe("£29.50");
+    expect(formatPrice(149000)).toBe("£1,490");
     expect(annualSavingsPercent(PLANS.starter)).toBe(17);
     expect(annualSavingsPercent(PLANS.free)).toBe(0);
   });
@@ -229,8 +230,9 @@ describe("founder metrics", () => {
   beforeEach(resetDatabase);
 
   it("estimates MRR from catalogue prices", () => {
-    expect(monthlyRevenueCents({ status: "active", planKey: "pro", billingInterval: "month", quantity: 1 })).toBe(7900);
-    expect(monthlyRevenueCents({ status: "active", planKey: "pro", billingInterval: "year", quantity: 1 })).toBe(Math.round(79000 / 12));
+    // Catalogue prices in pence: Bid Desk ("pro") £149 a month / £1,490 a year, Radar Pro ("starter") £29 a month.
+    expect(monthlyRevenueCents({ status: "active", planKey: "pro", billingInterval: "month", quantity: 1 })).toBe(14900);
+    expect(monthlyRevenueCents({ status: "active", planKey: "pro", billingInterval: "year", quantity: 1 })).toBe(Math.round(149000 / 12));
     expect(monthlyRevenueCents({ status: "past_due", planKey: "starter", billingInterval: "month", quantity: 2 })).toBe(5800);
     for (const status of ["trialing", "canceled", "paused"]) {
       expect(monthlyRevenueCents({ status, planKey: "pro", billingInterval: "month", quantity: 1 })).toBe(0);

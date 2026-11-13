@@ -72,11 +72,18 @@ beforeEach(async () => {
 
   const [ownerBMember] = await db.select().from(members).where(and(eq(members.userId, ownerB.id), eq(members.organizationId, orgB)));
   ownerBMemberId = ownerBMember!.id;
-  const invitation = await auth.api.createInvitation({
-    headers: headersFor(ownerB),
-    body: { email: "pending-b@example.com", role: "member", organizationId: orgB },
+  // A pending invitation in B. Inserted directly (like addMember) so that this fixture does not
+  // depend on the plan's seat limit: the Free plan has a single seat.
+  invitationBId = `inv_${Math.random().toString(36).slice(2)}`;
+  await db.insert(invitations).values({
+    id: invitationBId,
+    organizationId: orgB,
+    email: "pending-b@example.com",
+    role: "member",
+    status: "pending",
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    inviterId: ownerB.id,
   });
-  invitationBId = invitation.id;
   actAs(null);
 });
 

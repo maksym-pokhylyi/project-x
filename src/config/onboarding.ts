@@ -19,7 +19,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: "name-workspace",
     title: "Name your workspace",
-    description: "Give your workspace a name your teammates will recognise.",
+    description: "Use your company’s trading name. It appears on invitations and exports.",
     href: "/app/settings/workspace",
     cta: "Open workspace settings",
     completedBy: ["workspace.updated"],
@@ -27,7 +27,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: "invite-team",
     title: "Invite a teammate",
-    description: "Work is better together. Invite a colleague to collaborate.",
+    description: "Add the colleague who works on bids with you. Seats depend on your plan.",
     href: "/app/settings/members",
     cta: "Invite members",
     completedBy: ["member.invited"],
@@ -35,7 +35,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: "choose-plan",
     title: "Pick a plan",
-    description: "Start free and upgrade when you need more seats or volume.",
+    description: "Your radar and one cited bid check are free. See what the paid plans add.",
     href: "/app/settings/billing",
     cta: "View plans",
     completedBy: ["billing.checkout_started", "billing.subscription_started"],

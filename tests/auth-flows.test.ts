@@ -137,7 +137,12 @@ describe("workspaces and invitations", () => {
     actAs(owner);
   });
 
+  /** Puts the owner's workspace on a paid plan. Free has a single seat, so inviting needs one. */
+  const subscribe = (planKey: "starter" | "pro" | "business") =>
+    db.insert(subscriptions).values({ organizationId: owner.organizationId, status: "active", planKey, paddleSubscriptionId: `sub_${planKey}` });
+
   it("invitation by e-mail: invitee signs up, accepts and lands in the workspace", async () => {
+    await subscribe("starter"); // Radar Pro: 2 seats
     const invited = await inviteMemberAction({ email: "Invitee@Example.com", role: "member" });
     expect(invited.ok).toBe(true);
     const email = await latestEmail("invitee@example.com", "invitation");
@@ -165,7 +170,9 @@ describe("workspaces and invitations", () => {
   });
 
   it("an invitation can only be accepted by the invited address", async () => {
+    await subscribe("starter"); // Radar Pro: 2 seats
     const invited = await inviteMemberAction({ email: "invitee@example.com", role: "member" });
+    expect(invited.ok).toBe(true);
     const invitationId = invited.ok ? invited.data.invitationId : "";
     const stranger = await createTestUser({ email: "stranger@example.com" });
     actAs(stranger);
@@ -174,7 +181,14 @@ describe("workspaces and invitations", () => {
   });
 
   it("enforces the plan's seat limit, counting pending invitations", async () => {
-    // Free plan: 2 seats. Owner + 1 pending invitation uses both.
+    // Free plan: 1 seat, and the owner has it.
+    const onFree = await inviteMemberAction({ email: "zero@example.com", role: "member" });
+    expect(onFree).toMatchObject({ ok: false, error: { code: "SEAT_LIMIT_REACHED", details: { limit: 1 } } });
+    expect(await db.select().from(invitations)).toHaveLength(0);
+
+    // Radar Pro (plan key "starter"): 2 seats. Owner + 1 pending invitation uses both.
+    await subscribe("starter");
+    actAs(owner);
     expect((await inviteMemberAction({ email: "one@example.com", role: "member" })).ok).toBe(true);
     const blocked = await inviteMemberAction({ email: "two@example.com", role: "member" });
     expect(blocked).toMatchObject({ ok: false, error: { code: "SEAT_LIMIT_REACHED", details: { limit: 2 } } });
@@ -185,14 +199,14 @@ describe("workspaces and invitations", () => {
     expect(await cancelInvitationAction(pending!.id)).toMatchObject({ ok: true });
     expect((await inviteMemberAction({ email: "two@example.com", role: "member" })).ok).toBe(true);
 
-    // Upgrading raises the limit (Starter: 5 seats).
-    await db.insert(subscriptions).values({ organizationId: owner.organizationId, status: "active", planKey: "starter", paddleSubscriptionId: "sub_seats" });
+    // Upgrading raises the limit (Bid Desk, plan key "pro": 3 seats).
+    await db.update(subscriptions).set({ planKey: "pro" }).where(eq(subscriptions.organizationId, owner.organizationId));
     actAs(owner);
     expect((await inviteMemberAction({ email: "three@example.com", role: "admin" })).ok).toBe(true);
   });
 
   it("refuses to add a member beyond the seat limit even with a valid invitation (after a downgrade)", async () => {
-    await db.insert(subscriptions).values({ organizationId: owner.organizationId, status: "active", planKey: "starter", paddleSubscriptionId: "sub_downgrade" });
+    await subscribe("pro"); // Bid Desk: 3 seats
     const first = await inviteMemberAction({ email: "first@example.com", role: "member" });
     const second = await inviteMemberAction({ email: "second@example.com", role: "member" });
     expect(first.ok && second.ok).toBe(true);
@@ -201,8 +215,8 @@ describe("workspaces and invitations", () => {
     actAs(firstUser);
     expect(await acceptInvitationAction(first.ok ? first.data.invitationId : "")).toMatchObject({ ok: true });
 
-    // Subscription ends: back to 2 seats, which are now taken by the owner and the first member.
-    await db.update(subscriptions).set({ status: "canceled" }).where(eq(subscriptions.organizationId, owner.organizationId));
+    // Downgrade to Radar Pro: 2 seats, which are now taken by the owner and the first member.
+    await db.update(subscriptions).set({ planKey: "starter" }).where(eq(subscriptions.organizationId, owner.organizationId));
     const secondUser = await createTestUser({ email: "second@example.com" });
     actAs(secondUser);
     expect(await acceptInvitationAction(second.ok ? second.data.invitationId : "")).toMatchObject({ ok: false, error: { code: "SEAT_LIMIT_REACHED" } });
