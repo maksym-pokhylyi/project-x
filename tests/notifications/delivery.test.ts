@@ -516,6 +516,58 @@ describe("volume guards", () => {
   });
 });
 
+describe("trying a moment out (dev tools only)", () => {
+  const tick = (query = "") => cronTick(new Request(`http://localhost:3000/api/cron/jobs${query}`, { headers: { authorization: "Bearer test-cron-secret-0123456789" } }), {});
+  const devTools = features as unknown as { devTools: boolean };
+
+  afterEach(() => {
+    devTools.devTools = true;
+  });
+
+  it("?now= runs the tick, the fan-out and the sends as if it were that moment", async () => {
+    const parks = await addTender({ title: "Parks grounds maintenance", firstSeen: daysBefore(MONDAY, 2) });
+    // Stored after that Monday: not on the radar yet when Monday is looked at, news the week after.
+    const later = await addTender({ title: "Schools grounds maintenance", firstSeen: new Date(MONDAY.getTime() + 2 * 86_400_000) });
+
+    expect((await tick(`?now=${MONDAY.toISOString()}`)).status).toBe(200);
+    const [first] = await scheduledEmails(a.owner.email);
+    expect(first).toMatchObject({ template: "radar-digest", subject: "1 new tender for Acme Grounds" });
+    expect(first!.html.includes(parks) && !first!.html.includes(later), "only what was known that Monday").toBe(true);
+    expect(await logRows({ kind: "digest" })).toEqual([expect.objectContaining({ status: "sent", periodKey: WEEK, asOf: MONDAY, sentAt: MONDAY })]);
+    expect((await jobsOfType("notifications.fanout")).find((job) => job.payload.kind === "digest")!.payload).toEqual({ kind: "digest", period: WEEK, at: MONDAY.toISOString() });
+
+    // The same moment again: nothing more. A week on: the next digest, with what arrived in between.
+    await tick(`?now=${MONDAY.toISOString()}`);
+    expect(await scheduledEmails(a.owner.email)).toHaveLength(1);
+    const nextMonday = new Date("2026-11-23T07:30:00Z");
+    await tick(`?now=${nextMonday.toISOString()}`);
+    const emails = await scheduledEmails(a.owner.email);
+    expect(emails.map((email) => email.subject)).toEqual(["1 new tender for Acme Grounds", "1 new tender for Acme Grounds"]);
+    expect(emails[1]!.html.includes(later) && !emails[1]!.html.includes(parks), "what arrived in between").toBe(true);
+  });
+
+  it("is ignored where dev tools are off: the tick and every job act at the real time", async () => {
+    // A Monday long past: for the real clock that week is over, whenever this test runs.
+    const longAgo = new Date("2026-03-02T07:30:00Z");
+    await addTender({ title: "Parks grounds maintenance", firstSeen: daysBefore(longAgo, 2) });
+    devTools.devTools = false;
+    expect((await tick(`?now=${longAgo.toISOString()}`)).status).toBe(200);
+    // Whatever the tick scheduled is for the real clock: no simulated moment, not that week.
+    const fanouts = await jobsOfType("notifications.fanout");
+    expect(fanouts.every((job) => !("at" in job.payload) && job.payload.period !== "2026-W10" && job.payload.period !== "2026-03-02")).toBe(true);
+    // A job that claims a moment is not believed either.
+    await runNotificationFanout({ kind: "digest", period: "2026-W10", at: longAgo.toISOString() });
+    await runNotificationSend({ kind: "digest", period: "2026-W10", ...of(a), at: longAgo.toISOString() });
+    expect((await jobsOfType("notifications.send")).filter((job) => job.payload.period === "2026-W10")).toEqual([]);
+    expect((await logRows()).filter((row) => row.periodKey === "2026-W10")).toEqual([]);
+    expect((await scheduledEmails()).filter((email) => email.subject.includes("Acme"))).toEqual([]);
+    // With dev tools the same job is believed (this is what the e2e journey relies on).
+    devTools.devTools = true;
+    await runNotificationSend({ kind: "digest", period: "2026-W10", ...of(a), at: longAgo.toISOString() });
+    expect((await logRows()).filter((row) => row.periodKey === "2026-W10")).toEqual([expect.objectContaining({ status: "sent", sentAt: longAgo })]);
+  });
+});
+
 /** Runs a queued send job's payload at a given moment (what the worker does, with the clock held still). */
 async function runNotificationSendAt(payload: { kind: string; period: string; organizationId?: string; userId?: string; deferrals?: number }, now: Date) {
   const { sendNotification } = await import("@/features/notifications/deliver");

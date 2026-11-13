@@ -23,9 +23,9 @@ export type JobPayloads = {
   /** Compare open subscriptions with the Paddle API (no-op without PADDLE_API_KEY). */
   "billing.reconcile": Record<string, never>;
   /** Scheduled e-mails (src/features/notifications): one send job per member due a `kind` e-mail for `period`… */
-  "notifications.fanout": { kind: "digest" | "alert" | "reminder" | "renewal"; period: string; cursor?: { organizationId: string; userId: string } | null; offset?: number };
-  /** …and one e-mail to one member of one workspace. */
-  "notifications.send": { kind: "digest" | "alert" | "reminder" | "renewal"; period: string; organizationId: string; userId: string; deferrals?: number };
+  "notifications.fanout": { kind: "digest" | "alert" | "reminder" | "renewal"; period: string; cursor?: { organizationId: string; userId: string } | null; offset?: number; at?: string };
+  /** …and one e-mail to one member of one workspace. (`at`: a simulated moment, honoured only where dev tools are on.) */
+  "notifications.send": { kind: "digest" | "alert" | "reminder" | "renewal"; period: string; organizationId: string; userId: string; deferrals?: number; at?: string };
 };
 
 export type JobType = keyof JobPayloads;

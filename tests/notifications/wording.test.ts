@@ -171,8 +171,8 @@ describe("sentences", () => {
   it("closes by saying whether that was everything", () => {
     const options = { since: lastWeek, now: monday, firstLookbackDays: 7, kind: "digest" as const };
     expect(radarClosing({ ...options, moreMatches: 0, moreEnding: 0 })).toBe("That is everything new since last Monday.");
-    expect(radarClosing({ ...options, moreMatches: 7, moreEnding: 4 })).toBe("There is more on your radar: 7 more new tenders and 4 more contracts ending soon.");
-    expect(radarClosing({ ...options, moreMatches: 1, moreEnding: 0 })).toBe("There is more on your radar: 1 more new tender.");
+    expect(radarClosing({ ...options, moreMatches: 7, moreEnding: 4 })).toBe("This email lists the first few. Your radar shows 7 more new tenders and 4 more contracts ending soon.");
+    expect(radarClosing({ ...options, moreMatches: 1, moreEnding: 0 })).toBe("This email lists the first few. Your radar shows 1 more new tender.");
   });
 
   it("gives a capped plan one plain line", () => {

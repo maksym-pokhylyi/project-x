@@ -42,6 +42,8 @@ export type SendPayload = {
   userId: string;
   /** Times this send was put back by the per-tick cap. */
   deferrals?: number;
+  /** A simulated moment (dev tools only, see jobs.ts). */
+  at?: string;
 };
 
 export type SendOutcome =
@@ -160,7 +162,7 @@ export async function sendNotification(payload: SendPayload, options: { now?: Da
     await enqueueJob(
       "notifications.send",
       { ...payload, deferrals },
-      { runAfter: new Date(now.getTime() + limits.tickMinutes * 60_000), dedupeKey: `${sendDedupeKey(payload)}:defer:${deferrals}`, maxAttempts: 4 },
+      { runAfter: new Date((payload.at ? Date.now() : now.getTime()) + limits.tickMinutes * 60_000), dedupeKey: `${sendDedupeKey(payload)}:defer:${deferrals}`, maxAttempts: 4 },
     );
     return "deferred";
   }

@@ -197,7 +197,7 @@ describe("only strong matches, inside the plan", () => {
     expect(email).toMatchObject({ template: "radar-alert", subject: "9 new tenders for Acme Grounds" });
     expect((email!.html.match(/Open on Bidfolio/g) ?? []).length).toBe(8);
     expect(email!.text.includes("Since yesterday, nine new tenders match Acme Grounds."), "Since yesterday, nine new tenders match Acme Grounds.").toBe(true);
-    expect(email!.text.includes("There is more on your radar: 1 more new tender."), "There is more on your radar: 1 more new tender.").toBe(true);
+    expect(email!.text.includes("This email lists the first few. Your radar shows 1 more new tender."), "This email lists the first few. Your radar shows 1 more new tender.").toBe(true);
     expect(email!.html.includes("Contracts ending soon"), "Contracts ending soon").toBe(false);
     expect(email!.text.includes("You get this on working days when there is something new because you have a Bidfolio radar for Acme Grounds Ltd."), "You get this on working days when there is something new because you have a Bidfolio radar for Acme Grounds Ltd.").toBe(true);
     expect(await eventsNamed("alert_sent")).toEqual([expect.objectContaining({ properties: { matches: 9, plan: "pro" } })]);
@@ -218,7 +218,7 @@ describe("only strong matches, inside the plan", () => {
     expect(await send("digest", WEEK, who(), MONDAY)).toBe("sent");
     const [email] = await scheduledEmails(workspace.owner.email);
     expect(email!.subject).toBe("9 new tenders for Acme Grounds");
-    expect(email!.text.includes("There is more on your radar: 4 more new tenders."), "There is more on your radar: 4 more new tenders.").toBe(true);
+    expect(email!.text.includes("This email lists the first few. Your radar shows 4 more new tenders."), "This email lists the first few. Your radar shows 4 more new tenders.").toBe(true);
     expect((email!.html.match(/Open on Bidfolio/g) ?? []).length).toBe(5);
     // Nothing from Monday's digest comes back the week after, shown or only counted.
     expect(await buildDigest(await workspace.ctx(NEXT_MONDAY), NEXT_MONDAY)).toBeNull();
@@ -414,7 +414,7 @@ describe("contracts ending soon", () => {
     await send("digest", WEEK, who(), MONDAY);
     const [email] = await scheduledEmails(workspace.owner.email);
     expect(email!.subject).toBe("5 contracts ending soon in your trade · Acme Grounds");
-    expect(email!.text.includes("There is more on your radar: 2 more contracts ending soon."), "There is more on your radar: 2 more contracts ending soon.").toBe(true);
+    expect(email!.text.includes("This email lists the first few. Your radar shows 2 more contracts ending soon."), "This email lists the first few. Your radar shows 2 more contracts ending soon.").toBe(true);
   });
 });
 

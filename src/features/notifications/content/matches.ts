@@ -98,11 +98,14 @@ export async function selectDigestMatches(ctx: OrgContext, source: RadarSource, 
   const result = await getMatchesForSpec(spec, { limit: STRONG_MATCH.scanLimit, excludeOcids: options.excludeOcids, now: options.now });
   const strong = result.items.filter((item) => isStrongMatch(item, spec));
 
-  const visible = cap === null ? strong : strong.slice(0, cap);
-  const firstSeen = await tenderFirstSeen(visible.map((item) => item.ocid));
+  // As of `now`: a notice stored after that moment is not on the radar yet (only ever the
+  // case when a past or future moment is looked at — a preview, a simulated run).
+  const firstSeen = await tenderFirstSeen(strong.map((item) => item.ocid));
+  const known = strong.filter((item) => (firstSeen.get(item.ocid)?.getTime() ?? 0) <= options.now.getTime());
+  const visible = cap === null ? known : known.slice(0, cap);
   return {
     fresh: visible.filter((item) => seenAfter(firstSeen.get(item.ocid), since, options.overlapMs)),
-    locked: strong.length - visible.length,
+    locked: known.length - visible.length,
   };
 }
 
@@ -119,5 +122,9 @@ export async function selectEndingSoon(ctx: OrgContext, source: RadarSource, sin
   const months = notificationsConfig.digest.endingSoonMonths;
   const result = await getEndingSoonForSpec(spec, months, { limit: cap ?? notificationsConfig.digest.endingSoonScanLimit, now: options.now });
   const firstSeen = await contractFirstSeen(result.items);
-  return result.items.filter((item) => seenAfter(firstSeen.get(endingKey(item)), since, options.overlapMs) || enteredWindow(item.contractEnd, since, months, options.overlapMs));
+  return result.items.filter((item) => {
+    const seen = firstSeen.get(endingKey(item));
+    if (seen && seen.getTime() > options.now.getTime()) return false; // not known yet at `now`
+    return seenAfter(seen, since, options.overlapMs) || enteredWindow(item.contractEnd, since, months, options.overlapMs);
+  });
 }

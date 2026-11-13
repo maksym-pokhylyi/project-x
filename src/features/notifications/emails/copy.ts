@@ -71,15 +71,16 @@ export function radarIntro(input: RadarCopyInput): string {
 }
 
 /**
- * "That is everything new since last Monday." — or, when the lists were cut, what is left
- * on the radar: "There is more on your radar: 7 more new tenders and 4 more contracts
- * ending soon."
+ * "That is everything new since last Monday." — or, when the lists were cut, what the radar
+ * shows beyond them: "This email lists the first few. Your radar shows 7 more new tenders
+ * and 4 more contracts ending soon." (Worded as what the radar SHOWS, so that it cannot be
+ * taken for the capped plan's line about matches the plan does not show.)
  */
 export function radarClosing(input: { since: Since; now: Date; firstLookbackDays: number; moreMatches: number; moreEnding: number; kind: "digest" | "alert" }): string {
   const more: string[] = [];
   if (input.moreMatches > 0) more.push(countOf(input.moreMatches, "more new tender"));
   if (input.moreEnding > 0) more.push(`${countOf(input.moreEnding, "more contract")} ending soon`);
-  if (more.length > 0) return `There is more on your radar: ${more.join(" and ")}.`;
+  if (more.length > 0) return `This email lists the first few. Your radar shows ${more.join(" and ")}.`;
   if (input.since.first && input.kind === "digest") return `That is everything new in the last ${numberWord(input.firstLookbackDays)} days.`;
   return `That is everything new since ${describeSince(input.since.at, input.now)}.`;
 }

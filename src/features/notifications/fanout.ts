@@ -25,6 +25,8 @@ export type FanoutPayload = {
   cursor?: FanoutMember | null;
   /** Members already queued by earlier pages of this fan-out (for spreading the sends). */
   offset?: number;
+  /** A simulated moment (dev tools only, see jobs.ts): handed on to the send jobs. */
+  at?: string;
 };
 
 export type FanoutResult = { status: "done" | "continued" | "paused" | "stale"; enqueued: number };
@@ -37,11 +39,13 @@ function startTime(now: Date, index: number): Date {
   return new Date(now.getTime() + Math.floor(index / perTick) * tickMinutes * 60_000);
 }
 
-async function enqueueSends(kind: ScheduledKind, period: string, members: readonly FanoutMember[], now: Date, offset: number): Promise<number> {
+async function enqueueSends(kind: ScheduledKind, period: string, members: readonly FanoutMember[], now: Date, offset: number, at?: string): Promise<number> {
+  // A simulated run is spread from the real clock: its jobs must be claimable now.
+  const base = at ? new Date() : now;
   let enqueued = 0;
   for (const [index, member] of members.entries()) {
-    const payload = { kind, period, organizationId: member.organizationId, userId: member.userId };
-    const id = await enqueueJob("notifications.send", payload, { dedupeKey: sendDedupeKey(payload), runAfter: startTime(now, offset + index), maxAttempts: SEND_ATTEMPTS });
+    const payload = { kind, period, organizationId: member.organizationId, userId: member.userId, ...(at ? { at } : {}) };
+    const id = await enqueueJob("notifications.send", payload, { dedupeKey: sendDedupeKey(payload), runAfter: startTime(base, offset + index), maxAttempts: SEND_ATTEMPTS });
     if (id) enqueued += 1;
   }
   return enqueued;
@@ -69,7 +73,7 @@ export async function runFanout(payload: FanoutPayload, options: { now?: Date } 
     let enqueued = 0;
     for (const due of await listRenewalsDue(now)) {
       const owners = await listFanoutMembers({ kind: "renewal", organizationIds: [due.organizationId], limit: 50, now });
-      enqueued += await enqueueSends("renewal", due.periodKey, owners.members, now, enqueued);
+      enqueued += await enqueueSends("renewal", due.periodKey, owners.members, now, enqueued, payload.at);
     }
     return { status: "done", enqueued };
   }
@@ -93,12 +97,12 @@ export async function runFanout(payload: FanoutPayload, options: { now?: Date } 
     now,
   });
   const offset = payload.offset ?? 0;
-  const enqueued = await enqueueSends(payload.kind, payload.period, page.members, now, offset);
+  const enqueued = await enqueueSends(payload.kind, payload.period, page.members, now, offset, payload.at);
   if (!page.next) return { status: "done", enqueued };
 
   await enqueueJob(
     "notifications.fanout",
-    { kind: payload.kind, period: payload.period, cursor: page.next, offset: offset + page.members.length },
+    { kind: payload.kind, period: payload.period, cursor: page.next, offset: offset + page.members.length, ...(payload.at ? { at: payload.at } : {}) },
     { dedupeKey: `notifications.fanout:${payload.kind}:${payload.period}:${page.next.organizationId}:${page.next.userId}`, maxAttempts: 3 },
   );
   return { status: "continued", enqueued };

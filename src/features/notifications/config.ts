@@ -24,7 +24,7 @@ export const KIND_LABELS: Record<NotificationKind, { name: string; withArticle: 
   alert: { name: "Daily alerts", withArticle: "daily alerts" },
   reminder: { name: "Deadline reminders", withArticle: "deadline reminders" },
   renewal: { name: "Renewal reminder", withArticle: "the renewal reminder" },
-  product: { name: "Product e-mails", withArticle: "product e-mails" },
+  product: { name: "Product emails", withArticle: "product emails" },
 };
 
 export const NOTIFICATION_TIME_ZONE = "Europe/London";

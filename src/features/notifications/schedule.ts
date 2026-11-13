@@ -20,7 +20,7 @@ export type ScheduleResult = { status: "ok" | "paused" | "no_mail" | "error"; du
 
 export const fanoutDedupeKey = (slot: Pick<DueSlot, "kind" | "period">) => `notifications.fanout:${slot.kind}:${slot.period}`;
 
-export async function scheduleNotifications(now: Date = new Date()): Promise<ScheduleResult> {
+export async function scheduleNotifications(now: Date = new Date(), options: { simulated?: boolean } = {}): Promise<ScheduleResult> {
   if (features.notificationsPaused) return { status: "paused", due: [], enqueued: [] };
   // A deployment that cannot deliver mail has nothing to schedule.
   if (features.mailDelivery === "none") return { status: "no_mail", due: [], enqueued: [] };
@@ -28,7 +28,8 @@ export async function scheduleNotifications(now: Date = new Date()): Promise<Sch
   const enqueued: string[] = [];
   try {
     for (const slot of due) {
-      const id = await enqueueJob("notifications.fanout", { kind: slot.kind, period: slot.period }, { dedupeKey: fanoutDedupeKey(slot), maxAttempts: 3 });
+      const payload = { kind: slot.kind, period: slot.period, ...(options.simulated ? { at: now.toISOString() } : {}) };
+      const id = await enqueueJob("notifications.fanout", payload, { dedupeKey: fanoutDedupeKey(slot), maxAttempts: 3 });
       if (id) enqueued.push(fanoutDedupeKey(slot));
     }
     return { status: "ok", due, enqueued };
@@ -36,4 +37,17 @@ export async function scheduleNotifications(now: Date = new Date()): Promise<Sch
     await reportError(error, { route: "notifications.schedule" });
     return { status: "error", due, enqueued };
   }
+}
+
+/**
+ * The cron route's call. Where dev tools are on (local development, e2e — never a production
+ * deployment) `?now=<ISO instant>` runs the tick as if it were that moment: the fan-outs and
+ * sends it starts act at that time too. This is how "Monday 07:30" is tried out on a
+ * Thursday; see README → Scheduled e-mails. Without dev tools the parameter is ignored.
+ */
+export function scheduleFromCron(request: Request): Promise<ScheduleResult> {
+  const value = features.devTools ? new URL(request.url).searchParams.get("now") : null;
+  const simulated = value ? new Date(value) : null;
+  if (simulated && !Number.isNaN(simulated.getTime())) return scheduleNotifications(simulated, { simulated: true });
+  return scheduleNotifications();
 }
