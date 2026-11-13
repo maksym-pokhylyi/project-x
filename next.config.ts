@@ -48,6 +48,8 @@ const nextConfig: NextConfig = {
     return [
       // The free deliverable was renamed from "bid brief" to "cited bid check".
       { source: "/free-bid-brief", destination: "/free-bid-check", permanent: true },
+      // The Radar lives at /app; breadcrumbs and old links to the section root must not 404.
+      { source: "/app/radar", destination: "/app", permanent: false },
     ];
   },
 };

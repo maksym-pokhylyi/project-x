@@ -26,8 +26,15 @@
     {
       "idx": 3,
       "version": "7",
-      "when": 1794579779215,
-      "tag": "0003_outreach",
+      "when": 1794580074843,
+      "tag": "0003_bids",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794586287418,
+      "tag": "0004_outreach",
       "breakpoints": true
     }
   ]

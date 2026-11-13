@@ -4,6 +4,9 @@ import { and, eq, gte, sql } from "drizzle-orm";
 import {
   AI_BUDGET_POLICY,
   AI_DEFAULT_MAX_OUTPUT_TOKENS,
+  AI_DOCUMENT_MAX_INPUT_TOKENS,
+  AI_DOCUMENT_MAX_OUTPUT_TOKENS,
+  AI_FILE_TOKENS_PER_PAGE,
   AI_MAX_INPUT_TOKENS,
   AI_MAX_OUTPUT_TOKENS,
   AI_MODELS,
@@ -55,6 +58,9 @@ import { enforceRateLimit } from "@/lib/rate-limit";
  *
  * So N parallel calls can never spend more than the limits, failures are not free, and
  * free workspaces cannot drain the pool paying customers use.
+ *
+ * Confidentiality: every request asks the gateway for zero data retention and forbids
+ * training on the prompt (AI_PRIVACY_OPTIONS) — set here so no call site can forget it.
  */
 
 export type AiBudgetScope = "organization" | "global";
@@ -285,6 +291,15 @@ export type GenerateAiTextOptions = {
   /** Default 1,024; clamped to AI_MAX_OUTPUT_TOKENS. Part of the reserved worst-case cost. */
   maxOutputTokens?: number;
   abortSignal?: AbortSignal;
+  /**
+   * "document": the call reads a whole document set or returns a long structured list, so
+   * the per-call ceilings are AI_DOCUMENT_MAX_INPUT_TOKENS / AI_DOCUMENT_MAX_OUTPUT_TOKENS
+   * instead of the standard ones. Everything else is unchanged: the worst case of what the
+   * call may cost is reserved before anything is sent.
+   */
+  scale?: "standard" | "document";
+  /** Pages of the PDF attached to the prompt, when there is one (see estimatePromptTokens). */
+  filePages?: number;
 };
 
 export type GenerateAiTextResult = {
@@ -303,10 +318,55 @@ function resolveModel(model: GenerateAiTextOptions["model"]): { instance: Langua
   return { instance: model, id: `${model.provider}/${model.modelId}` };
 }
 
-/** Pessimistic size of everything sent to the model, in tokens. */
-export function estimatePromptTokens(options: Pick<GenerateAiTextOptions, "instructions" | "prompt">): number {
-  const prompt = typeof options.prompt === "string" ? options.prompt : JSON.stringify(options.prompt);
-  return estimateInputTokens(Buffer.byteLength(prompt, "utf8") + Buffer.byteLength(options.instructions ?? "", "utf8"));
+/**
+ * Confidentiality is a product promise: EVERY call asks the AI Gateway for zero data
+ * retention and forbids training on the prompt. Set here, in the one wrapper all model
+ * calls go through, so no call site can forget it. A provider that cannot honour it makes
+ * the gateway refuse the request (403) instead of sending the data.
+ */
+export const AI_PRIVACY_OPTIONS = { gateway: { zeroDataRetention: true, disallowPromptTraining: true } } as const;
+
+/** Cost in USD as reported by the gateway for this response, when it reports one. */
+export function gatewayReportedCostUsd(providerMetadata: unknown): number | null {
+  const raw = (providerMetadata as { gateway?: { cost?: unknown } } | undefined)?.gateway?.cost;
+  const value = typeof raw === "number" ? raw : typeof raw === "string" && raw.trim() !== "" ? Number(raw) : Number.NaN;
+  return Number.isFinite(value) && value >= 0 ? Math.round(value * 1_000_000) / 1_000_000 : null;
+}
+
+/** Size of one message tree: UTF-8 bytes of its text, and bytes of attached files counted apart. */
+function measurePrompt(value: unknown, totals: { textBytes: number; fileBytes: number }): void {
+  if (typeof value === "string") totals.textBytes += Buffer.byteLength(value, "utf8");
+  else if (value instanceof Uint8Array) totals.fileBytes += value.byteLength;
+  else if (value instanceof ArrayBuffer) totals.fileBytes += value.byteLength;
+  else if (Array.isArray(value)) for (const item of value) measurePrompt(item, totals);
+  else if (value && typeof value === "object") {
+    const part = value as Record<string, unknown>;
+    // A file or image part whose content is a base64 string: three bytes per four characters.
+    const inline = (part.type === "file" && typeof part.data === "string" ? part.data : part.type === "image" && typeof part.image === "string" ? part.image : null) as string | null;
+    for (const [key, item] of Object.entries(part)) {
+      if (inline !== null && item === inline) totals.fileBytes += Math.ceil(inline.length * 0.75);
+      else measurePrompt(item, totals);
+      totals.textBytes += key.length + 6;
+    }
+  }
+}
+
+/**
+ * Pessimistic size of everything sent to the model, in tokens.
+ *
+ * Text is counted at one token per two bytes. Attached files (a scanned PDF sent for
+ * transcription) are binary: their JSON or base64 length says nothing about tokens.
+ * When the caller states the page count (`filePages`), each page is reserved at
+ * AI_FILE_TOKENS_PER_PAGE — the top of what providers charge for a page's text plus its
+ * image; without it a file is counted like text, byte for byte, so it can never be
+ * under-reserved by accident.
+ */
+export function estimatePromptTokens(options: Pick<GenerateAiTextOptions, "instructions" | "prompt" | "filePages">): number {
+  const totals = { textBytes: Buffer.byteLength(options.instructions ?? "", "utf8"), fileBytes: 0 };
+  measurePrompt(options.prompt, totals);
+  const fileTokens =
+    totals.fileBytes === 0 ? 0 : options.filePages !== undefined ? Math.max(1, Math.ceil(options.filePages)) * AI_FILE_TOKENS_PER_PAGE : Math.ceil(totals.fileBytes / 2);
+  return estimateInputTokens(totals.textBytes) + fileTokens;
 }
 
 export async function generateAiText(options: GenerateAiTextOptions): Promise<GenerateAiTextResult> {
@@ -314,9 +374,12 @@ export async function generateAiText(options: GenerateAiTextOptions): Promise<Ge
   const userId = options.userId ?? null;
   const { instance, id: modelId } = resolveModel(options.model);
 
+  const document = options.scale === "document";
+  const inputCeiling = document ? AI_DOCUMENT_MAX_INPUT_TOKENS : AI_MAX_INPUT_TOKENS;
+  const outputCeiling = document ? AI_DOCUMENT_MAX_OUTPUT_TOKENS : AI_MAX_OUTPUT_TOKENS;
   const estimatedInputTokens = estimatePromptTokens(options);
-  if (estimatedInputTokens > AI_MAX_INPUT_TOKENS) throw new AiInputTooLargeError(estimatedInputTokens, AI_MAX_INPUT_TOKENS);
-  const maxOutputTokens = Math.min(Math.max(1, Math.floor(options.maxOutputTokens ?? AI_DEFAULT_MAX_OUTPUT_TOKENS)), AI_MAX_OUTPUT_TOKENS);
+  if (estimatedInputTokens > inputCeiling) throw new AiInputTooLargeError(estimatedInputTokens, inputCeiling);
+  const maxOutputTokens = Math.min(Math.max(1, Math.floor(options.maxOutputTokens ?? AI_DEFAULT_MAX_OUTPUT_TOKENS)), outputCeiling);
 
   await enforceRateLimit(`ai:${organizationId}`, AI_RATE_LIMIT);
 
@@ -344,11 +407,14 @@ export async function generateAiText(options: GenerateAiTextOptions): Promise<Ge
       prompt: options.prompt,
       maxOutputTokens,
       abortSignal: options.abortSignal,
+      providerOptions: AI_PRIVACY_OPTIONS,
     });
     const latencyMs = Date.now() - started;
     const inputTokens = result.usage.inputTokens ?? 0;
     const outputTokens = result.usage.outputTokens ?? 0;
-    const costUsd = estimateCostUsd(modelId, inputTokens, outputTokens);
+    // The "actual" of the settlement: the gateway's own figure when it reports one; the static
+    // price table is only an estimate.
+    const costUsd = gatewayReportedCostUsd(result.providerMetadata) ?? estimateCostUsd(modelId, inputTokens, outputTokens);
     await settleAiReservation(reservation.id, { status: "ok", inputTokens, outputTokens, costUsd, latencyMs });
     await track("ai.request_completed", { organizationId, userId }, { feature, model: modelId });
     return { text: result.text, model: modelId, usage: { inputTokens, outputTokens, costUsd }, latencyMs };

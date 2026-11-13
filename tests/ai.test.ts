@@ -4,7 +4,9 @@ import { estimateCostUsd, FALLBACK_PRICE, MODEL_PRICES } from "@/config/ai";
 import { PLANS } from "@/config/plans";
 import { db } from "@/db";
 import { aiUsage, events, organizations, subscriptions } from "@/db/schema";
-import { AiBudgetExceededError, assertAiBudget, generateAiText, getAiSpendUsd, startOfUtcDay, startOfUtcMonth } from "@/lib/ai";
+import { env } from "@/env";
+import { AiBudgetExceededError, aiBudgetLimits, assertAiBudget, generateAiText, getAiSpendUsd, startOfUtcDay, startOfUtcMonth } from "@/lib/ai";
+import { getOrgEntitlements } from "@/lib/billing/subscription";
 import { AppError } from "@/lib/errors";
 import { resetDatabase } from "./helpers/db";
 
@@ -41,8 +43,10 @@ describe("AI wrapper", () => {
   });
 
   it("estimates cost from the price table and is pessimistic for unknown models", () => {
-    expect(MODEL_PRICES["anthropic/claude-haiku-5.5"]).toEqual({ inputPerMTok: 0.1, outputPerMTok: 0.5 });
-    expect(estimateCostUsd("anthropic/claude-haiku-5.5", 1_000_000, 1_000_000)).toBeCloseTo(0.6, 6);
+    expect(MODEL_PRICES["anthropic/claude-haiku-5.5"]).toMatchObject({ inputPerMTok: 0.1, outputPerMTok: 0.5 });
+    expect(estimateCostUsd("anthropic/claude-haiku-5.5", 100_000, 1_000_000)).toBeCloseTo(0.51, 6);
+    // Haiku 5.5 charges five times the rate for the whole request once the prompt passes 100K tokens.
+    expect(estimateCostUsd("anthropic/claude-haiku-5.5", 1_000_000, 1_000_000)).toBeCloseTo(3, 6);
     expect(estimateCostUsd("anthropic/claude-sonnet-5.5", 2000, 1000)).toBeCloseTo(0.014, 6);
     expect(estimateCostUsd("vendor/unknown", 1_000_000, 0)).toBe(FALLBACK_PRICE.inputPerMTok);
     expect(estimateCostUsd("anthropic/claude-haiku-5.5", 0, 0)).toBe(0);
@@ -86,17 +90,18 @@ describe("AI wrapper", () => {
   });
 
   it("budgets each workspace separately", async () => {
-    await recordSpend(ORG, PLANS.free.limits.aiMonthlyBudgetUsd);
+    // ORG has used its whole day; the other workspace has not spent anything.
+    await recordSpend(ORG, aiBudgetLimits(await getOrgEntitlements(ORG)).organizationDailyUsd);
     const { model } = mockModel();
     await expect(generateAiText({ organizationId: OTHER, feature: "summary", model, prompt: "hi" })).resolves.toMatchObject({ text: "Hello from the mock" });
   });
 
   it("derives the workspace budget from its plan", async () => {
     await createOrg("org_ai_pro", "pro");
-    // More than a free workspace could ever spend in a day (0.10), less than Pro's daily ceiling here (0.50).
-    await recordSpend("org_ai_pro", 0.3);
+    // Well inside Pro's day in this environment (the plan's share, capped by its share of the global day).
+    await recordSpend("org_ai_pro", aiBudgetLimits(await getOrgEntitlements("org_ai_pro")).organizationDailyUsd * 0.6);
     await expect(assertAiBudget("org_ai_pro")).resolves.toBeUndefined();
-    // Stay under the global daily budget (1 USD in tests) by dating the big spend earlier this month.
+    // Stay under the global daily budget by dating the big spend earlier this month.
     const earlierThisMonth = new Date(Math.max(startOfUtcMonth(new Date()).getTime(), startOfUtcDay(new Date()).getTime() - 1));
     if (earlierThisMonth.getTime() < startOfUtcDay(new Date()).getTime()) {
       await recordSpend("org_ai_pro", PLANS.pro.limits.aiMonthlyBudgetUsd, earlierThisMonth);
@@ -112,9 +117,9 @@ describe("AI wrapper", () => {
   });
 
   it("fails closed when the global daily budget (AI_DAILY_BUDGET_USD) is used up", async () => {
-    // 1 USD global budget in tests; spend it through ANOTHER workspace.
+    // Spend the whole global day (AI_DAILY_BUDGET_USD) through ANOTHER workspace.
     await createOrg("org_ai_biz", "business");
-    await recordSpend("org_ai_biz", 1);
+    await recordSpend("org_ai_biz", env.AI_DAILY_BUDGET_USD);
     const { model, doGenerate } = mockModel();
     const error = await generateAiText({ organizationId: ORG, feature: "summary", model, prompt: "hi" }).catch((caught: unknown) => caught);
     expect(error).toBeInstanceOf(AiBudgetExceededError);
