@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { E2E_DEV_TOOLS_SECRET } from "./e2e/bids.env";
 
 /**
  * End-to-end test of the bid desk against a production build, fully offline:
@@ -14,8 +15,7 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = Number(process.env.E2E_PORT ?? 3115);
 const BASE_URL = `http://localhost:${PORT}`;
 export const E2E_DATABASE_URL = process.env.E2E_DATABASE_URL ?? "postgres://app:app@localhost:5432/bidfolio_b2_e2e";
-/** On a production build the dev outbox needs this key (`/dev/outbox?key=…`). */
-export const E2E_DEV_TOOLS_SECRET = "e2e-dev-tools-secret-0123456789";
+
 
 process.env.PLAYWRIGHT_BROWSERS_PATH ??= "/opt/pw-browsers";
 process.env.E2E_DATABASE_URL = E2E_DATABASE_URL;

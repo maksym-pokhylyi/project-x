@@ -20,7 +20,11 @@ export function BidTabs({ tabs }: { tabs: TabItem[] }) {
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className={cn("-mb-px inline-flex min-h-12 items-center gap-2 border-b-2 text-(--bid-ink) no-underline", active ? "border-(--bid-ink)" : "border-transparent hover:border-(--bid-line-strong)")}
+                className={cn(
+                  // The current tab is obvious at a glance: ink, semibold, 2 px ink underline; the others are muted.
+                  "-mb-px inline-flex min-h-11 cursor-pointer items-center gap-2 border-b-2 no-underline transition-colors",
+                  active ? "border-(--bid-ink) font-semibold text-(--bid-ink)" : "border-transparent text-(--bid-muted) hover:text-(--bid-ink)",
+                )}
               >
                 {tab.label}
                 {tab.count !== undefined ? <span className="bid-mono text-xs font-normal text-(--bid-muted) tabular-nums">{tab.count}</span> : null}

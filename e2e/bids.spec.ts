@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type Page } from "@playwright/test";
 import postgres from "postgres";
-import { E2E_DEV_TOOLS_SECRET } from "../playwright.bids.config";
+import { E2E_DEV_TOOLS_SECRET } from "./bids.env";
 import { expectAlignedControls } from "./control-heights";
 
 /**
