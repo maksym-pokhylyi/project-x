@@ -6,9 +6,12 @@ import { cn } from "@/lib/utils"
 
 /*
  * Buttons, as drawn in the artboards: 6 px radius, semibold label.
- *   default          brand green with a white label — one per view
- *   outline          white with a line-strong edge — every secondary action
- *   inverse          white with a green label, for brand-green panels
+ *   default              brand green with a white label — one per view
+ *   outline              white with a line-strong edge — every secondary action
+ *   inverse              white with a green label, for brand-green panels
+ *   destructive          filled red: the confirmation of a step that cannot be undone,
+ *                        inside the dialog that says what is lost
+ *   destructive-outline  white with a red label: the way into such a step from a page
  * States: hover, pressed (active), keyboard focus (global ring), disabled, loading.
  *
  * HEIGHT follows the control scale shared with fields (see control-group.tsx): 44 / 48 / 52 px.
@@ -40,6 +43,7 @@ const buttonVariants = cva(
       variant: {
         default: "bg-brand text-white hover:bg-brand-hover active:bg-brand-hover active:shadow-[inset_0_1px_2px_rgb(0_0_0/0.25)]",
         destructive: "bg-danger text-white hover:bg-danger-hover active:bg-danger-hover active:shadow-[inset_0_1px_2px_rgb(0_0_0/0.25)]",
+        "destructive-outline": "border-line-strong bg-surface text-danger hover:border-danger hover:bg-danger-tint active:bg-danger-tint",
         outline: "border-line-strong bg-surface text-ink hover:border-ink hover:bg-paper active:bg-paper-deep",
         secondary: "bg-paper-deep text-ink hover:bg-line active:bg-line",
         ghost: "text-ink hover:bg-paper-deep active:bg-line",

@@ -3,12 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { FormError, FormField } from "@/components/forms/form-field";
+import { Form } from "@/components/forms/form";
+import { Field, FormError, FormField, FormRow } from "@/components/forms/form-field";
 import { NativeSelect } from "@/components/forms/native-select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { fieldErrorsFrom, inviteSchema, type FieldErrors } from "@/lib/validation";
 import {
   cancelInvitationAction,
@@ -56,29 +56,31 @@ export function InviteForm({ seatsAvailable, canInvite }: { seatsAvailable: bool
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-3" data-testid="invite-form">
+    <Form onSubmit={onSubmit} noValidate className="space-y-3" data-testid="invite-form">
       <FormError message={formError} />
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        <div className="flex-1">
+      <FormRow
+        action={
+          <Button type="submit" disabled={!seatsAvailable} loading={pending}>
+            {pending ? "Sending…" : "Send invitation"}
+          </Button>
+        }
+      >
+        <div className="min-w-0 flex-1">
           <FormField label="Email address" name="email" type="email" placeholder="colleague@company.com" required error={errors.email?.[0]} />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="invite-role">Role</Label>
-          <NativeSelect id="invite-role" name="role" defaultValue="member" className="w-full sm:w-32">
+        <Field label="Role" htmlFor="invite-role">
+          <NativeSelect id="invite-role" name="role" defaultValue="member" className="w-full sm:w-36">
             <option value="member">Member</option>
             <option value="admin">Admin</option>
           </NativeSelect>
-        </div>
-        <Button type="submit" disabled={!seatsAvailable} loading={pending} className="sm:mt-[1.625rem]">
-          {pending ? "Sending…" : "Send invitation"}
-        </Button>
-      </div>
+        </Field>
+      </FormRow>
       {!seatsAvailable ? (
         <p role="status" className="text-sm text-ink-2">
           All seats of your plan are in use. Upgrade the plan or remove a member to invite someone new.
         </p>
       ) : null}
-    </form>
+    </Form>
   );
 }
 
@@ -126,7 +128,7 @@ export function MembersList({
           return (
             <li key={member.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between" data-testid="member-row">
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-ink">
+                <p className="truncate text-15 font-semibold text-ink">
                   {member.name} {isSelf ? <span className="font-normal text-ink-2">(you)</span> : null}
                 </p>
                 <p className="truncate text-sm text-ink-2">{member.email}</p>
@@ -174,7 +176,7 @@ export function MembersList({
             <Button variant="outline" onClick={() => setToRemove(null)}>
               Cancel
             </Button>
-            <Button variant="destructive" disabled={busyId !== null} onClick={() => void confirmRemove()}>
+            <Button variant="destructive" loading={busyId !== null} onClick={() => void confirmRemove()}>
               Remove member
             </Button>
           </DialogFooter>
@@ -216,7 +218,7 @@ export function InvitationsList({ invitations }: { invitations: InvitationItem[]
       {invitations.map((invitation) => (
         <li key={invitation.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-ink">{invitation.email}</p>
+            <p className="truncate text-15 font-semibold text-ink">{invitation.email}</p>
             <p className="text-sm text-ink-2">
               {ROLE_LABEL[invitation.role as keyof typeof ROLE_LABEL] ?? invitation.role} · expires{" "}
               {new Date(invitation.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}

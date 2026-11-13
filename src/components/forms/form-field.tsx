@@ -58,6 +58,51 @@ export function FormField({
   );
 }
 
+/**
+ * Label above any other control (a select, a textarea, a custom input), with the same 6 px
+ * and the same hint and error lines as FormField. The control is the child; give it the
+ * `id` you pass as `htmlFor`.
+ */
+export function Field({
+  label,
+  htmlFor,
+  hint,
+  error,
+  className,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  hint?: ReactNode;
+  error?: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={cn("space-y-1.5", className)}>
+      <Label htmlFor={htmlFor}>{label}</Label>
+      {children}
+      {hint && !error ? <FieldHint id={`${htmlFor}-hint`}>{hint}</FieldHint> : null}
+      {error ? <FieldError id={`${htmlFor}-error`}>{error}</FieldError> : null}
+    </div>
+  );
+}
+
+/**
+ * Fields side by side with their button, as one line of a form: the button lines up with
+ * the fields (it starts under the label line: 21 px of label and 6 px of gap), so a hint or
+ * an error under a field does not move it. One under the other on phones, the button last
+ * and full width.
+ */
+export function FormRow({ action, className, children }: { action: ReactNode; className?: string; children: ReactNode }) {
+  return (
+    <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-3", className)}>
+      {children}
+      <div className="flex shrink-0 max-sm:[&>*]:w-full sm:pt-[1.6875rem]">{action}</div>
+    </div>
+  );
+}
+
 /** Form-level error banner. */
 export function FormError({ message }: { message?: string | null }) {
   if (!message) return null;

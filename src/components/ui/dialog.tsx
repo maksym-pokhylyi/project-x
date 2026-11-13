@@ -8,8 +8,12 @@ import { Button } from "@/components/ui/button"
 
 /*
  * Modal dialog: 12 px radius, overlay shadow, ink scrim. Focus is trapped and returned by
- * Radix; Escape and the close button dismiss it. On phones it sits at the bottom of the
- * screen, within thumb reach.
+ * Radix; Escape and the close button (44 px) dismiss it. On phones it sits at the bottom of
+ * the screen, within thumb reach, and its footer buttons take the full width.
+ *
+ * A dialog that holds a form wraps fields AND footer in <Form>, so the footer buttons take
+ * the height of the fields (48 px; 52 px on phones). A dialog with only a footer keeps the
+ * 44 px default.
  */
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
@@ -63,7 +67,7 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute top-3 right-3 grid size-10 place-items-center rounded-control text-ink-2 transition-colors hover:bg-paper-deep hover:text-ink disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4"
+            className="absolute top-2.5 right-2.5 grid size-11 cursor-pointer place-items-center rounded-control text-ink-2 transition-colors hover:bg-paper-deep hover:text-ink disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4"
           >
             <XIcon aria-hidden />
             <span className="sr-only">Close</span>
@@ -75,7 +79,7 @@ function DialogContent({
 }
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="dialog-header" className={cn("flex flex-col gap-2 pr-10 text-left", className)} {...props} />
+  return <div data-slot="dialog-header" className={cn("flex flex-col gap-2 pr-9 text-left", className)} {...props} />
 }
 
 function DialogFooter({
@@ -87,7 +91,15 @@ function DialogFooter({
   showCloseButton?: boolean
 }) {
   return (
-    <div data-slot="dialog-footer" className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)} {...props}>
+    <div
+      data-slot="dialog-footer"
+      className={cn(
+        // Full-width buttons on phones are 48 px, unless a form around them already says 52.
+        "flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end max-sm:[&:not([data-slot=form]_*)]:controls-md",
+        className
+      )}
+      {...props}
+    >
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>

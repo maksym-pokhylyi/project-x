@@ -4,6 +4,7 @@ import { Check, ChevronDown, ChevronsUpDown, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { Form } from "@/components/forms/form";
 import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -131,11 +132,11 @@ export function WorkspaceSwitcher({
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
-          <form onSubmit={onCreate} noValidate className="space-y-4">
-            <DialogHeader>
-              <DialogTitle>Create workspace</DialogTitle>
-              <DialogDescription>Each workspace has its own members, plan and data.</DialogDescription>
-            </DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Create workspace</DialogTitle>
+            <DialogDescription>Each workspace has its own members, plan and data.</DialogDescription>
+          </DialogHeader>
+          <Form onSubmit={onCreate} noValidate>
             <FormField label="Workspace name" name="name" required autoFocus error={error} />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
@@ -145,7 +146,7 @@ export function WorkspaceSwitcher({
                 {pending ? "Creating…" : "Create workspace"}
               </Button>
             </DialogFooter>
-          </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </>

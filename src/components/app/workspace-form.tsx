@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { toast } from "sonner";
+import { Form } from "@/components/forms/form";
 import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -88,7 +89,7 @@ export function WorkspaceForm({ name, logo, canEdit }: { name: string; logo: str
         <p className="text-13 text-ink-2">PNG, JPEG or WebP, up to 1 MB.</p>
       </div>
 
-      <form onSubmit={onSubmit} noValidate className="space-y-4">
+      <Form onSubmit={onSubmit} noValidate>
         <FormField
           label="Workspace name"
           name="name"
@@ -103,7 +104,7 @@ export function WorkspaceForm({ name, logo, canEdit }: { name: string; logo: str
             {pending ? "Saving…" : "Save changes"}
           </Button>
         ) : null}
-      </form>
+      </Form>
     </div>
   );
 }

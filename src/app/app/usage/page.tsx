@@ -12,7 +12,7 @@ export default async function UsagePage() {
   const ctx = await requireOrgForPage();
   const usage = await getUsageSummary(ctx);
   return (
-    <SettingsFrame showBilling={ctx.role === "owner"}>
+    <SettingsFrame>
       <PageHeader
         level={2}
         title="Usage"

@@ -1,12 +1,49 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import type { PricingViewer } from "@/app/api/pricing/viewer/route";
 import { PricingTable } from "@/components/billing/pricing-table";
+import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { BID_PASS_DISPLAY } from "@/config/plan-display";
+import { isPlanKey, type BillingInterval, type Plan, type PlanKey } from "@/config/plans";
+import { authClient } from "@/lib/auth-client";
+import { BILLING_PATH, billingHandoff, signUpThenBilling } from "@/lib/billing/handoff";
 
-/** Where a signed-out visitor starts a Bid Pass: an account first, then the new bid. */
-export const BID_PASS_HREF = "/sign-up?next=/app/bids/new";
+/**
+ * Who is looking at the prices. Signed out (the default, and what the static page renders):
+ * null. Signed in: the plan of their active workspace and whether they may change it, asked
+ * from /api/pricing/viewer once the session is known.
+ */
+function usePricingViewer(): PricingViewer | null {
+  const { data } = authClient.useSession();
+  const signedIn = Boolean(data?.user);
+  const [viewer, setViewer] = useState<PricingViewer | null>(null);
+
+  useEffect(() => {
+    if (!signedIn) return;
+    let cancelled = false;
+    fetch("/api/pricing/viewer", { cache: "no-store" })
+      .then((response) => (response.ok ? (response.json() as Promise<PricingViewer>) : null))
+      .then((value) => {
+        if (!cancelled) setViewer(value);
+      })
+      .catch(() => {
+        // Not being able to tell is not an error for the visitor: the signed-out buttons stay.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [signedIn]);
+
+  return signedIn ? viewer : null;
+}
+
+const ownerOnly = (
+  <p className="flex min-h-(--control-h) items-center text-13 leading-[1.5]" data-testid="plan-owner-only">
+    A workspace owner can change the plan.
+  </p>
+);
 
 /**
  * Bid Pass: a first-class option beside the plans, for firms that bid a few times a year.
@@ -15,17 +52,15 @@ export const BID_PASS_HREF = "/sign-up?next=/app/bids/new";
  * the eyebrow and the button takes the full width (the two groups dissolve into one grid).
  */
 export function BidPassBand({
-  href = BID_PASS_HREF,
   headingLevel = 3,
   short = false,
   action,
 }: {
-  href?: string;
   headingLevel?: 2 | 3;
   /** Use the shorter description on phones (the landing page). */
   short?: boolean;
-  /** Replaces the default link button. */
-  action?: ReactNode;
+  /** The button: where it leads depends on who is looking (see MarketingPricing). */
+  action: ReactNode;
 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
@@ -58,22 +93,23 @@ export function BidPassBand({
           </span>
           <span className="text-13 leading-[1.5] sm:text-sm sm:leading-[1.5]">{BID_PASS_DISPLAY.period}</span>
         </p>
-        <div className="col-span-2 max-sm:[&>*]:w-full">
-          {action ?? (
-            <ButtonLink href={href} className="px-[1.1875rem]">
-              {BID_PASS_DISPLAY.cta}
-            </ButtonLink>
-          )}
-        </div>
+        <div className="col-span-2 max-sm:[&>*]:w-full">{action}</div>
       </div>
     </section>
   );
 }
 
 /**
- * Plan cards for signed-out visitors. Free starts with finding your company; every paid plan
- * starts with creating an account, with the plan and billing period carried along. The Bid
- * Pass band follows the cards. The landing page shows monthly prices only
+ * The plan cards of the public site: the one place where plans are compared and chosen.
+ * The buttons depend on who is looking:
+ *
+ *   signed out     Free → /find; a paid plan or the Bid Pass → sign-up, then the hand-off
+ *                  to Billing (src/lib/billing/handoff.ts)
+ *   signed in      the workspace's plan is marked "Current plan" (button disabled); the
+ *                  others link straight to the hand-off, where the change is confirmed
+ *   not an owner   no buttons: a sentence says who can change the plan
+ *
+ * The Bid Pass band follows the cards. The landing page shows monthly prices only
  * (`toggle={false}`); /pricing adds the Monthly / Annual toggle.
  */
 export function MarketingPricing({
@@ -88,17 +124,58 @@ export function MarketingPricing({
   /** The landing page words the Bid Pass more briefly on phones. */
   shortBidPass?: boolean;
 }) {
+  const viewer = usePricingViewer();
+  const currentPlan: PlanKey | undefined = viewer && isPlanKey(viewer.planKey) ? viewer.planKey : undefined;
+
+  function planAction(plan: Plan, interval: BillingInterval, featured: boolean) {
+    const variant = featured ? "inverse" : "outline";
+    if (!viewer) {
+      return (
+        <ButtonLink href={plan.key === "free" ? "/find" : signUpThenBilling({ plan: plan.key, interval })} className="w-full" variant={variant}>
+          {plan.cta}
+        </ButtonLink>
+      );
+    }
+    const isCurrent = plan.key === currentPlan && (plan.key === "free" || !viewer.interval || viewer.interval === interval);
+    if (isCurrent) {
+      return (
+        <Button className="w-full" variant={variant} disabled>
+          Current plan
+        </Button>
+      );
+    }
+    if (!viewer.canManageBilling) return ownerOnly;
+    if (plan.key === "free") {
+      return (
+        <ButtonLink href={BILLING_PATH} className="w-full" variant={variant}>
+          Cancel from Billing
+        </ButtonLink>
+      );
+    }
+    return (
+      <ButtonLink href={billingHandoff({ plan: plan.key, interval })} className="w-full" variant={variant}>
+        {viewer.hasSubscription ? (plan.key === currentPlan ? `Switch to ${interval === "year" ? "annual" : "monthly"}` : `Change to ${plan.name}`) : plan.cta}
+      </ButtonLink>
+    );
+  }
+
+  const bidPassAction =
+    viewer && !viewer.canManageBilling ? (
+      ownerOnly
+    ) : (
+      <ButtonLink href={viewer ? billingHandoff({ buy: "bid_pass" }) : signUpThenBilling({ buy: "bid_pass" })} className="px-[1.1875rem]">
+        {BID_PASS_DISPLAY.cta}
+      </ButtonLink>
+    );
+
   return (
     <PricingTable
       toggle={toggle}
       headingLevel={headingLevel}
       smallPrint={smallPrint}
-      after={<BidPassBand headingLevel={headingLevel} short={shortBidPass} />}
-      renderAction={(plan, interval, { featured }) => (
-        <ButtonLink href={plan.key === "free" ? "/find" : `/sign-up?plan=${plan.key}&interval=${interval}`} className="w-full" variant={featured ? "inverse" : "outline"}>
-          {plan.cta}
-        </ButtonLink>
-      )}
+      currentPlan={currentPlan}
+      after={<BidPassBand headingLevel={headingLevel} short={shortBidPass} action={bidPassAction} />}
+      renderAction={(plan, interval, { featured }) => planAction(plan, interval, featured)}
     />
   );
 }

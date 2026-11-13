@@ -5,10 +5,11 @@ import { AuthCard, AuthCardLine } from "@/components/auth/auth-card";
 import { SignUpForm } from "@/components/auth/sign-up-form";
 import { TickIcon } from "@/components/ui/icons";
 import { billingCopy } from "@/config/billing-copy";
-import { planDisplay } from "@/config/plan-display";
+import { BID_PASS_DISPLAY, planDisplay } from "@/config/plan-display";
 import { isBillingInterval, isPlanKey } from "@/config/plans";
 import { site } from "@/config/site";
 import { features } from "@/env";
+import { billingHandoff, parseBillingHandoff } from "@/lib/billing/handoff";
 import { safeRedirect } from "@/lib/redirects";
 import { getUser } from "@/server/session";
 
@@ -17,7 +18,8 @@ export const metadata: Metadata = { title: "Create your account", robots: { inde
 /**
  * Create an account, as in the SignUp-1440 / SignUp-390 artboards: the form in a white card
  * and, beside it (under it on phones), what the account gives. Coming from a paid plan on
- * /pricing, the column shows that plan instead of the free one.
+ * /pricing (the redirect is then the hand-off to Billing), the column shows that plan
+ * instead of the free one, and the account continues to the confirm step.
  */
 export default async function SignUpPage({
   searchParams,
@@ -25,25 +27,30 @@ export default async function SignUpPage({
   searchParams: Promise<{ redirect?: string; next?: string; email?: string; plan?: string; interval?: string }>;
 }) {
   const params = await searchParams;
-  // Coming from a paid plan on /pricing: continue to billing with that plan preselected.
-  const paidPlan = isPlanKey(params.plan) && params.plan !== "free" ? params.plan : null;
-  const interval = isBillingInterval(params.interval) ? params.interval : "month";
-  const planTarget = paidPlan ? `/app/settings/billing?plan=${paidPlan}&interval=${interval}` : undefined;
+  // Older links name the plan directly (?plan=pro&interval=month): the same hand-off.
+  const namedPlan = isPlanKey(params.plan) && params.plan !== "free" ? params.plan : null;
+  const planTarget = namedPlan ? billingHandoff({ plan: namedPlan, interval: isBillingInterval(params.interval) ? params.interval : "month" }) : undefined;
   // `next` is accepted as an alias of `redirect` (marketing links use it).
   const redirectTo = safeRedirect(params.redirect ?? params.next ?? planTarget);
   if (await getUser()) redirect(redirectTo);
 
+  // What the visitor chose on /pricing travels in the redirect: the hand-off to Billing.
+  const handoff = parseBillingHandoff(redirectTo);
+  const paidPlan = handoff && "plan" in handoff ? handoff.plan : null;
+  const interval = handoff && "plan" in handoff ? handoff.interval : "month";
   const plan = planDisplay(paidPlan ?? "free");
   const price = interval === "year" ? plan.annual : plan.monthly;
   const description = paidPlan
-    ? `Create your account first. You choose ${plan.name} and pay on the next step.`
-    : redirectTo.startsWith("/app/bids/new")
-      ? "Create your account, then upload your tender pack. Your first cited bid check is free."
-      : undefined;
+    ? `Create your account first. You confirm ${plan.name} and pay on the next step.`
+    : handoff
+      ? `Create your account first. You buy the ${BID_PASS_DISPLAY.name} on the next step.`
+      : redirectTo.startsWith("/app/bids/new")
+        ? "Create your account, then upload your tender pack. Your first cited bid check is free."
+        : undefined;
 
   return (
-    <div className="mx-auto flex w-full max-w-[68rem] flex-col gap-x-[4.5rem] gap-y-8 px-5 pt-6 pb-9 sm:px-6 sm:pt-14 sm:pb-14 lg:flex-row lg:items-start">
-      <div className="min-w-0 lg:flex-[0_1_31.25rem]">
+    <div className="mx-auto flex w-full max-w-[68rem] flex-col gap-x-[4.5rem] gap-y-8 px-5 pt-6 pb-9 sm:gap-y-10 sm:px-6 sm:pt-14 sm:pb-14 lg:flex-row lg:items-start">
+      <div className="min-w-0 sm:max-w-[31.25rem] lg:flex-[0_1_31.25rem]">
         <AuthCard
           title="Create your account"
           description={description}
