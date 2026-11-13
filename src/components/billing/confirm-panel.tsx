@@ -181,7 +181,7 @@ export function ConfirmPanel({ intent, config, subscribed, paused, trialEligible
         ) : null}
 
         <p className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="font-display text-[2rem] leading-[1.15] font-semibold tracking-[-0.02em] text-ink" data-testid="billing-confirm-price">
+          <span className="font-display text-32 leading-[1.15] font-semibold tracking-[-0.02em] text-ink" data-testid="billing-confirm-price">
             {priceLine}
           </span>
           <span className="text-13 leading-[1.5] text-ink-2">excluding VAT</span>

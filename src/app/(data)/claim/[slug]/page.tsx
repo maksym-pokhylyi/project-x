@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Stat, StatRow } from "@/components/ui/stat";
 import { claimSupplierAction } from "@/features/procurement/actions";
 import { DataAttribution } from "@/features/procurement/components/data-attribution";
 import { canAddRadarSource, radarAccess } from "@/features/procurement/access";
 import { pluralise } from "@/features/procurement/domain/format";
+import { formatMoneyShort } from "@/features/procurement/domain/money";
 import { getSupplierBySlug } from "@/features/procurement/queries/suppliers";
 import { hasSupplierLink, listRadarSources } from "@/features/procurement/radar/data";
 import { track } from "@/lib/analytics";
@@ -46,8 +48,14 @@ export default async function ClaimPage({ params, searchParams }: { params: Prom
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Claim your company page</p>
         <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">{supplier.name}</h1>
         <p className="text-sm text-muted-foreground">
-          {[supplier.companyNumber ? `Company number ${supplier.companyNumber}` : null, supplier.locality, pluralise(supplier.awardsCount, "published contract award")].filter(Boolean).join(" · ")}
+          {[supplier.companyNumber ? `Company number ${supplier.companyNumber}` : null, supplier.locality].filter(Boolean).join(" · ")}
         </p>
+        {/* The figures of the claim card (Claim artboards): one library row, so tiles never touch their dividers. */}
+        <StatRow frame="rules" className="mt-4" data-testid="claim-stats">
+          <Stat value={supplier.awardsCount.toLocaleString("en-GB")} label={supplier.awardsCount === 1 ? "contract" : "contracts"} />
+          <Stat value={formatMoneyShort(supplier.totalValue) ?? "—"} label="awarded" />
+          <Stat value={supplier.buyersCount.toLocaleString("en-GB")} label={supplier.buyersCount === 1 ? "public buyer" : "public buyers"} />
+        </StatRow>
       </header>
 
       {alreadyLinked ? (

@@ -14,7 +14,7 @@ const small = "text-xs leading-[1.5] text-ink-2";
 
 function StepCard({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <div aria-hidden className={cn("flex h-[14.75rem] flex-col overflow-hidden rounded-lg border border-line bg-surface p-[1.125rem]", className)}>
+    <div aria-hidden className={cn("flex h-[14.75rem] flex-col overflow-hidden rounded-inset border border-line bg-surface p-[1.125rem]", className)}>
       {children}
     </div>
   );
@@ -101,7 +101,7 @@ function DraftCard() {
       <span className="font-mono text-xs leading-[1.5] text-ink-2">Q2 · Responsive repairs · 15% · 1,000 words</span>
       <p className="text-sm leading-[1.55] text-ink">
         …our engineers attended 96.2% of emergency call-outs within two hours across 4,180 jobs in 2025–26
-        <span className="ml-[0.1875rem] rounded-[3px] bg-brand-tint px-1 font-mono text-xs leading-[inherit] font-medium text-brand">3</span>
+        <span className="ml-0.75 rounded-[3px] bg-brand-tint px-1 font-mono text-xs leading-[inherit] font-medium text-brand">3</span>
       </p>
       <span className="font-mono text-xs leading-[1.5] text-ink-2">3 · KPI report Q4 2025-26.pdf · p. 3</span>
       <div className="mt-auto flex flex-col gap-2 border-t border-line pt-3">

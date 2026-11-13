@@ -88,7 +88,7 @@ export function BidPassBand({
       </div>
       <div className="contents sm:flex sm:flex-wrap sm:items-center sm:gap-x-7 sm:gap-y-4">
         <p className="col-start-2 row-start-1 flex items-baseline gap-[0.3125rem] text-ink sm:gap-1.5">
-          <span className="type-figure text-[1.875rem] leading-[1.15] tracking-[-0.02em] sm:text-[2.75rem] sm:leading-none" data-testid="price-bid-pass">
+          <span className="type-figure text-30 leading-[1.15] tracking-[-0.02em] sm:text-44 sm:leading-none" data-testid="price-bid-pass">
             {BID_PASS_DISPLAY.price}
           </span>
           <span className="text-13 leading-[1.5] sm:text-sm sm:leading-[1.5]">{BID_PASS_DISPLAY.period}</span>

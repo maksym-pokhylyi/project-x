@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState, PageHeader, PageSection } from "@/components/app/page-header";
 import { FieldError, FieldHint, FormError, FormField } from "@/components/forms/form-field";
-import { NativeSelect } from "@/components/forms/native-select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Logo, LogoMark, Wordmark } from "@/components/logo";
 import { MARK_FAVICON } from "@/components/logo-paths";
 import {
@@ -343,7 +343,7 @@ export default function StyleguidePage() {
                   <p className="type-ref text-ink-2">Bid brief · built 13 Nov 2026 at 09:42 · 6 files, 214 pages read</p>
                 </Specimen>
                 <Specimen label="type-figure (+ a size) · large numerals in the serif">
-                  <p className="type-figure text-[2.125rem] leading-[1.15] text-ink">£6.4m</p>
+                  <p className="type-figure text-34 leading-[1.15] text-ink">£6.4m</p>
                 </Specimen>
               </div>
             </Group>
@@ -897,7 +897,7 @@ export default function StyleguidePage() {
               <div className="max-w-sm rounded-lg bg-paper-deep p-4">
                 <p className="text-xs text-ink-2">Marked against the buyer’s scheme</p>
                 <p className="mt-1 flex items-baseline gap-2 text-ink">
-                  <span className="type-figure text-[2.75rem] leading-none">3</span>
+                  <span className="type-figure text-44 leading-none">3</span>
                   <span className="text-15 font-semibold">of 5</span>
                   <span className="text-15">· Satisfactory</span>
                 </p>
@@ -1074,7 +1074,7 @@ export default function StyleguidePage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-modal bg-brand-tint p-6">
                   <Badge>Verdict</Badge>
-                  <p className="mt-3 font-display text-[1.625rem] leading-[1.15] font-semibold tracking-[-0.015em] text-ink">Worth bidding, if you close two gaps first.</p>
+                  <p className="mt-3 font-display text-26 leading-[1.15] font-semibold tracking-[-0.015em] text-ink">Worth bidding, if you close two gaps first.</p>
                 </div>
                 <div className="rounded-lg bg-paper-deep p-6">
                   <p className="text-xs text-ink-2">How it is marked</p>
@@ -1371,7 +1371,7 @@ export default function StyleguidePage() {
                   ].map(([value, label], index) => (
                     <div key={label} className={`flex flex-col-reverse gap-0.5 px-6 py-[1.125rem] ${index > 0 ? "border-t border-line sm:border-t-0 sm:border-l" : ""} ${index === 2 ? "sm:max-lg:border-t sm:max-lg:border-l-0" : ""} ${index === 3 ? "sm:max-lg:border-t" : ""}`}>
                       <dt className="text-13 text-ink-2">{label}</dt>
-                      <dd className="type-figure text-[2.125rem] leading-[1.15] text-ink">{value}</dd>
+                      <dd className="type-figure text-34 leading-[1.15] text-ink">{value}</dd>
                     </div>
                   ))}
                 </dl>

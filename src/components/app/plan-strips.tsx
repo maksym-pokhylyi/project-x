@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Dot } from "@/components/ui/dot";
 import { planPrice } from "@/config/plan-display";
 import { PLANS, isBillingInterval, isPlanKey } from "@/config/plans";
 import { BILLING_PATH } from "@/lib/billing/handoff";
@@ -64,7 +65,7 @@ export function TrialStrip({ ctx, now = new Date() }: { ctx: OrgContext; now?: D
     <div data-slot="trial-strip" data-testid="trial-strip" role="status" className="bg-accent-tint">
       <div className="container-app flex flex-wrap items-center justify-between gap-x-3 pb-3 text-sm leading-[1.5] text-ink tabular-nums md:min-h-11 md:justify-start md:gap-x-2.5 md:pb-0">
         <p className="order-1 flex items-center gap-2 md:gap-2.5">
-          <span aria-hidden className="size-[0.5625rem] shrink-0 rounded-full bg-accent" />
+          <Dot />
           <span className="font-semibold">Trial</span>
           <span className="font-semibold text-accent-ink">{left}</span>
         </p>

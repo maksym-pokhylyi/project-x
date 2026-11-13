@@ -1,4 +1,5 @@
 import { DeadlineMarker } from "@/components/ui/deadline-marker";
+import { Stat, StatRow } from "@/components/ui/stat";
 import { cn } from "@/lib/utils";
 
 /*
@@ -82,23 +83,26 @@ export function SupplierPreview({ className }: { className?: string }) {
 
       <div className="flex flex-col gap-4 px-[1.125rem] pt-[1.125rem] pb-1 sm:gap-[1.125rem] sm:px-6 sm:pt-[1.375rem] sm:pb-2">
         <div className="flex flex-col gap-1">
-          <p className="font-display text-[1.375rem] leading-[1.2] font-semibold tracking-[-0.01em] text-ink sm:text-[1.625rem] sm:leading-[1.15]">Aldermoor &amp; Pike Building Services Ltd</p>
+          <p className="font-display text-22 leading-[1.2] font-semibold tracking-[-0.01em] text-ink sm:text-26 sm:leading-[1.15]">Aldermoor &amp; Pike Building Services Ltd</p>
           <p className="text-13 leading-[1.5] text-ink-2">
             Wakefield<span className="hidden sm:inline">, West Yorkshire</span> · Building repairs and refurbishment
           </p>
         </div>
 
-        <div className="grid grid-cols-3 border-y border-line">
-          {stats.map((stat, index) => (
-            <div key={stat.label} className={cn("flex flex-col py-2.5 sm:py-3", index > 0 && "border-l border-line pl-3 sm:pl-4")}>
-              <span className="font-display text-2xl leading-[1.15] font-semibold tracking-normal text-ink sm:text-[1.75rem] sm:leading-[1.15] sm:tracking-normal">{stat.value}</span>
-              <span className={small}>
-                <span className="sm:hidden">{stat.short}</span>
-                <span className="hidden sm:inline">{stat.label}</span>
-              </span>
-            </div>
+        <StatRow frame="rules" size="sm">
+          {stats.map((stat) => (
+            <Stat
+              key={stat.label}
+              value={stat.value}
+              label={
+                <>
+                  <span className="sm:hidden">{stat.short}</span>
+                  <span className="hidden sm:inline">{stat.label}</span>
+                </>
+              }
+            />
           ))}
-        </div>
+        </StatRow>
 
         <div className="flex flex-col">
           <BlockHead title="Open tenders like your past work" note="4 open" />

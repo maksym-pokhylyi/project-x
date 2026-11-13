@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Dot } from "./dot"
 
 /*
  * Deadline marker, the same on every screen (Foundations, rule 1: "Amber marks, amber ink
@@ -52,7 +53,7 @@ function DeadlineMarker({
       {...props}
     >
       <span className={cn("inline-flex items-center whitespace-nowrap", size === "sm" ? "gap-1.5" : "gap-[0.4375rem]")}>
-        <span aria-hidden className={cn("shrink-0 rounded-full", size === "sm" ? "size-2" : "size-[0.5625rem]", closed ? "bg-line-strong" : "bg-accent")} />
+        <Dot size={size === "sm" ? "sm" : "md"} tone={closed ? "muted" : "accent"} />
         {children}
       </span>
       {left ? <span className="rounded-chip bg-accent-tint px-1.5 py-px text-xs leading-[1.5] whitespace-nowrap">{left}</span> : null}

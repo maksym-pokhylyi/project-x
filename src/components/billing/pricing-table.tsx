@@ -115,13 +115,13 @@ export function PricingTable({
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-1 sm:grid-cols-1 sm:gap-y-0">
                 {chip ? <div className="col-span-2 mb-1 flex sm:hidden">{chip}</div> : null}
                 <div className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-1 sm:col-start-1">
-                  <Heading id={titleId} className="font-display text-[1.375rem] leading-[1.2] font-semibold tracking-normal sm:text-2xl sm:leading-[1.2] sm:tracking-normal">
+                  <Heading id={titleId} className="font-display text-22 leading-[1.2] font-semibold tracking-normal sm:text-2xl sm:leading-[1.2] sm:tracking-normal">
                     {display.name}
                   </Heading>
                   {chip ? <div className="hidden sm:flex">{chip}</div> : null}
                 </div>
                 <p className="flex flex-wrap items-baseline justify-end gap-x-[0.3125rem] sm:col-start-1 sm:row-start-3 sm:mt-5 sm:justify-start sm:gap-x-1.5">
-                  <span className="type-figure text-[1.875rem] leading-[1.15] tracking-[-0.02em] sm:text-[2.75rem] sm:leading-none" data-testid={`price-${key}`}>
+                  <span className="type-figure text-30 leading-[1.15] tracking-[-0.02em] sm:text-44 sm:leading-none" data-testid={`price-${key}`}>
                     {price.amount}
                   </span>
                   {price.period ? <span className={cn("text-13 leading-[1.5] sm:text-sm sm:leading-[1.5]", !featured && "text-ink-2")}>{price.period}</span> : null}

@@ -84,7 +84,7 @@ export function RequirementCard({ className }: { className?: string }) {
         <span className="rounded-chip bg-paper-deep px-2 py-[0.1875rem] text-xs leading-[1.5] font-semibold text-ink">Pass or fail</span>
       </div>
 
-      <p className="font-display text-[1.3125rem] leading-[1.36] tracking-[-0.005em] text-ink sm:text-[1.5625rem] sm:text-pretty">“{QUOTE}”</p>
+      <p className="type-quote-lg text-ink">“{QUOTE}”</p>
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap rounded-control border border-line bg-paper">

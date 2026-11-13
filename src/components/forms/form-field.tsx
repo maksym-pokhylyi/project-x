@@ -100,6 +100,23 @@ export function Field({
 }
 
 /**
+ * The same label line over something that is not one field: a picture with its upload
+ * button, a set of options. A group with an accessible name, not a <label> (there is no
+ * single control for it to point at).
+ */
+export function FieldGroup({ id, label, hint, className, children }: { id: string; label: string; hint?: ReactNode; className?: string; children: ReactNode }) {
+  return (
+    <div role="group" aria-labelledby={`${id}-label`} data-slot="field-group" className={cn(fieldStack, className)}>
+      <p id={`${id}-label`} className={cn(labelLine, "font-semibold text-ink")}>
+        {label}
+      </p>
+      {children}
+      {hint ? <FieldHint>{hint}</FieldHint> : null}
+    </div>
+  );
+}
+
+/**
  * A row of labelled fields with its action button (invite a teammate, add a row, search by
  * two criteria…). Stacks on phones, sits in one line from 640 px.
  *

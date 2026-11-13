@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { BillingStepButton, type BillingStep } from "@/components/billing/billing-actions";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button-link";
+import { Dot } from "@/components/ui/dot";
 import { CardIcon } from "@/components/ui/icons";
 import { UsageBar } from "@/components/ui/usage-bar";
 import { billingCopy } from "@/config/billing-copy";
@@ -27,7 +28,7 @@ const label = "font-sans text-base leading-[1.5] font-semibold text-ink md:text-
 const actions = "mt-auto flex flex-col gap-2.5 pt-4 sm:flex-row sm:flex-wrap md:pt-[1.125rem]";
 /** A further block inside a card, under a hairline: 16 px above and below the rule on phones, 18 px from 768 px. */
 const divided = "mt-4 border-t border-line pt-4 md:mt-4.5 md:pt-4.5";
-const serifTitle = "font-display text-xl leading-[1.25] font-semibold tracking-normal text-ink md:text-[1.375rem]";
+const serifTitle = "font-display text-xl leading-[1.25] font-semibold tracking-normal text-ink md:text-22";
 
 /** Two cards side by side from 1200 px of page; one under the other below that. */
 export function BillingRow({ children }: { children: ReactNode }) {
@@ -65,13 +66,13 @@ export function CurrentPlanCard({ planName, price, summary, status, note, dateLi
       </h2>
       <div className="mt-2.5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 md:mt-3 md:gap-x-6 md:gap-y-1">
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="font-display text-[1.75rem] leading-[1.15] font-semibold tracking-[-0.015em] text-ink md:text-[2rem]" data-testid="current-plan-name">
+          <span className="font-display text-3xl leading-[1.15] font-semibold tracking-[-0.015em] text-ink md:text-32" data-testid="current-plan-name">
             {planName}
           </span>
           {status ? <Badge variant={statusVariant[status.tone]}>{status.label}</Badge> : null}
         </p>
         <p className="flex items-baseline gap-1.5">
-          <span className="font-display text-[1.75rem] leading-[1.15] font-semibold tracking-[-0.02em] text-ink md:text-[2rem]">{price?.amount ?? "£0"}</span>
+          <span className="font-display text-3xl leading-[1.15] font-semibold tracking-[-0.02em] text-ink md:text-32">{price?.amount ?? "£0"}</span>
           {price ? <span className="text-sm leading-[1.5] text-ink-2">{price.period}</span> : null}
         </p>
       </div>
@@ -149,7 +150,7 @@ export function AllowanceCard({ allowance, planFullBids, planName, renewsAt, sea
             ) : null}
             {bids.rolledOver ? (
               <p className="flex items-baseline gap-2 text-13 leading-[1.5] text-ink tabular-nums">
-                <span aria-hidden className="size-[0.5625rem] shrink-0 rounded-full bg-accent" />
+                <Dot />
                 <span>
                   {bids.rolledOver.count} unused {bids.rolledOver.count === 1 ? "bid" : "bids"} rolled over from {bids.rolledOver.fromLabel}:{" "}
                   <span className="font-semibold text-accent-ink">

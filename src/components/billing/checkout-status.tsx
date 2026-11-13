@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ButtonLink } from "@/components/ui/button-link";
+import { DetailList } from "@/components/ui/detail-list";
+import { Dot } from "@/components/ui/dot";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
 
 type Status = { isPaid: boolean; planKey: string };
 
@@ -38,20 +39,11 @@ function DoneMark() {
   );
 }
 
-const title = "mt-4 font-display text-[1.75rem] leading-[1.15] font-semibold tracking-[-0.015em] text-ink md:mt-[1.125rem] md:text-4xl md:leading-[1.15]";
+const title = "mt-4 font-display text-3xl leading-[1.15] font-semibold tracking-[-0.015em] text-ink md:mt-4.5 md:text-4xl md:leading-[1.15]";
 const lead = "mt-2 text-15 leading-[1.5] text-ink tabular-nums md:mt-2.5 md:text-base";
 
 function Rows({ rows, pending = false }: { rows: ConfirmationRow[]; pending?: boolean }) {
-  return (
-    <dl className="mt-6 flex flex-col rounded-card border border-line bg-surface px-4 py-1 tabular-nums md:mt-7 md:px-6 md:py-1.5">
-      {rows.map((row, index) => (
-        <div key={row.term} className={cn("flex flex-col gap-0.5 py-3 md:flex-row md:flex-wrap md:items-baseline md:gap-x-6 md:py-[0.8125rem]", index > 0 && "border-t border-line")}>
-          <dt className="text-xs leading-[1.5] text-ink-2 md:flex-[0_0_7.5rem] md:text-sm">{row.term}</dt>
-          <dd className={cn("min-w-0 text-15 leading-[1.5] [overflow-wrap:anywhere] text-ink md:flex-[1_1_20rem]", pending && "text-ink-2")}>{row.value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
+  return <DetailList rows={rows} muted={pending} className="mt-6 md:mt-7" />;
 }
 
 /**
@@ -145,7 +137,7 @@ export function CheckoutStatus({ kind = "plan", confirmation, confirmed = false 
     return (
       <div className="mx-auto flex w-full max-w-[40rem] flex-col" role="status" data-testid="checkout-timeout">
         <span aria-hidden className="grid size-10 place-items-center rounded-full bg-accent-tint">
-          <span className="size-[0.5625rem] rounded-full bg-accent" />
+          <Dot />
         </span>
         <h1 className={title}>This is taking longer than usual</h1>
         <p className={lead}>

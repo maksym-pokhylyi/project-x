@@ -13,7 +13,7 @@ export function ReplayWebhookButton({ eventId }: { eventId: string }) {
     <Button
       variant="outline"
       size="sm"
-      disabled={pending}
+      loading={pending}
       onClick={async () => {
         setPending(true);
         const result = await replayWebhookAction(eventId);
@@ -35,7 +35,7 @@ export function RetryJobButton({ jobId }: { jobId: string }) {
     <Button
       variant="outline"
       size="sm"
-      disabled={pending}
+      loading={pending}
       onClick={async () => {
         setPending(true);
         const result = await retryJobAction(jobId);

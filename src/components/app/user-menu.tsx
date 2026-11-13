@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { IconButton } from "@/components/ui/icon-button";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
@@ -56,14 +57,9 @@ export function UserMenu({ name, email, workspaceName, plan, isAdmin }: { name: 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full transition-colors duration-150 hover:bg-paper-deep"
-          data-testid="user-menu"
-          aria-label={`Open account menu: ${name || email}`}
-        >
+        <IconButton shape="round" label={`Open account menu: ${name || email}`} data-testid="user-menu">
           <UserInitial name={name} email={email} />
-        </button>
+        </IconButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={4} className="w-72">
         <div className="px-2.5 pt-2 pb-2.5">

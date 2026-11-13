@@ -28,7 +28,7 @@ export function AuthCard({
   return (
     <>
       <div data-slot="auth-card" className={cn("flex flex-col rounded-card border border-line bg-surface px-5 py-6 sm:px-10 sm:py-9", controlSize("form"), className)}>
-        <h1 className="font-display text-[1.75rem] leading-[1.15] font-semibold tracking-[-0.015em] text-ink sm:text-4xl sm:leading-[1.12]">{title}</h1>
+        <h1 className="font-display text-3xl leading-[1.15] font-semibold tracking-[-0.015em] text-ink sm:text-4xl sm:leading-[1.12]">{title}</h1>
         {description ? <p className="mt-2.5 text-15 leading-[1.5] text-ink-2">{description}</p> : null}
         <div className="mt-5 sm:mt-6">{children}</div>
         {footer ? <div className="mt-1.5 border-t border-line pt-3.5 text-13 leading-[1.6] text-ink-2 sm:pt-4">{footer}</div> : null}

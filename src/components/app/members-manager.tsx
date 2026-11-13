@@ -5,10 +5,10 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Form } from "@/components/forms/form";
 import { Field, FormError, FormField, FormRow, FormRowAction } from "@/components/forms/form-field";
-import { NativeSelect } from "@/components/forms/native-select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { NativeSelect } from "@/components/ui/native-select";
 import { fieldErrorsFrom, inviteSchema, type FieldErrors } from "@/lib/validation";
 import {
   cancelInvitationAction,

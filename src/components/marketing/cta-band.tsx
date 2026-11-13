@@ -30,7 +30,7 @@ export function IndependenceBand() {
   return (
     <section id="independence" aria-labelledby="independence-title" className="on-ink bg-ink text-paper">
       <div className="container-content flex flex-wrap gap-x-20 gap-y-3 py-10 md:gap-y-5 md:py-14">
-        <h2 id="independence-title" className="min-w-0 flex-[1_1_18.75rem] font-display text-[1.625rem] leading-[1.2] font-semibold tracking-[-0.01em] md:text-[1.875rem]">
+        <h2 id="independence-title" className="min-w-0 flex-[1_1_18.75rem] font-display text-26 leading-[1.2] font-semibold tracking-[-0.01em] md:text-30">
           {independence.title}
         </h2>
         <div className="flex min-w-0 flex-[2_1_35rem] flex-col gap-3 text-15 leading-[1.6] md:text-base md:leading-[1.6]">

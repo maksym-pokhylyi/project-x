@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils"
  *   destructive          filled red: the confirmation of a step that cannot be undone,
  *                        inside the dialog that says what is lost
  *   destructive-outline  white with a red label: the way into such a step from a page
+ *   ghost                no edge until hover: icon buttons (IconButton), quiet row actions
+ *   menu                 muted 14 px text: the trigger of a menu in a bar (MenuButton)
  * States: hover, pressed (active), keyboard focus (global ring), disabled, loading.
  *
  * HEIGHT follows the control scale shared with fields (see control-group.tsx): 44 / 48 / 52 px.
@@ -47,6 +49,8 @@ const buttonVariants = cva(
         outline: "border-line-strong bg-surface text-ink hover:border-ink hover:bg-paper active:bg-paper-deep",
         secondary: "bg-paper-deep text-ink hover:bg-line active:bg-line",
         ghost: "text-ink hover:bg-paper-deep active:bg-line",
+        /* The quiet trigger of a menu in a bar: muted 14 px text (see MenuButton). */
+        menu: "gap-2 px-2 text-sm font-normal text-ink-2 hover:bg-paper-deep hover:text-ink active:bg-line data-[state=open]:bg-paper-deep data-[state=open]:text-ink",
         /* A text link that happens to be a button: no height of its own, exempt from the scale. */
         link: "h-auto rounded-sm border-0 p-0 font-medium text-ink underline decoration-brand decoration-1 underline-offset-[3px] hover:text-brand",
         inverse: "bg-white text-brand hover:bg-brand-tint active:bg-brand-tint",

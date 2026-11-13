@@ -20,12 +20,6 @@ const ALLOWED: Record<string, string> = {
 };
 
 const KNOWN_DEBT = new Set([
-  "components/app/app-nav.tsx",
-  "components/app/user-menu.tsx",
-  "components/app/workspace-form.tsx",
-  "components/app/workspace-switcher.tsx",
-  "components/forms/native-select.tsx",
-  "components/marketing/mobile-nav.tsx",
   "components/styleguide/demos.tsx",
   // Bids and library modules were written before the rule; they are converted in the consolidation round.
   "features/bids/components/answer-editor.tsx",

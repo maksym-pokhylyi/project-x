@@ -29,9 +29,9 @@ export function LogoMark({ size = 24, title, className }: { size?: number; title
 
 /** Font size of the wordmark; the mark is 0.91 of it and sits on the baseline. */
 const sizes = {
-  sm: "text-[1.375rem]", // 22 px: the app bar and phone headers (smallest lockup)
-  md: "text-[1.375rem] md:text-[1.625rem]", // 26 px from 768 px: public header and footer
-  lg: "text-[2.75rem]", // 44 px: auth pages on a desk, splash
+  sm: "text-22", // 22 px: the app bar and phone headers (smallest lockup)
+  md: "text-22 md:text-26", // 26 px from 768 px: public header and footer
+  lg: "text-44", // 44 px: auth pages on a desk, splash
 } as const;
 
 const tones = {
@@ -68,8 +68,7 @@ export function Wordmark({
         <path d={MARK} />
       </svg>
       <span
-        className={cn("font-display leading-none font-semibold tracking-[-0.015em]", tones[tone].word)}
-        style={{ fontVariationSettings: "'opsz' 32" }}
+        className={cn("font-display leading-none font-semibold tracking-[-0.015em] [font-variation-settings:'opsz'_32]", tones[tone].word)}
       >
         {site.name}
       </span>
