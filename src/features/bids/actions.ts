@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { storageBackend } from "@/lib/storage";
 import { runAction, type ActionResult } from "@/server/http";
 import { requireOrg } from "@/server/session";
 import * as bids from "./server/bids";
 import { applySuggestions, draftAnswer, evaluateAnswer, restoreVersion, saveAnswer } from "./server/drafting";
 import { runCompanyCheck } from "./server/pipeline/step-company";
+import { browserUploadMode } from "@/features/bids/server/direct-upload";
 
 /**
  * Server Actions of the bid desk. Each one resolves the workspace from the session
@@ -38,7 +38,7 @@ export async function planUploadAction(bidId: string, file: { name: string; size
       fileId: plan.fileId,
       pathname: plan.storageKey,
       contentType: plan.contentType,
-      mode: storageBackend === "vercel-blob" ? ("blob" as const) : ("direct" as const),
+      mode: await browserUploadMode(),
       directUrl: `/api/bids/${bidId}/upload?fileId=${plan.fileId}&name=${encodeURIComponent(file.name)}`,
     };
   });

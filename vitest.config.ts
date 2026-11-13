@@ -37,6 +37,7 @@ export default defineConfig({
       PADDLE_PRICE_PRO_ANNUAL: "pri_test_pro_annual",
       PADDLE_PRICE_BUSINESS_MONTHLY: "pri_test_business_monthly",
       PADDLE_PRICE_BUSINESS_ANNUAL: "pri_test_business_annual",
+      PADDLE_PRICE_BID_PASS: "pri_test_bid_pass",
       BILLING_PAST_DUE_GRACE_DAYS: "7",
       AI_DAILY_BUDGET_USD: "1",
       // Tests simulate client IPs with X-Forwarded-For (tests/rate-limit.test.ts covers the untrusted default).

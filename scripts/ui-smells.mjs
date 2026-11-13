@@ -62,7 +62,7 @@ export const SMELLS = {
   legacyToken: {
     title: "Pre-design-system token (unstyled leftovers)",
     fix: "restyle with the Bidfolio tokens: text-ink-2, bg-surface, border-line, rounded-card / rounded-control …",
-    pattern: /(?<![\w-])(?:text-muted-foreground|text-foreground|bg-background|bg-card|bg-sidebar|bg-muted|border-input|bg-primary|text-primary|text-primary-foreground|bg-secondary|bg-accent|text-accent-foreground|text-destructive|bg-destructive|ring-ring|rounded-(?:md|lg|xl))(?![\w-])/g,
+    pattern: /(?<![\w-])(?:text-muted-foreground|text-foreground|bg-background|bg-card|bg-sidebar|bg-muted|border-input|bg-primary|text-primary|text-primary-foreground|bg-secondary|text-accent-foreground|text-destructive|bg-destructive|ring-ring|rounded-(?:md|lg|xl))(?![\w-])/g,
   },
 };
 

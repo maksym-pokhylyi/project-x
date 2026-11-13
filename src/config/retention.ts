@@ -49,6 +49,12 @@ export const RETENTION_DAYS = {
    */
   bidWorkFiles: 14,
   /**
+   * The Paddle transaction kept on a one-off purchase (`billing_purchases.raw`, for debugging).
+   * The purchase itself and the receipts (`billing_payments`) are business records: they stay
+   * as long as the workspace exists and go with it.
+   */
+  purchasePayload: 90,
+  /**
    * Outreach prospects (src/db/schema/outreach.ts): this long after a campaign was created,
    * the e-mail address, its fingerprint and the merge fields of every prospect in it are
    * erased. The rows stay (status, dates, link code) so the funnel counts remain. The

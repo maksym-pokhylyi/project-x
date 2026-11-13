@@ -5,7 +5,7 @@ vi.mock("next/headers", () => import("./helpers/next-headers"));
 
 import { RETENTION_DAYS } from "@/config/retention";
 import { db } from "@/db";
-import { aiUsage, auditLog, emailOutbox, errorLog, events, invitations, jobs, sessions, verifications, webhookEvents } from "@/db/schema";
+import { aiUsage, auditLog, billingPurchases, emailOutbox, errorLog, events, invitations, jobs, sessions, verifications, webhookEvents } from "@/db/schema";
 import { ingestPaddleEvent, processStoredEvent } from "@/lib/billing/webhooks";
 import { enqueueJob } from "@/lib/jobs/queue";
 import { runWorker } from "@/lib/jobs/worker";
@@ -43,10 +43,34 @@ describe("data retention (F-14)", () => {
       auditLog: 730,
       checkoutNonces: 90,
       bidWorkFiles: 14,
+      purchasePayload: 90,
       outreachProspects: 365,
       outreachNamedAddresses: 90,
       outreachAudit: 730,
     });
+  });
+
+  it("a one-off purchase keeps its row; only the stored Paddle transaction is dropped after 90 days", async () => {
+    const user = await createTestUser({ email: "owner@example.com" });
+    const purchase = (transactionId: string, createdAt: Date) => ({
+      organizationId: user.organizationId,
+      userId: user.id,
+      kind: "bid_pass",
+      paddleTransactionId: transactionId,
+      priceId: "pri_test_bid_pass",
+      amountMinor: 9900,
+      currency: "GBP",
+      paddleEnvironment: "sandbox",
+      raw: { id: transactionId, status: "completed" },
+      createdAt,
+    });
+    await db.insert(billingPurchases).values([purchase("txn_old", outside(RETENTION_DAYS.purchasePayload)), purchase("txn_recent", inside(RETENTION_DAYS.purchasePayload))]);
+    expect(await runMaintenance()).toMatchObject({ purchasePayloads: 1 });
+    const rows = await db.select().from(billingPurchases);
+    expect(rows).toHaveLength(2);
+    expect(rows.find((row) => row.paddleTransactionId === "txn_old")).toMatchObject({ raw: null, kind: "bid_pass", amountMinor: 9900 });
+    expect(rows.find((row) => row.paddleTransactionId === "txn_recent")!.raw).toEqual({ id: "txn_recent", status: "completed" });
+    expect(await runMaintenance()).toMatchObject({ purchasePayloads: 0 });
   });
 
   it("removes what is past its retention period and keeps what is not", async () => {

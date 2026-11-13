@@ -40,7 +40,7 @@ const EXPORT_ROW_LIMIT = 50_000;
 /** Internal tables that are not part of a customer's export. They are still erased. */
 const NOT_EXPORTED = new Set(["error_log", "billing_checkout_nonces"]);
 /** Columns never included in an export. */
-const EXPORT_OMITS: Record<string, string[]> = { subscriptions: ["raw"] };
+const EXPORT_OMITS: Record<string, string[]> = { subscriptions: ["raw"], billing_purchases: ["raw"] };
 
 type Executor = Pick<typeof db, "execute">;
 
@@ -173,6 +173,12 @@ export async function deleteWorkspace(organizationId: string): Promise<{ files: 
 /** Stored Paddle events about this workspace's subscription, customer and checkouts. */
 async function eraseBillingEvents(tx: Tx, organizationId: string, subscriptionId: string | null, customerId: string | null): Promise<void> {
   await tx.execute(sql`delete from webhook_events where payload -> 'data' -> 'custom_data' ->> 'organization_id' = ${organizationId}`);
+  // Events about the payments recorded for the workspace (their transactions, and the refunds and chargebacks of those).
+  await tx.execute(sql`
+    delete from webhook_events
+    where (payload -> 'data' ->> 'id') in (select paddle_transaction_id from billing_payments where organization_id = ${organizationId})
+       or (payload -> 'data' ->> 'transaction_id') in (select paddle_transaction_id from billing_payments where organization_id = ${organizationId})
+  `);
   if (subscriptionId) {
     await tx.execute(sql`
       delete from webhook_events
