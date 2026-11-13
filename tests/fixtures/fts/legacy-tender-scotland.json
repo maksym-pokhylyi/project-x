@@ -1,0 +1,353 @@
+{
+ "ocid": "ocds-h6vhtk-06f762",
+ "id": "086108-2026",
+ "date": "2026-09-10T16:39:42+01:00",
+ "tag": [
+  "tender"
+ ],
+ "description": "NOTE: To register your interest in this notice and obtain any additional information please visit the Public Contracts Scotland Web Site at https://www.publiccontractsscotland.gov.uk/Search/Search_Switch.aspx?ID=839846.\nThe buyer has indicated that it will accept electronic responses to this notice via the Postbox facility. A user guide is available at https://www.publiccontractsscotland.gov.uk/sitehelp/help_guides.aspx.\nSuppliers are advised to allow adequate time for uploading documents and to dispatch the electronic response well in advance of the closing time to avoid any last minute problems.\nCommunity benefits are included in this requirement. For more information see: https://www.gov.scot/policies/public-sector-procurement/community-benefits-in-procurement/\nA summary of the expected community benefits has been provided as follows:\nPlease refer to tender documents.\n(SC Ref:839846)\nDownload the ESPD document here: https://www.publiccontractsscotland.gov.uk/ESPD/ESPD_Download.aspx?id=839846",
+ "initiationType": "tender",
+ "tender": {
+  "id": "ocds-h6vhtk-06f762",
+  "legalBasis": {
+   "id": "32014L0024",
+   "scheme": "CELEX"
+  },
+  "title": "Maryhill Housing Association - Heating Maintenance 2026 - 2031",
+  "status": "active",
+  "classification": {
+   "scheme": "CPV",
+   "id": "50720000",
+   "description": "Repair and maintenance services of central heating"
+  },
+  "mainProcurementCategory": "services",
+  "description": "Maryhill Housing Association (MHA) seeks to appoint a qualified and experienced contractor to deliver a programme of:\nGas servicing + reactive repairs\nBoiler Replacements\nASHP servicing and reactive repairs\nHHR upgrades\nto properties within the Maryhill area of Glasgow, including providing a 24-hour call out service to attend to emergency and urgent reactive repairs.",
+  "value": {
+   "amount": 710000,
+   "currency": "GBP"
+  },
+  "lotDetails": {
+   "maximumLotsBidPerSupplier": null
+  },
+  "lots": [
+   {
+    "id": "1",
+    "title": "Gas Servicing & Reactive Repairs",
+    "description": "Gas servicing including routine maintenance and reactive repairs, providing a 24-hour call out service to attend to emergency and urgent reactive repairs.",
+    "awardCriteria": {
+     "criteria": [
+      {
+       "name": "Quality",
+       "type": "quality",
+       "description": "60"
+      },
+      {
+       "type": "price",
+       "description": "40"
+      }
+     ]
+    },
+    "value": {
+     "amount": 453000,
+     "currency": "GBP"
+    },
+    "contractPeriod": {
+     "durationInDays": 1080
+    },
+    "hasRenewal": true,
+    "renewal": {
+     "description": "The buyer may, entirely at their discretion, extend the contract by two further periods of one year."
+    },
+    "submissionTerms": {
+     "variantPolicy": "notAllowed"
+    },
+    "hasOptions": false,
+    "status": "active"
+   },
+   {
+    "id": "2",
+    "title": "Boiler Replacements",
+    "description": "A programme of boiler replacements to selected properties within MHA stock.",
+    "awardCriteria": {
+     "criteria": [
+      {
+       "name": "Quality",
+       "type": "quality",
+       "description": "60"
+      },
+      {
+       "type": "price",
+       "description": "40"
+      }
+     ]
+    },
+    "contractPeriod": {
+     "durationInDays": 1080
+    },
+    "hasRenewal": true,
+    "renewal": {
+     "description": "The buyer may, entirely at their discretion, extend the contract by two further periods of one year."
+    },
+    "submissionTerms": {
+     "variantPolicy": "notAllowed"
+    },
+    "hasOptions": false,
+    "status": "active"
+   },
+   {
+    "id": "3",
+    "title": "ASHP Installations & Reactive Repairs and HHR Upgrades",
+    "description": "Deliver a programme of ASHP servicing including routine maintenance and reactive repairs, plus a 24-hour emergency call out service.\nCarry out a separate programme of HHR upgrades to selected properties within MHA stock.",
+    "awardCriteria": {
+     "criteria": [
+      {
+       "name": "Quality",
+       "type": "quality",
+       "description": "60"
+      },
+      {
+       "type": "price",
+       "description": "40"
+      }
+     ]
+    },
+    "contractPeriod": {
+     "durationInDays": 1080
+    },
+    "hasRenewal": true,
+    "renewal": {
+     "description": "The buyer may, entirely at their discretion, extend the contract by two further periods of one year."
+    },
+    "submissionTerms": {
+     "variantPolicy": "notAllowed"
+    },
+    "hasOptions": false,
+    "status": "active"
+   }
+  ],
+  "items": [
+   {
+    "id": "1",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "44621200",
+      "description": "Boilers"
+     },
+     {
+      "scheme": "CPV",
+      "id": "44620000",
+      "description": "Central-heating radiators and boilers and parts"
+     },
+     {
+      "scheme": "CPV",
+      "id": "44621000",
+      "description": "Radiators and boilers"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKM82"
+     }
+    ],
+    "deliveryLocation": {
+     "description": "Maryhill & Ruchill areas of Glasgow"
+    },
+    "relatedLot": "1"
+   },
+   {
+    "id": "2",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "42160000",
+      "description": "Boiler installations"
+     },
+     {
+      "scheme": "CPV",
+      "id": "44621000",
+      "description": "Radiators and boilers"
+     },
+     {
+      "scheme": "CPV",
+      "id": "44621200",
+      "description": "Boilers"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKM82"
+     }
+    ],
+    "deliveryLocation": {
+     "description": "Maryhill & Ruchill areas of Glasgow"
+    },
+    "relatedLot": "2"
+   },
+   {
+    "id": "3",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "44621100",
+      "description": "Radiators"
+     },
+     {
+      "scheme": "CPV",
+      "id": "44621110",
+      "description": "Central-heating radiators"
+     },
+     {
+      "scheme": "CPV",
+      "id": "44621112",
+      "description": "Parts of central-heating radiators"
+     },
+     {
+      "scheme": "CPV",
+      "id": "42511110",
+      "description": "Heat pumps"
+     },
+     {
+      "scheme": "CPV",
+      "id": "42533000",
+      "description": "Parts of heat pumps"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKM82"
+     }
+    ],
+    "deliveryLocation": {
+     "description": "Maryhill & Ruchill areas of Glasgow"
+    },
+    "relatedLot": "3"
+   }
+  ],
+  "submissionMethod": [
+   "electronicSubmission"
+  ],
+  "submissionMethodDetails": "https://www.publiccontractsscotland.gov.uk/",
+  "selectionCriteria": {
+   "criteria": [
+    {
+     "type": "suitability",
+     "description": "Selection criteria as stated in the procurement documents.",
+     "appliesTo": [
+      "supplier"
+     ]
+    }
+   ]
+  },
+  "documents": [
+   {
+    "documentType": "economicSelectionCriteria",
+    "id": "economic"
+   },
+   {
+    "documentType": "technicalSelectionCriteria",
+    "id": "technical"
+   }
+  ],
+  "contractTerms": {
+   "performanceTerms": "As outlined within the tender documents.",
+   "hasElectronicOrdering": true,
+   "electronicInvoicingPolicy": "allowed",
+   "hasElectronicPayment": true
+  },
+  "otherRequirements": {
+   "requiresStaffNamesAndQualifications": true
+  },
+  "procurementMethod": "open",
+  "procurementMethodDetails": "Open procedure",
+  "coveredBy": [
+   "GPA"
+  ],
+  "tenderPeriod": {
+   "endDate": "2026-10-12T17:00:00+01:00"
+  },
+  "submissionTerms": {
+   "languages": [
+    "en"
+   ],
+   "bidValidityPeriod": {
+    "durationInDays": 90
+   }
+  },
+  "awardPeriod": {
+   "startDate": "2026-10-13T12:00:00+01:00"
+  },
+  "bidOpening": {
+   "date": "2026-10-13T12:00:00+01:00"
+  },
+  "hasRecurrence": false
+ },
+ "parties": [
+  {
+   "name": "Maryhill Housing Association",
+   "id": "GB-FTS-102767",
+   "identifier": {
+    "legalName": "Maryhill Housing Association"
+   },
+   "address": {
+    "streetAddress": "45 Garrioch Road",
+    "locality": "Glasgow",
+    "region": "UKM",
+    "postalCode": "G20 8RG",
+    "countryName": "United Kingdom"
+   },
+   "contactPoint": {
+    "telephone": "+44 0000 000000",
+    "email": "enquiries@maryhill.org.uk",
+    "url": "https://www.publiccontractsscotland.gov.uk/"
+   },
+   "roles": [
+    "buyer",
+    "centralPurchasingBody"
+   ],
+   "details": {
+    "url": "https://www.maryhill.org.uk",
+    "buyerProfile": "https://www.publiccontractsscotland.gov.uk/search/Search_AuthProfile.aspx?ID=AA13362",
+    "classifications": [
+     {
+      "scheme": "TED_CA_TYPE",
+      "id": "REGIONAL_AGENCY",
+      "description": "Regional or local agency/office"
+     },
+     {
+      "scheme": "COFOG",
+      "id": "06",
+      "description": "Housing and community amenities"
+     }
+    ]
+   }
+  },
+  {
+   "name": "Glasgow Sheriff Court and Justice of the Peace Court",
+   "id": "GB-FTS-3525",
+   "identifier": {
+    "legalName": "Glasgow Sheriff Court and Justice of the Peace Court"
+   },
+   "address": {
+    "streetAddress": "1 Carlton Place",
+    "locality": "Glasgow",
+    "postalCode": "G5 9DA",
+    "countryName": "United Kingdom"
+   },
+   "roles": [
+    "reviewBody"
+   ]
+  }
+ ],
+ "buyer": {
+  "id": "GB-FTS-102767",
+  "name": "Maryhill Housing Association"
+ },
+ "links": [
+  {
+   "rel": "canonical",
+   "href": "https://api.publiccontractsscotland.gov.uk/v1/Notice?id=ocds-r6ebe6-[phone removed]"
+  }
+ ],
+ "language": "en"
+}

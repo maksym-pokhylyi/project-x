@@ -12,6 +12,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/app", "/admin", "/api", "/dev", "/accept-invitation", "/styleguide", "/maintenance"],
       },
     ],
-    sitemap: `${appUrl}/sitemap.xml`,
+    // sitemap-data.xml indexes the public data pages (src/features/procurement/sitemaps.ts).
+    sitemap: [`${appUrl}/sitemap.xml`, `${appUrl}/sitemap-data.xml`],
   };
 }

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Answer editor, desktop</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Inter:wght@400..700&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+h1,h2,h3,p,ul,ol,figure,dl,dd,blockquote{margin:0}
+ul,ol{padding:0;list-style:none}
+a{color:#161A1D}a:hover{color:#0F5A47}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid #0F5A47;outline-offset:2px}
+</style>
+</helmet>
+<div id="top" style="min-height: 100vh; display: flex; flex-direction: column; background: #FAF8F3; color: #161A1D; font-family: Inter, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+
+  <header style="padding: 0 32px; background: #FFFFFF; border-bottom: 1px solid #E3DED2">
+    <div style="max-width: 1376px; margin: 0 auto; min-height: 60px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 32px">
+      <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px 28px">
+        <a href="Supplier-1440.dc.html" aria-label="Bidfolio home" style="display: flex; align-items: baseline; gap: 7px; text-decoration: none; color: #161A1D">
+          <svg viewBox="0 0 24 32" width="15" height="20" aria-hidden="true"><path fill="#0F5A47" d="M0 11.022L4.393 15.415 19.808 0H22a2 2 0 0 1 2 2v28a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2ZM0 6.213 15 0 4.393 10.607Z"></path></svg>
+          <span style="font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; font-size: 22px; line-height: 1; letter-spacing: -0.015em; font-variation-settings: 'opsz' 32">Bidfolio</span>
+        </a>
+        <nav aria-label="Main" style="display: flex; align-items: stretch; gap: 28px; font-size: 15px; font-weight: 500">
+          <a href="Radar-1440.dc.html" style="display: inline-flex; align-items: center; min-height: 60px; text-decoration: none">Radar</a>
+          <a href="Brief-1440.dc.html" aria-current="page" style="display: inline-flex; align-items: center; min-height: 60px; box-sizing: border-box; text-decoration: none; border-bottom: 2px solid #161A1D; padding-top: 2px">Bids</a>
+          <a href="Documents-1440.dc.html" style="display: inline-flex; align-items: center; min-height: 60px; text-decoration: none">Documents</a>
+        </nav>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px">
+        <span style="font-size: 14px; color: #5A6165">Aldermoor &amp; Pike Building Services Ltd</span>
+        <button type="button" aria-label="Account: Joanne Pike" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 0; padding: 0"><span style="width: 34px; height: 34px; border-radius: 50%; background: #E6EFEB; color: #0F5A47; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center">JP</span></button>
+      </div>
+    </div>
+  </header>
+
+  <div style="padding: 0 32px; background: #FFFFFF; border-bottom: 1px solid #E3DED2">
+    <div style="max-width: 1376px; margin: 0 auto; min-height: 64px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 32px">
+      <div style="min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 20px">
+        <a href="Brief-1440.dc.html" style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 14px; font-weight: 500; text-decoration: none"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="#161A1D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>Bid brief</a>
+        <span style="min-width: 0; max-width: 470px; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Planned and responsive maintenance of corporate buildings 2027–2031</span>
+        <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #925207; font-variant-numeric: tabular-nums; white-space: nowrap"><span style="width: 9px; height: 9px; border-radius: 50%; background: #B4690E"></span>Closes 27 Nov 2026, 12:00 <span style="font-size: 12px; font-weight: 600; background: #F7EBD7; border-radius: 4px; padding: 1px 6px">14 days left</span></span>
+      </div>
+      <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px">
+        <span style="font-size: 13px; color: #5A6165; margin-right: 4px">Saved at 10:14</span>
+        <a href="#" style="box-sizing: border-box; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; font-weight: 600; text-decoration: none; color: #161A1D; background: #FFFFFF; border: 1px solid #857F70; border-radius: 6px"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8M4.5 6.5L8 10l3.5-3.5M3 13h10" fill="none" stroke="#161A1D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>Export to Word</a>
+        <button type="button" style="box-sizing: border-box; min-height: 44px; padding: 10px 18px; font-size: 15px; font-weight: 600; color: #FFFFFF; background: #0F5A47; border: 0; border-radius: 6px">Mark as final</button>
+      </div>
+    </div>
+  </div>
+
+  <main style="flex-grow: 1; padding: 28px 32px 64px">
+    <div style="max-width: 1376px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px">
+
+      <div style="flex: 1 1 260px; max-width: 300px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+        <nav aria-label="Questions" style="display: flex; flex-direction: column; gap: 10px">
+          <h2 style="font-size: 15px; font-weight: 600">Questions <span style="font-weight: 400; color: #5A6165">· 60% of marks</span></h2>
+          <ul style="display: flex; flex-direction: column; gap: 4px">
+            <li><a href="#" style="display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid transparent; border-radius: 8px; text-decoration: none">
+              <span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; color: #5A6165">Q1 · 10%</span>
+              <span style="font-size: 14px; font-weight: 600; line-height: 1.35">Mobilisation and contract management</span>
+              <span style="font-size: 12px; color: #5A6165; font-variant-numeric: tabular-nums">712 of 750 words · marked 4 of 5</span>
+            </a></li>
+            <li><a href="#top" aria-current="true" style="display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; background: #FFFFFF; border: 1px solid #161A1D; border-radius: 8px; text-decoration: none; color: #161A1D">
+              <span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; color: #5A6165">Q2 · 15%</span>
+              <span style="font-size: 14px; font-weight: 600; line-height: 1.35">Delivering responsive repairs within target times</span>
+              <span style="font-size: 12px; color: #5A6165; font-variant-numeric: tabular-nums">412 of 1,000 words · marked 3 of 5</span>
+            </a></li>
+            <li><a href="#" style="display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid transparent; border-radius: 8px; text-decoration: none">
+              <span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; color: #5A6165">Q3 · 10%</span>
+              <span style="font-size: 14px; font-weight: 600; line-height: 1.35">Health, safety and working in occupied buildings</span>
+              <span style="font-size: 12px; font-weight: 600; color: #A3271C">Waiting on gap R-14</span>
+            </a></li>
+            <li><a href="#" style="display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid transparent; border-radius: 8px; text-decoration: none">
+              <span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; color: #5A6165">Q4 · 10%</span>
+              <span style="font-size: 14px; font-weight: 600; line-height: 1.35">Resources, capacity and supply chain</span>
+              <span style="font-size: 12px; color: #5A6165; font-variant-numeric: tabular-nums">698 of 750 words · marked 3 of 5</span>
+            </a></li>
+            <li><a href="#" style="display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid transparent; border-radius: 8px; text-decoration: none">
+              <span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; color: #5A6165">Q5 · 5%</span>
+              <span style="font-size: 14px; font-weight: 600; line-height: 1.35">Customer care and complaints</span>
+              <span style="font-size: 12px; color: #5A6165; font-variant-numeric: tabular-nums">488 of 500 words · marked 4 of 5</span>
+            </a></li>
+            <li><a href="#" style="display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid transparent; border-radius: 8px; text-decoration: none">
+              <span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; color: #5A6165">Q6 · 10%</span>
+              <span style="font-size: 14px; font-weight: 600; line-height: 1.35">Social value</span>
+              <span style="font-size: 12px; font-weight: 600; color: #1F4F8F">Needs your commitments</span>
+            </a></li>
+          </ul>
+        </nav>
+
+        <section aria-labelledby="src-h" style="background: #FFFFFF; border: 1px solid #E3DED2; border-radius: 10px; padding: 16px 16px 6px">
+          <h2 id="src-h" style="font-size: 15px; font-weight: 600">Sources in this answer</h2>
+          <p style="margin-top: 2px; font-size: 12px; color: #5A6165">Your documents only. Select a marker to see the passage.</p>
+          <ol style="margin-top: 10px; display: flex; flex-direction: column">
+            <li id="src-1" style="display: flex; gap: 10px; padding: 10px 0; border-top: 1px solid #E3DED2">
+              <span style="flex-shrink: 0; width: 20px; height: 20px; border-radius: 3px; background: #E6EFEB; color: #0F5A47; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center">1</span>
+              <span style="min-width: 0; display: flex; flex-direction: column; font-size: 12px"><span style="font-family: 'IBM Plex Mono', Menlo, monospace; overflow-wrap: anywhere">Case studies 2026.docx</span><span style="display: inline-flex; align-items: center; gap: 5px; color: #5A6165"><svg viewBox="0 0 12 12" width="12" height="12" role="img" aria-label="Verified"><path d="M2 6.5l2.6 2.6L10 3.5" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>p.2</span></span>
+            </li>
+            <li id="src-2" style="display: flex; gap: 10px; padding: 10px 0; border-top: 1px solid #E3DED2">
+              <span style="flex-shrink: 0; width: 20px; height: 20px; border-radius: 3px; background: #E6EFEB; color: #0F5A47; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center">2</span>
+              <span style="min-width: 0; display: flex; flex-direction: column; font-size: 12px"><span style="font-family: 'IBM Plex Mono', Menlo, monospace; overflow-wrap: anywhere">Repairs operating procedure v6.pdf</span><span style="display: inline-flex; align-items: center; gap: 5px; color: #5A6165"><svg viewBox="0 0 12 12" width="12" height="12" role="img" aria-label="Verified"><path d="M2 6.5l2.6 2.6L10 3.5" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>p.4 · used twice</span></span>
+            </li>
+            <li id="src-3" style="display: flex; gap: 10px; padding: 10px 0; border-top: 1px solid #E3DED2">
+              <span style="flex-shrink: 0; width: 20px; height: 20px; border-radius: 3px; background: #0F5A47; color: #FFFFFF; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center">3</span>
+              <span style="min-width: 0; display: flex; flex-direction: column; font-size: 12px">
+                <span style="font-family: 'IBM Plex Mono', Menlo, monospace; overflow-wrap: anywhere">KPI report Q4 2025-26.pdf</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; color: #5A6165"><svg viewBox="0 0 12 12" width="12" height="12" role="img" aria-label="Verified"><path d="M2 6.5l2.6 2.6L10 3.5" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>p.3 · used twice</span>
+                <blockquote style="margin-top: 8px; padding: 10px 12px; background: #FAF8F3; border-radius: 6px; font-family: 'Source Serif 4', Georgia, serif; font-size: 14px; line-height: 1.45">“Emergency (2 hr) attendance: 96.2% (4,021 of 4,180). Routine completed in target: 94.8%.”</blockquote>
+              </span>
+            </li>
+            <li id="src-4" style="display: flex; gap: 10px; padding: 10px 0; border-top: 1px solid #E3DED2">
+              <span style="flex-shrink: 0; width: 20px; height: 20px; border-radius: 3px; background: #E6EFEB; color: #0F5A47; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center">4</span>
+              <span style="min-width: 0; display: flex; flex-direction: column; font-size: 12px"><span style="font-family: 'IBM Plex Mono', Menlo, monospace; overflow-wrap: anywhere">Out-of-hours rota Oct 2026.xlsx</span><span style="display: inline-flex; align-items: center; gap: 5px; color: #5A6165"><svg viewBox="0 0 12 12" width="12" height="12" role="img" aria-label="Check"><circle cx="6" cy="6" r="3.5" fill="#B4690E"></circle></svg>sheet “Rota” · used twice</span></span>
+            </li>
+            <li id="src-5" style="display: flex; gap: 10px; padding: 10px 0; border-top: 1px solid #E3DED2">
+              <span style="flex-shrink: 0; width: 20px; height: 20px; border-radius: 3px; background: #E6EFEB; color: #0F5A47; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center">5</span>
+              <span style="min-width: 0; display: flex; flex-direction: column; font-size: 12px"><span style="font-family: 'IBM Plex Mono', Menlo, monospace; overflow-wrap: anywhere">Customer satisfaction 2025-26.pdf</span><span style="display: inline-flex; align-items: center; gap: 5px; color: #5A6165"><svg viewBox="0 0 12 12" width="12" height="12" role="img" aria-label="Verified"><path d="M2 6.5l2.6 2.6L10 3.5" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>p.5</span></span>
+            </li>
+          </ol>
+        </section>
+      </div>
+
+      <div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+
+        <section aria-labelledby="question-h" style="background: #FFFFFF; border: 1px solid #E3DED2; border-radius: 10px; padding: 22px 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+            <h1 id="question-h" style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 14px; font-weight: 500; margin-right: 6px">Q2</h1>
+            <span style="font-size: 12px; font-weight: 600; border: 1px solid #161A1D; border-radius: 4px; padding: 2px 8px">15% of marks</span>
+            <span style="font-size: 12px; font-weight: 600; border: 1px solid #857F70; border-radius: 4px; padding: 2px 8px">Limit 1,000 words</span>
+            <span style="font-size: 12px; font-weight: 600; border: 1px solid #857F70; border-radius: 4px; padding: 2px 8px">Scored 0 to 5</span>
+          </div>
+          <p style="font-family: 'Source Serif 4', Georgia, serif; font-size: 20px; line-height: 1.4; text-wrap: pretty">“Describe how you will deliver responsive repairs within the Council’s target response times, including: (a) how jobs are received, prioritised and allocated; (b) your out-of-hours emergency arrangements; (c) how you will achieve first-time fixes; and (d) how you will measure and report performance.”</p>
+          <a href="#" style="display: inline-flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; text-decoration: none; background: #FAF8F3; border: 1px solid #E3DED2; border-radius: 4px; padding: 3px 8px"><svg viewBox="0 0 12 12" width="12" height="12" role="img" aria-label="Verified"><path d="M2 6.5l2.6 2.6L10 3.5" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>Vol 3 Quality Questionnaire.docx · p. 6 · Q2</a>
+        </section>
+
+        <section aria-labelledby="draft-h" style="background: #FFFFFF; border: 1px solid #E3DED2; border-radius: 10px">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 12px 28px; border-bottom: 1px solid #E3DED2">
+            <h2 id="draft-h" style="font-size: 15px; font-weight: 600">Draft answer <span style="font-weight: 400; color: #5A6165">· draft 3</span></h2>
+            <div role="img" aria-label="412 of 1,000 words used, 588 left" style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-variant-numeric: tabular-nums">
+              <span><span style="font-weight: 600">412</span> of 1,000 words</span>
+              <span style="width: 140px; height: 6px; border-radius: 3px; background: #E3DED2; display: flex"><span style="width: 41.2%; border-radius: 3px; background: #161A1D"></span></span>
+              <span style="color: #5A6165">588 left</span>
+            </div>
+          </div>
+
+          <article id="draft" aria-label="Draft answer to question 2" style="padding: 26px 36px 30px; font-size: 16px; line-height: 1.7; display: flex; flex-direction: column; gap: 14px">
+            <h3 style="font-size: 16px; font-weight: 700">(a) Receiving, prioritising and allocating jobs</h3>
+            <p>Every repair request from the Council’s helpdesk will arrive in our job management system through the same integration we run for Wharfedale &amp; Aire Homes, where it has handled 11,260 orders since March 2024.<a href="#src-1" data-skip="1" aria-label="Source 1" style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; line-height: 1; text-decoration: none; color: #0F5A47; background: #E6EFEB; border-radius: 3px; padding: 2px 5px; margin-left: 4px">1</a> Each order is given one of the Council’s four priorities on receipt: emergency (attend within two hours), urgent (24 hours), routine (five working days) or planned (20 working days).</p>
+            <p>Our contract supervisor, based at our Wakefield depot 11 miles from the Civic Centre, allocates each job to the nearest engineer with the right trade and van stock. Engineers receive the order on a handheld device, with the building’s access notes and asbestos register attached, and cannot close a job without a photograph of the completed work.<a href="#src-2" data-skip="1" aria-label="Source 2" style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; line-height: 1; text-decoration: none; color: #0F5A47; background: #E6EFEB; border-radius: 3px; padding: 2px 5px; margin-left: 4px">2</a></p>
+            <p>On our current responsive repairs contract we attended 96.2% of emergency call-outs within two hours across 4,180 jobs in 2025–26, and completed 94.8% of routine repairs within target.<a href="#src-3" data-skip="1" aria-label="Source 3, selected" style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; line-height: 1; text-decoration: none; color: #FFFFFF; background: #0F5A47; border-radius: 3px; padding: 2px 5px; margin-left: 4px">3</a></p>
+
+            <h3 style="font-size: 16px; font-weight: 700; margin-top: 6px">(b) Out-of-hours emergencies</h3>
+            <p>We run a 24-hour service, 365 days a year. Two multi-trade engineers and one electrician are on call each night and at weekends on a published six-week rota, with a duty supervisor as escalation.<a href="#src-4" data-skip="1" aria-label="Source 4" style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; line-height: 1; text-decoration: none; color: #0F5A47; background: #E6EFEB; border-radius: 3px; padding: 2px 5px; margin-left: 4px">4</a></p>
+            <p id="gap-b" data-skip="1" style="background: #F6E3E0; border: 1px dashed #A3271C; border-radius: 6px; padding: 10px 14px; font-size: 14px; line-height: 1.5"><span style="font-weight: 600; color: #A3271C">Gap to fill.</span> Your documents do not say who takes an out-of-hours call or how the job reaches the engineer. Write two or three sentences here.</p>
+            <p>Each on-call van carries the materials to make safe the faults we are called to most often: leaks, loss of heating, insecure doors and windows, and electrical faults.<a href="#src-4" data-skip="1" aria-label="Source 4" style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; line-height: 1; text-decoration: none; color: #0F5A47; background: #E6EFEB; border-radius: 3px; padding: 2px 5px; margin-left: 4px">4</a> Where a repair cannot be completed at the first visit, the engineer makes the building safe, tells the building manager what will happen next and raises a follow-on order before leaving site.</p>
+
+            <h3 style="font-size: 16px; font-weight: 700; margin-top: 6px">(c) First-time fixes</h3>
+            <p>We achieve first-time fixes by sending the right trade with the right stock. Van stock lists are reviewed every quarter against the 50 most-used materials on each contract, and our supervisor telephones the requester before attending any job where the description is unclear.<a href="#src-2" data-skip="1" aria-label="Source 2" style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; line-height: 1; text-decoration: none; color: #0F5A47; background: #E6EFEB; border-radius: 3px; padding: 2px 5px; margin-left: 4px">2</a></p>
+            <p id="gap-c" data-skip="1" style="background: #F6E3E0; border: 1px dashed #A3271C; border-radius: 6px; padding: 10px 14px; font-size: 14px; line-height: 1.5"><span style="font-weight: 600; color: #A3271C">Gap to fill.</span> No first-time-fix rate found in your documents. If you measure it, give the figure and the contract it comes from.</p>
+
+            <h3 style="font-size: 16px; font-weight: 700; margin-top: 6px">(d) Measuring and reporting performance</h3>
+            <p>We will report against the Council’s key performance indicators every month: attendance and completion within target for each priority, first-time fix, recalls within 28 days and customer satisfaction. The report will be issued by the fifth working day and reviewed at a monthly contract meeting with the Council’s contract manager, in the format we already provide to Wharfedale &amp; Aire Homes.<a href="#src-3" data-skip="1" aria-label="Source 3, selected" style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; line-height: 1; text-decoration: none; color: #FFFFFF; background: #0F5A47; border-radius: 3px; padding: 2px 5px; margin-left: 4px">3</a></p>
+            <p>After every tenth completed job we ask the building user to score the repair. In 2025–26, 93% of 1,034 responses rated our service good or excellent.<a href="#src-5" data-skip="1" aria-label="Source 5" style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; font-weight: 500; line-height: 1; text-decoration: none; color: #0F5A47; background: #E6EFEB; border-radius: 3px; padding: 2px 5px; margin-left: 4px">5</a> Any score of poor is called back by the contract supervisor within one working day. <span style="text-decoration: underline dotted #A3271C; text-decoration-thickness: 2px; text-underline-offset: 5px">We have never failed a monthly KPI review.</span><span data-skip="1" style="font-size: 12px; font-weight: 600; line-height: 1; color: #A3271C; background: #F6E3E0; border-radius: 3px; padding: 2px 6px; margin-left: 6px; white-space: nowrap">no source</span></p>
+          </article>
+
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 24px; padding: 12px 28px; border-top: 1px solid #E3DED2; font-size: 13px; color: #5A6165">
+            <span>Written only from your documents. A numbered marker shows where each claim comes from.</span>
+            <span>Words over the limit are not read <a href="#" style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; color: #161A1D; text-decoration-color: #0F5A47; text-underline-offset: 3px">Vol 3 · p. 2</a></span>
+          </div>
+        </section>
+      </div>
+
+      <aside aria-labelledby="eval-h" style="flex: 1 1 380px; max-width: 440px; min-width: 0; background: #FFFFFF; border: 1px solid #E3DED2; border-radius: 10px; padding: 22px 22px 20px; display: flex; flex-direction: column">
+        <h2 id="eval-h" style="font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; font-size: 22px; line-height: 1.25">Evaluator’s view</h2>
+        <p style="margin-top: 4px; font-size: 13px; color: #5A6165">Marked against the Council’s own scoring scheme. Draft 3, marked 13 Nov 2026 at 10:12.</p>
+
+        <div style="margin-top: 16px; background: #FAF8F3; border-radius: 8px; padding: 16px; display: flex; flex-direction: column">
+          <span style="font-size: 12px; color: #5A6165">Marked</span>
+          <p style="display: flex; align-items: baseline; gap: 10px"><span style="font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; font-size: 56px; line-height: 1.1; letter-spacing: -0.02em">3</span><span style="font-size: 15px"><span style="font-weight: 600">of 5</span> · Satisfactory</span></p>
+          <div role="img" aria-label="3 of 5" style="margin-top: 8px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px">
+            <span style="height: 8px; border-radius: 4px; background: #0F5A47"></span>
+            <span style="height: 8px; border-radius: 4px; background: #0F5A47"></span>
+            <span style="height: 8px; border-radius: 4px; background: #0F5A47"></span>
+            <span style="height: 8px; border-radius: 4px; background: #E3DED2"></span>
+            <span style="height: 8px; border-radius: 4px; background: #E3DED2"></span>
+          </div>
+          <blockquote style="margin-top: 14px; font-family: 'Source Serif 4', Georgia, serif; font-size: 15px; line-height: 1.45">“Satisfactory: the response addresses most of the requirements and is supported by some evidence. Minor reservations.”</blockquote>
+          <a href="#" style="margin-top: 8px; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; text-decoration: none; background: #FFFFFF; border: 1px solid #E3DED2; border-radius: 4px; padding: 3px 8px"><svg viewBox="0 0 12 12" width="12" height="12" role="img" aria-label="Verified"><path d="M2 6.5l2.6 2.6L10 3.5" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>Vol 1 Instructions to Tenderers.pdf · p. 14</a>
+          <p style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #E3DED2; font-size: 13px">In the buyer’s scheme a 3 carries <span style="font-weight: 600">9 of this question’s 15 marks</span>; a 4 carries 12.</p>
+        </div>
+
+        <section aria-labelledby="eval-parts" style="margin-top: 20px; padding-top: 18px; border-top: 1px solid #E3DED2">
+          <h3 id="eval-parts" style="font-size: 15px; font-weight: 600">What the question asks for</h3>
+          <ul style="margin-top: 10px; display: flex; flex-direction: column; gap: 12px">
+            <li style="display: flex; gap: 10px"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" style="flex-shrink: 0"><circle cx="10" cy="10" r="8" fill="none" stroke="#0F5A47" stroke-width="1.8"></circle><path d="M6.3 10.3l2.6 2.6 4.8-5" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">(a) Receiving, prioritising and allocating jobs</span><span style="font-size: 13px">Covered, with evidence.</span></span></li>
+            <li style="display: flex; gap: 10px"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" style="flex-shrink: 0"><circle cx="10" cy="10" r="8" fill="none" stroke="#1F4F8F" stroke-width="1.8"></circle><path d="M10 2a8 8 0 0 0 0 16z" fill="#1F4F8F"></path></svg><span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">(b) Out-of-hours emergencies</span><span style="font-size: 13px">Partly covered. The rota is evidenced; call handling is missing.</span></span></li>
+            <li style="display: flex; gap: 10px"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" style="flex-shrink: 0"><circle cx="10" cy="10" r="8" fill="none" stroke="#A3271C" stroke-width="1.8"></circle><path d="M10 5.8v5M10 13.8v.4" fill="none" stroke="#A3271C" stroke-width="1.8" stroke-linecap="round"></path></svg><span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">(c) First-time fixes</span><span style="font-size: 13px">Described, not evidenced. No measured rate.</span></span></li>
+            <li style="display: flex; gap: 10px"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" style="flex-shrink: 0"><circle cx="10" cy="10" r="8" fill="none" stroke="#0F5A47" stroke-width="1.8"></circle><path d="M6.3 10.3l2.6 2.6 4.8-5" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">(d) Measuring and reporting performance</span><span style="font-size: 13px">Covered, with evidence.</span></span></li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="eval-fixes" style="margin-top: 20px; padding-top: 18px; border-top: 1px solid #E3DED2">
+          <h3 id="eval-fixes" style="font-size: 15px; font-weight: 600">What a 4 needs</h3>
+          <ol style="margin-top: 10px; display: flex; flex-direction: column; gap: 14px">
+            <li style="display: flex; gap: 10px">
+              <span style="flex-shrink: 0; width: 20px; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 13px; color: #5A6165">1</span>
+              <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px"><span style="font-size: 14px; font-weight: 600">Say who takes an out-of-hours call</span><span style="font-size: 13px">The scheme gives a 4 only when every part is addressed. You show the rota, but not how a call at night reaches the engineer.</span><a href="#gap-b" style="font-size: 13px; font-weight: 500; padding: 4px 0; text-decoration: underline; text-decoration-color: #0F5A47; text-underline-offset: 3px">Go to the gap in (b)</a></span>
+            </li>
+            <li style="display: flex; gap: 10px">
+              <span style="flex-shrink: 0; width: 20px; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 13px; color: #5A6165">2</span>
+              <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px"><span style="font-size: 14px; font-weight: 600">Put a number on first-time fixes</span><span style="font-size: 13px">A measured rate from a current contract would count as evidence. None of your 12 documents gives one.</span><a href="#gap-c" style="font-size: 13px; font-weight: 500; padding: 4px 0; text-decoration: underline; text-decoration-color: #0F5A47; text-underline-offset: 3px">Go to the gap in (c)</a></span>
+            </li>
+          </ol>
+        </section>
+
+        <section aria-labelledby="eval-credit" style="margin-top: 20px; padding-top: 18px; border-top: 1px solid #E3DED2">
+          <h3 id="eval-credit" style="font-size: 15px; font-weight: 600">An evaluator would credit</h3>
+          <ul style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px; font-size: 13px">
+            <li style="display: flex; gap: 10px"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Measured results on a comparable contract: 96.2% of emergencies attended within two hours, across 4,180 jobs.</span></li>
+            <li style="display: flex; gap: 10px"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>The answer follows the question’s four parts in order, so the marks are easy to find.</span></li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="eval-check" style="margin-top: 20px; padding-top: 18px; border-top: 1px solid #E3DED2">
+          <h3 id="eval-check" style="font-size: 15px; font-weight: 600">Check before you submit</h3>
+          <ul style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px; font-size: 13px">
+            <li style="display: flex; gap: 10px"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><path d="M8 3.2v6M8 12.2v.5" fill="none" stroke="#A3271C" stroke-width="1.8" stroke-linecap="round"></path></svg><span>One sentence has no source: “We have never failed a monthly KPI review.” Evidence it or take it out.</span></li>
+            <li style="display: flex; gap: 10px"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><path d="M8 7v5.5M8 3.6v.5" fill="none" stroke="#1F4F8F" stroke-width="1.8" stroke-linecap="round"></path></svg><span>You have 588 words in hand. Spend them on (b) and (c), not on (a).</span></li>
+          </ul>
+        </section>
+
+        <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid #E3DED2; display: flex; flex-direction: column; gap: 10px">
+          <button type="button" style="box-sizing: border-box; min-height: 44px; padding: 10px 16px; font-size: 15px; font-weight: 600; color: #161A1D; background: #FFFFFF; border: 1px solid #857F70; border-radius: 6px">Mark again</button>
+          <p style="font-size: 12px; color: #5A6165">A reading of the scoring scheme, not a forecast of the buyer’s decision.</p>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

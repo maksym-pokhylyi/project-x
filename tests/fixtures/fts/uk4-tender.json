@@ -1,0 +1,335 @@
+{
+ "id": "086022-2026",
+ "tag": [
+  "tender"
+ ],
+ "date": "2026-09-10T15:29:23+01:00",
+ "initiationType": "tender",
+ "ocid": "ocds-h6vhtk-069f8b",
+ "parties": [
+  {
+   "name": "Great Places Housing Group",
+   "id": "GB-MPR-30045R",
+   "identifier": {
+    "scheme": "GB-MPR",
+    "id": "30045R"
+   },
+   "address": {
+    "streetAddress": "2A Derwent Avenue",
+    "locality": "Manchester",
+    "postalCode": "M21 7QP",
+    "country": "GB",
+    "countryName": "United Kingdom",
+    "region": "UKD33"
+   },
+   "contactPoint": {
+    "email": "procurement@greatplaces.org.uk",
+    "telephone": "+44 0000 000000"
+   },
+   "roles": [
+    "buyer"
+   ],
+   "details": {
+    "url": "http://www.greatplaces.org.uk/Pages/default.aspx",
+    "classifications": [
+     {
+      "scheme": "UK_CA_TYPE",
+      "id": "publicAuthoritySubCentralGovernment",
+      "description": "Public authority - sub-central government"
+     }
+    ]
+   }
+  }
+ ],
+ "buyer": {
+  "id": "GB-MPR-30045R",
+  "name": "Great Places Housing Group"
+ },
+ "tender": {
+  "id": "DN808977",
+  "legalBasis": {
+   "id": "2023/54",
+   "scheme": "UKPGA",
+   "uri": "https://www.legislation.gov.uk/ukpga/2023/54/contents"
+  },
+  "title": "Terra Nova Construction Materials",
+  "description": "An Open Framework to facilitate the supply of bulk construction materials to Terra Nova, Great Places Housing Group's in-house new build construction arm. Terra Nova intends that the Open Framework scheme of frameworks will endure for eight years, with annual iterations re-opening the Open Framework to competition, providing for potential new entrants, and that orders will be called off on a scheme by scheme basis, either with or without further competition. \nInitial Categories will include: Bulk Bricks, Bulk Blocks, Bulk First & Second Fix Joinery Timber",
+  "status": "active",
+  "items": [
+   {
+    "id": "1",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "44111100",
+      "description": "Bricks"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKD",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     },
+     {
+      "region": "UKE3",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     }
+    ],
+    "relatedLot": "1"
+   },
+   {
+    "id": "2",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "44111600",
+      "description": "Blocks"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKD",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     },
+     {
+      "region": "UKE3",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     }
+    ],
+    "relatedLot": "2"
+   },
+   {
+    "id": "3",
+    "additionalClassifications": [
+     {
+      "scheme": "CPV",
+      "id": "44220000",
+      "description": "Builders' joinery"
+     },
+     {
+      "scheme": "CPV",
+      "id": "44230000",
+      "description": "Builders' carpentry"
+     }
+    ],
+    "deliveryAddresses": [
+     {
+      "region": "UKD",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     },
+     {
+      "region": "UKE3",
+      "country": "GB",
+      "countryName": "United Kingdom"
+     }
+    ],
+    "relatedLot": "3"
+   }
+  ],
+  "value": {
+   "amountGross": 15000000.0,
+   "amount": 15000000.0,
+   "currency": "GBP"
+  },
+  "procurementMethod": "open",
+  "procurementMethodDetails": "Open procedure",
+  "mainProcurementCategory": "goods",
+  "aboveThreshold": true,
+  "techniques": {
+   "hasFrameworkAgreement": true,
+   "frameworkAgreement": {
+    "isOpenFrameworkScheme": true,
+    "maximumParticipants": 12,
+    "method": "withAndWithoutReopeningCompetition",
+    "type": "closed",
+    "description": "Contracts may be awarded to successful suppliers with a place on the framework either with or without competition, in compliance with §45 of PA23.\nAny contracts under the framework awarded without competition will be awarded according to\nobjective mechanisms detailed in the Framework Agreement.\nThe process is detailed in the associated tender documents.",
+    "openFrameworkSchemeEndDate": "2034-11-08T23:59:59+00:00"
+   }
+  },
+  "submissionMethodDetails": "Submission is through ProActis ProContract:\nhttps://procontract.due-north.com \nincluding all clarifications via the messaging facility\nIf the ProContract link does not work, please search on ProContract using reference DN808977.\nCommunication outside of ProContract may not be responded to, and may be considered in breach of procedural requirements and result in disqualification.",
+  "submissionTerms": {
+   "electronicSubmissionPolicy": "allowed",
+   "languages": [
+    "en"
+   ]
+  },
+  "tenderPeriod": {
+   "endDate": "2026-10-05T12:00:00+01:00"
+  },
+  "enquiryPeriod": {
+   "endDate": "2026-09-25T00:00:00+01:00"
+  },
+  "awardPeriod": {
+   "endDate": "2026-11-05T23:59:59+00:00"
+  },
+  "lots": [
+   {
+    "id": "1",
+    "title": "Bricks",
+    "description": "Lot 1 – Bricks:\nCommon, facing, engineering and other clay bricks as required",
+    "status": "active",
+    "value": {
+     "amountGross": 5970000.0,
+     "amount": 5970000.0,
+     "currency": "GBP"
+    },
+    "awardCriteria": {
+     "criteria": [
+      {
+       "type": "price",
+       "name": "Price",
+       "numbers": [
+        {
+         "number": 70.0,
+         "weight": "percentageExact"
+        }
+       ]
+      },
+      {
+       "type": "quality",
+       "name": "Quality",
+       "numbers": [
+        {
+         "number": 30.0,
+         "weight": "percentageExact"
+        }
+       ]
+      }
+     ]
+    },
+    "selectionCriteria": {
+     "criteria": [
+      {
+       "type": "economic",
+       "description": "Financial Capacity Conditions of Participation:\nFinancial Standing - Annual turnover must be at least twice the annual Lot value.\nLot 1 Bricks estimated annual turnover: £500,000\nInsurance - Confirm willingness to obtain required insurance:\nEmployer’s (Compulsory) Liability Insurance* = [£5m]\nPublic Liability Insurance = [£5m]\nProduct Indemnity Insurance = [£5m]\nReal Living Wage - Supplier must commit to pay in line with the Real Living Wage.\nLegal Capacity Conditions of Participation:\nData Protection - Supplier must be willing to complete Data Protection Impact Assessment and confirm ICO compliance.\nICO Regulatory Action - Supplier must confirm whether their organisation has been subject to regulatory action.\nModern Slavery:  \nPlease advise us of the measures followed by your company to identify, prevent and mitigate risks of modern slavery within your organisation and throughout your supply chain for the materials proposed under this contract. \n1. If you are a relevant commercial organisation subject to Section 54 of the Modern Slavery Act 2015, that is, you carry on your business, or part of your business in the UK, supplying goods or services and you have an annual turnover of at least £36 million, please attach your current Modern Slavery statement, or a link to it.\nOR\n2. If you are not a relevant commercial organisation, but have a Modern Slavery Policy, please attach or link to that.\nOR\n3. Describe in up to 250 words what measures you take to:\n•\tIdentify Modern Slavery risks\n•\tMitigate & Prevent those risks\nIn all cases you response will be assessed for the adequacy of the measures described."
+      },
+      {
+       "type": "technical",
+       "description": "Sustainability:  \nPlease describe how you can assure Terra Nova of the measures you are taking to minimise waste and reduce carbon footprints throughout the supply chain\nDeliveries:  \nSuppliers must be able to deliver across Terra Nova sites as required\nDelivery Timeframes:  \nSuppliers to Lot 1 must be able to provide initial deliveries to a call-off contract within four weeks of the contract being agreed, and then provide subsequent deliveries to the schedule provided at call-off.  \nAll other orders must be delivered within two working days.\nCredit Account Set-Up:  \nGreat Places must be able to set up a credit account with suppliers within a week of confirmation of call-off contracts\nCyber Security: \nSupplier must be willing to complete the Security Questionnaire and confirm resources to handle cyber security."
+      }
+     ]
+    },
+    "suitability": {
+     "sme": true,
+     "vcse": true
+    },
+    "contractPeriod": {
+     "startDate": "2026-11-09T00:00:00+00:00",
+     "endDate": "2034-11-08T23:59:59+00:00"
+    }
+   },
+   {
+    "id": "2",
+    "title": "Concrete Blocks",
+    "description": "Lot 2 – Concrete Blocks:\nLightweight, high density and load-bearing blocks and other components, primarily of concrete, as required",
+    "status": "active",
+    "value": {
+     "amountGross": 3580000.0,
+     "amount": 3580000.0,
+     "currency": "GBP"
+    },
+    "awardCriteria": {
+     "criteria": [
+      {
+       "type": "price",
+       "name": "Price",
+       "numbers": [
+        {
+         "number": 70.0,
+         "weight": "percentageExact"
+        }
+       ]
+      },
+      {
+       "type": "quality",
+       "name": "Quality",
+       "numbers": [
+        {
+         "number": 30.0,
+         "weight": "percentageExact"
+        }
+       ]
+      }
+     ]
+    },
+    "suitability": {
+     "sme": true,
+     "vcse": true
+    },
+    "contractPeriod": {
+     "startDate": "2026-11-09T00:00:00+00:00",
+     "endDate": "2034-11-08T23:59:59+00:00"
+    }
+   },
+   {
+    "id": "3",
+    "title": "Timber packs",
+    "description": "Lot 3 – Timber packs:\nFirst- and second-fix timber packs, to include studding, joists, roof timbers, timber flooring, door sets, skirting, architraves, window boards, ironmongery and fixings as required",
+    "status": "active",
+    "value": {
+     "amountGross": 3580000.0,
+     "amount": 3580000.0,
+     "currency": "GBP"
+    },
+    "awardCriteria": {
+     "criteria": [
+      {
+       "type": "price",
+       "name": "Price",
+       "numbers": [
+        {
+         "number": 70.0,
+         "weight": "percentageExact"
+        }
+       ]
+      },
+      {
+       "type": "quality",
+       "name": "Quality",
+       "numbers": [
+        {
+         "number": 30.0,
+         "weight": "percentageExact"
+        }
+       ]
+      }
+     ]
+    },
+    "suitability": {
+     "sme": true,
+     "vcse": true
+    },
+    "contractPeriod": {
+     "startDate": "2026-11-09T00:00:00+00:00",
+     "endDate": "2034-11-08T23:59:59+00:00"
+    }
+   }
+  ],
+  "documents": [
+   {
+    "id": "conflictOfInterest",
+    "documentType": "conflictOfInterest",
+    "description": "Not published"
+   },
+   {
+    "id": "086022-2026",
+    "documentType": "tenderNotice",
+    "noticeType": "UK4",
+    "description": "Tender notice on Find a Tender",
+    "url": "https://www.find-tender.service.gov.uk/Notice/086022-2026",
+    "datePublished": "2026-09-10T15:29:23+01:00",
+    "format": "text/html"
+   }
+  ],
+  "contractTerms": {
+   "financialTerms": "All invoices must be sent to redacted@example.org, or such other email address as shall be specified, quoting a valid purchase order number.\nThe details on the invoice must reflect the details provided during supplier account set-up, and match\nthe purchase order value.\nSubject to the Employer's right to withhold or dispute any amount, the Employer will pay the Supplier within 30 calendar days from receipt of an undisputed invoice."
+  },
+  "riskDetails": "Supplier Performance Risks:\nSupplier performance failure resulting in poor service levels, delayed deliveries, product quality\nissues, or inadequate customer service.\nSupply Chain Risks:\nSupply chain disruption causing shortages of materials or delays in product availability.\nFinancial Stability Risks:\nSupplier insolvency or business failure leading to interruptions in the provision of goods.\nPricing and Market Risks:\nPrice increases and market volatility affecting the cost of materials, transport, or distribution services.\nCapacity and Demand Risks:\nDemand exceeding supplier capacity, particularly in circumstances where the demand increases, for\ninstance, should GPHG merge with other organisations.\nQuality, Health and Safety Risks:\nHealth & Safety, and product compliance failures resulting from goods not meeting required specifications, standards, or regulations, in particular for products falling under COSHH regulations.\nContract Management Risks:\nContract management resource constraints limiting effective supplier oversight and performance\nmonitoring.\nCompetition Risks:\nFailure to maintain competition throughout the framework term due to supplier attrition or reduced\nsupplier participation within individual Lots.\nInnovation Risks:\nLack of supplier innovation or continuous improvement over the life of the framework, resulting in missed opportunities for efficiencies, cost savings, or service enhancements.\nRegulatory Risks:\nChanges in industry standards, or legislative and regulatory requirements that impact the supply or\nuse of materials covered by the framework.\nSustainability Risks:\nEnvironmental or sustainability performance risks where suppliers fail to meet agreed commitments\nrelating to responsible sourcing, carbon reduction or waste management.\nCyber Security and Data Protection Risks:\nCyber security or data protection incidents affecting suppliers, particularly given that electronic ordering,\ninvoicing, and inventory management systems are used."
+ },
+ "language": "en"
+}

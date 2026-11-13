@@ -10,25 +10,25 @@ SCENARIOS = {
   # Adverse: the personalised page does not beat ordinary cold email, deliverability caps volume, organic stays tiny.
   'adverse': dict(
      mix=dict(radar=.72, desk=.25, plus=.03),
-     emails=[300, 600, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000],
+     emails=[0, 300, 600] + [1000]*9,   # month 1 has no cold email: sending domains need ~4 weeks of age (report P2)
      visit=.03, claim=.25, activate=.40, pay=.10,
-     linkedin=[0] + [.3]*11,
+     linkedin=[0] + [.1]*11,   # LinkedIn is content-led only: pitching in DMs needs consent (ICO; see docs/gtm)
      organic_visits_m12=300, organic_signup=.02, organic_pay=.05,
      partners=[0]*12, churn=.07, pass_rate=.15),
   # Base: funnel ~1.5 paying per 1,000 emails (report B base 1.05; red team median 1.5), modest organic.
   'base': dict(
      mix=dict(radar=.62, desk=.32, plus=.06),
-     emails=[400, 1000] + [1800]*10,
+     emails=[0, 400, 1000] + [1800]*9,
      visit=.07, claim=.30, activate=.48, pay=.15,
-     linkedin=[0] + [.5]*11,
+     linkedin=[0] + [.3]*11,
      organic_visits_m12=1000, organic_signup=.03, organic_pay=.07,
      partners=[0, 0, 0] + [.3]*9, churn=.05, pass_rate=.30),
   # Favourable: the hook works about 2.6x better than base, organic and partners contribute, more Bid Desk buyers.
   'favourable': dict(
      mix=dict(radar=.45, desk=.45, plus=.10),
-     emails=[500, 1500] + [2000]*10,
+     emails=[0, 500, 1500] + [2000]*9,
      visit=.12, claim=.33, activate=.55, pay=.18,
-     linkedin=[0] + [1.2]*11,
+     linkedin=[0] + [.8]*11,
      organic_visits_m12=3000, organic_signup=.04, organic_pay=.09,
      partners=[0, 0, 0] + [1.0]*9, churn=.04, pass_rate=.35),
 }
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     for label, mix in [('Plan mix 72/25/3 (mostly Radar)', dict(radar=.72, desk=.25, plus=.03)), ('Plan mix 62/32/6 (base)', b['mix']), ('Plan mix 30/55/15 (mostly Bid Desk)', dict(radar=.30, desk=.55, plus=.15))]:
         _, rows = run('base', b, {'mix': mix}); print(f"| {label} | ARPA £{arpa_gbp(mix):.0f} | {rows[-1]['cust']:.0f} | {rows[-1]['mrr']:,.0f} |")
     for label, em in [('Emails per month 1,000', 1000), ('Emails per month 1,800 (base)', 1800), ('Emails per month 3,000 (two senders/domains)', 3000)]:
-        _, rows = run('base', b, {'emails': [400, 1000] + [em]*10}); print(f"| {label} | {em} | {rows[-1]['cust']:.0f} | {rows[-1]['mrr']:,.0f} |")
+        _, rows = run('base', b, {'emails': [0, 400, 1000] + [em]*9}); print(f"| {label} | {em} | {rows[-1]['cust']:.0f} | {rows[-1]['mrr']:,.0f} |")
     # What does $10k MRR require?
     print("\n### What $10k MRR requires\n")
     for n, s in SCENARIOS.items():

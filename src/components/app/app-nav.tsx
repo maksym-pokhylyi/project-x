@@ -14,7 +14,7 @@ type Item = { href: string; label: string; match: (path: string) => boolean };
  * /app/library. Add a section here and it appears in the bar and in the phone menu.
  */
 const sections: Item[] = [
-  { href: "/app", label: "Radar", match: (path) => path === "/app" },
+  { href: "/app", label: "Radar", match: (path) => path === "/app" || path.startsWith("/app/tenders") || path.startsWith("/app/radar") },
   { href: "/app/bids", label: "Bids", match: (path) => path.startsWith("/app/bids") },
   { href: "/app/library", label: "Documents", match: (path) => path.startsWith("/app/library") },
 ];

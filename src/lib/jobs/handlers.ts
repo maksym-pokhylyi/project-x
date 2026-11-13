@@ -32,4 +32,10 @@ export const jobHandlers: { [T in JobType]: JobHandler<T> } = {
     `);
     log.info("maintenance.cleanup done", { rateLimits, finishedJobs, outboxBodies: outboxBodies.length });
   },
+
+  "procurement.backfill": async (payload) => {
+    // Imported lazily so the job registry does not pull the ingestion module into every bundle.
+    const { runBackfillSlice } = await import("@/features/procurement/ingest/run");
+    await runBackfillSlice(payload);
+  },
 };
