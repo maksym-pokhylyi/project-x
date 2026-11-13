@@ -1,160 +1,139 @@
 "use client";
 
-import { Fragment, useState } from "react";
-import { filterChipClasses } from "@/components/ui/filter-chip";
-import { radioGroupKeyDown } from "@/components/ui/radio-keys";
-import { BID_PASS, COMPARISON, planPrice, type ComparisonValue } from "@/config/plan-display";
-import { PLANS, PLAN_KEYS, type PlanKey } from "@/config/plans";
+import { useEffect, useRef, useState } from "react";
+import { useBillingInterval } from "@/components/billing/billing-interval";
+import { COMPARISON, COMPARISON_NONE, planPrice, type ComparisonValue } from "@/config/plan-display";
+import { PLANS, PLAN_KEYS } from "@/config/plans";
 import { cn } from "@/lib/utils";
 
-function Value({ value, plan, label, align = "center" }: { value: ComparisonValue; plan: string; label: string; align?: "center" | "end" }) {
-  if (typeof value === "string") return <>{value}</>;
-  return (
-    <>
-      <svg
-        viewBox="0 0 16 16"
-        aria-hidden
-        className={cn(
-          "size-4 fill-none stroke-[1.8] [stroke-linecap:round] [stroke-linejoin:round]",
-          value ? "stroke-brand" : "stroke-line-strong",
-          align === "center" ? "mx-auto" : "ml-auto",
-        )}
-      >
-        {value ? <path d="M3 8.5l3.2 3.2L13 4.8" /> : <path d="M4.5 8h7" />}
+/** A cell: text, a tick ("Included") or a dash ("Not included" / "Not applicable"). */
+function Value({ value }: { value: ComparisonValue }) {
+  if (typeof value === "string") return value === COMPARISON_NONE ? <span className="text-ink-2">{value}</span> : <>{value}</>;
+  if (value) {
+    return (
+      <svg viewBox="0 0 16 16" role="img" aria-label="Included" className="block size-4 fill-none stroke-brand stroke-[1.8] [stroke-linecap:round] [stroke-linejoin:round]">
+        <path d="M3 8.5l3.2 3.2L13 4.8" />
       </svg>
-      <span className="sr-only">
-        {label}: {value ? "included" : "not included"} in {plan}
-      </span>
-    </>
+    );
+  }
+  return (
+    <svg viewBox="0 0 16 16" role="img" aria-label={value === null ? "Not applicable" : "Not included"} className="block size-4 fill-none stroke-ink-2 stroke-[1.6] [stroke-linecap:round]">
+      <path d="M4 8h8" />
+    </svg>
   );
 }
 
-const priceLine = (key: PlanKey) => {
-  const price = planPrice(key, "month");
-  return price.period ? `${price.amount} ${price.period}` : price.amount;
-};
+/*
+ * One table at every width, as on the pricing artboards. Two sizes, chosen by the width of
+ * the table's own box (a container query, so it works in any column):
+ *  - compact (under 904 px): 14 px, a 148 px first column that stays put while the plans
+ *    scroll sideways, and the "Scroll sideways to compare" hint when they have to;
+ *  - full (904 px and up): 15 px, 32% + 4 × 17%.
+ */
+const firstColumn = "sticky left-0 z-10 border-r border-line py-3 pr-3 pl-4 text-left @[56.5rem]:border-r-0 @[56.5rem]:pr-4 @[56.5rem]:pl-6";
+const planColumn = "p-3 @[56.5rem]:px-4 @[56.5rem]:last:pr-6";
 
 /**
- * Plan comparison (docs/product/SPEC.md §5), rendered from the display adapter, in the table
- * style of the supplier page: a white card, small muted column heads, hairline rows.
- *  - from 768 px: one table, plans as columns;
- *  - on phones: pick a plan and read its column as a list — no sideways scrolling.
+ * "Compare the plans": every row is derived from the plan catalogue (src/config/plans.ts).
+ * The prices in the column heads follow the Monthly / Annual toggle of the plan cards when
+ * both sit inside one <BillingIntervalProvider>.
  */
 export function PlanComparison({ labelledBy }: { labelledBy: string }) {
-  const [selected, setSelected] = useState<PlanKey>("pro");
-  const plan = PLANS[selected];
+  const [interval] = useBillingInterval();
+  const scroller = useRef<HTMLDivElement>(null);
+  const [scrollable, setScrollable] = useState(false);
+
+  /* A box that scrolls must be reachable by keyboard; one that fits must not be a tab stop. */
+  useEffect(() => {
+    const element = scroller.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => setScrollable(element.scrollWidth > element.clientWidth + 1));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <>
-      {/* Phones: one plan at a time. */}
-      <div className="md:hidden">
-        <div role="radiogroup" aria-label="Plan to show" className="flex flex-wrap gap-2">
-          {PLAN_KEYS.map((key) => {
-            const checked = key === selected;
-            return (
-              <button
-                key={key}
-                type="button"
-                role="radio"
-                aria-checked={checked}
-                data-value={key}
-                tabIndex={checked ? 0 : -1}
-                onClick={() => setSelected(key)}
-                onKeyDown={(event) => radioGroupKeyDown(event, PLAN_KEYS, selected, setSelected)}
-                className={filterChipClasses(checked)}
-              >
-                {PLANS[key].name}
-              </button>
-            );
-          })}
-        </div>
+    <div className="@container flex flex-col gap-4">
+      <p className="-mt-2 flex items-center gap-1.5 text-13 text-ink-2 @[40.5rem]:hidden">
+        <svg viewBox="0 0 16 16" aria-hidden className="size-4 shrink-0 fill-none stroke-current stroke-[1.6] [stroke-linecap:round] [stroke-linejoin:round]">
+          <path d="M2.5 8h11M5 5.5L2.5 8 5 10.5M11 5.5L13.5 8 11 10.5" />
+        </svg>
+        Scroll sideways to compare
+      </p>
 
-        <div className="mt-4 overflow-hidden rounded-card border border-line bg-surface" aria-live="polite">
-          <p className="flex items-baseline justify-between gap-4 border-b border-line px-5 py-4">
-            <span className="type-h3 text-ink">{plan.name}</span>
-            <span className="text-sm text-ink-2 tabular-nums">{priceLine(selected)}</span>
-          </p>
-          {COMPARISON.map((group) => (
-            <section key={group.title} aria-label={`${group.title}: ${plan.name}`}>
-              <h3 className="border-b border-line bg-paper px-5 py-2 font-sans text-xs leading-[1.125rem] font-semibold text-ink-2">{group.title}</h3>
-              <dl>
-                {group.rows.map((row) => (
-                  <div key={row.label} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 border-b border-line px-5 py-3.5">
-                    <dt className="text-sm text-ink">
-                      <span className="font-semibold">{row.label}</span>
-                      {row.detail ? <span className="mt-0.5 block text-13 text-ink-2">{row.detail}</span> : null}
-                    </dt>
-                    <dd className="max-w-32 text-right text-sm text-ink tabular-nums">
-                      <Value value={row.values[selected]} plan={plan.name} label={row.label} align="end" />
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          ))}
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 px-5 py-3.5">
-            <p className="text-sm text-ink">
-              <span className="font-semibold">{BID_PASS.name}</span>
-              <span className="mt-0.5 block text-13 text-ink-2">{BID_PASS.summary}</span>
-            </p>
-            <p className="max-w-32 text-right text-sm text-ink tabular-nums">
-              {BID_PASS.price} {BID_PASS.period}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Tablets and up: the full table. */}
-      <div className="hidden overflow-hidden rounded-card border border-line bg-surface md:block">
-        <table aria-labelledby={labelledBy} className="w-full border-separate border-spacing-0 text-sm">
-          <thead>
-            <tr>
-              <th scope="col" className="w-[34%] border-b border-line px-6 py-4 text-left align-bottom text-xs leading-[1.125rem] font-semibold text-ink-2">
-                What you get
-              </th>
+      <div className="overflow-hidden rounded-card border border-line bg-surface">
+        <div
+          ref={scroller}
+          {...(scrollable ? { tabIndex: 0, role: "region", "aria-labelledby": labelledBy } : {})}
+          className="overflow-x-auto overscroll-x-contain focus-visible:-outline-offset-2"
+        >
+          <table
+            aria-labelledby={labelledBy}
+            data-testid="plan-comparison"
+            className="w-full min-w-[40.25rem] table-fixed border-separate border-spacing-0 text-sm leading-[1.4] text-ink tabular-nums @[56.5rem]:text-15 @[56.5rem]:leading-[1.45]"
+          >
+            <colgroup>
+              <col className="w-[9.25rem] @[56.5rem]:w-[32%]" />
               {PLAN_KEYS.map((key) => (
-                <th key={key} scope="col" className="border-b border-line px-3 py-4 text-center align-bottom last:pr-6">
-                  <span className="block font-display text-17 leading-6 font-semibold text-ink">{PLANS[key].name}</span>
-                  <span className="block text-13 font-normal text-ink-2">{priceLine(key)}</span>
-                </th>
+                <col key={key} className="w-[7.75rem] @[56.5rem]:w-[17%]" />
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {COMPARISON.map((group) => (
-              <Fragment key={group.title}>
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col" className={cn(firstColumn, "border-b bg-surface align-bottom text-xs leading-[inherit] font-semibold text-ink-2 @[56.5rem]:pt-[1.125rem] @[56.5rem]:pb-4")}>
+                  What you get
+                </th>
+                {PLAN_KEYS.map((key) => {
+                  const plan = PLANS[key];
+                  return (
+                    <th key={key} scope="col" className={cn(planColumn, "border-b border-line text-left align-bottom font-normal @[56.5rem]:pt-[1.125rem] @[56.5rem]:pb-4")}>
+                      {plan.recommended ? (
+                        <span className="mb-1 inline-block rounded-chip bg-brand px-1.5 py-px text-xs leading-[inherit] font-semibold text-white @[56.5rem]:mb-1.5 @[56.5rem]:px-2 @[56.5rem]:py-0.5">
+                          Recommended
+                        </span>
+                      ) : null}
+                      <span className="block text-sm leading-[inherit] font-semibold @[56.5rem]:text-base @[56.5rem]:leading-[inherit]">{plan.name}</span>
+                      <span className="block text-xs leading-[inherit] text-ink-2 @[56.5rem]:text-13 @[56.5rem]:leading-[inherit]" data-testid={`compare-price-${key}`}>
+                        {planPrice(key, interval).line}
+                      </span>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            {COMPARISON.map((group, groupIndex) => (
+              <tbody key={group.title}>
                 <tr>
-                  <th scope="colgroup" colSpan={PLAN_KEYS.length + 1} className="border-b border-line bg-paper px-6 py-2.5 text-left text-xs leading-[1.125rem] font-semibold text-ink-2">
+                  {/* The group title stays put while the plans scroll; the rest of its row is an empty band. */}
+                  <th
+                    scope="rowgroup"
+                    className="sticky left-0 z-10 border-b border-line bg-paper py-2 pr-3 pl-4 text-left text-13 leading-[inherit] font-semibold whitespace-nowrap @[56.5rem]:py-2.5 @[56.5rem]:pl-6"
+                  >
                     {group.title}
                   </th>
+                  <td colSpan={PLAN_KEYS.length} className="border-b border-line bg-paper" />
                 </tr>
-                {group.rows.map((row) => (
-                  <tr key={row.label} className="transition-colors duration-100 hover:bg-brand-tint/50">
-                    <th scope="row" className="border-b border-line py-3.5 pr-4 pl-6 text-left align-top font-normal">
-                      <span className="block font-semibold text-ink">{row.label}</span>
-                      {row.detail ? <span className="mt-0.5 block text-13 text-ink-2">{row.detail}</span> : null}
-                    </th>
-                    {PLAN_KEYS.map((key) => (
-                      <td key={key} className="border-b border-line px-3 py-3.5 text-center align-top text-ink last:pr-6">
-                        <Value value={row.values[key]} plan={PLANS[key].name} label={row.label} />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </Fragment>
+                {group.rows.map((row, rowIndex) => {
+                  /* The card's own edge closes the table: the last row has no rule. */
+                  const rule = groupIndex === COMPARISON.length - 1 && rowIndex === group.rows.length - 1 ? undefined : "border-b";
+                  return (
+                    <tr key={row.label}>
+                      <th scope="row" className={cn(firstColumn, "bg-surface align-middle font-medium @[56.5rem]:py-3.5", rule)}>
+                        {row.label}
+                      </th>
+                      {PLAN_KEYS.map((key) => (
+                        <td key={key} className={cn(planColumn, "border-line align-middle @[56.5rem]:py-3.5", rule)}>
+                          <Value value={row.values[key]} />
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
             ))}
-            <tr>
-              <th scope="row" className="py-3.5 pr-4 pl-6 text-left align-top font-normal">
-                <span className="block font-semibold text-ink">{BID_PASS.name}</span>
-                <span className="mt-0.5 block text-13 text-ink-2">{BID_PASS.summary}</span>
-              </th>
-              <td colSpan={PLAN_KEYS.length} className="px-3 py-3.5 pr-6 text-center align-top text-ink">
-                {BID_PASS.price} {BID_PASS.period}, on any plan
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          </table>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -12,7 +12,7 @@ export function CompanySearch({ id, className, children }: { id: string; classNa
   const { search } = landing;
   return (
     <form action={search.action} method="get" role="search" aria-label="Find your company" className={cn("flex flex-col gap-2", className)}>
-      <label htmlFor={id} className="text-sm leading-5 font-semibold text-ink">
+      <label htmlFor={id} className="text-sm leading-[1.5] font-semibold text-ink">
         {search.label}
       </label>
       <div className="flex flex-col gap-2 sm:flex-row">

@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils"
  * the words (and an icon where it helps), not by colour alone.
  *
  *   default      solid brand, white label — the "Verdict" label; use sparingly
- *   secondary    ink on paper-deep — quiet facts: categories, plan names, roles
+ *   secondary    ink on paper-deep — quiet facts: categories, plan names, roles, "Pass or fail"
  *   brand        ink on brand-tint — the strongest reason, "selected"
- *   outline      line-strong edge — a property of a requirement ("Pass / fail")
+ *   outline      line-strong edge — a quiet property that needs an edge on a tinted panel
  *   strong       ink edge — the property that matters most ("Mandatory")
  *   warning      ink on amber-tint — time left ("14 days left")
  *   success      brand green on success-tint — "Met", "Active" (add a tick)

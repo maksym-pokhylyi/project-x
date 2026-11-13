@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PlanTick } from "@/components/billing/pricing-table";
@@ -10,6 +11,7 @@ import { Eyebrow, Point, Section, SectionHeading } from "@/components/marketing/
 import { DocumentExcerpt, ProofBridge, RequirementCard } from "@/components/marketing/visuals/proof-visuals";
 import { stepVisuals } from "@/components/marketing/visuals/step-visuals";
 import { SupplierPreview } from "@/components/marketing/visuals/supplier-preview";
+import { Button } from "@/components/ui/button";
 import { landing } from "@/config/landing";
 import { site } from "@/config/site";
 import { appUrl } from "@/env";
@@ -22,7 +24,7 @@ export const metadata: Metadata = {
 
 /** The landing page, built to docs/design/handoff/Landing-1440 and Landing-390. Copy: src/config/landing.ts. */
 export default function LandingPage() {
-  const { hero, strip, how, proof, pricing, straightAnswers, questions } = landing;
+  const { hero, strip, how, proof, pricing, questions } = landing;
 
   return (
     <>
@@ -31,9 +33,9 @@ export default function LandingPage() {
 
       {/* Hero ---------------------------------------------------------------------------- */}
       <section aria-labelledby="hero-title">
-        <div className="container-content grid gap-y-9 pt-7 pb-10 md:gap-y-10 md:pt-14 md:pb-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:items-center lg:gap-x-12 lg:pt-16 lg:pb-[5.5rem] xl:grid-cols-[33.75rem_minmax(0,1fr)] xl:gap-x-14">
-          <div className="flex max-w-[38rem] flex-col gap-5 md:gap-6">
-            <Eyebrow>{hero.eyebrow}</Eyebrow>
+        <div className="container-content grid gap-y-8 pt-7 pb-10 md:gap-y-10 md:pt-14 md:pb-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:items-start lg:gap-x-12 lg:pt-16 lg:pb-[5.5rem] xl:grid-cols-[33.75rem_minmax(0,1fr)] xl:gap-x-14">
+          <div className="flex max-w-[38rem] flex-col gap-4 md:gap-6 lg:pt-3">
+            <Eyebrow className="max-sm:-mb-1">{hero.eyebrow}</Eyebrow>
             <h1 id="hero-title" className="type-hero text-ink">
               {hero.titleLead} <span className="text-brand">— {hero.titleRest}</span>
             </h1>
@@ -42,8 +44,9 @@ export default function LandingPage() {
               <span className="hidden sm:inline">{hero.lead}</span>
             </p>
             <CompanySearch id="hero-company" className="mt-1 md:mt-2">
-              <p className="text-13 text-ink-2">
-                {hero.note} {hero.sampleLink.before}
+              <p className="text-13 leading-[1.5] text-ink-2 max-sm:pt-0.5">
+                <span className="sm:hidden">{hero.noteShort}</span>
+                <span className="hidden sm:inline">{hero.note}</span> {hero.sampleLink.before}
                 <Link href={hero.sampleLink.href} className="link">
                   {hero.sampleLink.label}
                 </Link>
@@ -56,15 +59,15 @@ export default function LandingPage() {
       </section>
 
       {/* Open data and independence ------------------------------------------------------ */}
-      <section aria-label="About the data">
+      <section aria-label="Where the data comes from">
         <div className="container-content">
-          <div className="flex flex-wrap justify-between gap-x-12 gap-y-2 border-y border-line py-5 text-sm leading-[1.3125rem] text-ink">
-            <p className="max-w-[40rem] min-w-0 flex-[1_1_24rem]">
+          <div className="flex flex-wrap justify-between gap-x-10 gap-y-2 border-y border-line py-4 text-sm leading-[1.3125rem] text-ink sm:py-5">
+            <p className="max-w-[40rem] min-w-0 flex-[1_1_30rem]">
               <strong className="font-semibold">{strip.data.strong}</strong> {strip.data.text}
             </p>
             <p className="lg:shrink-0">
               <strong className="font-semibold">{strip.independent.strong}</strong> {strip.independent.text}{" "}
-              <a href={strip.independent.link.href} className="link">
+              <a href={strip.independent.link.href} className="link max-sm:hidden">
                 {strip.independent.link.label}
               </a>
             </p>
@@ -73,23 +76,23 @@ export default function LandingPage() {
       </section>
 
       {/* How it works -------------------------------------------------------------------- */}
-      <Section id="how" labelledBy="how-title" containerClassName="flex flex-col gap-8 md:gap-12">
+      <Section id="how" labelledBy="how-title" containerClassName="flex flex-col gap-7 md:gap-12">
         <SectionHeading id="how-title" eyebrow={how.eyebrow} title={how.title} className="max-w-[30rem]" />
-        <ol className="grid gap-y-8 md:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
+        <ol className="grid md:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
           {how.steps.map((step, index) => {
             const visual = stepVisuals[index]!;
             return (
               <li
                 key={step.title}
-                className="flex flex-col border-t border-line pt-6 md:grid md:grid-cols-2 md:items-center md:gap-x-8 md:border-t-0 md:pt-0 lg:flex lg:items-stretch"
+                className="flex flex-col border-t border-line pt-[1.125rem] pb-[1.375rem] last:pb-0 md:grid md:grid-cols-2 md:items-center md:gap-x-8 md:border-t-0 md:py-0 lg:flex lg:items-stretch"
               >
                 <div className="hidden md:block">{visual.card}</div>
                 <div className="lg:mt-5">
-                  <p className="font-mono text-13 text-ink-2">{String(index + 1).padStart(2, "0")}</p>
-                  <h3 className="type-h3 mt-2 text-ink">{step.title}</h3>
-                  <p className="type-reading mt-2 text-ink">{step.body}</p>
+                  <p className="font-mono text-13 leading-[1.5] font-normal text-ink-2">{String(index + 1).padStart(2, "0")}</p>
+                  <h3 className="type-h3 mt-1.5 text-ink md:mt-2">{step.title}</h3>
+                  <p className="type-reading mt-1.5 text-ink md:mt-2">{step.body}</p>
                 </div>
-                <div className="mt-4 md:hidden">{visual.chip}</div>
+                <div className="mt-3.5 md:hidden">{visual.chip}</div>
               </li>
             );
           })}
@@ -97,22 +100,30 @@ export default function LandingPage() {
       </Section>
 
       {/* Proof: every requirement, quoted and cited -------------------------------------- */}
-      <Section id="proof" labelledBy="proof-title" tone="deep" containerClassName="flex flex-col gap-9 md:gap-14">
-        <SectionHeading id="proof-title" eyebrow={proof.eyebrow} title={proof.title} lead={proof.lead} />
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-10">
+      <Section id="proof" labelledBy="proof-title" tone="deep" containerClassName="flex flex-col gap-7 md:gap-14">
+        <SectionHeading
+          id="proof-title"
+          eyebrow={proof.eyebrow}
+          title={proof.title}
+          lead={
+            <>
+              <span className="sm:hidden">{proof.leadShort}</span>
+              <span className="hidden sm:inline">{proof.lead}</span>
+            </>
+          }
+        />
+        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-14">
           <DocumentExcerpt className="min-w-0 lg:flex-[1_1_27.5rem]" />
-          <ProofBridge className="lg:hidden">{proof.bridge}</ProofBridge>
+          <ProofBridge className="py-3 lg:hidden">{proof.bridge}</ProofBridge>
           <RequirementCard className="min-w-0 lg:flex-[1.25_1_31.25rem]" />
         </div>
 
-        <ul className="divide-y divide-line border-y border-line md:hidden">
+        {/* Phones: the three claims as one ticked list. From 768 px: each under its ink rule, with its sentence. */}
+        <ul className="-mt-2 rounded-card border border-line bg-surface text-15 font-semibold text-ink md:hidden">
           {proof.points.map((point) => (
-            <li key={point.title} className="flex gap-2.5 py-3.5">
-              <PlanTick className="mt-1 text-brand" />
-              <div>
-                <h3 className="font-sans text-15 font-semibold text-ink">{point.title}</h3>
-                <p className="mt-0.5 text-sm leading-[1.3125rem] text-ink">{point.short}</p>
-              </div>
+            <li key={point.title} className="flex min-h-[2.875rem] items-center gap-2.5 border-line px-4 not-first:border-t">
+              <PlanTick className="mt-0 text-brand" />
+              {point.title}
             </li>
           ))}
         </ul>
@@ -124,19 +135,24 @@ export default function LandingPage() {
           ))}
         </ul>
 
-        <p className="text-15 text-ink">
-          <Link href={proof.sampleLink.href} className="link font-medium">
+        <div className="-mt-2 flex flex-col gap-x-6 sm:flex-row sm:flex-wrap sm:items-center md:mt-0">
+          <Button asChild size="lg" className="sm:h-12">
+            <Link href={proof.cta.href}>
+              {proof.cta.label} <ArrowRight aria-hidden strokeWidth={2.2} />
+            </Link>
+          </Button>
+          <Link href={proof.sampleLink.href} className="link inline-flex min-h-11 items-center self-center text-15 font-medium sm:min-h-12 sm:text-base">
             {proof.sampleLink.label}
           </Link>
-          <span className="text-ink-2"> · {proof.note}</span>
-        </p>
+        </div>
       </Section>
 
       {/* Pricing ------------------------------------------------------------------------- */}
-      <Section id="pricing" labelledBy="pricing-title" containerClassName="flex flex-col gap-8 md:gap-10">
+      <Section id="pricing" labelledBy="pricing-title" containerClassName="flex flex-col gap-6 md:gap-10">
         <SectionHeading id="pricing-title" eyebrow={pricing.eyebrow} title={pricing.title} lead={pricing.lead} />
         <MarketingPricing
           toggle={false}
+          shortBidPass
           smallPrint={
             <>
               {pricing.smallPrint}{" "}
@@ -148,39 +164,15 @@ export default function LandingPage() {
         />
       </Section>
 
-      {/* Straight answers ---------------------------------------------------------------- */}
-      <Section id="straight-answers" labelledBy="answers-title" tone="deep" containerClassName="flex flex-wrap gap-x-20 gap-y-9">
-        <div className="flex min-w-0 flex-[1_1_18.75rem] flex-col gap-3">
-          <Eyebrow>{straightAnswers.eyebrow}</Eyebrow>
-          <h2 id="answers-title" className="type-h2 text-ink">
-            {straightAnswers.title}
-          </h2>
-          <p className="type-reading mt-1 text-ink">{straightAnswers.lead}</p>
-        </div>
-        <dl className="grid min-w-0 flex-[2_1_35rem] gap-x-8 gap-y-7 sm:grid-cols-2">
-          {straightAnswers.items.map((item) => (
-            <div key={item.question} className="flex flex-col gap-1.5 border-t-2 border-ink pt-[1.125rem]">
-              <dt className="text-17 font-semibold text-ink">{item.question}</dt>
-              <dd className="text-15 leading-[1.45rem] text-ink">{item.answer}</dd>
-            </div>
-          ))}
-        </dl>
-      </Section>
-
       {/* Questions ----------------------------------------------------------------------- */}
-      <Section
-        id="questions"
-        labelledBy="questions-title"
-        tone="surface"
-        containerClassName="flex flex-wrap gap-x-20 gap-y-8"
-        className="border-t-0"
-      >
-        <div className="flex min-w-0 flex-[1_1_18.75rem] flex-col gap-3">
+      <Section id="questions" labelledBy="questions-title" tone="surface" containerClassName="flex flex-wrap gap-x-20 gap-y-5 sm:gap-y-10">
+        <div className="flex min-w-0 flex-[1_1_18.75rem] flex-col gap-2 sm:gap-3">
           <Eyebrow>{questions.eyebrow}</Eyebrow>
           <h2 id="questions-title" className="type-h2 text-ink">
             {questions.title}
           </h2>
-          <p className="type-reading mt-1 text-ink-2">
+          {/* The 390 px artboard leaves the contact line to the footer. */}
+          <p className="type-reading text-ink-2 max-sm:hidden">
             {questions.contact.before}
             <a href={`mailto:${site.supportEmail}`}>{site.supportEmail}</a>
             {questions.contact.after}

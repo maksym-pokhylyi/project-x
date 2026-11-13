@@ -12,7 +12,8 @@
  *                       src/components/ui (and anything written shadcn-style) picks them up.
  *   3. :root            the short DESIGN.md names (--paper, --ink …) for hand-written CSS.
  *   4. @layer base      element defaults: focus ring, selection, links, headings, motion, print.
- *   5. @utility         type roles (type-hero … type-ref) and a few shared helpers.
+ *   5. @utility         type roles (type-hero … type-ref), the control sizes (controls-*)
+ *                       and a few shared helpers.
  *
  * Light theme only in v1. Components never hard-code colours: change a value here and it
  * changes everywhere. Contrast of every pair is checked by scripts/design/contrast.mjs.
@@ -83,7 +84,7 @@
   --text-xl--line-height: 1.625rem;
   --text-2xl: 1.5rem;
   --text-2xl--line-height: 1.875rem;
-  --text-2xl--letter-spacing: -0.005em;
+  --text-2xl--letter-spacing: 0em;
   --text-3xl: 1.75rem;
   --text-3xl--line-height: 2.125rem;
   --text-3xl--letter-spacing: -0.01em;
@@ -192,6 +193,26 @@
   @media (width >= 48rem) {
     --header-height: 4.5rem;
   }
+
+  /*
+   * Control sizes (Foundations, "Control sizes"): ONE height scale for fields and buttons.
+   *   --control-sm  44 px  toolbars, tables and filters in the app
+   *   --control-md  48 px  forms
+   *   --control-lg  52 px  search rows, and forms on phones
+   * Two heights are never mixed in one row: a button beside a field has the field's height,
+   * and a form's submit button the height of the form's fields. That holds by construction:
+   * every field and button is as tall as --control-h, which a group sets once for all of
+   * them (the controls-* utilities below, or <ControlGroup size>), and which is 44 px
+   * where nothing sets it. The label and padding that go with a height travel with it.
+   */
+  --control-sm: 2.75rem;
+  --control-md: 3rem;
+  --control-lg: 3.25rem;
+  --control-h: var(--control-sm);
+  --control-text: 0.9375rem; /* button label: 15 px at 44 px, 16 px at 48 and 52 px */
+  --control-px: 1.0625rem; /* button side padding; with its 1 px edge: 18 px, 22 px at 48 and 52 */
+  --field-text: 0.9375rem; /* text in a field from 640 px (always 16 px on phones) */
+  --field-px: 0.75rem; /* field side padding; with its 1 px edge: 13 px, 15 px at 48 and 52 */
 }
 
 @layer base {
@@ -234,13 +255,6 @@
   h5,
   h6 {
     font-weight: 600;
-  }
-
-  p,
-  li,
-  dd,
-  figcaption {
-    text-wrap: pretty;
   }
 
   /* Figures line up down a column: pounds, dates, counts. */
@@ -349,17 +363,17 @@
 @utility type-hero {
   font-family: var(--font-display);
   font-size: 2.125rem;
-  line-height: 2.375rem;
+  line-height: 1.1;
   font-weight: 600;
   letter-spacing: -0.02em;
   text-wrap: balance;
   @media (width >= 40rem) {
     font-size: 2.75rem;
-    line-height: 3rem;
+    line-height: 1.09;
   }
   @media (width >= 64rem) {
     font-size: 3.125rem;
-    line-height: 3.375rem;
+    line-height: 1.07;
   }
 }
 
@@ -367,7 +381,7 @@
 @utility type-h1 {
   font-family: var(--font-display);
   font-size: 1.875rem;
-  line-height: 2.125rem;
+  line-height: 2.0625rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   text-wrap: balance;
@@ -417,45 +431,55 @@
 @utility type-section {
   font-family: var(--font-display);
   font-size: 1.5rem;
-  line-height: 1.8125rem;
+  line-height: 1.15;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   text-wrap: balance;
   @media (width >= 48rem) {
     font-size: 1.75rem;
-    line-height: 2.125rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
   }
 }
 
-/* Sub-section heading, step and plan names: 22/27 on phones, 24/29 from 640 px. */
+/* Sub-section heading, step and plan names: 22 px on phones, 24 px from 640 px, at 1.2. */
 @utility type-h3 {
   font-family: var(--font-display);
   font-size: 1.375rem;
-  line-height: 1.6875rem;
+  line-height: 1.2;
   font-weight: 600;
-  letter-spacing: -0.005em;
+  letter-spacing: 0;
   text-wrap: balance;
   @media (width >= 40rem) {
     font-size: 1.5rem;
-    line-height: 1.8125rem;
   }
 }
 
-/* Lead paragraph under a heading: 16/26 on phones, 18/28 from 640 px. Ink, not grey. */
+/* A question that opens (FAQ rows): serif 19/25 on phones, 21/27 from 640 px. */
+@utility type-question {
+  font-family: var(--font-display);
+  font-size: 1.1875rem;
+  line-height: 1.3;
+  font-weight: 600;
+  @media (width >= 40rem) {
+    font-size: 1.3125rem;
+  }
+}
+
+/* Lead paragraph under a heading: 16 px on phones, 18 px from 640 px, at 1.55. Ink, not grey. */
 @utility type-lead {
   font-size: 1rem;
-  line-height: 1.625rem;
+  line-height: 1.55;
   text-wrap: pretty;
   @media (width >= 40rem) {
     font-size: 1.125rem;
-    line-height: 1.75rem;
   }
 }
 
-/* Running text: 16/26. Marketing paragraphs, FAQ answers, legal pages. */
+/* Running text: 16 px at 1.6. Marketing paragraphs, legal pages. */
 @utility type-reading {
   font-size: 1rem;
-  line-height: 1.625rem;
+  line-height: 1.6;
   text-wrap: pretty;
 }
 
@@ -463,7 +487,7 @@
 @utility type-eyebrow {
   font-family: var(--font-sans);
   font-size: 0.875rem;
-  line-height: 1.25rem;
+  line-height: 1.3125rem;
   font-weight: 600;
   letter-spacing: 0;
   color: var(--color-brand);
@@ -507,6 +531,47 @@
   font-weight: 600;
   letter-spacing: -0.01em;
   font-variant-numeric: lining-nums;
+}
+
+/*
+ * Control sizes. Put one of these on a row, a form or any wrapper and every field and
+ * button inside takes that height (see the tokens in :root above); or on one control to
+ * size it alone, which is what the `size` prop of Button, Input and the selects does.
+ *   controls-sm    44 px   toolbars, tables and filters in the app (the default everywhere)
+ *   controls-md    48 px   forms
+ *   controls-lg    52 px   search rows
+ *   controls-form  a form: 52 px on phones, 48 px from 640 px
+ */
+@utility controls-sm {
+  --control-h: var(--control-sm);
+  --control-text: 0.9375rem;
+  --control-px: 1.0625rem;
+  --field-text: 0.9375rem;
+  --field-px: 0.75rem;
+}
+@utility controls-md {
+  --control-h: var(--control-md);
+  --control-text: 1rem;
+  --control-px: 1.3125rem;
+  --field-text: 1rem;
+  --field-px: 0.875rem;
+}
+@utility controls-lg {
+  --control-h: var(--control-lg);
+  --control-text: 1rem;
+  --control-px: 1.3125rem;
+  --field-text: 1rem;
+  --field-px: 0.875rem;
+}
+@utility controls-form {
+  --control-h: var(--control-lg);
+  --control-text: 1rem;
+  --control-px: 1.3125rem;
+  --field-text: 1rem;
+  --field-px: 0.875rem;
+  @media (width >= 40rem) {
+    --control-h: var(--control-md);
+  }
 }
 
 /* Link style for anchors that carry classes of their own: ink, green underline. */

@@ -3,17 +3,19 @@ import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { HeaderSessionLink } from "./header-session-link";
 import { MobileNav } from "./mobile-nav";
-import { findCompany, primaryNav } from "./site-nav";
+import { findCompany } from "./site-nav";
+import { SiteNavLinks } from "./site-nav-links";
 
 const navLink = "link-quiet inline-flex min-h-11 items-center rounded-sm text-15 font-medium";
 
 /**
- * Public header, as in the landing artboard: the lockup on the left; on the right the
- * links, "Sign in" and the one green button. 72 px tall on a hairline (56 px on phones,
- * where the links move into the menu).
+ * Public header, as in the landing and pricing artboards: the lockup on the left; on the
+ * right the links, "Sign in" and the one green button. 72 px tall on a hairline (56 px on
+ * phones, where the links move into the menu).
  *
- * Static (no session read on the server) so public pages stay cacheable; the sign-in link
- * is a small client island that becomes "Open your radar" for people who are signed in.
+ * Static (no session read on the server) so public pages stay cacheable; the links (which
+ * mark the current page) and the sign-in link (which becomes "Open your radar" for people
+ * who are signed in) are small client islands.
  */
 export function SiteHeader() {
   return (
@@ -22,11 +24,7 @@ export function SiteHeader() {
         <Logo />
         <div className="hidden items-center gap-8 md:flex">
           <nav aria-label="Main" className="flex items-center gap-8">
-            {primaryNav.map((item) => (
-              <Link key={item.href} href={item.href} className={navLink}>
-                {item.label}
-              </Link>
-            ))}
+            <SiteNavLinks className={navLink} />
             <HeaderSessionLink className={navLink} />
           </nav>
           <Button asChild>

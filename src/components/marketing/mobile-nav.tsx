@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useState } from "react";
 import { Wordmark } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import { findCompany, primaryNav } from "./site-nav";
+import { findCompany, navHref, primaryNav } from "./site-nav";
 
 const iconButton = "grid size-11 shrink-0 cursor-pointer place-items-center rounded-control text-ink transition-colors duration-150 hover:bg-paper-deep";
 
@@ -26,6 +27,7 @@ function MenuIcon({ open = false }: { open?: boolean }) {
  */
 export function MobileNav() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   const { data } = authClient.useSession();
   const signedIn = Boolean(data?.user);
   const close = () => setOpen(false);
@@ -60,7 +62,12 @@ export function MobileNav() {
             <ul className="divide-y divide-line border-b border-line">
               {primaryNav.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} onClick={close} className="link-quiet flex min-h-[3.25rem] items-center text-17 font-medium">
+                  <Link
+                    href={navHref(item.href, pathname)}
+                    onClick={close}
+                    aria-current={item.href === pathname ? "page" : undefined}
+                    className="link-quiet flex min-h-[3.25rem] items-center text-17 font-medium aria-[current=page]:font-semibold"
+                  >
                     {item.label}
                   </Link>
                 </li>
@@ -79,7 +86,7 @@ export function MobileNav() {
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link href="/free-bid-check" onClick={close}>
-                  Get a free bid check
+                  Get a free cited bid check
                 </Link>
               </Button>
             </div>

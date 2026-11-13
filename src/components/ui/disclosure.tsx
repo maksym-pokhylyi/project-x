@@ -20,7 +20,7 @@ function Disclosure({
 }: Omit<React.ComponentProps<"details">, "children"> & { summary: React.ReactNode; children: React.ReactNode }) {
   return (
     <details data-slot="disclosure" className={cn("group", className)} {...props}>
-      <summary className="flex items-center justify-between gap-5 rounded-sm py-4 font-display text-lg leading-6 font-semibold text-ink transition-colors hover:text-brand sm:py-5 sm:text-xl sm:leading-[1.625rem]">
+      <summary className="type-question flex items-center justify-between gap-4 rounded-sm py-4 text-ink transition-colors hover:text-brand sm:gap-5 sm:py-5">
         <span className="text-pretty">{summary}</span>
         <svg
           viewBox="0 0 16 16"
@@ -30,7 +30,7 @@ function Disclosure({
           <path d="M3.5 6l4.5 4.5L12.5 6" />
         </svg>
       </summary>
-      <div className="type-reading max-w-[42.5rem] pb-6 text-ink sm:pr-10 [&>*+*]:mt-3">{children}</div>
+      <div className="max-w-[45rem] pb-5 text-base leading-[1.6] text-ink sm:pr-10 sm:pb-6 [&>*+*]:mt-3">{children}</div>
     </details>
   )
 }
