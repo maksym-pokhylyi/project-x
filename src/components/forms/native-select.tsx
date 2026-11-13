@@ -1,14 +1,13 @@
 import type { ComponentProps } from "react";
+import { controlClasses } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 /** Styled native <select>: accessible, mobile-friendly and dependency-free. */
 export function NativeSelect({ className, ...props }: ComponentProps<"select">) {
   return (
     <select
-      className={cn(
-        "h-9 rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
-        className,
-      )}
+      data-slot="native-select"
+      className={cn(controlClasses, "select-chevron h-10 w-auto cursor-pointer appearance-none pr-9", className)}
       {...props}
     />
   );

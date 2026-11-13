@@ -66,7 +66,7 @@ export type Plan = {
   key: PlanKey;
   name: string;
   description: string;
-  /** Price in USD cents per billing interval; `null` for the free plan. */
+  /** Price in GBP pence per billing interval; `null` for the free plan. */
   prices: Record<BillingInterval, number> | null;
   limits: PlanLimits;
   features: PlanFeatures;
@@ -76,43 +76,86 @@ export type Plan = {
   recommended?: boolean;
 };
 
+/** ISO 4217 code of the currency every catalogue price is stated in. */
+export const PLAN_CURRENCY = "GBP";
+
+/*
+ * The four plan KEYS are the foundation's (free / starter / pro / business) and must not be
+ * renamed: subscriptions, env vars and Paddle custom data refer to them. Their display
+ * names are the real Bidfolio plans:
+ *
+ *   free      -> Free            £0
+ *   starter   -> Radar Pro       £29 / month,  £290 / year
+ *   pro       -> Bid Desk        £149 / month, £1,490 / year
+ *   business  -> Bid Desk Plus   £349 / month, £3,490 / year
+ *
+ * Annual billing is two months free. The one-off Bid Pass (£99, one full bid) is not a
+ * subscription plan; its display data lives in src/config/plan-display.ts, together with
+ * the comparison table. `units` is still the foundation's placeholder quota metric.
+ */
 export const PLANS: Record<PlanKey, Plan> = {
   free: {
     key: "free",
     name: "Free",
-    description: "Try the product with a small workspace.",
+    description: "Your supplier page, your radar and one cited bid check.",
     prices: null,
-    limits: { seats: 2, units: 50, aiMonthlyBudgetUsd: 0.5 },
+    limits: { seats: 1, units: 50, aiMonthlyBudgetUsd: 0.5 },
     features: { apiAccess: false, advancedExports: false, auditLog: false, prioritySupport: false },
-    highlights: ["2 seats", "50 units / month", "Community support"],
+    highlights: [
+      "Your supplier page, open and free",
+      "Radar: your top 10 matching tenders",
+      "Weekly digest by email",
+      "1 free cited bid check",
+      "1 seat",
+    ],
   },
   starter: {
     key: "starter",
-    name: "Starter",
-    description: "For small teams getting real work done.",
+    name: "Radar Pro",
+    description: "The full radar, with daily alerts and watchlists.",
     prices: { month: 2900, year: 29000 },
-    limits: { seats: 5, units: 1000, aiMonthlyBudgetUsd: 5 },
+    limits: { seats: 2, units: 1000, aiMonthlyBudgetUsd: 5 },
     features: { apiAccess: false, advancedExports: true, auditLog: false, prioritySupport: false },
-    highlights: ["5 seats", "1,000 units / month", "Advanced exports", "Email support"],
+    highlights: [
+      "The full radar: every match, up to 5 profiles",
+      "Daily alerts by email",
+      "Buyer and competitor watchlists",
+      "Export to CSV",
+      "1 cited bid check a month",
+      "2 seats",
+    ],
   },
   pro: {
     key: "pro",
-    name: "Pro",
-    description: "For growing teams that rely on it daily.",
-    prices: { month: 7900, year: 79000 },
-    limits: { seats: 15, units: 10000, aiMonthlyBudgetUsd: 25 },
+    name: "Bid Desk",
+    description: "For firms that bid most months: check, draft and mark each bid.",
+    prices: { month: 14900, year: 149000 },
+    limits: { seats: 3, units: 10000, aiMonthlyBudgetUsd: 25 },
     features: { apiAccess: true, advancedExports: true, auditLog: true, prioritySupport: false },
-    highlights: ["15 seats", "10,000 units / month", "API access", "Audit log"],
+    highlights: [
+      "Everything in Radar Pro",
+      "3 full bids a month; unused bids roll over one month",
+      "Cited check and scored-question matrix for each bid",
+      "First drafts written only from your evidence",
+      "Evaluator-style marking and Word export",
+      "3 seats",
+    ],
     recommended: true,
   },
   business: {
     key: "business",
-    name: "Business",
-    description: "For organisations with higher volume and support needs.",
-    prices: { month: 19900, year: 199000 },
-    limits: { seats: 50, units: 100000, aiMonthlyBudgetUsd: 100 },
+    name: "Bid Desk Plus",
+    description: "For bid writers and consultancies working across clients.",
+    prices: { month: 34900, year: 349000 },
+    limits: { seats: 10, units: 100000, aiMonthlyBudgetUsd: 100 },
     features: { apiAccess: true, advancedExports: true, auditLog: true, prioritySupport: true },
-    highlights: ["50 seats", "100,000 units / month", "Priority support", "Everything in Pro"],
+    highlights: [
+      "Everything in Bid Desk",
+      "10 full bids a month; unused bids roll over one month",
+      "Separate client workspaces",
+      "10 seats",
+      "Priority support",
+    ],
   },
 };
 
@@ -136,14 +179,16 @@ export function paddlePriceEnvVar(plan: PaidPlanKey, interval: BillingInterval):
   return `PADDLE_PRICE_${plan.toUpperCase()}_${interval === "month" ? "MONTHLY" : "ANNUAL"}`;
 }
 
-/** "$29" / "$290" — whole-dollar display for catalogue prices. */
-export function formatPrice(cents: number): string {
-  const dollars = cents / 100;
-  return new Intl.NumberFormat("en-US", {
+/** "£29" / "£1,490" / "£24.17" — catalogue prices in pounds; pence only when not whole. */
+export function formatPrice(pence: number): string {
+  const pounds = pence / 100;
+  const digits = Number.isInteger(pounds) ? 0 : 2;
+  return new Intl.NumberFormat("en-GB", {
     style: "currency",
-    currency: "USD",
-    maximumFractionDigits: Number.isInteger(dollars) ? 0 : 2,
-  }).format(dollars);
+    currency: PLAN_CURRENCY,
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(pounds);
 }
 
 /** Percentage saved by paying annually instead of 12 monthly payments. */

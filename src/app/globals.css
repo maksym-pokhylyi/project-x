@@ -2,96 +2,551 @@
 @import "tw-animate-css";
 
 /*
- * Design tokens.
+ * Bidfolio design tokens — the implementation of docs/design/DESIGN.md §3–4.
  *
- * Everything visual is driven by the CSS variables in :root below (shadcn/ui naming).
- * To apply a brand theme, change these values — components never hard-code colours.
- * The palette is intentionally neutral; `--primary` is the single accent to rebrand first.
- * Dark mode is not implemented: add a `.dark { … }` block with the same variables if needed.
+ * How this file is organised
+ *   1. @theme           raw tokens. Every colour here becomes a utility: bg-paper, text-ink-2,
+ *                       border-line, bg-brand-tint, text-accent-ink …
+ *   2. @theme inline    shadcn/ui semantic names mapped onto the tokens, so every primitive in
+ *                       src/components/ui (and anything written shadcn-style) picks them up.
+ *   3. :root            the short DESIGN.md names (--paper, --ink …) for hand-written CSS.
+ *   4. @layer base      element defaults: focus ring, selection, links, headings, motion, print.
+ *   5. @utility         type roles (type-hero … type-eyebrow) and a few shared helpers.
+ *
+ * Light theme only in v1. Components never hard-code colours: change a value here and it
+ * changes everywhere. Contrast of every pair is checked by scripts/design/contrast.mjs.
  */
-:root {
-  --radius: 0.5rem;
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.47 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.55 0.22 27);
-  --success: oklch(0.52 0.14 150);
-  --warning: oklch(0.62 0.15 70);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.87 0 0);
-  --ring: oklch(0.556 0 0);
+@theme {
+  /* --- Surfaces ------------------------------------------------------------------- */
+  --color-paper: #faf8f3; /* page background (warm off-white) */
+  --color-surface: #ffffff; /* cards, panels, inputs */
+  --color-surface-sunken: #f3f0e8; /* table headers, citation blocks, wells */
 
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-accent: oklch(0.955 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
+  /* --- Text ----------------------------------------------------------------------- */
+  --color-ink: #161a1d; /* primary text */
+  --color-ink-2: #434a50; /* secondary text */
+  --color-ink-3: #6b737a; /* tertiary text, placeholders — on paper/surface only */
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans",
-    sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  /* --- Lines ---------------------------------------------------------------------- */
+  --color-line: #e3ded2; /* hairlines, card borders */
+  --color-line-strong: #c9c2b2; /* dividers that must read, secondary-button outline */
+  --color-line-control: #8a8373; /* form-control boundary (≥3:1 on surface and paper) */
+
+  /* --- Brand ---------------------------------------------------------------------- */
+  --color-brand: #0f5a47; /* primary actions, links, active navigation */
+  --color-brand-hover: #0b4636; /* hover and pressed */
+  --color-brand-tint: #e4f0ea; /* selected rows, brand badges */
+  --color-brand-on-dark: #c9ded5; /* secondary text on a brand-coloured panel */
+
+  /* --- Status roles (each with a tint) -------------------------------------------- */
+  --color-accent: #b4690e; /* amber: deadline "soon", highlights — icons, bars, borders */
+  --color-accent-ink: #8f5206; /* amber for text (accent itself is below 4.5:1) */
+  --color-accent-tint: #fbf0dc;
+  --color-danger: #a3271c; /* errors, closing/closed, gaps */
+  --color-danger-hover: #861f15; /* destructive button, hover and pressed */
+  --color-danger-tint: #fbe9e6;
+  --color-success: #1d6f43; /* met requirement, success */
+  --color-success-tint: #e3f3e9;
+  --color-info: #1f4f8f; /* informational, planning-stage notices */
+  --color-info-tint: #e6eef8;
+
+  /* --- Focus ---------------------------------------------------------------------- */
+  --color-focus: #1f4f8f; /* 2 px ring + 2 px offset on keyboard focus */
+  --color-focus-on-dark: #ffffff; /* the same ring on a brand-coloured panel */
+
+  /* --- Type families (the --font-* variables are set by next/font in layout.tsx) --- */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans--font-feature-settings: "tnum" 1, "cv11" 1;
+  --font-display: var(--font-source-serif), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-serif: var(--font-source-serif), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  /*
+   * Type scale (px / line-height): 12/16, 13/18, 14/20, 16/24, 18/28, 22/28, 28/34, 40/44, 56/58.
+   * The Tailwind size names are remapped so that every text-* class lands on the scale.
+   */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-13: 0.8125rem;
+  --text-13--line-height: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.75rem;
+  --text-xl--letter-spacing: -0.005em;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 2.125rem;
+  --text-2xl--letter-spacing: -0.01em;
+  --text-3xl: 2.5rem;
+  --text-3xl--line-height: 2.75rem;
+  --text-3xl--letter-spacing: -0.015em;
+  --text-4xl: 3.5rem;
+  --text-4xl--line-height: 3.625rem;
+  --text-4xl--letter-spacing: -0.02em;
+
+  --tracking-eyebrow: 0.06em;
+
+  /* --- Radius: 4 px controls and chips, 8 px cards, 12 px modals -------------------- */
+  --radius-control: 0.25rem;
+  --radius-card: 0.5rem;
+  --radius-modal: 0.75rem;
+  /* The Tailwind size names snap to the same three steps. */
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 0.75rem;
+  --radius-4xl: 0.75rem;
+
+  /* --- Shadows: rare. Raised cards, and popovers/modals ----------------------------- */
+  --shadow-raised: 0 1px 2px rgb(22 26 29 / 0.06);
+  --shadow-overlay: 0 12px 32px rgb(22 26 29 / 0.14);
+  --shadow-2xs: 0 1px 2px rgb(22 26 29 / 0.06);
+  --shadow-xs: 0 1px 2px rgb(22 26 29 / 0.06);
+  --shadow-sm: 0 1px 2px rgb(22 26 29 / 0.06);
+  --shadow-md: 0 1px 2px rgb(22 26 29 / 0.06);
+  --shadow-lg: 0 12px 32px rgb(22 26 29 / 0.14);
+  --shadow-xl: 0 12px 32px rgb(22 26 29 / 0.14);
+  --shadow-2xl: 0 12px 32px rgb(22 26 29 / 0.14);
+
+  /* --- Layout ----------------------------------------------------------------------- */
+  --container-content: 70rem; /* 1120 px content width */
+  --container-reading: 68ch; /* reading column */
+
+  /* --- Motion: 120–180 ms ease-out, for state changes only -------------------------- */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
+/* shadcn/ui semantic names → Bidfolio tokens. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: var(--color-brand);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-surface-sunken);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: var(--color-surface-sunken);
+  --color-muted-foreground: var(--color-ink-2);
+  /* NOTE: `accent` is the amber role from DESIGN.md, not shadcn's neutral hover grey.
+     For hover and selected surfaces use bg-muted or bg-brand-tint. */
+  --color-accent-foreground: #ffffff;
+  --color-destructive: var(--color-danger);
+  --color-destructive-foreground: #ffffff;
+  --color-warning: var(--color-accent);
+  --color-border: var(--color-line);
+  --color-input: var(--color-line-control);
+  --color-ring: var(--color-focus);
+  --color-sidebar: var(--color-paper);
+  --color-sidebar-foreground: var(--color-ink);
+  --color-sidebar-border: var(--color-line);
+  --color-sidebar-accent: var(--color-brand-tint);
+  --color-sidebar-accent-foreground: var(--color-brand);
+}
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+:root {
+  /* DESIGN.md names, for hand-written CSS and inline styles. */
+  --paper: var(--color-paper);
+  --surface: var(--color-surface);
+  --surface-sunken: var(--color-surface-sunken);
+  --ink: var(--color-ink);
+  --ink-2: var(--color-ink-2);
+  --ink-3: var(--color-ink-3);
+  --line: var(--color-line);
+  --line-strong: var(--color-line-strong);
+  --line-control: var(--color-line-control);
+  --brand: var(--color-brand);
+  --brand-hover: var(--color-brand-hover);
+  --brand-tint: var(--color-brand-tint);
+  --accent: var(--color-accent);
+  --accent-ink: var(--color-accent-ink);
+  --accent-tint: var(--color-accent-tint);
+  --danger: var(--color-danger);
+  --danger-tint: var(--color-danger-tint);
+  --success: var(--color-success);
+  --success-tint: var(--color-success-tint);
+  --info: var(--color-info);
+  --info-tint: var(--color-info-tint);
+  --focus: var(--color-focus);
 
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
+  /* Height of the sticky marketing header; used for anchor offsets. */
+  --header-height: 4rem;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  *,
+  ::before,
+  ::after,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--header-height) + 1rem);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: var(--font-sans--font-feature-settings);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headings: display serif, 600 for h1–h2, 500 for h3. Sizes come from type-* or text-*. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-feature-settings: normal;
+    text-wrap: balance;
+  }
+  h1,
+  h2 {
+    font-weight: 600;
+  }
+  h3 {
+    font-weight: 500;
+  }
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+  }
+
+  p,
+  li,
+  dd,
+  figcaption {
+    text-wrap: pretty;
+  }
+
+  /* Keyboard focus: one ring, everywhere, always visible. */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  /* On brand-coloured panels the ring switches to white. */
+  .on-brand :focus-visible {
+    outline-color: var(--color-focus-on-dark);
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-brand) 20%, transparent);
+    color: var(--color-ink);
+  }
+  .on-brand ::selection {
+    background-color: color-mix(in srgb, #ffffff 28%, transparent);
+    color: #ffffff;
+  }
+
+  /* Content links: any anchor without a class of its own. Styled components opt out by having one. */
+  a:where(:not([class])) {
+    color: var(--color-brand);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    text-decoration-color: color-mix(in srgb, var(--color-brand) 45%, transparent);
+    transition: color 150ms var(--ease-out), text-decoration-color 150ms var(--ease-out);
+  }
+  a:where(:not([class])):hover {
+    color: var(--color-brand-hover);
+    text-decoration-color: currentColor;
+  }
+
+  ::placeholder {
+    color: var(--color-ink-3);
+    opacity: 1;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+    font-feature-settings: normal;
+  }
+  :where(p, li, dd, td) > code {
+    border-radius: var(--radius-control);
+    background-color: var(--color-surface-sunken);
+    padding: 0.0625rem 0.3125rem;
+    font-size: 0.875em;
+  }
+
+  mark {
+    background-color: var(--color-accent-tint);
+    color: inherit;
+  }
+
+  /* The summary marker is drawn by the component, not the browser. */
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ----------------------------------------------------------------------------------------
+ * Type roles. Use these on headings instead of assembling family + size + weight by hand.
+ * (Named type-*, not text-*, so tailwind-merge never mistakes them for a colour.)
+ * ------------------------------------------------------------------------------------- */
+
+/* Hero headline: 40/44, and 56/58 from 1024 px. */
+@utility type-hero {
+  font-family: var(--font-display);
+  font-feature-settings: normal;
+  font-size: 2.5rem;
+  line-height: 2.75rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  @media (width >= 64rem) {
+    font-size: 3.5rem;
+    line-height: 3.625rem;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Page title on public pages: 28/34 on phones, 40/44 from 640 px. */
+@utility type-h1 {
+  font-family: var(--font-display);
+  font-feature-settings: normal;
+  font-size: 1.75rem;
+  line-height: 2.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  @media (width >= 40rem) {
+    font-size: 2.5rem;
+    line-height: 2.75rem;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* Section heading, and page title inside the app: 28/34. */
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-feature-settings: normal;
+  font-size: 1.75rem;
+  line-height: 2.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+/* Sub-section heading: 22/28, weight 500. */
+@utility type-h3 {
+  font-family: var(--font-display);
+  font-feature-settings: normal;
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+/* Lead paragraph under a heading: 18/28. */
+@utility type-lead {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: var(--color-ink-2);
+  text-wrap: pretty;
+}
+
+/* Long-form reading text (legal pages, FAQ answers): 16/28 in the reading column. */
+@utility type-reading {
+  font-size: 1rem;
+  line-height: 1.75rem;
+  text-wrap: pretty;
+}
+
+/* The only all-caps style: 12 px label with 0.06em tracking. */
+@utility type-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+}
+
+/* References, CPV codes, file names and page numbers. */
+@utility type-ref {
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 400;
+}
+
+/* Brand link style for anchors that carry classes of their own. */
+@utility link {
+  color: var(--color-brand);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, var(--color-brand) 45%, transparent);
+  transition: color 150ms var(--ease-out), text-decoration-color 150ms var(--ease-out);
+  &:hover {
+    color: var(--color-brand-hover);
+    text-decoration-color: currentColor;
+  }
+}
+
+/* Quiet link: inherits its colour, underlines on hover. Navigation and footers. */
+@utility link-quiet {
+  text-decoration-line: none;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  &:hover {
+    color: var(--color-ink);
+    text-decoration-line: underline;
+  }
+}
+
+/* Extends the hit area of a small control to at least 40 px without changing its look. */
+@utility hit-40 {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 2.5rem);
+    height: max(100%, 2.5rem);
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Chevron for native selects (stroke = ink-2). */
+@utility select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23434A50' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  background-size: 1rem;
+}
+
+/* Page gutters and the 1120 px content column. */
+@utility container-content {
+  width: 100%;
+  max-width: calc(var(--container-content) + 2rem);
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 40rem) {
+    max-width: calc(var(--container-content) + 3rem);
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    max-width: calc(var(--container-content) + 4rem);
+    padding-inline: 2rem;
+  }
+}
+
+/* ----------------------------------------------------------------------------------------
+ * Print: public pages and legal documents must print as clean documents.
+ * ------------------------------------------------------------------------------------- */
+@media print {
+  @page {
+    margin: 18mm 16mm;
   }
   html {
-    @apply scroll-smooth;
+    font-size: 11pt;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    background: #ffffff !important;
+    color: #000000 !important;
   }
-  /* Visible keyboard focus everywhere, including custom controls. */
-  :focus-visible {
-    @apply outline-2 outline-offset-2 outline-ring;
+  /* Chrome that has no meaning on paper. */
+  [data-print="hide"],
+  [data-slot="site-header"],
+  [data-slot="site-footer-nav"],
+  [data-slot="app-sidebar"],
+  [data-slot="app-topbar"],
+  [data-slot="app-tabbar"],
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+  *,
+  ::before,
+  ::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+  p,
+  li,
+  blockquote {
+    orphans: 3;
+    widows: 3;
+  }
+  table,
+  figure,
+  blockquote,
+  [data-slot="card"] {
+    break-inside: avoid;
+  }
+  thead {
+    display: table-header-group;
+  }
+  a {
+    color: inherit !important;
+  }
+  /* Show where external links point. */
+  [data-print="urls"] a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+  /* Closed disclosures print open. */
+  details > :not(summary) {
+    display: block !important;
+  }
+  details::details-content {
+    content-visibility: visible;
+    block-size: auto;
   }
 }
