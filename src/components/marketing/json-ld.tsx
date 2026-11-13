@@ -1,5 +1,4 @@
-import { BID_PASS } from "@/config/plan-display";
-import { PLANS, PLAN_CURRENCY, PLAN_KEYS } from "@/config/plans";
+import { BID_PASS, PLANS, PLAN_CURRENCY, PLAN_KEYS } from "@/config/plans";
 import { site } from "@/config/site";
 import type { FaqItem } from "./faq";
 
@@ -52,8 +51,8 @@ export function softwareApplicationJsonLd(origin: string) {
       {
         "@type": "Offer",
         name: BID_PASS.name,
-        description: BID_PASS.summary,
-        price: pounds(BID_PASS.pricePence),
+        description: BID_PASS.description,
+        price: pounds(BID_PASS.price),
         priceCurrency: PLAN_CURRENCY,
         url: `${origin}/pricing`,
       },

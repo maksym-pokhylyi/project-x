@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LegalDocument, type LegalSection } from "@/components/marketing/legal-document";
-import { site } from "@/config/site";
+import { operatorAddress, operatorLegalName, site } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Data processing agreement",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/legal/dpa" },
 };
 
-const { company, facts } = site;
+const { operator, facts } = site;
 
 const summary = [
   "This agreement applies to personal data inside what you upload: tender packs, library documents, company facts and drafts.",
@@ -21,7 +21,7 @@ const sections: LegalSection[] = [
     heading: "Parties and scope",
     id: "scope",
     body: [
-      `This data processing agreement (“DPA”) forms part of the [Terms of Service](/legal/terms) between ${company.legalName} (“Processor”, “we”) and the customer (“Controller”, “you”). It applies where we process personal data on your behalf in providing ${site.name}.`,
+      `This data processing agreement (“DPA”) forms part of the [Terms of Service](/legal/terms) between ${operatorLegalName}, of ${operatorAddress} (“Processor”, “we”) and the customer (“Controller”, “you”). It applies where we process personal data on your behalf in providing ${site.name}.`,
       "It reflects Article 28 of the UK GDPR and of the EU GDPR. Where those laws do not apply to you, it applies as a contractual commitment.",
     ],
   },
@@ -133,7 +133,7 @@ const sections: LegalSection[] = [
     id: "precedence",
     body: [
       "If this DPA conflicts with the Terms of Service on a question of personal data, this DPA prevails.",
-      `For a countersigned copy, write to ${company.privacyContactEmail}.`,
+      `For a countersigned copy, write to ${operator.privacyEmail}.`,
     ],
   },
 ];

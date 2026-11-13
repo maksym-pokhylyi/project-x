@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LegalDocument, type LegalSection } from "@/components/marketing/legal-document";
-import { site } from "@/config/site";
+import { operatorAddress, operatorLegalName, site, ukRepresentativeLine } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Privacy notice",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/legal/privacy" },
 };
 
-const { company, facts } = site;
+const { operator, facts } = site;
 
 const summary = [
   "If we emailed your business about its public contracts and you want that to stop: use the [opt‑out page](/optout) or reply to the email. That is all it takes. The details are in [section 2](#contacted).",
@@ -22,10 +22,13 @@ const sections: LegalSection[] = [
     heading: "Who is responsible for your data",
     id: "controller",
     body: [
-      `The controller is ${company.legalName}, ${company.address}, ${company.country}, trading as ${site.name}. The business is run by one person and is based in ${facts.operatorCountry}.`,
-      `Contact for privacy matters: ${company.privacyContactEmail}.`,
-      `Our representative in the United Kingdom under Article 27 of the UK GDPR is ${company.ukRepresentative}. You can contact the representative about anything in this notice.`,
-      `We are registered with the UK Information Commission under reference ${company.icoRegistrationNumber}.`,
+      `The controller is ${operatorLegalName}, a ${operator.legalForm} registered in ${operator.address.country}, of ${operatorAddress}, trading as ${site.name}. The business is run by one person, ${operator.name}.`,
+      `Contact for privacy matters: ${operator.privacyEmail}.`,
+      /* Pending details say so plainly, or say nothing: see `operator` in src/config/site.ts. */
+      operator.ukRepresentative
+        ? `Our representative in the United Kingdom under Article 27 of the UK GDPR is ${operator.ukRepresentative}. You can contact the representative about anything in this notice.`
+        : `${ukRepresentativeLine}. Article 27 of the UK GDPR provides for a representative in the United Kingdom; until one is named here, write to us directly about anything in this notice.`,
+      ...(operator.icoRegistrationNumber ? [`We are registered with the UK Information Commission under reference ${operator.icoRegistrationNumber}.`] : []),
       "For the files and content that a customer puts into the Service we act as a processor on that customer’s behalf, under the [data processing agreement](/legal/dpa).",
     ],
   },
@@ -193,14 +196,14 @@ const sections: LegalSection[] = [
         "ask us to restrict how we use your data, or object to a use that relies on legitimate interests;",
         "receive data you gave us in a portable format, where the law provides for it.",
       ],
-      `To use any of these rights, write to ${company.privacyContactEmail} or to our UK representative. We reply within one month. It costs nothing.`,
+      `To use any of these rights, write to ${operator.privacyEmail}${operator.ukRepresentative ? " or to our UK representative" : ""}. We reply within one month. It costs nothing.`,
     ],
   },
   {
     heading: "How to complain",
     id: "complaints",
     body: [
-      `If you think we have handled your personal data wrongly, tell us first: write to ${company.privacyContactEmail} or use the [contact page](/contact), and say that it is a data protection complaint.`,
+      `If you think we have handled your personal data wrongly, tell us first: write to ${operator.privacyEmail} or use the [contact page](/contact), and say that it is a data protection complaint.`,
       [
         "We acknowledge every complaint within 30 days.",
         "We look into it and tell you the outcome without undue delay.",
